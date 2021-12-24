@@ -6,29 +6,57 @@
 import {AbsoluteCellRange} from '../AbsoluteCellRange'
 import {ArraySize} from '../ArraySize'
 import {ArrayValue, ErroredArray, IArray, NotComputedArray} from '../ArrayValue'
+import { AsyncPromise } from '../AsyncPromise'
 import {CellError, equalSimpleCellAddress, ErrorType, SimpleCellAddress} from '../Cell'
 import {RawCellContent} from '../CellContentParser'
 import {ErrorMessage} from '../error-message'
-import {AsyncInterpreterValue, EmptyValue, getRawValue, InternalScalarValue, InterpreterValue} from '../interpreter/InterpreterValue'
+import {EmptyValue, getRawValue, InternalScalarValue, InterpreterValue} from '../interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from '../LazilyTransformingAstService'
 import {Maybe} from '../Maybe'
 import {Ast} from '../parser'
 import {ColumnsSpan, RowsSpan} from '../Span'
 
-export interface AsyncVertex {
-  asyncResolveIndex?: number,
-  getPromise?: () => AsyncInterpreterValue,
-}
-
-export abstract class FormulaVertex implements AsyncVertex {
-  public asyncResolveIndex?: number
-  public getPromise?: () => AsyncInterpreterValue
+export abstract class FormulaVertex {
+  private resolveIndex?: number
 
   protected constructor(
     protected formula: Ast,
     protected cellAddress: SimpleCellAddress,
-    public version: number
+    public version: number,
+    protected asyncPromises?: AsyncPromise[],
   ) {
+  }
+
+  public setResolveIndex(resolveIndex: number) {
+    this.resolveIndex = resolveIndex
+  }
+
+  public getResolveIndex() {
+    if (this.resolveIndex === undefined) {
+      throw new Error('resolveIndex has not been set')
+    }
+
+    return this.resolveIndex
+  }
+
+  public getAsyncPromises() {
+    if (!this.asyncPromises) {
+      throw new Error('asyncPromises has not been set')
+    }
+
+    return this.asyncPromises
+  }
+
+  public hasAsyncPromises() {
+    return this.asyncPromises?.length
+  }
+
+  public isResolveIndexSet() {
+    return this.resolveIndex !== undefined
+  }
+
+  public asyncPromisesAreAllCanceled() {
+    return this.asyncPromises?.every(x => x.getPromise()?.isCanceled())
   }
 
   public get width(): number {
@@ -39,11 +67,11 @@ export abstract class FormulaVertex implements AsyncVertex {
     return 1
   }
 
-  static fromAst(formula: Ast, address: SimpleCellAddress, size: ArraySize, version: number) {
+  static fromAst(formula: Ast, address: SimpleCellAddress, size: ArraySize, version: number, asyncPromises?: AsyncPromise[]) {
     if (size.isScalar()) {
-      return new FormulaCellVertex(formula, address, version)
+      return new FormulaCellVertex(formula, address, version, asyncPromises)
     } else {
-      return new ArrayVertex(formula, address, size, version)
+      return new ArrayVertex(formula, address, size, asyncPromises, version)
     }
   }
 
@@ -72,6 +100,19 @@ export abstract class FormulaVertex implements AsyncVertex {
     return this.cellAddress
   }
 
+  public recalculateAsyncPromisesWhenNeeded() {
+    this.asyncPromises?.forEach((asyncPromise) => {
+      asyncPromise.resetIsResolvedValue()
+    })
+  }
+
+  /**
+   * Returns true if the vertex has asynchronous promises pending.
+   */
+  public hasAsyncPromisesPending(): boolean {
+    return !!this.asyncPromises?.some(x => !x.getIsResolvedValue())
+  }
+
   /**
    * Sets computed cell value stored in this vertex
    */
@@ -90,8 +131,8 @@ export abstract class FormulaVertex implements AsyncVertex {
 export class ArrayVertex extends FormulaVertex {
   array: IArray
 
-  constructor(formula: Ast, cellAddress: SimpleCellAddress, size: ArraySize, version: number = 0) {
-    super(formula, cellAddress, version)
+  constructor(formula: Ast, cellAddress: SimpleCellAddress, size: ArraySize, asyncPromises?: AsyncPromise[], version: number = 0) {
+    super(formula, cellAddress, version, asyncPromises)
     if (size.isRef) {
       this.array = new ErroredArray(new CellError(ErrorType.REF, ErrorMessage.NoSpaceForArrayResult), ArraySize.error())
     } else {
@@ -241,8 +282,9 @@ export class FormulaCellVertex extends FormulaVertex {
     /** Address which this vertex represents */
     address: SimpleCellAddress,
     version: number,
+    asyncPromises?: AsyncPromise[],
   ) {
-    super(formula, address, version)
+    super(formula, address, version, asyncPromises)
   }
 
   public valueOrUndef(): Maybe<InterpreterValue> {

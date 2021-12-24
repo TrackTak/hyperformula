@@ -13,9 +13,14 @@ import {
   OrMethodOpts,
   tokenMatcher
 } from 'chevrotain'
+import { AsyncPromise } from '../AsyncPromise'
 
-import {CellError, ErrorType, simpleCellAddress, SimpleCellAddress} from '../Cell'
+import {CancelablePromise, CanceledPromise, CellError, ErrorType, simpleCellAddress, SimpleCellAddress, withTimeout} from '../Cell'
+import { Config } from '../Config'
 import {ErrorMessage} from '../error-message'
+import { FunctionRegistry } from '../interpreter/FunctionRegistry'
+import { InterpreterState } from '../interpreter/InterpreterState'
+import { InterpreterValue } from '../interpreter/InterpreterValue'
 import {Maybe} from '../Maybe'
 import {
   cellAddressFromString,
@@ -120,9 +125,7 @@ export interface FormulaParserResult {
  * A -> A1 | $A1 | A$1 | $A$1 <br/>
  * P -> SUM(..) <br/>
  */
-export class FormulaParser extends EmbeddedActionsParser {
-  private lexerConfig: ILexerConfig
-
+export class FormulaParser extends EmbeddedActionsParser {  
   /**
    * Address of the cell in which formula is located
    */
@@ -168,7 +171,41 @@ export class FormulaParser extends EmbeddedActionsParser {
     }
 
     const rParenToken = this.CONSUME(RParen) as IExtendedToken
-    return buildProcedureAst(canonicalProcedureName, args, procedureNameToken.leadingWhitespace, rParenToken.leadingWhitespace)
+
+    const ast = buildProcedureAst(canonicalProcedureName, args, procedureNameToken.leadingWhitespace, rParenToken.leadingWhitespace)
+
+    const metadata = this.functionRegistry.getMetadata(procedureName)
+
+    if (metadata?.isAsyncMethod) {
+      const pluginFunction = this.functionRegistry.getAsyncFunction(procedureName)
+
+      if (pluginFunction !== undefined) {
+        const promiseGetter = (state: InterpreterState) => {
+          const promise = new Promise<InterpreterValue | CanceledPromise>((resolve, reject) => {
+            const pluginFunctionValue = pluginFunction(ast, state)
+            const functionPromise = withTimeout(pluginFunctionValue, this.config.timeoutTime)
+
+            functionPromise.then((interpreterValue) => {
+              resolve(interpreterValue)
+            }).catch((error) => {
+              if (error instanceof CellError) {
+                resolve(error)
+              } else {
+                reject(error)
+              }
+            })
+          })
+
+          return new CancelablePromise(promise)
+        }
+
+        const asyncPromise = new AsyncPromise(promiseGetter)
+
+        ast.asyncPromise = asyncPromise
+      }
+    }
+
+    return ast
   })
   private namedExpressionExpression: AstRule = this.RULE('namedExpressionExpression', () => {
     const name = this.CONSUME(NamedExpression) as IExtendedToken
@@ -462,9 +499,8 @@ export class FormulaParser extends EmbeddedActionsParser {
     ])
   })
 
-  constructor(lexerConfig: ILexerConfig, sheetMapping: SheetMappingFn) {
+  constructor(private readonly lexerConfig: ILexerConfig, private readonly functionRegistry: FunctionRegistry, private readonly config: Config, sheetMapping: SheetMappingFn) {
     super(lexerConfig.allTokens, {outputCst: false, maxLookahead: 7})
-    this.lexerConfig = lexerConfig
     this.sheetMapping = sheetMapping
     this.formulaAddress = simpleCellAddress(0, 0, 0)
     this.performSelfAnalysis()

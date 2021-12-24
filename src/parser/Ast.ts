@@ -4,6 +4,7 @@
  */
 
 import {IToken} from 'chevrotain'
+import { AsyncPromise } from '../AsyncPromise'
 import {CellError} from '../Cell'
 import {AddressWithSheet} from './Address'
 import {CellAddress} from './CellAddress'
@@ -386,6 +387,7 @@ export interface ProcedureAst extends AstWithInternalWhitespace {
   type: AstNodeType.FUNCTION_CALL,
   procedureName: string,
   args: Ast[],
+  asyncPromise?: AsyncPromise,
 }
 
 export const buildProcedureAst = (procedureName: string, args: Ast[], leadingWhitespace?: IToken, internalWhitespace?: IToken): ProcedureAst => ({

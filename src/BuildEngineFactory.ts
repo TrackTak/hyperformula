@@ -4,6 +4,7 @@
  */
 
 import {ArraySizePredictor} from './ArraySize'
+import {AsyncPromiseFetcher} from './AsyncPromise'
 import {CellContentParser} from './CellContentParser'
 import {ClipboardOperations} from './ClipboardOperations'
 import {Config, ConfigParams} from './Config'
@@ -69,10 +70,11 @@ export class BuildEngineFactory {
   private static buildEngine(config: Config, sheets: Sheets = {}, inputNamedExpressions: SerializedNamedExpression[] = [], stats: Statistics = config.useStats ? new Statistics() : new EmptyStatistics()): [EngineState, Promise<void>] {
     stats.start(StatType.BUILD_ENGINE_TOTAL)
 
+    const asyncPromiseFetcher = new AsyncPromiseFetcher(config)
     const namedExpressions = new NamedExpressions()
     const functionRegistry = new FunctionRegistry(config)
     const lazilyTransformingAstService = new LazilyTransformingAstService(stats)
-    const dependencyGraph = DependencyGraph.buildEmpty(lazilyTransformingAstService, config, functionRegistry, namedExpressions, stats)
+    const dependencyGraph = DependencyGraph.buildEmpty(lazilyTransformingAstService, config, functionRegistry, namedExpressions, stats, asyncPromiseFetcher)
     const columnSearch = buildColumnSearchStrategy(dependencyGraph, config, stats)
     const sheetMapping = dependencyGraph.sheetMapping
     const addressMapping = dependencyGraph.addressMapping
@@ -90,7 +92,7 @@ export class BuildEngineFactory {
       }
     }
 
-    const parser = new ParserWithCaching(config, functionRegistry, sheetMapping.get)
+    const parser = new ParserWithCaching(config, functionRegistry, sheetMapping.get, config)
     lazilyTransformingAstService.parser = parser
     const unparser = new Unparser(config, buildLexerConfig(config), sheetMapping.fetchDisplayName, namedExpressions)
     const dateTimeHelper = new DateTimeHelper(config)
@@ -99,7 +101,7 @@ export class BuildEngineFactory {
     const cellContentParser = new CellContentParser(config, dateTimeHelper, numberLiteralHelper)
 
     const arraySizePredictor = new ArraySizePredictor(config, functionRegistry)
-    const operations = new Operations(config, dependencyGraph, columnSearch, cellContentParser, parser, stats, lazilyTransformingAstService, namedExpressions, arraySizePredictor)
+    const operations = new Operations(config, dependencyGraph, columnSearch, cellContentParser, parser, stats, lazilyTransformingAstService, namedExpressions, arraySizePredictor, asyncPromiseFetcher)
     const undoRedo = new UndoRedo(config, operations)
     lazilyTransformingAstService.undoRedo = undoRedo
     const clipboardOperations = new ClipboardOperations(config, dependencyGraph, operations)
@@ -115,7 +117,7 @@ export class BuildEngineFactory {
     const interpreter = new Interpreter(config, dependencyGraph, columnSearch, stats, arithmeticHelper, functionRegistry, namedExpressions, serialization, arraySizePredictor, dateTimeHelper, cellContentParser)
 
     stats.measure(StatType.GRAPH_BUILD, () => {
-      const graphBuilder = new GraphBuilder(dependencyGraph, columnSearch, parser, cellContentParser, stats, arraySizePredictor)
+      const graphBuilder = new GraphBuilder(dependencyGraph, columnSearch, parser, cellContentParser, stats, arraySizePredictor, asyncPromiseFetcher)
       graphBuilder.buildGraph(sheets, stats)
     })
 

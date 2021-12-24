@@ -52,13 +52,12 @@ class AsyncPlugin extends FunctionPlugin implements FunctionPluginTypecheck<Asyn
     },
   }
 
-  public async asyncFoo(ast: ProcedureAst, state: InterpreterState): AsyncInternalScalarValue {
+  public asyncFoo(ast: ProcedureAst, state: InterpreterState): AsyncInternalScalarValue {
     return new Promise(resolve => setTimeout(() => {
       if (ast.args[0]) {
-        const argument = this.evaluateAst(ast.args[0], state)
+        const argument = this.evaluateAst(ast.args[0], state) as number
 
-        resolve(argument as number + 5)
-
+        resolve(argument + 5)
         return
       }
   
@@ -72,14 +71,13 @@ class AsyncPlugin extends FunctionPlugin implements FunctionPluginTypecheck<Asyn
     }, 100))
   }
 
-  public asyncArrayFooSize(ast: ProcedureAst, state: InterpreterState) {
-    if (!state.formulaVertex) {
-      return ArraySize.error()
+  public asyncArrayFooSize(ast: ProcedureAst, _state: InterpreterState) {
+    if (ast.asyncPromise?.getIsResolvedValue()) {
+      const value = ast.asyncPromise?.getResolvedValue() as SimpleRangeValue
+
+      return value.size
     }
-
-    const cellValue = (state.formulaVertex).getCellValue() as SimpleRangeValue
-
-    return new ArraySize(cellValue.width(), cellValue.height())
+    return ArraySize.error()
   }
   
   public async longAsyncFoo(ast: ProcedureAst, state: InterpreterState): AsyncInternalScalarValue {
@@ -172,7 +170,7 @@ describe('async functions', () => {
       expect(engine.getSheetValues(0)).toEqual([[.1], [1.1]])
     })
 
-    it.only('async functions operations on dependent async value', async() => {
+    it('async functions operations on dependent async value', async() => {
       const [engine, promise] = HyperFormula.buildFromArray([[
         '=ASYNC_FOO()', '=ASYNC_FOO()+A1'
       ]])
@@ -208,7 +206,7 @@ describe('async functions', () => {
       const asyncChanges = await promise
 
       expect(engine.getSheetValues(0)).toEqual([[1, 1, 2, 6]])
-      expect(asyncChanges).toEqual([new ExportedCellChange(adr('C1'), 2), new ExportedCellChange(adr('B1'), 1), new ExportedCellChange(adr('D1'), 6)])
+      expect(asyncChanges).toEqual([new ExportedCellChange(adr('B1'), 1), new ExportedCellChange(adr('D1'), 6), new ExportedCellChange(adr('C1'), 2)])
     })
 
     it('asyncValuesUpdated fires once per public async action', async() => {
@@ -300,18 +298,18 @@ describe('async functions', () => {
 
   it('works with multiple async functions one after another', async() => {
     const sheet = [[
-      1, '=ASYNC_FOO()'
+      2, '=ASYNC_FOO()'
     ]]
     const [engine] = HyperFormula.buildFromArray(sheet)
 
     const [,promise] = engine.setSheetContent(0, [[
-      '=ASYNC_FOO()', 1
+      '=ASYNC_FOO()', 3
     ]])
 
     await promise
 
     expect(engine.getSheetValues(0)).toEqual([[
-      1, 1
+      1, 3
     ]])
   })
 
@@ -329,7 +327,7 @@ describe('async functions', () => {
     ]])
   })
 
-  it('named expressions works with async functions', async() => {
+  it.only('named expressions works with async functions', async() => {
     const [engine] = HyperFormula.buildEmpty()
     const [changes, promise] = engine.addNamedExpression('asyncFoo', '=ASYNC_FOO()')
 

@@ -5,6 +5,7 @@
 
 import {absolutizeDependencies} from './absolutizeDependencies'
 import {ArraySize, ArraySizePredictor} from './ArraySize'
+import {AsyncPromiseFetcher} from './AsyncPromise'
 import {SimpleCellAddress, simpleCellAddress} from './Cell'
 import {CellContent, CellContentParser} from './CellContentParser'
 import {CellDependency} from './CellDependency'
@@ -40,8 +41,9 @@ export class GraphBuilder {
     private readonly cellContentParser: CellContentParser,
     private readonly stats: Statistics,
     private readonly arraySizePredictor: ArraySizePredictor,
+    private readonly asyncPromiseFetcher: AsyncPromiseFetcher
   ) {
-    this.buildStrategy = new SimpleStrategy(dependencyGraph, columnSearch, parser, stats, cellContentParser, arraySizePredictor)
+    this.buildStrategy = new SimpleStrategy(dependencyGraph, columnSearch, parser, stats, cellContentParser, arraySizePredictor, asyncPromiseFetcher)
   }
 
   /**
@@ -71,7 +73,8 @@ export class SimpleStrategy implements GraphBuilderStrategy {
     private readonly parser: ParserWithCaching,
     private readonly stats: Statistics,
     private readonly cellContentParser: CellContentParser,
-    private readonly arraySizePredictor: ArraySizePredictor
+    private readonly arraySizePredictor: ArraySizePredictor,
+    private readonly asyncPromiseFetcher: AsyncPromiseFetcher
   ) {
   }
 
@@ -97,11 +100,12 @@ export class SimpleStrategy implements GraphBuilderStrategy {
               this.dependencyGraph.addVertex(address, vertex)
             } else {
               this.shrinkArrayIfNeeded(address)
-              
+ 
+              const asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(parseResult.ast, address)
               const size = this.arraySizePredictor.checkArraySize(parseResult.ast, address)
-              
+
               if (size.isScalar()) {
-                const vertex = new FormulaCellVertex(parseResult.ast, address, 0)
+                const vertex = new FormulaCellVertex(parseResult.ast, address, 0, asyncPromises)
                 dependencies.set(vertex, absolutizeDependencies(parseResult.dependencies, address))
                 this.dependencyGraph.addVertex(address, vertex)
                 if (parseResult.hasVolatileFunction) {
@@ -114,7 +118,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
                   this.dependencyGraph.markAsAsync(vertex)
                 }
               } else {
-                const vertex = new ArrayVertex(parseResult.ast, address, new ArraySize(size.width, size.height))
+                const vertex = new ArrayVertex(parseResult.ast, address, new ArraySize(size.width, size.height), asyncPromises)
                 dependencies.set(vertex, absolutizeDependencies(parseResult.dependencies, address))
                 this.dependencyGraph.addArrayVertex(address, vertex)
 

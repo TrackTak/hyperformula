@@ -6,6 +6,7 @@
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {absolutizeDependencies, filterDependenciesOutOfScope} from './absolutizeDependencies'
 import {ArraySize, ArraySizePredictor} from './ArraySize'
+import { AsyncPromise, AsyncPromiseFetcher } from './AsyncPromise'
 import {equalSimpleCellAddress, invalidSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
 import {CellContent, CellContentParser, RawCellContent} from './CellContentParser'
 import {ClipboardCell, ClipboardCellType} from './ClipboardOperations'
@@ -169,6 +170,7 @@ export class Operations {
     private readonly lazilyTransformingAstService: LazilyTransformingAstService,
     private readonly namedExpressions: NamedExpressions,
     private readonly arraySizePredictor: ArraySizePredictor,
+    private readonly asyncPromiseFetcher: AsyncPromiseFetcher
   ) {
     this.allocateNamedExpressionAddressSpace()
     this.maxColumns = config.maxColumns
@@ -552,12 +554,13 @@ export class Operations {
     if (parsedCellContent instanceof CellContent.Formula) {
       const parserResult = this.parser.parse(parsedCellContent.formula, address)
       const {ast, errors} = parserResult
+
       if (errors.length > 0) {
         this.setParsingErrorToCell(parsedCellContent.formula, errors, address)
       } else {
         const size = this.arraySizePredictor.checkArraySize(ast, address)
-
-        this.setFormulaToCell(address, size, true, parserResult)
+  
+        this.setFormulaToCell(address, size, parserResult)
       }
     } else if (parsedCellContent instanceof CellContent.Empty) {
       this.setCellEmpty(address)
@@ -588,14 +591,20 @@ export class Operations {
     this.changes.addChange(vertex.getCellValue(), address)
   }
 
-  public setAsyncFormulaToCell(address: SimpleCellAddress, ast: Ast, formulaVertex: FormulaVertex) {
-    const parserResult = this.parser.fetchCachedResultForAst(ast)
-    const size = this.arraySizePredictor.checkArraySize(ast, address, formulaVertex)
+  public setAsyncFormulaToCell(address: SimpleCellAddress, ast: Ast) {
+    const cell = this.dependencyGraph.getCell(address)
 
-    this.setFormulaToCell(address, size, true, parserResult)
+    if (!(cell instanceof FormulaVertex)) {
+      throw new Error('async cell must be an instance of FormulaVertex')
+    }
+
+    const parserResult = this.parser.fetchCachedResultForAst(ast)
+    const size = this.arraySizePredictor.checkArraySize(ast, address)
+
+    this.setFormulaToCell(address, size, parserResult)
   }
 
-  public setFormulaToCell(address: SimpleCellAddress, size: ArraySize, markNodeAsSpecialRecentlyChanged: boolean, {
+  public setFormulaToCell(address: SimpleCellAddress, size: ArraySize, {
     ast,
     hasVolatileFunction,
     hasStructuralChangeFunction,
@@ -603,7 +612,7 @@ export class Operations {
     dependencies
   }: ParsingResult) {
     const oldValue = this.dependencyGraph.getCellValue(address)
-    const arrayChanges = this.dependencyGraph.setFormulaToCell(address, ast, absolutizeDependencies(dependencies, address), size, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, markNodeAsSpecialRecentlyChanged)
+    const arrayChanges = this.dependencyGraph.setFormulaToCell(address, ast, absolutizeDependencies(dependencies, address), size, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
     this.columnSearch.remove(getRawValue(oldValue), address)
     this.columnSearch.applyChanges(arrayChanges.getChanges())
     this.changes.addAll(arrayChanges)
@@ -643,6 +652,7 @@ export class Operations {
     this.parser.rememberNewAst(cleanedAst)
     const cleanedDependencies = filterDependenciesOutOfScope(absoluteDependencies)
     const size = this.arraySizePredictor.checkArraySize(ast, address)
+
     this.dependencyGraph.setFormulaToCell(address, cleanedAst, cleanedDependencies, size, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
   }
 

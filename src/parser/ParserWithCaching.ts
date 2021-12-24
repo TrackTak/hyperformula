@@ -5,6 +5,7 @@
 
 import {IToken, tokenMatcher} from 'chevrotain'
 import {ErrorType, SimpleCellAddress} from '../Cell'
+import { Config } from '../Config'
 import {FunctionRegistry} from '../interpreter/FunctionRegistry'
 import {AstNodeType, buildParsingErrorAst, RelativeDependency} from './'
 import {
@@ -43,19 +44,20 @@ export interface ParsingResult {
  */
 export class ParserWithCaching {
   public statsCacheUsed: number = 0
-  private cache: Cache
-  private lexer: FormulaLexer
+  private readonly cache: Cache
+  private readonly lexer: FormulaLexer
   private readonly lexerConfig: ILexerConfig
-  private formulaParser: FormulaParser
+  private readonly formulaParser: FormulaParser
 
   constructor(
-    private readonly config: ParserConfig,
+    parserConfig: ParserConfig,
     private readonly functionRegistry: FunctionRegistry,
     private readonly sheetMapping: SheetMappingFn,
+    private readonly config: Config
   ) {
-    this.lexerConfig = buildLexerConfig(config)
+    this.lexerConfig = buildLexerConfig(parserConfig)
     this.lexer = new FormulaLexer(this.lexerConfig)
-    this.formulaParser = new FormulaParser(this.lexerConfig, this.sheetMapping)
+    this.formulaParser = new FormulaParser(this.lexerConfig, this.functionRegistry, this.config, this.sheetMapping)
     this.cache = new Cache(this.functionRegistry)
   }
 

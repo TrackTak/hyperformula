@@ -4048,13 +4048,13 @@ export class HyperFormula implements TypedEmitter {
     if (ast === undefined) {
       throw new NotAFormulaError()
     }
-    const [interpreterValue, asyncPromiseVertex] = this.evaluator.runAndForget(ast, address, dependencies)
+    const interpreterValue = this.evaluator.runAndForget(ast, address, dependencies)
     
     const cellValuePromise = new Promise<CellValue | CellValue[][]>((resolve, reject) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      asyncPromiseVertex?.getPromise!().then((interpreterValue) => {
-        resolve(this._exporter.exportScalarOrRange(interpreterValue))
-      }).catch(reject)
+      // asyncPromiseVertex?.getPromise!().then((interpreterValue) => {
+      //   resolve(this._exporter.exportScalarOrRange(interpreterValue))
+      // }).catch(reject)
     })
 
     return [this._exporter.exportScalarOrRange(interpreterValue), cellValuePromise]
@@ -4364,7 +4364,7 @@ export class HyperFormula implements TypedEmitter {
       let evaluatorPromise: Promise<ContentChanges> = Promise.resolve(ContentChanges.empty())
 
       if (verticesToRecomputeFrom.length > 0) {
-        const [contentChanges, promise] = this.evaluator.partialRun(verticesToRecomputeFrom)
+        const [contentChanges,, promise] = this.evaluator.partialRun(verticesToRecomputeFrom)
 
         evaluatorPromise = promise
 

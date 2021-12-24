@@ -116,7 +116,6 @@ export const CellValueTypeOrd = (arg: CellValueType): number => {
   throw new Error('Cell value not computed')
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const withTimeout = <T>(promise: Promise<T>, ms: number) => {
   const timeoutPromise = new Promise<T>((_resolve, reject) => {
     return setTimeout(
@@ -167,6 +166,43 @@ export const getCellValueFormat = (cellValue: InterpreterValue): string | undefi
     return undefined
   }
 }
+
+export class CancelablePromise<T> {
+  private canceled = false
+  private promise!: Promise<T | CanceledPromise> 
+
+  constructor(promise: Promise<T | CanceledPromise>) {
+    this.setPromise(promise)
+  }
+
+  public setPromise(promise: Promise<T | CanceledPromise>) {
+    this.promise = new Promise<T | CanceledPromise>((resolve, reject) => {
+      promise
+        .then(val => {
+            return this.canceled ? resolve(new CanceledPromise()) : resolve(val)
+        })
+        .catch(
+          error => {
+            return this.canceled ? resolve(new CanceledPromise()) : reject(error)
+          }
+        )
+    })
+  }
+
+  public getPromise() {
+    return this.promise
+  }
+
+  public cancel() {
+    this.canceled = true
+  }
+
+  public isCanceled() {
+    return this.canceled
+  }
+}
+
+export class CanceledPromise {}
 
 export class CellError {
   constructor(

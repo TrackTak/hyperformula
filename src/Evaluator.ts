@@ -3,6 +3,12 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/**
+ * @license
+ * Copyright (c) 2021 Handsoncode. All rights reserved.
+ */
+
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {absolutizeDependencies} from './absolutizeDependencies'
 import {CellError, ErrorType, SimpleCellAddress} from './Cell'
@@ -12,12 +18,12 @@ import {ArrayVertex, DependencyGraph, RangeVertex, Vertex} from './DependencyGra
 import {FormulaVertex} from './DependencyGraph/FormulaCellVertex'
 import {Interpreter} from './interpreter/Interpreter'
 import {InterpreterState} from './interpreter/InterpreterState'
-import {AsyncPromiseVertex, EmptyValue, getRawValue, OptionalInterpreterTuple} from './interpreter/InterpreterValue'
+import {EmptyValue, getRawValue, InterpreterValue} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import {Operations} from './Operations'
-import {Ast, ProcedureAst, RelativeDependency} from './parser'
+import {Ast, RelativeDependency} from './parser'
 import {Statistics, StatType} from './statistics'
 
 export class Evaluator {
@@ -42,68 +48,81 @@ export class Evaluator {
     })
   }
 
-  private async recomputeAsyncFunctions(asyncPromiseVertices: AsyncPromiseVertex[]): Promise<ContentChanges> {
+  private async recomputeAsyncFunctions(asyncPromiseVertices: FormulaVertex[]): Promise<ContentChanges> {
+    const changes = ContentChanges.empty()
+
     if (!asyncPromiseVertices.length) {
-      return ContentChanges.empty()
+      return changes
     }
+
+    const asyncGroupedVertices = this.dependencyGraph.getAsyncGroupedVertices(asyncPromiseVertices)
     
-    const asyncPromiseGroupedVertices = this.dependencyGraph.getAsyncGroupedVertices(asyncPromiseVertices)
-    
-    for (const asyncPromiseGroupedVerticesRow of asyncPromiseGroupedVertices) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const promises = asyncPromiseGroupedVerticesRow.map(({ getPromise }) => getPromise!())
-      const interpreterValues = await Promise.all(promises)
+    for (const asyncGroupedVerticesRow of asyncGroupedVertices) {
+      await new Promise((resolve, reject) => {
+        const promises = asyncGroupedVerticesRow.map((vertex) => {
+          return Promise.all(vertex.getAsyncPromises().map(x => {
+            const interpreterState = new InterpreterState(
+              vertex.getAddress(this.lazilyTransformingAstService),
+              this.config.useArrayArithmetic,
+              vertex
+            )
 
-      interpreterValues.forEach((value, i) => {
-        const vertex = asyncPromiseGroupedVerticesRow[i].asyncVertex as FormulaVertex
-        const address = vertex.getAddress(this.lazilyTransformingAstService)
-        const ast = vertex.getFormula(this.lazilyTransformingAstService) as ProcedureAst
+            return x.startPromise(interpreterState).getPromise()
+          }))
+        })
 
-        // Have to set it before it before for the
-        // arraySize check and then again for the new vertex
-        vertex.setCellValue(value)
-
-        this.operations.setAsyncFormulaToCell(address, ast, vertex)
-
-        const newVertex = this.dependencyGraph.getCell(address) as FormulaVertex
-
-        newVertex.setCellValue(value)
+        Promise.all(promises).then((resolve)).catch(reject)
       })
+
+      for (const vertex of asyncGroupedVerticesRow) {
+        const address = vertex.getAddress(this.lazilyTransformingAstService)
+        const ast = vertex.getFormula(this.lazilyTransformingAstService)
+        const currentValue = vertex.isComputed() ? vertex.getCellValue() : undefined
+        const promisesAreAllCanceled = vertex.asyncPromisesAreAllCanceled()
+        
+        let newCellValue
+
+        if (promisesAreAllCanceled) {
+          vertex.setCellValue(EmptyValue)
+
+          newCellValue = EmptyValue
+        } else {
+          this.operations.setAsyncFormulaToCell(address, ast)
+
+          const newVertex = this.dependencyGraph.getCell(address) as FormulaVertex
+
+          this.recomputeFormulaVertexValue(newVertex, false)
+
+          newCellValue = newVertex.getCellValue()
+        }
+
+        changes.addChange(newCellValue, address)
+
+        this.columnSearch.change(getRawValue(currentValue), getRawValue(newCellValue), address)
+      }
     }
 
-    const asyncNodes = this.dependencyGraph.asyncVertices()
+    const verticesToRecomputeFrom = Array.from(this.dependencyGraph.verticesToRecompute())
+    const [contentChanges] = this.partialRun(verticesToRecomputeFrom, false)
 
-    // Filter out async nodes as they were just computed
-    const verticesToRecomputeFrom = Array.from(this.dependencyGraph.verticesToRecompute()).filter(vertex => !asyncNodes.get(vertex))
+    changes.addAll(contentChanges)
 
-    const [contentChanges] = this.partialRunWithoutAsync(verticesToRecomputeFrom)
-
-    asyncNodes.forEach((vertex) => {
-      const formulaVertex = vertex as FormulaVertex
-      const value = formulaVertex.getCellValue()
-      const address = formulaVertex.getAddress(this.lazilyTransformingAstService)
-
-      this.columnSearch.add(getRawValue(value), address)
-    
-      contentChanges.addChange(value, address)
-    })
-
-    return contentChanges
+    return changes
   }
 
-  private partialRunWithoutAsync(vertices: Vertex[]): [ContentChanges, Vertex[], AsyncPromiseVertex[]] {
+  public partialRun(vertices: Vertex[], recalculateAsyncPromises = true): [ContentChanges, Vertex[], Promise<ContentChanges>] {
     const changes = ContentChanges.empty()
-    const asyncPromiseVertices: AsyncPromiseVertex[] = []
+    const asyncVertices: FormulaVertex[] = []
 
     const { sorted } = this.stats.measure(StatType.EVALUATION, () => {
       return this.dependencyGraph.graph.getTopSortedWithSccSubgraphFrom(vertices,
         (vertex: Vertex) => {
           if (vertex instanceof FormulaVertex) {
             const currentValue = vertex.isComputed() ? vertex.getCellValue() : undefined
-            const [newCellValue, asyncPromiseVertex] = this.recomputeFormulaVertexValue(vertex)
+            const newCellValue = this.recomputeFormulaVertexValue(vertex, recalculateAsyncPromises)
 
-            if (asyncPromiseVertex) {
-              asyncPromiseVertices.push(asyncPromiseVertex)
+            if (vertex.hasAsyncPromisesPending()) {
+              asyncVertices.push(vertex)
             }
 
             if (newCellValue !== currentValue) {
@@ -134,16 +153,10 @@ export class Evaluator {
       )
     })
 
-    return [changes, sorted, asyncPromiseVertices]
+    return [changes, sorted, this.recomputeAsyncFunctions(asyncVertices)]
   }
 
-  public partialRun(vertices: Vertex[]): [ContentChanges, Promise<ContentChanges>] {
-    const [changes,, asyncPromiseVertices] = this.partialRunWithoutAsync(vertices)
-
-    return [changes, this.recomputeAsyncFunctions(asyncPromiseVertices)]
-  }
-
-  public runAndForget(ast: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[]): OptionalInterpreterTuple {
+  public runAndForget(ast: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[]): InterpreterValue {
     const tmpRanges: RangeVertex[] = []
     for (const dep of absolutizeDependencies(dependencies, address)) {
       if (dep instanceof AbsoluteCellRange) {
@@ -155,17 +168,14 @@ export class Evaluator {
         }
       }
     }
-    const [ret, asyncPromiseVertex] = this.evaluateAstToCellValue(ast, new InterpreterState(address, this.config.useArrayArithmetic))
+    
+    const ret = this.evaluateAstToCellValue(ast, new InterpreterState(address, this.config.useArrayArithmetic))
 
     tmpRanges.forEach((rangeVertex) => {
       this.dependencyGraph.rangeMapping.removeRange(rangeVertex)
     })
 
-    if (!asyncPromiseVertex) {
-      return [ret]
-    }
-
-    return [ret, asyncPromiseVertex]
+    return ret
   }
 
   /**
@@ -178,56 +188,56 @@ export class Evaluator {
       }
     })
 
-    const asyncPromiseVertices: AsyncPromiseVertex[] = []
+    const asyncVertices: FormulaVertex[] = []
 
     sorted.forEach((vertex: Vertex) => {
       if (vertex instanceof FormulaVertex) {
-        const [newCellValue, asyncPromiseVertex] = this.recomputeFormulaVertexValue(vertex)
+        const newCellValue = this.recomputeFormulaVertexValue(vertex, true)
         const address = vertex.getAddress(this.lazilyTransformingAstService)
 
         this.columnSearch.add(getRawValue(newCellValue), address)
 
-        if (asyncPromiseVertex) {
-          asyncPromiseVertices.push(asyncPromiseVertex)
+        if (vertex.hasAsyncPromisesPending()) {
+          asyncVertices.push(vertex)
         }
+
       } else if (vertex instanceof RangeVertex) {
         vertex.clearCache()
       }
     })
 
     return new Promise<void>((resolve, reject) => {
-      this.recomputeAsyncFunctions(asyncPromiseVertices).then(() => {
+      this.recomputeAsyncFunctions(asyncVertices).then(() => {
         resolve(undefined)
       }).catch(reject)
     })
   }
 
-  private recomputeFormulaVertexValue(vertex: FormulaVertex): OptionalInterpreterTuple {
+  private recomputeFormulaVertexValue(vertex: FormulaVertex, recalculateAsyncPromises: boolean): InterpreterValue {
     const address = vertex.getAddress(this.lazilyTransformingAstService)
     if (vertex instanceof ArrayVertex && (vertex.array.size.isRef || !this.dependencyGraph.isThereSpaceForArray(vertex))) {
-      return [vertex.setNoSpace()]
+      return vertex.setNoSpace()
     } else {
-      const formula = vertex.getFormula(this.lazilyTransformingAstService)
-      const [newCellValue, promise] = this.evaluateAstToCellValue(formula, new InterpreterState(address, this.config.useArrayArithmetic, vertex))
+      if (recalculateAsyncPromises) {
+        vertex.recalculateAsyncPromisesWhenNeeded()
+      }
       
-      return [vertex.setCellValue(newCellValue), promise]
+      const formula = vertex.getFormula(this.lazilyTransformingAstService)
+      const newCellValue = this.evaluateAstToCellValue(formula, new InterpreterState(address, this.config.useArrayArithmetic, vertex))
+      
+      return vertex.setCellValue(newCellValue)
     }
   }
 
-  private evaluateAstToCellValue(ast: Ast, state: InterpreterState): OptionalInterpreterTuple {
-    const [interpreterValue, asyncPromiseVertex] = this.interpreter.evaluateAst(ast, state)
-    let newAsyncPromiseVertex = asyncPromiseVertex
-
-    if (!asyncPromiseVertex?.getPromise) {
-      newAsyncPromiseVertex = undefined
-    }
+  private evaluateAstToCellValue(ast: Ast, state: InterpreterState): InterpreterValue {
+    const interpreterValue = this.interpreter.evaluateAst(ast, state)
 
     if (interpreterValue instanceof SimpleRangeValue) {
-      return [interpreterValue, newAsyncPromiseVertex]
+      return interpreterValue
     } else if (interpreterValue === EmptyValue && this.config.evaluateNullToZero) {
-      return [0, newAsyncPromiseVertex]
+      return 0
     } else {
-      return [interpreterValue, newAsyncPromiseVertex]
+      return interpreterValue
     }
   }
 }

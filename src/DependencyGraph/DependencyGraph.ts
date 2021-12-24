@@ -6,6 +6,7 @@
 import {AbsoluteCellRange, SimpleCellRange, simpleCellRange} from '../AbsoluteCellRange'
 import {absolutizeDependencies} from '../absolutizeDependencies'
 import {ArraySize} from '../ArraySize'
+import {AsyncPromiseFetcher} from '../AsyncPromise'
 import {CellError, ErrorType, isSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from '../Cell'
 import {RawCellContent} from '../CellContentParser'
 import {CellDependency} from '../CellDependency'
@@ -14,7 +15,6 @@ import {ContentChanges} from '../ContentChanges'
 import {ErrorMessage} from '../error-message'
 import {FunctionRegistry} from '../interpreter/FunctionRegistry'
 import {
-  AsyncPromiseVertex,
   EmptyValue,
   getRawValue,
   InternalScalarValue,
@@ -60,6 +60,7 @@ export class DependencyGraph {
     public readonly lazilyTransformingAstService: LazilyTransformingAstService,
     public readonly functionRegistry: FunctionRegistry,
     public readonly namedExpressions: NamedExpressions,
+    public readonly asyncPromiseFetcher: AsyncPromiseFetcher
   ) {
     this.graph = new Graph<Vertex>(this.dependencyQueryVertices)
   }
@@ -69,7 +70,7 @@ export class DependencyGraph {
    * - empty cell has associated EmptyCellVertex if and only if it is a dependency (possibly indirect, through range) to some formula
    */
 
-  public static buildEmpty(lazilyTransformingAstService: LazilyTransformingAstService, config: Config, functionRegistry: FunctionRegistry, namedExpressions: NamedExpressions, stats: Statistics) {
+  public static buildEmpty(lazilyTransformingAstService: LazilyTransformingAstService, config: Config, functionRegistry: FunctionRegistry, namedExpressions: NamedExpressions, stats: Statistics, asyncPromiseFetcher: AsyncPromiseFetcher) {
     return new DependencyGraph(
       new AddressMapping(config.chooseAddressMappingPolicy),
       new RangeMapping(),
@@ -78,12 +79,19 @@ export class DependencyGraph {
       stats,
       lazilyTransformingAstService,
       functionRegistry,
-      namedExpressions
+      namedExpressions,
+      asyncPromiseFetcher
     )
   }
 
-  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean, markNodeAsSpecialRecentlyChanged = true): ContentChanges {
-    const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version())
+  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean): ContentChanges {
+    let asyncPromises
+
+    if (hasAsyncFunction) {
+      asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(ast, address)
+    }
+
+    const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version(), asyncPromises)
     
     if (hasAsyncFunction) {
       this.markAsAsync(newVertex)
@@ -91,10 +99,7 @@ export class DependencyGraph {
 
     this.exchangeOrAddFormulaVertex(newVertex)
     this.processCellPrecedents(precedents, newVertex)
-    
-    if (markNodeAsSpecialRecentlyChanged) {
-      this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
-    }
+    this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
 
     if (hasVolatileFunction) {
       this.markAsVolatile(newVertex)
@@ -182,7 +187,7 @@ export class DependencyGraph {
     const dependencyVertices = this.graph.adjacentNodes(startVertex)
     const vertices = [...dependencyVertices]
     
-    if (startVertex instanceof FormulaVertex && startVertex.asyncResolveIndex === undefined) {
+    if (startVertex instanceof FormulaVertex && !startVertex.isResolveIndexSet()) {
       vertices.unshift(startVertex)
     }
 
@@ -196,7 +201,7 @@ export class DependencyGraph {
 
         this.graph.dependencyIndexes.set(vertex, newIndex)
 
-        vertex.asyncResolveIndex = newIndex
+        vertex.setResolveIndex(newIndex)
       }
     })
   }
@@ -684,20 +689,19 @@ export class DependencyGraph {
     }
   }
 
-  public getAsyncGroupedVertices(vertices: AsyncPromiseVertex[]) {
-    const asyncGroupedVertices: AsyncPromiseVertex[][] = []
+  public getAsyncGroupedVertices(vertices: FormulaVertex[]) {
+    const asyncVertices: FormulaVertex[][] = []
 
     for (const vertex of vertices) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const index = vertex.asyncVertex!.asyncResolveIndex!
+      const index = vertex.getResolveIndex()
 
-      asyncGroupedVertices[index] = asyncGroupedVertices[index] ? [
-        ...asyncGroupedVertices[index],
+      asyncVertices[index] = asyncVertices[index] ? [
+        ...asyncVertices[index],
         vertex
       ] : [vertex]
     }
 
-    return asyncGroupedVertices
+    return asyncVertices
   }
 
   public asyncVertices() {
@@ -1187,11 +1191,30 @@ export class DependencyGraph {
     })
   }
 
+  private cancelFormulaVertexAsyncPromises(vertex: Vertex) {
+    if (vertex instanceof FormulaVertex && vertex.hasAsyncPromises()) {
+      const asyncPromises = vertex.getAsyncPromises()
+
+      asyncPromises.forEach((asyncPromise) => {
+        const cancelablePromise = asyncPromise.getPromise()
+
+        cancelablePromise?.cancel()
+      })
+    }
+  }
+
   private removeVertexAndCleanupDependencies(inputVertex: Vertex) {
     const dependencies = new Set(this.graph.removeNode(inputVertex))
+
+    this.cancelFormulaVertexAsyncPromises(inputVertex)
+    
     while (dependencies.size > 0) {
       const vertex: Vertex = dependencies.values().next().value
+
+      this.cancelFormulaVertexAsyncPromises(inputVertex)
+
       dependencies.delete(vertex)
+      
       if (this.graph.hasNode(vertex) && this.graph.adjacentNodesCount(vertex) === 0) {
         if (vertex instanceof RangeVertex || vertex instanceof EmptyCellVertex) {
           this.graph.removeNode(vertex).forEach((candidate) => dependencies.add(candidate))

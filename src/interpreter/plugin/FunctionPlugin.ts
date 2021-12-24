@@ -89,7 +89,7 @@ export interface FunctionMetadata {
   /**
    * Engine.
    * 
-   * If set to `true`, the function will be treated as an async method.
+   * If true then the method will be classed as asynchronous.
    */
   isAsyncMethod?: boolean,
   /**
@@ -273,7 +273,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
   }
 
   protected evaluateAst(ast: Ast, state: InterpreterState): InterpreterValue {
-    return this.interpreter.evaluateAst(ast, state)[0]
+    return this.interpreter.evaluateAst(ast, state)
   }
 
   protected arraySizeForAst(ast: Ast, state: InterpreterState): ArraySize {
@@ -402,9 +402,9 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
       allPromises.push(rowPromise)
     })
 
-    const intepreterValues = await Promise.all(allPromises)
+    const interpreterValues = await Promise.all(allPromises)
 
-    for (const row of intepreterValues) {
+    for (const row of interpreterValues) {
       const rowArr: InternalScalarValue[] = []
 
       for (const value of row) {
