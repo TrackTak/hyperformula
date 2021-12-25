@@ -327,7 +327,7 @@ describe('async functions', () => {
     ]])
   })
 
-  it.only('named expressions works with async functions', async() => {
+  it('named expressions works with async functions', async() => {
     const [engine] = HyperFormula.buildEmpty()
     const [changes, promise] = engine.addNamedExpression('asyncFoo', '=ASYNC_FOO()')
 
@@ -354,7 +354,7 @@ describe('async functions', () => {
     expect(newCellValue).toEqual(6)
   })
 
-  it('batch works with async functions', async() => {
+  it.only('batch works with async functions', async() => {
     const [engine] = HyperFormula.buildFromArray([[]])
 
     const [,promise] = engine.batch(() => {

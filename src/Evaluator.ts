@@ -11,7 +11,8 @@
 
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {absolutizeDependencies} from './absolutizeDependencies'
-import {CellError, ErrorType, SimpleCellAddress} from './Cell'
+import { AsyncPromise } from './AsyncPromise'
+import {CanceledPromise, CellError, ErrorType, SimpleCellAddress} from './Cell'
 import {Config} from './Config'
 import {ContentChanges} from './ContentChanges'
 import {ArrayVertex, DependencyGraph, RangeVertex, Vertex} from './DependencyGraph'
@@ -23,7 +24,7 @@ import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import {Operations} from './Operations'
-import {Ast, RelativeDependency} from './parser'
+import {Ast, AstNodeType, RelativeDependency} from './parser'
 import {Statistics, StatType} from './statistics'
 
 export class Evaluator {
@@ -48,6 +49,12 @@ export class Evaluator {
     })
   }
 
+  private startAsyncPromises(asyncPromises: AsyncPromise[], state: InterpreterState) {
+    return Promise.all(asyncPromises.map(x => {
+      return x.startPromise(state).getPromise()
+    }))
+  }
+
   private async recomputeAsyncFunctions(asyncPromiseVertices: FormulaVertex[]): Promise<ContentChanges> {
     const changes = ContentChanges.empty()
 
@@ -60,15 +67,13 @@ export class Evaluator {
     for (const asyncGroupedVerticesRow of asyncGroupedVertices) {
       await new Promise((resolve, reject) => {
         const promises = asyncGroupedVerticesRow.map((vertex) => {
-          return Promise.all(vertex.getAsyncPromises().map(x => {
-            const interpreterState = new InterpreterState(
+          return this.startAsyncPromises(vertex.getAsyncPromises(), 
+            new InterpreterState(
               vertex.getAddress(this.lazilyTransformingAstService),
               this.config.useArrayArithmetic,
               vertex
             )
-
-            return x.startPromise(interpreterState).getPromise()
-          }))
+          )
         })
 
         Promise.all(promises).then((resolve)).catch(reject)
@@ -156,7 +161,7 @@ export class Evaluator {
     return [changes, sorted, this.recomputeAsyncFunctions(asyncVertices)]
   }
 
-  public runAndForget(ast: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[]): InterpreterValue {
+  public runAndForget(ast: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[]): [InterpreterValue, Promise<InterpreterValue>?] {
     const tmpRanges: RangeVertex[] = []
     for (const dep of absolutizeDependencies(dependencies, address)) {
       if (dep instanceof AbsoluteCellRange) {
@@ -169,13 +174,26 @@ export class Evaluator {
       }
     }
     
-    const ret = this.evaluateAstToCellValue(ast, new InterpreterState(address, this.config.useArrayArithmetic))
+    const state = new InterpreterState(address, this.config.useArrayArithmetic)
+    const ret = this.evaluateAstToCellValue(ast, state)
 
     tmpRanges.forEach((rangeVertex) => {
       this.dependencyGraph.rangeMapping.removeRange(rangeVertex)
     })
 
-    return ret
+    if (ast.type === AstNodeType.FUNCTION_CALL && ast.asyncPromise) {
+      const asyncPromise = ast.asyncPromise
+
+      const promise = new Promise<InterpreterValue>((resolve, reject) => {
+        this.startAsyncPromises([asyncPromise], state).then(([value]) => {
+          resolve(value instanceof CanceledPromise ? EmptyValue : value)
+        }).catch(reject)
+      })
+
+      return [ret, promise]
+    }
+
+    return [ret]
   }
 
   /**

@@ -4048,16 +4048,15 @@ export class HyperFormula implements TypedEmitter {
     if (ast === undefined) {
       throw new NotAFormulaError()
     }
-    const interpreterValue = this.evaluator.runAndForget(ast, address, dependencies)
+    const [interpreterValue, promise] = this.evaluator.runAndForget(ast, address, dependencies)
     
-    const cellValuePromise = new Promise<CellValue | CellValue[][]>((resolve, reject) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      // asyncPromiseVertex?.getPromise!().then((interpreterValue) => {
-      //   resolve(this._exporter.exportScalarOrRange(interpreterValue))
-      // }).catch(reject)
+    const newPromise = new Promise<CellValue | CellValue[][]>((resolve, reject) => {
+      promise?.then((value) => {
+        resolve(this._exporter.exportScalarOrRange(value))
+      }).catch(reject)
     })
 
-    return [this._exporter.exportScalarOrRange(interpreterValue), cellValuePromise]
+    return [this._exporter.exportScalarOrRange(interpreterValue), newPromise]
   }
 
   /**
