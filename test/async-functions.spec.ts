@@ -116,36 +116,6 @@ describe('async functions', () => {
     HyperFormula.unregisterFunctionPlugin(AsyncPlugin)
   })
 
-  describe('arrays', () => {
-    it('with arrayformula', async() => {
-      const [engine, promise] = HyperFormula.buildFromArray([[1, 2, '=ASYNC_FOO(A1)'], ['=ARRAYFORMULA(SUM(A1:C1))']])
-
-      await promise
-
-      expect(engine.getCellValue(adr('A2'))).toEqual(9)  
-    })
-
-    it('array parsing', async() => {
-      const [engine, promise] = HyperFormula.buildFromArray([['={ASYNC_FOO(),2;3,ASYNC_FOO()}']])
-
-      expect(engine.getSheetValues(0)).toEqual([[getLoadingError('Sheet1!A1'), 2], [3, getLoadingError('Sheet1!A1')]])
-
-      await promise
-
-      expect(engine.getSheetValues(0)).toEqual([[1, 2], [3, 1]])
-    })
-
-    it('custom array', async() => {
-      const [engine, promise] = HyperFormula.buildFromArray([['=ASYNC_ARRAY_FOO()']])
-
-      expect(engine.getSheetValues(0)).toEqual([[getLoadingError('Sheet1!A1')]])
-
-      await promise
-
-      expect(engine.getSheetValues(0)).toEqual([[1, 1], [1, 1]])
-    })
-  })
-
   describe('operations buildFromArray', () => {
     it('plus op', async() => {
       const [engine, promise] = HyperFormula.buildFromArray([
@@ -221,22 +191,6 @@ describe('async functions', () => {
       expect(handler).toHaveBeenCalledTimes(2)
       expect(changes).toEqual([new ExportedCellChange(adr('A1'), 1), new ExportedCellChange(adr('B1'), 1), new ExportedCellChange(adr('C1'), 1)])
     })
-  })
-  
-  it('async values are calculated in parallel', async() => {
-    const [engine, promise] = HyperFormula.buildFromArray([
-      ['=ASYNC_FOO()', '=ASYNC_FOO(A1)', '=A1 + B1'],
-      ['=ASYNC_FOO()', '=ASYNC_FOO(A2)'],
-    ])
-
-    expect(engine.getSheetValues(0)).toEqual([
-      [getLoadingError('Sheet1!A1'), getLoadingError('Sheet1!B1'), getLoadingError('Sheet1!A1')],
-      [getLoadingError('Sheet1!A2'), getLoadingError('Sheet1!B2')]
-    ])
-
-    await promise
-
-    expect(engine.getSheetValues(0)).toEqual([[1, 6, 7], [1, 6]])
   })
 
   it('should return #TIMEOUT error if function does not resolve due to the request taking too long', async() => {

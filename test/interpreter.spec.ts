@@ -1,6 +1,7 @@
 import {HyperFormula} from '../src'
 import {ErrorType} from '../src/Cell'
 import {ErrorMessage} from '../src/error-message'
+import AsyncTestPlugin, { getLoadingError } from './helpers/AsyncTestPlugin'
 import {adr, detailedError} from './testUtils'
 
 describe('Interpreter', () => {
@@ -63,6 +64,14 @@ describe('Interpreter', () => {
     const [engine] = HyperFormula.buildFromArray([['=FOO()']])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOO')))
+  })
+
+  it('async procedures - loading', () => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine] = HyperFormula.buildFromArray([['=ASYNC_FOO()']])
+
+    expect(engine.getCellValue(adr('A1'))).toEqualError(getLoadingError('Sheet1!A1'))
   })
 
   it('errors - parsing errors', () => {

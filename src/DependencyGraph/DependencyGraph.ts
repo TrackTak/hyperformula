@@ -669,7 +669,8 @@ export class DependencyGraph {
         const depIndex = this.graph.dependencyIndexes.get(startVertex) ?? -1
         // If vertex is async then increment it to the next index
         // so that Promise.all() can work later
-        const newIndex = asyncVertex ? depIndex + 1 : depIndex
+        const existingIndex = vertex.isResolveIndexSet() ? vertex.getResolveIndex() : -Infinity
+        const newIndex = Math.max(existingIndex, asyncVertex ? depIndex + 1 : depIndex)
 
         this.graph.dependencyIndexes.set(vertex, newIndex)
 

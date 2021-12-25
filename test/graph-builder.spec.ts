@@ -65,15 +65,13 @@ describe('GraphBuilder', () => {
     expect(engine.graph.adjacentNodes(ab)).toContain(c1)
   })
 
-  it('async vertices dependencies should work', async() => {
+  it('async vertices dependencies should work', () => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
-    const [engine, promise] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=ASYNC_FOO()', '=ASYNC_FOO(A1)', '=A1 + B1', '=ASYNC_FOO(C1)+B1+A2'],
       ['=ASYNC_FOO()', '=ASYNC_FOO(A2)'],
     ])
-
-    await promise
 
     const a1 = engine.addressMapping.fetchCell(adr('A1')) as FormulaVertex
     const b1 = engine.addressMapping.fetchCell(adr('B1')) as FormulaVertex
