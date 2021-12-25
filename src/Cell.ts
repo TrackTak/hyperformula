@@ -169,21 +169,21 @@ export const getCellValueFormat = (cellValue: InterpreterValue): string | undefi
 
 export class CancelablePromise<T> {
   private canceled = false
-  private promise!: Promise<T | CanceledPromise> 
+  private promise!: Promise<T | CanceledPromise<T>> 
 
-  constructor(promise: Promise<T | CanceledPromise>) {
+  constructor(promise: Promise<T>) {
     this.setPromise(promise)
   }
 
-  public setPromise(promise: Promise<T | CanceledPromise>) {
-    this.promise = new Promise<T | CanceledPromise>((resolve, reject) => {
+  public setPromise(promise: Promise<T>) {
+    this.promise = new Promise<T | CanceledPromise<T>>((resolve, reject) => {
       promise
         .then(val => {
-            return this.canceled ? resolve(new CanceledPromise()) : resolve(val)
+            return this.canceled ? resolve(new CanceledPromise(val)) : resolve(val)
         })
         .catch(
           error => {
-            return this.canceled ? resolve(new CanceledPromise()) : reject(error)
+            return this.canceled ? resolve(new CanceledPromise(error)) : reject(error)
           }
         )
     })
@@ -202,7 +202,9 @@ export class CancelablePromise<T> {
   }
 }
 
-export class CanceledPromise {}
+export class CanceledPromise<T> {
+  constructor(public readonly value: T) {}
+}
 
 export class CellError {
   constructor(

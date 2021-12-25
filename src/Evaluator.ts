@@ -27,6 +27,11 @@ import {Operations} from './Operations'
 import {Ast, AstNodeType, RelativeDependency} from './parser'
 import {Statistics, StatType} from './statistics'
 
+interface AsyncVertexValues {
+  vertex: FormulaVertex,
+  values: (InterpreterValue | CanceledPromise<InterpreterValue>)[],
+}
+
 export class Evaluator {
   constructor(
     private readonly config: Config,
@@ -63,43 +68,48 @@ export class Evaluator {
     }
 
     const asyncGroupedVertices = this.dependencyGraph.getAsyncGroupedVertices(asyncPromiseVertices)
-    
+
     for (const asyncGroupedVerticesRow of asyncGroupedVertices) {
-      await new Promise((resolve, reject) => {
+      const asyncVertexValues = await new Promise<AsyncVertexValues[]>((resolve, reject) => {
         const promises = asyncGroupedVerticesRow.map((vertex) => {
-          return this.startAsyncPromises(vertex.getAsyncPromises(), 
+          const promise = this.startAsyncPromises(vertex.getAsyncPromises(), 
             new InterpreterState(
               vertex.getAddress(this.lazilyTransformingAstService),
               this.config.useArrayArithmetic,
               vertex
             )
           )
+
+          return new Promise<AsyncVertexValues>((resolve, reject) => {
+            promise.then(values => {
+              resolve({
+                values,
+                vertex
+              })
+            }).catch(reject)
+          })
         })
 
-        Promise.all(promises).then((resolve)).catch(reject)
+        Promise.all(promises).then(resolve).catch(reject)
       })
 
-      for (const vertex of asyncGroupedVerticesRow) {
+      for (const { vertex, values } of asyncVertexValues) {
         const address = vertex.getAddress(this.lazilyTransformingAstService)
         const ast = vertex.getFormula(this.lazilyTransformingAstService)
         const currentValue = vertex.isComputed() ? vertex.getCellValue() : undefined
-        const promisesAreAllCanceled = vertex.asyncPromisesAreAllCanceled()
-        
-        let newCellValue
+        const promisesAreCanceled = values.some(value => value instanceof CanceledPromise)
 
-        if (promisesAreAllCanceled) {
-          vertex.setCellValue(EmptyValue)
+        if (promisesAreCanceled) {
+          continue
+        } 
 
-          newCellValue = EmptyValue
-        } else {
-          this.operations.setAsyncFormulaToCell(address, ast)
+        this.operations.setAsyncFormulaToCell(address, ast)
 
-          const newVertex = this.dependencyGraph.getCell(address) as FormulaVertex
+        const newVertex = this.dependencyGraph.getCell(address) as FormulaVertex
 
-          this.recomputeFormulaVertexValue(newVertex, false)
+        this.recomputeFormulaVertexValue(newVertex, false)
 
-          newCellValue = newVertex.getCellValue()
-        }
+        const newCellValue = newVertex.getCellValue()
 
         changes.addChange(newCellValue, address)
 
@@ -186,7 +196,7 @@ export class Evaluator {
 
       const promise = new Promise<InterpreterValue>((resolve, reject) => {
         this.startAsyncPromises([asyncPromise], state).then(([value]) => {
-          resolve(value instanceof CanceledPromise ? EmptyValue : value)
+          resolve(value instanceof CanceledPromise ? value.value : value)
         }).catch(reject)
       })
 

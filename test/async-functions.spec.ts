@@ -354,7 +354,7 @@ describe('async functions', () => {
     expect(newCellValue).toEqual(6)
   })
 
-  it.only('batch works with async functions', async() => {
+  it('batch works with async functions', async() => {
     const [engine] = HyperFormula.buildFromArray([[]])
 
     const [,promise] = engine.batch(() => {

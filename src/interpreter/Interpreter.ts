@@ -219,7 +219,7 @@ export class Interpreter {
             const value = ast.asyncPromise.getResolvedValue()
             
             if (value instanceof CanceledPromise) {
-              return EmptyValue
+              return value.value
             }
 
             return value

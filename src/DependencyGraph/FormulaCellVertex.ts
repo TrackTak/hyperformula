@@ -55,10 +55,6 @@ export abstract class FormulaVertex {
     return this.resolveIndex !== undefined
   }
 
-  public asyncPromisesAreAllCanceled() {
-    return this.asyncPromises?.every(x => x.getPromise()?.isCanceled())
-  }
-
   public get width(): number {
     return 1
   }
