@@ -188,6 +188,8 @@ describe('async functions', () => {
 
       const changes = await engine.setSheetContent(0, [['=ASYNC_FOO()', '=ASYNC_FOO()', '=ASYNC_FOO()']])[1]
 
+      await engine.setCellContents(adr('D1'), 'test')[1]
+
       expect(handler).toHaveBeenCalledTimes(2)
       expect(changes).toEqual([new ExportedCellChange(adr('A1'), 1), new ExportedCellChange(adr('B1'), 1), new ExportedCellChange(adr('C1'), 1)])
     })

@@ -84,12 +84,15 @@ export class DependencyGraph {
     )
   }
 
-  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: AsyncPromise[] | undefined, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean): ContentChanges {
+  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: AsyncPromise[] | undefined, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean, markNodeAsSpecialRecentlyChanged = true): ContentChanges {
     const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version(), asyncPromises)
 
     this.exchangeOrAddFormulaVertex(newVertex)
     this.processCellPrecedents(precedents, newVertex)
-    this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
+
+    if (markNodeAsSpecialRecentlyChanged) {
+      this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
+    }
 
     if (hasAsyncFunction) {
       this.markAsAsync(newVertex)

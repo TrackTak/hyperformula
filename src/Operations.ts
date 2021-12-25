@@ -561,7 +561,7 @@ export class Operations {
         const size = this.arraySizePredictor.checkArraySize(ast, address)
         const asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(ast, address)
 
-        this.setFormulaToCell(address, size, asyncPromises, parserResult)
+        this.setFormulaToCell(address, size, asyncPromises, parserResult, true)
       }
     } else if (parsedCellContent instanceof CellContent.Empty) {
       this.setCellEmpty(address)
@@ -603,7 +603,7 @@ export class Operations {
     const size = this.arraySizePredictor.checkArraySize(ast, address)
     const asyncPromises = cell.getAsyncPromises()
 
-    this.setFormulaToCell(address, size, asyncPromises, parserResult)
+    this.setFormulaToCell(address, size, asyncPromises, parserResult, false)
   }  
 
   public setFormulaToCell(address: SimpleCellAddress, size: ArraySize, asyncPromises: AsyncPromise[] | undefined, {
@@ -612,9 +612,9 @@ export class Operations {
     hasStructuralChangeFunction,
     hasAsyncFunction,
     dependencies
-  }: ParsingResult) {
+  }: ParsingResult, markNodeAsSpecialRecentlyChanged: boolean) {
     const oldValue = this.dependencyGraph.getCellValue(address)
-    const arrayChanges = this.dependencyGraph.setFormulaToCell(address, ast, absolutizeDependencies(dependencies, address), size, asyncPromises, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
+    const arrayChanges = this.dependencyGraph.setFormulaToCell(address, ast, absolutizeDependencies(dependencies, address), size, asyncPromises, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, markNodeAsSpecialRecentlyChanged)
     this.columnSearch.remove(getRawValue(oldValue), address)
     this.columnSearch.applyChanges(arrayChanges.getChanges())
     this.changes.addAll(arrayChanges)
