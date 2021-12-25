@@ -13,7 +13,7 @@ import {Ast, AstNodeType} from './parser'
 export class AsyncPromise {
   private isResolvedValue = false
   /** Most recently fetched value of this promise. */
-  private resolvedValue?: InterpreterValue | CanceledPromise
+  private resolvedValue?: InterpreterValue | CanceledPromise<InterpreterValue>
   private cancelablePromise?: CancelablePromise<InterpreterValue>
 
   constructor(
@@ -27,20 +27,12 @@ export class AsyncPromise {
   public startPromise(state: InterpreterState) {
     const cancelablePromise = this.promiseGetter(state)
 
-    const promise = new Promise<InterpreterValue | CanceledPromise>((resolve, reject) => {
-      cancelablePromise.getPromise().then((value) => {
-        this.resolvedValue = value
-        this.isResolvedValue = true
-
-        resolve(value)
-      }).catch((error) => {
-        this.isResolvedValue = false
-
-        reject(error)
-      })
+    cancelablePromise.getPromise().then((value) => {
+      this.resolvedValue = value
+      this.isResolvedValue = true
+    }).catch(() => {
+      this.isResolvedValue = false
     })
-
-    cancelablePromise.setPromise(promise)
 
     this.cancelablePromise = cancelablePromise
 

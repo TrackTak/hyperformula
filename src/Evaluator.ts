@@ -117,6 +117,7 @@ export class Evaluator {
       }
     }
 
+    // TODO: Don't recompute cancelled vertices
     const verticesToRecomputeFrom = Array.from(this.dependencyGraph.verticesToRecompute())
     const [contentChanges] = this.partialRun(verticesToRecomputeFrom, false)
 

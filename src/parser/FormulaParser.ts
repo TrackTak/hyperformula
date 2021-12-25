@@ -181,7 +181,7 @@ export class FormulaParser extends EmbeddedActionsParser {
 
       if (pluginFunction !== undefined) {
         const promiseGetter = (state: InterpreterState) => {
-          const promise = new Promise<InterpreterValue | CanceledPromise>((resolve, reject) => {
+          const promise = new Promise<InterpreterValue>((resolve, reject) => {
             const pluginFunctionValue = pluginFunction(ast, state)
             const functionPromise = withTimeout(pluginFunctionValue, this.config.timeoutTime)
 

@@ -172,10 +172,6 @@ export class CancelablePromise<T> {
   private promise!: Promise<T | CanceledPromise<T>> 
 
   constructor(promise: Promise<T>) {
-    this.setPromise(promise)
-  }
-
-  public setPromise(promise: Promise<T>) {
     this.promise = new Promise<T | CanceledPromise<T>>((resolve, reject) => {
       promise
         .then(val => {

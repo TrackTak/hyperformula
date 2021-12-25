@@ -92,7 +92,7 @@ export class BuildEngineFactory {
       }
     }
 
-    const parser = new ParserWithCaching(config, functionRegistry, sheetMapping.get, config)
+    const parser = new ParserWithCaching(config, functionRegistry, sheetMapping.get)
     lazilyTransformingAstService.parser = parser
     const unparser = new Unparser(config, buildLexerConfig(config), sheetMapping.fetchDisplayName, namedExpressions)
     const dateTimeHelper = new DateTimeHelper(config)

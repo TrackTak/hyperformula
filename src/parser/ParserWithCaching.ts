@@ -27,7 +27,6 @@ import {
   RowRange,
   WhiteSpace,
 } from './LexerConfig'
-import {ParserConfig} from './ParserConfig'
 import {formatNumber} from './Unparser'
 
 export interface ParsingResult {
@@ -50,12 +49,11 @@ export class ParserWithCaching {
   private readonly formulaParser: FormulaParser
 
   constructor(
-    parserConfig: ParserConfig,
+    private readonly config: Config,
     private readonly functionRegistry: FunctionRegistry,
-    private readonly sheetMapping: SheetMappingFn,
-    private readonly config: Config
+    private readonly sheetMapping: SheetMappingFn
   ) {
-    this.lexerConfig = buildLexerConfig(parserConfig)
+    this.lexerConfig = buildLexerConfig(config)
     this.lexer = new FormulaLexer(this.lexerConfig)
     this.formulaParser = new FormulaParser(this.lexerConfig, this.functionRegistry, this.config, this.sheetMapping)
     this.cache = new Cache(this.functionRegistry)
