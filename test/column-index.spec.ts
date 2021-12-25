@@ -1,6 +1,7 @@
 import {deepStrictEqual} from 'assert'
 import {HyperFormula} from '../src'
 import {AbsoluteCellRange} from '../src/AbsoluteCellRange'
+import { AsyncPromiseFetcher } from '../src/AsyncPromise'
 import {CellError, ErrorType} from '../src/Cell'
 import {Config} from '../src/Config'
 import {DependencyGraph} from '../src/DependencyGraph'
@@ -19,7 +20,8 @@ import {adr, expectColumnIndexToMatchSheet} from './testUtils'
 function buildEmptyIndex(transformingService: LazilyTransformingAstService, config: Config, statistics: Statistics): ColumnIndex {
   const functionRegistry = new FunctionRegistry(config)
   const namedExpression = new NamedExpressions()
-  const dependencyGraph = DependencyGraph.buildEmpty(transformingService, config, functionRegistry, namedExpression, statistics)
+  const asyncPromiseFetcher = new AsyncPromiseFetcher(config)
+  const dependencyGraph = DependencyGraph.buildEmpty(transformingService, config, functionRegistry, namedExpression, statistics, asyncPromiseFetcher)
   return new ColumnIndex(dependencyGraph, config, statistics)
 }
 
