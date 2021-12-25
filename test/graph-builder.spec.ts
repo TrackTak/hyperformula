@@ -1,7 +1,9 @@
 import {HyperFormula} from '../src'
 import {Config} from '../src/Config'
 import {EmptyCellVertex, ValueCellVertex} from '../src/DependencyGraph'
+import { FormulaVertex } from '../src/DependencyGraph/FormulaCellVertex'
 import {SheetSizeLimitExceededError} from '../src/errors'
+import AsyncTestPlugin from './helpers/AsyncTestPlugin'
 import {adr, colEnd, colStart} from './testUtils'
 
 describe('GraphBuilder', () => {
@@ -61,6 +63,32 @@ describe('GraphBuilder', () => {
     expect(engine.graph.adjacentNodes(a1)).toContain(ab)
     expect(engine.graph.adjacentNodes(b1)).toContain(ab)
     expect(engine.graph.adjacentNodes(ab)).toContain(c1)
+  })
+
+  it('async vertices dependencies should work', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine, promise] = HyperFormula.buildFromArray([
+      ['=ASYNC_FOO()', '=ASYNC_FOO(A1)', '=A1 + B1', '=ASYNC_FOO(C1)+B1+A2'],
+      ['=ASYNC_FOO()', '=ASYNC_FOO(A2)'],
+    ])
+
+    await promise
+
+    const a1 = engine.addressMapping.fetchCell(adr('A1')) as FormulaVertex
+    const b1 = engine.addressMapping.fetchCell(adr('B1')) as FormulaVertex
+    const c1 = engine.addressMapping.fetchCell(adr('C1')) as FormulaVertex
+    const d1 = engine.addressMapping.fetchCell(adr('D1')) as FormulaVertex
+
+    const a2 = engine.addressMapping.fetchCell(adr('A2')) as FormulaVertex
+    const b2 = engine.addressMapping.fetchCell(adr('B2')) as FormulaVertex
+
+    expect(a1.getResolveIndex()).toBe(0)
+    expect(b1.getResolveIndex()).toBe(1)
+    expect(c1.getResolveIndex()).toBe(1)
+    expect(d1.getResolveIndex()).toBe(2)
+    expect(a2.getResolveIndex()).toBe(0)
+    expect(b2.getResolveIndex()).toBe(1)
   })
 
   it('#loadSheet - it should build graph with only one RangeVertex', () => {

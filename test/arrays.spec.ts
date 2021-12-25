@@ -2,9 +2,20 @@ import {ErrorType, HyperFormula} from '../src'
 import {ArraySize} from '../src/ArraySize'
 import {ArrayVertex, ValueCellVertex} from '../src/DependencyGraph'
 import {ErrorMessage} from '../src/error-message'
+import AsyncTestPlugin from './helpers/AsyncTestPlugin'
 import {adr, detailedError, detailedErrorWithOrigin, expectVerticesOfTypes, noSpace} from './testUtils'
 
 describe('without arrayformula, with useArrayArithmetic flag', () => {
+  it('with async function', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine, promise] = HyperFormula.buildFromArray([[1, 2, '=ASYNC_FOO(A1)'], ['=SUM(-A1:C1)']], {useArrayArithmetic: true})
+    
+    await promise
+
+    expect(engine.getCellValue(adr('A2'))).toEqual(-9)
+  })
+
   it('unary op, scalar ret', () => {
     const [engine] = HyperFormula.buildFromArray([[1, 2, 3], ['=SUM(-A1:C1)']], {useArrayArithmetic: true})
     expect(engine.getCellValue(adr('A2'))).toEqual(-6)
@@ -64,6 +75,16 @@ describe('without arrayformula, with useArrayArithmetic flag', () => {
 })
 
 describe('without arrayformula, without useArrayArithmetic flag', () => {
+  it('with async function', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine, promise] = HyperFormula.buildFromArray([[1, 2, 3], [undefined, undefined, undefined, '=SUM(-A1:C1)']], {useArrayArithmetic: false})
+    
+    await promise
+
+    expect(engine.getCellValue(adr('D2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+  })
+
   it('unary op', () => {
     const [engine] = HyperFormula.buildFromArray([[1, 2, 3], [undefined, undefined, undefined, '=SUM(-A1:C1)']], {useArrayArithmetic: false})
     expect(engine.getCellValue(adr('D2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
@@ -108,6 +129,16 @@ describe('without arrayformula, without useArrayArithmetic flag', () => {
 })
 
 describe('with arrayformula, without useArrayArithmetic flag', () => {
+  it('with async function', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine, promise] = HyperFormula.buildFromArray([[1, 2, '=ASYNC_FOO(A1)'], ['=ARRAYFORMULA(SUM(-A1:C1))']], {useArrayArithmetic: false})
+    
+    await promise
+    
+    expect(engine.getCellValue(adr('A2'))).toEqual(-9)
+  })
+
   it('unary op', () => {
     const [engine] = HyperFormula.buildFromArray([[1, 2, 3], ['=ARRAYFORMULA(SUM(-A1:C1))']], {useArrayArithmetic: false})
     expect(engine.getCellValue(adr('A2'))).toEqual(-6)
@@ -162,6 +193,16 @@ describe('with arrayformula, without useArrayArithmetic flag', () => {
 })
 
 describe('coercion of array to scalar', () => {
+  it('with async function', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine, promise] = HyperFormula.buildFromArray([['=ASYNC_FOO()', 2, 3], ['=ARRAYFORMULA(2*A1:C1)+ARRAYFORMULA(2*A1:C1)']])
+    
+    await promise
+
+    expect(engine.getSheetValues(0)).toEqual([[1, 2, 3], [4]])
+  })
+
   it('actual range', () => {
     const [engine] = HyperFormula.buildFromArray([[0, 2, 3, '=SIN(A1:C1)']])
     expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
@@ -199,6 +240,16 @@ describe('coercion of array to scalar', () => {
 })
 
 describe('range interpolation', () => {
+  it('with async function', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine, promise] = HyperFormula.buildFromArray([[0, '=ASYNC_FOO()', 2], ['=EXP(A1:C1)']])
+    
+    await promise
+
+    expect(engine.getCellValue(adr('A2'))).toEqual(1)
+  })
+
   it('with function', () => {
     const [engine] = HyperFormula.buildFromArray([[0, 1, 2], ['=EXP(A1:C1)']])
     expect(engine.getCellValue(adr('A2'))).toEqual(1)
@@ -231,6 +282,16 @@ describe('range interpolation', () => {
 })
 
 describe('array parsing', () => {
+  it('with async function', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine, promise] = HyperFormula.buildFromArray([['={ASYNC_FOO(),2;3,4}']])
+
+    await promise
+
+    expect(engine.getSheetValues(0)).toEqual([[1, 2], [3, 4]])
+  })
+
   it('simple array', () => {
     const [engine] = HyperFormula.buildFromArray([['={1,2;3,4}']])
     expect(engine.getSheetValues(0)).toEqual([[1, 2], [3, 4]])
@@ -394,6 +455,23 @@ describe('build from array', () => {
     ])
   })
 
+  it('array should work with async data', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine, promise] = HyperFormula.buildFromArray([
+      ['=ASYNC_ARRAY_FOO()'],
+    ], {useArrayArithmetic: true})
+
+    engine.setCellContents(adr('C1'), '=TRANSPOSE(A1:B2)')
+
+    await promise
+
+    expect(engine.getSheetValues(0)).toEqual([
+      [1, 1, 1, 1], 
+      [1, 1, 1, 1]
+    ])
+  })
+
   it('should make REF array if no space', () => {
     const [engine] = HyperFormula.buildFromArray([
       ['=-C1:D2', 2],
@@ -443,6 +521,19 @@ describe('build from array', () => {
 })
 
 describe('column ranges', () => {
+  it('async functions should work for column range', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine, promise] = HyperFormula.buildFromArray([
+      ['=2*(B:B)', 1],
+      [null, '=ASYNC_FOO(B1)'],
+    ], {useArrayArithmetic: true})
+
+    await promise
+
+    expect(engine.getSheetValues(0)).toEqual([[2, 1], [12, 6]])
+  })
+
   it('arithmetic should work for column range', () => {
     const [engine] = HyperFormula.buildFromArray([
       ['=2*(B:B)', 1],

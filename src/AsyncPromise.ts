@@ -3,12 +3,13 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import {SimpleCellAddress} from '.'
-import {CancelablePromise, CanceledPromise} from './Cell'
+import {CellError, SimpleCellAddress} from '.'
+import {CancelablePromise, CanceledPromise, withTimeout} from './Cell'
 import {Config} from './Config'
+import {FunctionRegistry} from './interpreter/FunctionRegistry'
 import {InterpreterState} from './interpreter/InterpreterState'
 import {InterpreterValue} from './interpreter/InterpreterValue'
-import {Ast, AstNodeType} from './parser'
+import {Ast, AstNodeType, ProcedureAst} from './parser'
 
 export class AsyncPromise {
   private isResolvedValue = false
@@ -62,7 +63,8 @@ export class AsyncPromise {
 
 export class AsyncPromiseFetcher {
   constructor(
-    private config: Config,
+    private readonly config: Config,
+    private readonly functionRegistry: FunctionRegistry
   ) {
   }
 
@@ -75,6 +77,8 @@ export class AsyncPromiseFetcher {
   public checkFunctionPromisesForAst(ast: Ast, state: InterpreterState): (AsyncPromise | undefined)[] {
     switch (ast.type) {
       case AstNodeType.FUNCTION_CALL: {
+        this.setAsyncPromiseToProcedureAst(ast)
+
         return [ast.asyncPromise]
       }
       case AstNodeType.DIV_OP:
@@ -117,6 +121,39 @@ export class AsyncPromiseFetcher {
       }
       default:
         return []
+    }
+  }
+
+  private setAsyncPromiseToProcedureAst(ast: ProcedureAst) {
+    const metadata = this.functionRegistry.getMetadata(ast.procedureName)
+
+    if (metadata?.isAsyncMethod) {
+      const pluginFunction = this.functionRegistry.getAsyncFunction(ast.procedureName)
+
+      if (pluginFunction !== undefined) {
+        const promiseGetter = (state: InterpreterState) => {
+          const promise = new Promise<InterpreterValue>((resolve, reject) => {
+            const pluginFunctionValue = pluginFunction(ast, state)
+            const functionPromise = withTimeout(pluginFunctionValue, this.config.timeoutTime)
+
+            functionPromise.then((interpreterValue) => {
+              resolve(interpreterValue)
+            }).catch((error) => {
+              if (error instanceof CellError) {
+                resolve(error)
+              } else {
+                reject(error)
+              }
+            })
+          })
+
+          return new CancelablePromise(promise)
+        }
+
+        const asyncPromise = new AsyncPromise(promiseGetter)
+
+        ast.asyncPromise = asyncPromise
+      }
     }
   }
 }

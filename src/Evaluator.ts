@@ -185,6 +185,8 @@ export class Evaluator {
       }
     }
     
+    this.dependencyGraph.asyncPromiseFetcher.checkFunctionPromises(ast, address)
+    
     const state = new InterpreterState(address, this.config.useArrayArithmetic)
     const ret = this.evaluateAstToCellValue(ast, state)
 

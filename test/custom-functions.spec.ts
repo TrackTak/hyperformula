@@ -11,6 +11,7 @@ import {NumericAggregationPlugin} from '../src/interpreter/plugin/NumericAggrega
 import {SumifPlugin} from '../src/interpreter/plugin/SumifPlugin'
 import {VersionPlugin} from '../src/interpreter/plugin/VersionPlugin'
 import {ProcedureAst} from '../src/parser'
+import AsyncTestPlugin from './helpers/AsyncTestPlugin'
 import {adr, detailedError, expectArrayWithSameContent} from './testUtils'
 
 class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlugin> {

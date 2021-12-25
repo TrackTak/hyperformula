@@ -2,6 +2,7 @@ import {ExportedCellChange, ExportedNamedExpressionChange, HyperFormula} from '.
 import {ErrorType} from '../src/Cell'
 import {Events} from '../src/Emitter'
 import {NamedExpressionDoesNotExistError} from '../src/errors'
+import AsyncTestPlugin, { getLoadingError } from './helpers/AsyncTestPlugin'
 
 import {adr, detailedErrorWithOrigin} from './testUtils'
 
@@ -124,6 +125,23 @@ describe('Events', () => {
     expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 43)])
   })
 
+  it('asyncValuesUpdated works', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine] = HyperFormula.buildFromArray([
+      ['=ASYNC_FOO()']
+    ])
+    const handler = jasmine.createSpy()
+
+    engine.on(Events.AsyncValuesUpdated, handler)
+
+    await engine.setCellContents(adr('B1'), [['=ASYNC_FOO()']])[1]
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), 1), new ExportedCellChange(adr('A1'), 1)])
+  })
+
+
   it('valuesUpdated may sometimes be triggered even if nothing changed', () => {
     const [engine] = HyperFormula.buildFromArray([
       ['42']
@@ -137,52 +155,74 @@ describe('Events', () => {
     expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 42)])
   })
 
-  it('suspension and resuming of evaluation', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['42']
+  it('suspension and resuming of evaluation', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine, promise] = HyperFormula.buildFromArray([
+      ['42', '=ASYNC_FOO()']
     ])
     const handlerUpdated = jasmine.createSpy()
     const handlerSuspended = jasmine.createSpy()
     const handlerResumed = jasmine.createSpy()
+    const handlerAsyncValuesUpdated = jasmine.createSpy()
+
+    await promise
 
     engine.on(Events.ValuesUpdated, handlerUpdated)
     engine.on(Events.EvaluationSuspended, handlerSuspended)
     engine.on(Events.EvaluationResumed, handlerResumed)
+    engine.on(Events.AsyncValuesUpdated, handlerAsyncValuesUpdated)
 
     engine.suspendEvaluation()
     expect(handlerUpdated).toHaveBeenCalledTimes(0)
     expect(handlerSuspended).toHaveBeenCalledTimes(1)
     expect(handlerResumed).toHaveBeenCalledTimes(0)
+    expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(0)
 
-    engine.setCellContents(adr('A1'), [['13']])
+    await engine.setCellContents(adr('A1'), [['13']])[1]
+
     expect(handlerUpdated).toHaveBeenCalledTimes(0)
     expect(handlerSuspended).toHaveBeenCalledTimes(1)
     expect(handlerResumed).toHaveBeenCalledTimes(0)
+    expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(0)
 
-    engine.resumeEvaluation()
+    await engine.resumeEvaluation()[1]
+
     expect(handlerUpdated).toHaveBeenCalledTimes(1)
     expect(handlerSuspended).toHaveBeenCalledTimes(1)
-    expect(handlerResumed).toHaveBeenCalledTimes(1)
-    expect(handlerResumed).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 13)])
+    expect(handlerResumed).toHaveBeenCalledTimes(2)
+    expect(handlerResumed).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 13), new ExportedCellChange(adr('B1'), getLoadingError('Sheet1!B1'))])
+    expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(1)
+    expect(handlerAsyncValuesUpdated).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), 1)])
   })
 
-  it('batching', () => {
-    const [engine] = HyperFormula.buildFromArray([
+  it('batching', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
+    const [engine, promise] = HyperFormula.buildFromArray([
       ['42']
     ])
+
+    await promise
+
     const handlerUpdated = jasmine.createSpy()
     const handlerSuspended = jasmine.createSpy()
     const handlerResumed = jasmine.createSpy()
+    const handlerAsyncValuesUpdated = jasmine.createSpy()
 
     engine.on(Events.ValuesUpdated, handlerUpdated)
     engine.on(Events.EvaluationSuspended, handlerSuspended)
     engine.on(Events.EvaluationResumed, handlerResumed)
+    engine.on(Events.AsyncValuesUpdated, handlerAsyncValuesUpdated)
 
-    engine.batch(() => engine.setCellContents(adr('A1'), [['13']]))
+    await engine.batch(() => engine.setCellContents(adr('A1'), [['13', '=ASYNC_FOO()']]))[1]
+
     expect(handlerUpdated).toHaveBeenCalledTimes(1)
     expect(handlerSuspended).toHaveBeenCalledTimes(1)
-    expect(handlerResumed).toHaveBeenCalledTimes(1)
-    expect(handlerResumed).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 13)])
+    expect(handlerResumed).toHaveBeenCalledTimes(2)
+    expect(handlerResumed).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 13), new ExportedCellChange(adr('B1'), getLoadingError('Sheet1!B1'))])
+    expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(1)
+    expect(handlerAsyncValuesUpdated).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), 1)])
   })
 })
 

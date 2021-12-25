@@ -1,6 +1,7 @@
 import {EvaluationSuspendedError, ExportedCellChange, HyperFormula} from '../src'
 import {AbsoluteCellRange} from '../src/AbsoluteCellRange'
 import {CellType} from '../src/Cell'
+import AsyncTestPlugin from './helpers/AsyncTestPlugin'
 import {adr} from './testUtils'
 
 describe('Evaluation suspension', () => {
@@ -15,14 +16,19 @@ describe('Evaluation suspension', () => {
   })
 
   it('when evaluation is stopped, getting cell values is forbidden', () => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '42'],
+      ['1', '2', '42', '=ASYNC_FOO()'],
     ])
 
     engine.suspendEvaluation()
 
     expect(() => {
       engine.getCellValue(adr('C1'))
+    }).toThrow(new EvaluationSuspendedError())
+    expect(() => {
+      engine.getCellValue(adr('D1'))
     }).toThrow(new EvaluationSuspendedError())
     expect(() => {
       engine.getSheetValues(0)
@@ -111,16 +117,23 @@ describe('Evaluation suspension', () => {
     expect(engine.getCellFormula(adr('C1'))).toEqual('=A3+42')
   })
 
-  it('resuming evaluation', () => {
+  it('resuming evaluation', async() => {
+    HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
+
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '=A1'],
+      ['1', '2', '=A1', '=ASYNC_FOO(A1)'],
     ])
+
     engine.suspendEvaluation()
     engine.setCellContents(adr('C1'), [['=B1']])
+    engine.setCellContents(adr('D1'), [['=ASYNC_FOO()']])[1]
 
-    const [changes] = engine.resumeEvaluation()
+    const [changes, promise] = engine.resumeEvaluation()
+
+    await promise
 
     expect(engine.getCellValue(adr('C1'))).toBe(2)
+    expect(engine.getCellValue(adr('D1'))).toBe(1)
     expect(changes).toContainEqual(new ExportedCellChange(adr('C1'), 2))
   })
 

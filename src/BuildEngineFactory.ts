@@ -70,9 +70,9 @@ export class BuildEngineFactory {
   private static buildEngine(config: Config, sheets: Sheets = {}, inputNamedExpressions: SerializedNamedExpression[] = [], stats: Statistics = config.useStats ? new Statistics() : new EmptyStatistics()): [EngineState, Promise<void>] {
     stats.start(StatType.BUILD_ENGINE_TOTAL)
 
-    const asyncPromiseFetcher = new AsyncPromiseFetcher(config)
     const namedExpressions = new NamedExpressions()
     const functionRegistry = new FunctionRegistry(config)
+    const asyncPromiseFetcher = new AsyncPromiseFetcher(config, functionRegistry)
     const lazilyTransformingAstService = new LazilyTransformingAstService(stats)
     const dependencyGraph = DependencyGraph.buildEmpty(lazilyTransformingAstService, config, functionRegistry, namedExpressions, stats, asyncPromiseFetcher)
     const columnSearch = buildColumnSearchStrategy(dependencyGraph, config, stats)

@@ -6,7 +6,7 @@
 import {AbsoluteCellRange, SimpleCellRange, simpleCellRange} from '../AbsoluteCellRange'
 import {absolutizeDependencies} from '../absolutizeDependencies'
 import {ArraySize} from '../ArraySize'
-import {AsyncPromiseFetcher} from '../AsyncPromise'
+import {AsyncPromise, AsyncPromiseFetcher} from '../AsyncPromise'
 import {CellError, ErrorType, isSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from '../Cell'
 import {RawCellContent} from '../CellContentParser'
 import {CellDependency} from '../CellDependency'
@@ -84,26 +84,21 @@ export class DependencyGraph {
     )
   }
 
-  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean): ContentChanges {
-    let asyncPromises
-
-    if (hasAsyncFunction) {
-      asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(ast, address)
-    }
-
+  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: AsyncPromise[] | undefined, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean): ContentChanges {
     const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version(), asyncPromises)
-    
-    if (hasAsyncFunction) {
-      this.markAsAsync(newVertex)
-    }
 
     this.exchangeOrAddFormulaVertex(newVertex)
     this.processCellPrecedents(precedents, newVertex)
     this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
 
+    if (hasAsyncFunction) {
+      this.markAsAsync(newVertex)
+    }
+
     if (hasVolatileFunction) {
       this.markAsVolatile(newVertex)
     }
+
     if (hasStructuralChangeFunction) {
       this.markAsDependentOnStructureChange(newVertex)
     }
@@ -182,32 +177,8 @@ export class DependencyGraph {
     return new Set([...this.graph.specialNodesRecentlyChanged, ...this.volatileVertices()])
   }
 
-  private processAsyncCellDependencies(startVertex: Vertex) {
-    const asyncVertices = this.asyncVertices()
-    const dependencyVertices = this.graph.adjacentNodes(startVertex)
-    const vertices = [...dependencyVertices]
-    
-    if (startVertex instanceof FormulaVertex && !startVertex.isResolveIndexSet()) {
-      vertices.unshift(startVertex)
-    }
-
-    vertices.forEach((vertex) => {
-      if (vertex instanceof FormulaVertex) {
-        const asyncVertex = asyncVertices.get(vertex)
-        const depIndex = this.graph.dependencyIndexes.get(startVertex) ?? -1
-        // If vertex is async then increment it to the next index
-        // so that Promise.all() can work later
-        const newIndex = asyncVertex ? depIndex + 1 : depIndex
-
-        this.graph.dependencyIndexes.set(vertex, newIndex)
-
-        vertex.setResolveIndex(newIndex)
-      }
-    })
-  }
-
   public processCellPrecedents(cellPrecedents: CellDependency[], endVertex: Vertex) {
-    const precedents = cellPrecedents.map((dep: CellDependency) => {
+    cellPrecedents.forEach((dep: CellDependency) => {
       if (dep instanceof AbsoluteCellRange) {
         const range = dep
 
@@ -218,11 +189,13 @@ export class DependencyGraph {
         }
 
         this.graph.addNode(rangeVertex)
+
         if (!range.isFinite()) {
           this.graph.markNodeAsInfiniteRange(rangeVertex)
         }
 
         const {smallerRangeVertex, restRange} = this.rangeMapping.findSmallerRange(range)
+        
         if (smallerRangeVertex !== undefined) {
           this.graph.addEdge(smallerRangeVertex, rangeVertex)
           if (rangeVertex.bruteForce) {
@@ -236,6 +209,7 @@ export class DependencyGraph {
         }
 
         const array = this.arrayMapping.getArray(restRange)
+
         if (array !== undefined) {
           this.graph.addEdge(array, rangeVertex)
         } else {
@@ -248,26 +222,16 @@ export class DependencyGraph {
         if (range.isFinite()) {
           this.correctInfiniteRangesDependenciesByRangeVertex(rangeVertex)
         }
-        return rangeVertex
       } else if (dep instanceof NamedExpressionDependency) {
         const sheetOfVertex = (endVertex as FormulaCellVertex).getAddress(this.lazilyTransformingAstService).sheet
         const namedExpressionVertex = this.fetchNamedExpressionVertex(dep.name, sheetOfVertex)
       
         this.graph.addEdge(namedExpressionVertex, endVertex)
-       return namedExpressionVertex
       } else {
         const depVertex = this.fetchCellOrCreateEmpty(dep)
 
         this.graph.addEdge(depVertex, endVertex)
-
-        return depVertex
       }
-    })
-
-    const vertices = [endVertex, ...precedents]
-
-    vertices.forEach((vertex) => {
-      this.processAsyncCellDependencies(vertex)
     })
   }
 
@@ -689,10 +653,36 @@ export class DependencyGraph {
     }
   }
 
+  private processAsyncCellDependencies(startVertex: Vertex) {
+    const asyncVertices = this.asyncVertices()
+    const adjacentNodes = this.graph.adjacentNodes(startVertex)
+
+    if (startVertex instanceof FormulaVertex && !startVertex.isResolveIndexSet()) {
+      startVertex.setResolveIndex(0)
+
+      this.graph.dependencyIndexes.set(startVertex, 0)
+    }
+
+    adjacentNodes.forEach((vertex) => {
+      if (vertex instanceof FormulaVertex) {
+        const asyncVertex = asyncVertices.get(vertex)
+        const depIndex = this.graph.dependencyIndexes.get(startVertex) ?? -1
+        // If vertex is async then increment it to the next index
+        // so that Promise.all() can work later
+        const newIndex = asyncVertex ? depIndex + 1 : depIndex
+
+        this.graph.dependencyIndexes.set(vertex, newIndex)
+
+        vertex.setResolveIndex(newIndex)
+      }
+    })
+  }
+
   public getAsyncGroupedVertices(vertices: FormulaVertex[]) {
     const asyncVertices: FormulaVertex[][] = []
 
     for (const vertex of vertices) {
+      this.processAsyncCellDependencies(vertex)
       const index = vertex.getResolveIndex()
 
       asyncVertices[index] = asyncVertices[index] ? [

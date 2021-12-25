@@ -15,7 +15,7 @@ describe('generateCellsFromRange', () => {
   const functionRegistry = new FunctionRegistry(config)
   const stats = new Statistics()
   const lazilyTransformingAstService = new LazilyTransformingAstService(stats)
-  const asyncPromiseFetcher = new AsyncPromiseFetcher(config)
+  const asyncPromiseFetcher = new AsyncPromiseFetcher(config, functionRegistry)
   const dependencyGraph = DependencyGraph.buildEmpty(lazilyTransformingAstService, config, functionRegistry, new NamedExpressions(), stats, asyncPromiseFetcher)
   const generateCellsFromRange = (range: AbsoluteCellRange): SimpleCellAddress[] => {
     return Array.from(range.addresses(dependencyGraph))

@@ -20,7 +20,7 @@ import {adr, expectColumnIndexToMatchSheet} from './testUtils'
 function buildEmptyIndex(transformingService: LazilyTransformingAstService, config: Config, statistics: Statistics): ColumnIndex {
   const functionRegistry = new FunctionRegistry(config)
   const namedExpression = new NamedExpressions()
-  const asyncPromiseFetcher = new AsyncPromiseFetcher(config)
+  const asyncPromiseFetcher = new AsyncPromiseFetcher(config, functionRegistry)
   const dependencyGraph = DependencyGraph.buildEmpty(transformingService, config, functionRegistry, namedExpression, statistics, asyncPromiseFetcher)
   return new ColumnIndex(dependencyGraph, config, statistics)
 }
