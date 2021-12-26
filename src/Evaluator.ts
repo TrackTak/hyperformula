@@ -44,7 +44,7 @@ export class Evaluator {
   ) {
   }
 
-  public run(): Promise<void> {
+  public run(): Promise<ContentChanges> {
     this.stats.start(StatType.TOP_SORT)
     const {sorted, cycled} = this.dependencyGraph.topSortWithScc()
     this.stats.end(StatType.TOP_SORT)
@@ -212,7 +212,7 @@ export class Evaluator {
   /**
    * Recalculates formulas in the topological sort order
    */
-  private recomputeFormulas(cycled: Vertex[], sorted: Vertex[]): Promise<void> {
+  private recomputeFormulas(cycled: Vertex[], sorted: Vertex[]): Promise<ContentChanges> {
     cycled.forEach((vertex: Vertex) => {
       if (vertex instanceof FormulaVertex) {
         vertex.setCellValue(new CellError(ErrorType.CYCLE, undefined, vertex))
@@ -237,11 +237,7 @@ export class Evaluator {
       }
     })
 
-    return new Promise<void>((resolve, reject) => {
-      this.recomputeAsyncFunctions(asyncVertices).then(() => {
-        resolve(undefined)
-      }).catch(reject)
-    })
+    return this.recomputeAsyncFunctions(asyncVertices)
   }
 
   private recomputeFormulaVertexValue(vertex: FormulaVertex, recalculateAsyncPromises: boolean): InterpreterValue {

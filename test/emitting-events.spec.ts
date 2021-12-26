@@ -138,7 +138,7 @@ describe('Events', () => {
     await engine.setCellContents(adr('B1'), [['=ASYNC_FOO()']])[1]
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), 1), new ExportedCellChange(adr('A1'), 1)])
+    expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), 1)])
   })
 
 
@@ -155,7 +155,7 @@ describe('Events', () => {
     expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 42)])
   })
 
-  it('suspension and resuming of evaluation', async() => {
+  it.only('suspension and resuming of evaluation', async() => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
     const [engine, promise] = HyperFormula.buildFromArray([
@@ -166,32 +166,32 @@ describe('Events', () => {
     const handlerResumed = jasmine.createSpy()
     const handlerAsyncValuesUpdated = jasmine.createSpy()
 
-    await promise
-
     engine.on(Events.ValuesUpdated, handlerUpdated)
     engine.on(Events.EvaluationSuspended, handlerSuspended)
     engine.on(Events.EvaluationResumed, handlerResumed)
     engine.on(Events.AsyncValuesUpdated, handlerAsyncValuesUpdated)
 
+    await promise
+
     engine.suspendEvaluation()
     expect(handlerUpdated).toHaveBeenCalledTimes(0)
     expect(handlerSuspended).toHaveBeenCalledTimes(1)
     expect(handlerResumed).toHaveBeenCalledTimes(0)
-    expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(0)
+    expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(1)
 
     await engine.setCellContents(adr('A1'), [['13']])[1]
 
     expect(handlerUpdated).toHaveBeenCalledTimes(0)
     expect(handlerSuspended).toHaveBeenCalledTimes(1)
     expect(handlerResumed).toHaveBeenCalledTimes(0)
-    expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(0)
+    expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(1)
 
     await engine.resumeEvaluation()[1]
 
     expect(handlerUpdated).toHaveBeenCalledTimes(1)
     expect(handlerSuspended).toHaveBeenCalledTimes(1)
     expect(handlerResumed).toHaveBeenCalledTimes(2)
-    expect(handlerResumed).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 13), new ExportedCellChange(adr('B1'), getLoadingError('Sheet1!B1'))])
+    expect(handlerResumed).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 13)])
     expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(1)
     expect(handlerAsyncValuesUpdated).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), 1)])
   })

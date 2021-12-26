@@ -259,10 +259,11 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Factories
    */
-  public static buildFromArray(sheet: Sheet, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<void>] {
+  public static buildFromArray(sheet: Sheet, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
     const [engine, evaluatorPromise] = BuildEngineFactory.buildFromSheet(sheet, configInput, namedExpressions)
+    const hyperFormula = this.buildFromEngineState(engine)
 
-    return [this.buildFromEngineState(engine), evaluatorPromise]
+    return [hyperFormula, hyperFormula.wrapEvaluatorPromiseWithChanges(evaluatorPromise)]
   }
 
   /**
@@ -301,10 +302,11 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Factories
    */
-  public static buildFromSheets(sheets: Sheets, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<void>] {
+  public static buildFromSheets(sheets: Sheets, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
     const [engine, evaluatorPromise]  = BuildEngineFactory.buildFromSheets(sheets, configInput, namedExpressions)
+    const hyperFormula = this.buildFromEngineState(engine)
 
-    return [this.buildFromEngineState(engine), evaluatorPromise]
+    return [hyperFormula, hyperFormula.wrapEvaluatorPromiseWithChanges(evaluatorPromise)]
   }
 
   /**
@@ -323,10 +325,11 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Factories
    */
-  public static buildEmpty(configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<void>] {
+  public static buildEmpty(configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
     const [engine, evaluatorPromise]  = BuildEngineFactory.buildEmpty(configInput, namedExpressions)
+    const hyperFormula = this.buildFromEngineState(engine)
 
-    return [this.buildFromEngineState(engine), evaluatorPromise]
+    return [hyperFormula, hyperFormula.wrapEvaluatorPromiseWithChanges(evaluatorPromise)]
   }
 
   /**
@@ -949,14 +952,14 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Instance
    */
-  public updateConfig(newParams: Partial<ConfigParams>): Promise<void> {
+  public updateConfig(newParams: Partial<ConfigParams>): Promise<ExportedChange[]> {
     const newConfig = this._config.mergeConfig(newParams)
 
     const configNewLanguage = this._config.mergeConfig({language: newParams.language})
     const serializedSheets = this._serialization.withNewConfig(configNewLanguage, this._namedExpressions).getAllSheetsSerialized()
     const serializedNamedExpressions = this._serialization.getAllNamedExpressionsSerialized()
 
-    const [newEngine, promise] = BuildEngineFactory.rebuildWithConfig(newConfig, serializedSheets, serializedNamedExpressions, this._stats)
+    const [newEngine, evaluatorPromise] = BuildEngineFactory.rebuildWithConfig(newConfig, serializedSheets, serializedNamedExpressions, this._stats)
 
     this._config = newEngine.config
     this._stats = newEngine.stats
@@ -973,7 +976,7 @@ export class HyperFormula implements TypedEmitter {
     this._serialization = newEngine.serialization
     this._functionRegistry = newEngine.functionRegistry
 
-    return promise
+    return this.wrapEvaluatorPromiseWithChanges(evaluatorPromise)
   }
 
   /**
@@ -1001,7 +1004,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Instance
    */
-  public rebuildAndRecalculate(): Promise<void> {
+  public rebuildAndRecalculate(): Promise<ExportedChange[]> {
     return this.updateConfig({})
   }
 
@@ -4325,6 +4328,26 @@ export class HyperFormula implements TypedEmitter {
     objectDestroy(this)
   }
 
+
+  /**
+   * @internal
+   */
+   public wrapEvaluatorPromiseWithChanges(evaluatorPromise: Promise<ContentChanges>): Promise<ExportedChange[]> {
+    const promise = new Promise<ExportedChange[]>((resolve, reject) => {
+      evaluatorPromise.then((contentChanges) => {
+        const exportedChanges = contentChanges.exportChanges(this._exporter)
+
+        if (!contentChanges.isEmpty()) {
+          this._emitter.emit(Events.AsyncValuesUpdated, exportedChanges)  
+        }
+
+        resolve(exportedChanges)
+      }).catch(reject)
+    })
+
+    return promise
+  }
+
   private ensureEvaluationIsNotSuspended() {
     if (this._evaluationSuspended) {
       throw new EvaluationSuspendedError()
@@ -4370,17 +4393,7 @@ export class HyperFormula implements TypedEmitter {
         changes.addAll(contentChanges)
       }
 
-      const promise = new Promise<ExportedChange[]>((resolve, reject) => {
-        evaluatorPromise.then((contentChanges) => {
-          const exportedChanges = contentChanges.exportChanges(this._exporter)
-  
-          if (!contentChanges.isEmpty()) {
-            this._emitter.emit(Events.AsyncValuesUpdated, exportedChanges)  
-          }
-  
-          resolve(exportedChanges)
-        }).catch(reject)
-      })
+      const promise = this.wrapEvaluatorPromiseWithChanges(evaluatorPromise)
   
       const exportedChanges = changes.exportChanges(this._exporter)
 
