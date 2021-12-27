@@ -4328,11 +4328,7 @@ export class HyperFormula implements TypedEmitter {
     objectDestroy(this)
   }
 
-
-  /**
-   * @internal
-   */
-   public wrapEvaluatorPromiseWithChanges(evaluatorPromise: Promise<ContentChanges>): Promise<ExportedChange[]> {
+  private wrapEvaluatorPromiseWithChanges(evaluatorPromise: Promise<ContentChanges>): Promise<ExportedChange[]> {
     const promise = new Promise<ExportedChange[]>((resolve, reject) => {
       evaluatorPromise.then((contentChanges) => {
         const exportedChanges = contentChanges.exportChanges(this._exporter)
@@ -4348,20 +4344,24 @@ export class HyperFormula implements TypedEmitter {
     return promise
   }
 
+  public extractFormula(formulaString: string, sheetId: number = 1):  { ast?: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[] } {
+    return this.extractTemporaryFormula(formulaString, sheetId, false)
+  }
+
   private ensureEvaluationIsNotSuspended() {
     if (this._evaluationSuspended) {
       throw new EvaluationSuspendedError()
     }
   }
 
-  private extractTemporaryFormula(formulaString: string, sheetId: number = 1): { ast?: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[] } {
+  private extractTemporaryFormula(formulaString: string, sheetId: number = 1, stripWhitespaces = true): { ast?: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[] } {
     const parsedCellContent = this._cellContentParser.parse(formulaString)
     const address = {sheet: sheetId, col: 0, row: 0}
     if (!(parsedCellContent instanceof CellContent.Formula)) {
       return {address, dependencies: []}
     }
 
-    const {ast, errors, dependencies} = this._parser.parse(parsedCellContent.formula, address)
+    const {ast, errors, dependencies} = this._parser.parse(parsedCellContent.formula, address, stripWhitespaces)
 
     if (errors.length > 0) {
       return {address, dependencies: []}

@@ -110,6 +110,8 @@ export enum RangeSheetReferenceType {
 }
 
 export interface AstWithWhitespace {
+  startOffset?: number,
+  endOffset?: number,
   leadingWhitespace?: string,
 }
 
@@ -131,9 +133,16 @@ export interface NumberAst extends AstWithWhitespace {
   value: number,
 }
 
-export const buildNumberAst = (value: number, leadingWhitespace?: IToken): NumberAst => ({
+export const buildNumberAst = (
+  value: number,
+  startOffset?: number,
+  endOffset?: number,
+  leadingWhitespace?: IToken
+): NumberAst => ({
   type: AstNodeType.NUMBER,
   value: value,
+  startOffset: leadingWhitespace?.startOffset ?? startOffset,
+  endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -146,7 +155,10 @@ export const buildStringAst = (token: IExtendedToken): StringAst => ({
   type: AstNodeType.STRING,
   value: token.image.slice(1, -1),
   leadingWhitespace: token.leadingWhitespace?.image,
+  startOffset: token.leadingWhitespace?.startOffset ?? token.startOffset,
+  endOffset: token.endOffset,
 })
+
 
 export interface CellReferenceAst extends AstWithWhitespace {
   type: AstNodeType.CELL_REFERENCE,
@@ -166,14 +178,23 @@ export interface CellRangeAst extends AstWithWhitespace {
   sheetReferenceType: RangeSheetReferenceType,
 }
 
-export const buildCellRangeAst = (start: CellAddress, end: CellAddress, sheetReferenceType: RangeSheetReferenceType, leadingWhitespace?: string): CellRangeAst => {
+export const buildCellRangeAst = (
+  start: CellAddress,
+  end: CellAddress,
+  sheetReferenceType: RangeSheetReferenceType,
+  startOffset?: number,
+  endOffset?: number,
+  leadingWhitespace?: string,
+): CellRangeAst => {
   assertRangeConsistency(start, end, sheetReferenceType)
   return {
     type: AstNodeType.CELL_RANGE,
     start,
     end,
     sheetReferenceType,
-    leadingWhitespace
+    leadingWhitespace: leadingWhitespace,
+    startOffset: leadingWhitespace && startOffset ? startOffset - leadingWhitespace.length : startOffset,
+    endOffset: endOffset,
   }
 }
 
@@ -184,13 +205,22 @@ export interface ColumnRangeAst extends AstWithWhitespace {
   sheetReferenceType: RangeSheetReferenceType,
 }
 
-export const buildColumnRangeAst = (start: ColumnAddress, end: ColumnAddress, sheetReferenceType: RangeSheetReferenceType, leadingWhitespace?: IToken): ColumnRangeAst => {
+export const buildColumnRangeAst = (
+  start: ColumnAddress,
+  end: ColumnAddress,
+  sheetReferenceType: RangeSheetReferenceType,
+  startOffset?: number,
+  endOffset?: number,
+  leadingWhitespace?: IToken
+): ColumnRangeAst => {
   assertRangeConsistency(start, end, sheetReferenceType)
   return {
     type: AstNodeType.COLUMN_RANGE,
     start,
     end,
     sheetReferenceType,
+    startOffset: leadingWhitespace?.startOffset ?? startOffset,
+    endOffset,
     leadingWhitespace: leadingWhitespace?.image,
   }
 }
@@ -202,12 +232,21 @@ export interface RowRangeAst extends AstWithWhitespace {
   sheetReferenceType: RangeSheetReferenceType,
 }
 
-export const buildRowRangeAst = (start: RowAddress, end: RowAddress, sheetReferenceType: RangeSheetReferenceType, leadingWhitespace?: IToken): RowRangeAst => {
+export const buildRowRangeAst = (
+  start: RowAddress,
+  end: RowAddress,
+  sheetReferenceType: RangeSheetReferenceType,
+  startOffset?: number,
+  endOffset?: number,
+  leadingWhitespace?: IToken
+): RowRangeAst => {
   assertRangeConsistency(start, end, sheetReferenceType)
   return {
     type: AstNodeType.ROW_RANGE,
     start,
     end,
+    startOffset: leadingWhitespace?.startOffset ?? startOffset,
+    endOffset,
     sheetReferenceType,
     leadingWhitespace: leadingWhitespace?.image,
   }
@@ -222,10 +261,16 @@ export interface ConcatenateOpAst extends BinaryOpAst {
   type: AstNodeType.CONCATENATE_OP,
 }
 
-export const buildConcatenateOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): ConcatenateOpAst => ({
+export const buildConcatenateOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): ConcatenateOpAst => ({
   type: AstNodeType.CONCATENATE_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -233,10 +278,16 @@ export interface EqualsOpAst extends BinaryOpAst {
   type: AstNodeType.EQUALS_OP,
 }
 
-export const buildEqualsOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): EqualsOpAst => ({
+export const buildEqualsOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): EqualsOpAst => ({
   type: AstNodeType.EQUALS_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -244,10 +295,16 @@ export interface NotEqualOpAst extends BinaryOpAst {
   type: AstNodeType.NOT_EQUAL_OP,
 }
 
-export const buildNotEqualOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): NotEqualOpAst => ({
+export const buildNotEqualOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): NotEqualOpAst => ({
   type: AstNodeType.NOT_EQUAL_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -255,10 +312,16 @@ export interface GreaterThanOpAst extends BinaryOpAst {
   type: AstNodeType.GREATER_THAN_OP,
 }
 
-export const buildGreaterThanOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): GreaterThanOpAst => ({
+export const buildGreaterThanOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): GreaterThanOpAst => ({
   type: AstNodeType.GREATER_THAN_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -266,10 +329,16 @@ export interface LessThanOpAst extends BinaryOpAst {
   type: AstNodeType.LESS_THAN_OP,
 }
 
-export const buildLessThanOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): LessThanOpAst => ({
+export const buildLessThanOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): LessThanOpAst => ({
   type: AstNodeType.LESS_THAN_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -277,10 +346,16 @@ export interface GreaterThanOrEqualOpAst extends BinaryOpAst {
   type: AstNodeType.GREATER_THAN_OR_EQUAL_OP,
 }
 
-export const buildGreaterThanOrEqualOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): GreaterThanOrEqualOpAst => ({
+export const buildGreaterThanOrEqualOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): GreaterThanOrEqualOpAst => ({
   type: AstNodeType.GREATER_THAN_OR_EQUAL_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -288,10 +363,16 @@ export interface LessThanOrEqualOpAst extends BinaryOpAst {
   type: AstNodeType.LESS_THAN_OR_EQUAL_OP,
 }
 
-export const buildLessThanOrEqualOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): LessThanOrEqualOpAst => ({
+export const buildLessThanOrEqualOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): LessThanOrEqualOpAst => ({
   type: AstNodeType.LESS_THAN_OR_EQUAL_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -299,10 +380,16 @@ export interface PlusOpAst extends BinaryOpAst {
   type: AstNodeType.PLUS_OP,
 }
 
-export const buildPlusOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): PlusOpAst => ({
+export const buildPlusOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): PlusOpAst => ({
   type: AstNodeType.PLUS_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -310,10 +397,16 @@ export interface MinusOpAst extends BinaryOpAst {
   type: AstNodeType.MINUS_OP,
 }
 
-export const buildMinusOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): MinusOpAst => ({
+export const buildMinusOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): MinusOpAst => ({
   type: AstNodeType.MINUS_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -321,10 +414,16 @@ export interface TimesOpAst extends BinaryOpAst {
   type: AstNodeType.TIMES_OP,
 }
 
-export const buildTimesOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): TimesOpAst => ({
+export const buildTimesOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): TimesOpAst => ({
   type: AstNodeType.TIMES_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -332,10 +431,16 @@ export interface DivOpAst extends BinaryOpAst {
   type: AstNodeType.DIV_OP,
 }
 
-export const buildDivOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): DivOpAst => ({
+export const buildDivOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): DivOpAst => ({
   type: AstNodeType.DIV_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -343,10 +448,16 @@ export interface PowerOpAst extends BinaryOpAst {
   type: AstNodeType.POWER_OP,
 }
 
-export const buildPowerOpAst = (left: Ast, right: Ast, leadingWhitespace?: IToken): PowerOpAst => ({
+export const buildPowerOpAst = (
+  left: Ast,
+  right: Ast,
+  leadingWhitespace?: IToken
+): PowerOpAst => ({
   type: AstNodeType.POWER_OP,
   left,
   right,
+  startOffset: leadingWhitespace?.startOffset ?? left.startOffset,
+  endOffset: right.endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -355,9 +466,16 @@ export interface MinusUnaryOpAst extends AstWithWhitespace {
   value: Ast,
 }
 
-export const buildMinusUnaryOpAst = (value: Ast, leadingWhitespace?: IToken): MinusUnaryOpAst => ({
+export const buildMinusUnaryOpAst = (
+  value: Ast,
+  startOffset?: number,
+  endOffset?: number,
+  leadingWhitespace?: IToken
+): MinusUnaryOpAst => ({
   type: AstNodeType.MINUS_UNARY_OP,
   value,
+  startOffset: leadingWhitespace?.startOffset ?? startOffset,
+  endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -366,9 +484,16 @@ export interface PlusUnaryOpAst extends AstWithWhitespace {
   value: Ast,
 }
 
-export const buildPlusUnaryOpAst = (value: Ast, leadingWhitespace?: IToken): PlusUnaryOpAst => ({
+export const buildPlusUnaryOpAst = (
+  value: Ast,
+  startOffset?: number,
+  endOffset?: number,
+  leadingWhitespace?: IToken
+): PlusUnaryOpAst => ({
   type: AstNodeType.PLUS_UNARY_OP,
   value,
+  startOffset: leadingWhitespace?.startOffset ?? startOffset,
+  endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -377,9 +502,16 @@ export interface PercentOpAst extends AstWithWhitespace {
   value: Ast,
 }
 
-export const buildPercentOpAst = (value: Ast, leadingWhitespace?: IToken): PercentOpAst => ({
+export const buildPercentOpAst = (
+  value: Ast,
+  startOffset: number,
+  endOffset?: number,
+  leadingWhitespace?: IToken
+): PercentOpAst => ({
   type: AstNodeType.PERCENT_OP,
   value,
+  startOffset: leadingWhitespace?.startOffset ?? startOffset,
+  endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -390,10 +522,19 @@ export interface ProcedureAst extends AstWithInternalWhitespace {
   asyncPromise?: AsyncPromise,
 }
 
-export const buildProcedureAst = (procedureName: string, args: Ast[], leadingWhitespace?: IToken, internalWhitespace?: IToken): ProcedureAst => ({
+export const buildProcedureAst = (
+  procedureName: string,
+  args: Ast[],
+  startOffset: number,
+  endOffset?: number,
+  leadingWhitespace?: IToken,
+  internalWhitespace?: IToken
+): ProcedureAst => ({
   type: AstNodeType.FUNCTION_CALL,
   procedureName,
   args,
+  startOffset: leadingWhitespace?.startOffset ?? startOffset,
+  endOffset,
   leadingWhitespace: leadingWhitespace?.image,
   internalWhitespace: internalWhitespace?.image,
 })
@@ -403,7 +544,11 @@ export interface ArrayAst extends AstWithInternalWhitespace {
   args: Ast[][],
 }
 
-export const buildArrayAst = (args: Ast[][], leadingWhitespace?: IToken, internalWhitespace?: IToken): ArrayAst => ({
+export const buildArrayAst = (
+  args: Ast[][],
+  leadingWhitespace?: IToken,
+  internalWhitespace?: IToken
+): ArrayAst => ({
   type: AstNodeType.ARRAY,
   args,
   leadingWhitespace: leadingWhitespace?.image,
@@ -415,9 +560,16 @@ export interface NamedExpressionAst extends AstWithInternalWhitespace {
   expressionName: string,
 }
 
-export const buildNamedExpressionAst = (expressionName: string, leadingWhitespace?: IToken): NamedExpressionAst => ({
+export const buildNamedExpressionAst = (
+  expressionName: string,
+  startOffset: number,
+  endOffset?: number,
+  leadingWhitespace?: IToken
+): NamedExpressionAst => ({
   type: AstNodeType.NAMED_EXPRESSION,
   expressionName,
+  startOffset: leadingWhitespace?.startOffset ?? startOffset,
+  endOffset,
   leadingWhitespace: leadingWhitespace?.image,
 })
 
@@ -426,9 +578,17 @@ export interface ParenthesisAst extends AstWithInternalWhitespace {
   expression: Ast,
 }
 
-export const buildParenthesisAst = (expression: Ast, leadingWhitespace?: IToken, internalWhitespace?: IToken): ParenthesisAst => ({
+export const buildParenthesisAst = (
+  expression: Ast,
+  startOffset: number,
+  endOffset?: number,
+  leadingWhitespace?: IToken,
+  internalWhitespace?: IToken
+): ParenthesisAst => ({
   type: AstNodeType.PARENTHESIS,
   expression,
+  startOffset: leadingWhitespace?.startOffset ?? startOffset,
+  endOffset,
   leadingWhitespace: leadingWhitespace?.image,
   internalWhitespace: internalWhitespace?.image,
 })
