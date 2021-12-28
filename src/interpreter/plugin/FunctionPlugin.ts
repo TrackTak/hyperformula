@@ -6,6 +6,7 @@
 import {AbsoluteCellRange} from '../../AbsoluteCellRange'
 import {ArraySize, ArraySizePredictor} from '../../ArraySize'
 import {CellError, ErrorType, SimpleCellAddress} from '../../Cell'
+import {CellContent, CellContentParser} from '../../CellContentParser'
 import {Config} from '../../Config'
 import {DateTimeHelper} from '../../DateTimeHelper'
 import {DependencyGraph} from '../../DependencyGraph'
@@ -25,8 +26,8 @@ import {
 import {Interpreter} from '../Interpreter'
 import {InterpreterState} from '../InterpreterState'
 import {
+  AsyncInterpreterValue,
   ExtendedNumber,
-  FormatInfo,
   getRawValue,
   InternalScalarValue,
   InterpreterValue,
@@ -49,75 +50,89 @@ export interface FunctionMetadata {
 
   /**
    * Internal.
-   * 
+   *
    * For functions with a variable number of arguments: sets how many last arguments can be repeated indefinitely.
    */
   repeatLastArgs?: number,
 
   /**
    * Internal.
-   * 
+   *
    * If set to `true`, ranges in the function's arguments are inlined to (possibly multiple) scalar arguments.
    */
   expandRanges?: boolean,
 
   /**
    * Internal.
-   * 
+   *
    * Return number value is packed into this subtype.
    */
   returnNumberType?: NumberType,
+
+  /**
+   * Internal.
+   *
+   * Infers the return type automatically based on the content.
+   */
+  inferReturnType?: boolean,
+
   /**
    * Engine.
    */
   method: string,
   /**
    * Engine.
-   * 
-   * If set to `true`, the function is volatile.
+   *
+   * If set to `true`, the function will be checked for an array size.
    */
   arraySizeMethod?: string,
+  /**
+   * Engine.
+   * 
+   * If set to `true`, the function will be treated as an async method.
+   */
+  isAsyncMethod?: boolean,
   /**
    * Engine.
    */
   isVolatile?: boolean,
   /**
    * Engine.
-   * 
+   *
    * If set to `true`, the function gets recalculated with each sheet shape change
    * (e.g. when adding/removing rows or columns).
    */
   isDependentOnSheetStructureChange?: boolean,
   /**
    * Engine.
-   * 
+   *
    * If set to `true`, the function treats reference or range arguments as arguments that don't create dependency.
-   * 
+   *
    * Other arguments are properly evaluated.
    */
   doesNotNeedArgumentsToBeComputed?: boolean,
   /**
    * Engine.
-   * 
+   *
    * If set to `true`, the function enables the array arithmetic mode in its arguments and nested expressions.
    */
   arrayFunction?: boolean,
 
   /**
    * Internal.
-   * 
+   *
    * If set to `true`, prevents the function from ever being vectorized.
-   * 
+   *
    * Some functions do not allow vectorization: array-output, and special functions.
    */
   vectorizationForbidden?: boolean,
 }
 
 export interface FunctionPluginDefinition {
-  new(interpreter: Interpreter): FunctionPlugin,
-
   implementedFunctions: ImplementedFunctions,
-  aliases?: {[formulaId: string]: string},
+  aliases?: { [formulaId: string]: string },
+
+  new(interpreter: Interpreter, cellContentParser: CellContentParser): FunctionPlugin,
 }
 
 export enum ArgumentTypes {
@@ -185,7 +200,7 @@ export interface FunctionArgument {
   /**
    * If set to `true`:
    * if an argument is missing, and no `defaultValue` is set, the argument is `undefined` (instead of throwing an error).
-   * 
+   *
    * This is logically equivalent to setting `defaultValue` to `undefined`.
    */
   optionalArg?: boolean,
@@ -212,11 +227,16 @@ export interface FunctionArgument {
 }
 
 export type PluginFunctionType = (ast: ProcedureAst, state: InterpreterState) => InterpreterValue
-
+export type AsyncPluginFunctionType = (ast: ProcedureAst, state: InterpreterState) => AsyncInterpreterValue
 export type PluginArraySizeFunctionType = (ast: ProcedureAst, state: InterpreterState) => ArraySize
 
 export type FunctionPluginTypecheck<T> = {
-  [K in keyof T]: T[K] extends PluginFunctionType ? T[K] : T[K] extends PluginArraySizeFunctionType ? T[K] : never
+  [K in keyof T]: T[K] extends PluginFunctionType | PluginArraySizeFunctionType | AsyncPluginFunctionType ? T[K] : never
+}
+
+interface ArgCoercion {
+  argCoerceFailure: Maybe<CellError>,
+  coercedArguments: Maybe<InterpreterValue | complex | RawNoErrorScalarValue>[],
 }
 
 /**
@@ -229,8 +249,9 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
    * Dictionary containing functions implemented by specific plugin, along with function name translations.
    */
   public static implementedFunctions: ImplementedFunctions
-  public static aliases?: {[formulaId: string]: string}
+  public static aliases?: { [formulaId: string]: string }
   protected readonly interpreter: Interpreter
+  protected readonly cellContentParser: CellContentParser
   protected readonly dependencyGraph: DependencyGraph
   protected readonly columnSearch: SearchStrategy
   protected readonly config: Config
@@ -239,8 +260,9 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
   protected readonly dateTimeHelper: DateTimeHelper
   protected readonly arithmeticHelper: ArithmeticHelper
 
-  constructor(interpreter: Interpreter) {
+  constructor(interpreter: Interpreter, cellContentParser: CellContentParser) {
     this.interpreter = interpreter
+    this.cellContentParser = cellContentParser
     this.dependencyGraph = interpreter.dependencyGraph
     this.columnSearch = interpreter.columnSearch
     this.config = interpreter.config
@@ -251,7 +273,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
   }
 
   protected evaluateAst(ast: Ast, state: InterpreterState): InterpreterValue {
-    return this.interpreter.evaluateAst(ast, state)
+    return this.interpreter.evaluateAst(ast, state)[0]
   }
 
   protected arraySizeForAst(ast: Ast, state: InterpreterState): ArraySize {
@@ -278,21 +300,21 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
   protected coerceToType(arg: InterpreterValue, coercedType: FunctionArgument, state: InterpreterState): Maybe<InterpreterValue | complex | RawNoErrorScalarValue> {
     let ret
     if (arg instanceof SimpleRangeValue) {
-      switch(coercedType.argumentType) {
+      switch (coercedType.argumentType) {
         case ArgumentTypes.RANGE:
         case ArgumentTypes.ANY:
           ret = arg
           break
         default: {
           const coerce = coerceRangeToScalar(arg, state)
-          if(coerce === undefined) {
+          if (coerce === undefined) {
             return undefined
           }
           arg = coerce
         }
       }
     }
-    if(!(arg instanceof SimpleRangeValue)) {
+    if (!(arg instanceof SimpleRangeValue)) {
       switch (coercedType.argumentType) {
         case ArgumentTypes.INTEGER:
         case ArgumentTypes.NUMBER:
@@ -342,11 +364,66 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
           return this.arithmeticHelper.coerceScalarToComplex(getRawValue(arg))
       }
     }
-    if(coercedType.passSubtype || ret === undefined) {
+    if (coercedType.passSubtype || ret === undefined) {
       return ret
     } else {
       return getRawValue(ret)
     }
+  }
+
+  protected runAsyncFunction = async(
+    args: Ast[],
+    state: InterpreterState,
+    metadata: FunctionMetadata,
+    fn: (...arg: any) => Promise<InterpreterValue>,
+  ) => {
+    const coercedArgs = this.getValidatedArgs(args, state, metadata)
+
+    if (coercedArgs instanceof CellError) return coercedArgs
+
+    const { maxWidth, maxHeight, retArr } = coercedArgs
+
+    const valuesArray: InternalScalarValue[][] = []
+    const allPromises: Promise<InterpreterValue[]>[] = []
+    
+    retArr.forEach((row) => {
+      const rowPromise = new Promise<InterpreterValue[]>((resolve, reject) => {
+        const promises: Promise<InterpreterValue>[] = []
+
+        row.forEach(({ argCoerceFailure, coercedArguments }) => {
+          if (argCoerceFailure === undefined) {
+            promises.push(fn(...coercedArguments))
+          }
+        })
+
+        Promise.all(promises).then(resolve).catch(reject)
+      })
+
+      allPromises.push(rowPromise)
+    })
+
+    const intepreterValues = await Promise.all(allPromises)
+
+    for (const row of intepreterValues) {
+      const rowArr: InternalScalarValue[] = []
+
+      for (const value of row) {
+        const ret = this.returnNumberWrapper(value, metadata)
+    
+        if (maxHeight === 1 && maxWidth === 1) {
+          return ret
+        }
+
+        if (ret instanceof SimpleRangeValue) {
+          throw 'Function returning array cannot be vectorized.'
+        }
+
+        rowArr.push(ret)
+      }
+      valuesArray.push(rowArr)
+    }
+
+    return SimpleRangeValue.onlyValues(valuesArray)
   }
 
   protected runFunction = (
@@ -354,6 +431,87 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     state: InterpreterState,
     metadata: FunctionMetadata,
     fn: (...arg: any) => InterpreterValue,
+  ) => {
+    const coercedArgs = this.getValidatedArgs(args, state, metadata)
+
+    if (coercedArgs instanceof CellError) return coercedArgs
+
+    const { maxWidth, maxHeight, retArr } = coercedArgs
+
+    const valuesArray: InternalScalarValue[][] = []
+
+    for (const row of retArr) {
+      const rowArr: InternalScalarValue[] = []
+
+      for (const { argCoerceFailure, coercedArguments } of row) {
+        const ret = argCoerceFailure ?? this.returnNumberWrapper(fn(...coercedArguments), metadata)
+    
+        if (maxHeight === 1 && maxWidth === 1) {
+          return ret
+        }
+
+        if (ret instanceof SimpleRangeValue) {
+          throw 'Function returning array cannot be vectorized.'
+        }
+
+        rowArr.push(ret)
+      }
+      valuesArray.push(rowArr)
+    }
+
+    return SimpleRangeValue.onlyValues(valuesArray)
+  }
+
+  protected runFunctionWithReferenceArgument = (
+    args: Ast[],
+    state: InterpreterState,
+    metadata: FunctionMetadata,
+    noArgCallback: () => InternalScalarValue,
+    referenceCallback: (reference: SimpleCellAddress) => InternalScalarValue,
+    nonReferenceCallback: (...arg: any) => InternalScalarValue = () => new CellError(ErrorType.NA, ErrorMessage.CellRefExpected)
+  ) => {
+    if (args.length === 0) {
+      return this.returnNumberWrapper(noArgCallback(), metadata)
+    } else if (args.length > 1) {
+      return new CellError(ErrorType.NA, ErrorMessage.WrongArgNumber)
+    }
+    let arg = args[0]
+
+    while (arg.type === AstNodeType.PARENTHESIS) {
+      arg = arg.expression
+    }
+
+    let cellReference: Maybe<SimpleCellAddress>
+
+    if (arg.type === AstNodeType.CELL_REFERENCE) {
+      cellReference = arg.reference.toSimpleCellAddress(state.formulaAddress)
+    } else if (arg.type === AstNodeType.CELL_RANGE || arg.type === AstNodeType.COLUMN_RANGE || arg.type === AstNodeType.ROW_RANGE) {
+      try {
+        cellReference = AbsoluteCellRange.fromAst(arg, state.formulaAddress).start
+      } catch (e) {
+        return new CellError(ErrorType.REF, ErrorMessage.CellRefExpected)
+      }
+    }
+
+    if (cellReference !== undefined) {
+      return this.returnNumberWrapper(referenceCallback(cellReference), metadata)
+    }
+
+    return this.runFunction(args, state, metadata, nonReferenceCallback)
+  }
+
+  protected metadata(name: string): FunctionMetadata {
+    const params = (this.constructor as FunctionPluginDefinition).implementedFunctions[name]
+    if (params !== undefined) {
+      return params
+    }
+    throw new Error(`No metadata for function ${name}.`)
+  }
+
+  private getValidatedArgs = (
+    args: Ast[],
+    state: InterpreterState,
+    metadata: FunctionMetadata,
   ) => {
     let argumentDefinitions: FunctionArgument[] = metadata.parameters!
     let argValues: [InterpreterValue, boolean][]
@@ -364,7 +522,6 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
       argValues = args.map((ast) => [this.evaluateAst(ast, state), false])
     }
 
-
     if (metadata.repeatLastArgs === undefined && argumentDefinitions.length < argValues.length) {
       return new CellError(ErrorType.NA, ErrorMessage.WrongArgNumber)
     }
@@ -373,16 +530,16 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
       return new CellError(ErrorType.NA, ErrorMessage.WrongArgNumber)
     }
     argumentDefinitions = [...argumentDefinitions]
-    while(argumentDefinitions.length < argValues.length) {
-      argumentDefinitions.push(...argumentDefinitions.slice(argumentDefinitions.length-metadata.repeatLastArgs!))
+    while (argumentDefinitions.length < argValues.length) {
+      argumentDefinitions.push(...argumentDefinitions.slice(argumentDefinitions.length - metadata.repeatLastArgs!))
     }
 
     let maxWidth = 1
     let maxHeight = 1
-    if(!metadata.vectorizationForbidden && state.arraysFlag) {
-      for(let i=0;i<argValues.length;i++) {
-      const [val] = argValues[i]
-      if(val instanceof SimpleRangeValue && argumentDefinitions[i].argumentType !== ArgumentTypes.RANGE && argumentDefinitions[i].argumentType !== ArgumentTypes.ANY) {
+    if (!metadata.vectorizationForbidden && state.arraysFlag) {
+      for (let i = 0; i < argValues.length; i++) {
+        const [val] = argValues[i]
+        if (val instanceof SimpleRangeValue && argumentDefinitions[i].argumentType !== ArgumentTypes.RANGE && argumentDefinitions[i].argumentType !== ArgumentTypes.ANY) {
           maxHeight = Math.max(maxHeight, val.height())
           maxWidth = Math.max(maxWidth, val.width())
         }
@@ -398,18 +555,18 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
       }
     }
 
-    const retArr: InternalScalarValue[][] = []
-    for(let row = 0; row<maxHeight; row++) {
-      const rowArr: InternalScalarValue[] = []
-      for(let col = 0; col<maxWidth; col++) {
+    const retArr: ArgCoercion[][] = []
+    for (let row = 0; row < maxHeight; row++) {
+      const rowArr: ArgCoercion[] = []
+      for (let col = 0; col < maxWidth; col++) {
         let argCoerceFailure: Maybe<CellError> = undefined
         const coercedArguments: Maybe<InterpreterValue | complex | RawNoErrorScalarValue>[] = []
         for (let i = 0; i < argumentDefinitions.length; i++) {
           // eslint-disable-next-line prefer-const
           let [val, ignorable] = argValues[i] ?? [undefined, undefined]
-          if(val instanceof SimpleRangeValue && argumentDefinitions[i].argumentType !== ArgumentTypes.RANGE && argumentDefinitions[i].argumentType !== ArgumentTypes.ANY) {
-            if(!metadata.vectorizationForbidden && state.arraysFlag) {
-              val = val.data[val.height()!==1 ? row : 0]?.[val.width()!==1 ? col : 0]
+          if (val instanceof SimpleRangeValue && argumentDefinitions[i].argumentType !== ArgumentTypes.RANGE && argumentDefinitions[i].argumentType !== ArgumentTypes.ANY) {
+            if (!metadata.vectorizationForbidden && state.arraysFlag) {
+              val = val.data[val.height() !== 1 ? row : 0]?.[val.width() !== 1 ? col : 0]
             }
           }
           const arg = val ?? argumentDefinitions[i]?.defaultValue
@@ -431,72 +588,59 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
           }
         }
 
-        const ret = argCoerceFailure ?? this.returnNumberWrapper(fn(...coercedArguments), metadata.returnNumberType)
-        if(maxHeight === 1 && maxWidth === 1) {
-          return ret
-        }
-        if(ret instanceof SimpleRangeValue) {
-          throw 'Function returning array cannot be vectorized.'
-        }
-        rowArr.push(ret)
+        rowArr.push({
+          argCoerceFailure,
+          coercedArguments
+        })
       }
       retArr.push(rowArr)
     }
-    return SimpleRangeValue.onlyValues(retArr)
+
+    return { maxWidth, maxHeight, retArr}
   }
 
-  protected runFunctionWithReferenceArgument = (
-    args: Ast[],
-    state: InterpreterState,
-    metadata: FunctionMetadata,
-    noArgCallback: () => InternalScalarValue,
-    referenceCallback: (reference: SimpleCellAddress) => InternalScalarValue,
-    nonReferenceCallback: (...arg: any) => InternalScalarValue = () => new CellError(ErrorType.NA, ErrorMessage.CellRefExpected)
-  ) => {
-    if (args.length === 0) {
-      return this.returnNumberWrapper(noArgCallback(), metadata.returnNumberType)
-    } else if (args.length > 1) {
-      return new CellError(ErrorType.NA, ErrorMessage.WrongArgNumber)
-    }
-    let arg = args[0]
-
-    while(arg.type === AstNodeType.PARENTHESIS) {
-      arg = arg.expression
-    }
-
-    let cellReference: Maybe<SimpleCellAddress>
-
-    if (arg.type === AstNodeType.CELL_REFERENCE) {
-      cellReference = arg.reference.toSimpleCellAddress(state.formulaAddress)
-    } else if (arg.type === AstNodeType.CELL_RANGE || arg.type === AstNodeType.COLUMN_RANGE || arg.type === AstNodeType.ROW_RANGE) {
-      try {
-        cellReference = AbsoluteCellRange.fromAst(arg, state.formulaAddress).start
-      } catch (e) {
-        return new CellError(ErrorType.REF, ErrorMessage.CellRefExpected)
-      }
-    }
-
-    if (cellReference !== undefined) {
-      return this.returnNumberWrapper(referenceCallback(cellReference), metadata.returnNumberType)
-    }
-
-    return this.runFunction(args, state, metadata, nonReferenceCallback)
-  }
-
-  protected metadata(name: string): FunctionMetadata {
-    const params = (this.constructor as FunctionPluginDefinition).implementedFunctions[name]
-    if (params !== undefined) {
-      return params
-    }
-    throw new Error(`No metadata for function ${name}.`)
-  }
-
-  private returnNumberWrapper<T>(val: T | ExtendedNumber, type?: NumberType, format?: FormatInfo): T | ExtendedNumber {
-    if(type !== undefined && isExtendedNumber(val)) {
-      return this.arithmeticHelper.ExtendedNumberFactory(getRawValue(val), {type, format})
+  private returnNumberWrapper<T>(val: T | ExtendedNumber, metadata: FunctionMetadata): T | InterpreterValue | ExtendedNumber {
+    const {inferReturnType, returnNumberType} = metadata
+    
+    if (returnNumberType !== undefined && isExtendedNumber(val)) {
+      return this.arithmeticHelper.ExtendedNumberFactory(getRawValue(val), {type: returnNumberType})
     } else {
+      if (inferReturnType) {
+        if (val instanceof SimpleRangeValue) {
+          const values = val.data.map((arr) => {
+            return arr.map((value) => {
+              return this.parseReturnVal(value)
+            })
+          })
+
+          return SimpleRangeValue.onlyValues(values)
+        }
+
+        return this.parseReturnVal(val)
+      }
+
       return val
     }
+  }
+
+  private parseReturnVal<T>(val: T | ExtendedNumber) {
+    if (typeof val === 'string' || 
+      typeof val === 'boolean' || 
+      typeof val === 'number') {
+      const parsedValue = this.cellContentParser.parse(val)
+    
+      if (parsedValue instanceof CellContent.Formula) {
+        return parsedValue.formula
+      }
+
+      if (parsedValue instanceof CellContent.Empty) {
+        return val
+      }
+    
+      return parsedValue.value
+    }
+
+    return val
   }
 }
 

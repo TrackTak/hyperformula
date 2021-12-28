@@ -3,6 +3,7 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
+import {CellContentParser} from '../CellContentParser'
 import {Config} from '../Config'
 import {AliasAlreadyExisting, FunctionPluginValidationError, ProtectedFunctionError} from '../errors'
 import {HyperFormula} from '../HyperFormula'
@@ -10,6 +11,7 @@ import {TranslationSet} from '../i18n'
 import {Maybe} from '../Maybe'
 import {Interpreter} from './Interpreter'
 import {
+  AsyncPluginFunctionType,
   FunctionMetadata,
   FunctionPlugin,
   FunctionPluginDefinition,
@@ -23,13 +25,13 @@ export type FunctionTranslationsPackage = Record<string, TranslationSet>
 function validateAndReturnMetadataFromName(functionId: string, plugin: FunctionPluginDefinition): FunctionMetadata {
   let entry = plugin.implementedFunctions[functionId]
   const key = plugin.aliases?.[functionId]
-  if(key!==undefined) {
+  if (key !== undefined) {
     if (entry !== undefined) {
       throw new AliasAlreadyExisting(functionId, plugin.name)
     }
     entry = plugin.implementedFunctions[key]
   }
-  if(entry === undefined) {
+  if (entry === undefined) {
     throw FunctionPluginValidationError.functionNotDeclaredInPlugin(functionId, plugin.name)
   }
   return entry
@@ -42,6 +44,34 @@ export class FunctionRegistry {
     ['VERSION', VersionPlugin],
     ['OFFSET', undefined],
   ])
+  private readonly instancePlugins: Map<string, FunctionPluginDefinition>
+  private readonly functions: Map<string, [string, FunctionPlugin]> = new Map()
+  private readonly arraySizeFunctions: Map<string, [string, FunctionPlugin]> = new Map()
+  private readonly asyncFunctions: Map<string, [string, FunctionPlugin]> = new Map()
+  private readonly volatileFunctions: Set<string> = new Set()
+  private readonly arrayFunctions: Set<string> = new Set()
+  private readonly structuralChangeFunctions: Set<string> = new Set()
+  private readonly functionsWhichDoesNotNeedArgumentsToBeComputed: Set<string> = new Set()
+  private readonly functionsMetadata: Map<string, FunctionMetadata> = new Map()
+
+  constructor(private config: Config) {
+    if (config.functionPlugins.length > 0) {
+      this.instancePlugins = new Map()
+      for (const plugin of config.functionPlugins) {
+        FunctionRegistry.loadPluginFunctions(plugin, this.instancePlugins)
+      }
+    } else {
+      this.instancePlugins = new Map(FunctionRegistry.plugins)
+    }
+
+    for (const [functionId, plugin] of FunctionRegistry.protectedFunctions()) {
+      FunctionRegistry.loadFunctionUnprotected(plugin, functionId, this.instancePlugins)
+    }
+
+    for (const [functionId, plugin] of this.instancePlugins.entries()) {
+      this.categorizeFunction(functionId, validateAndReturnMetadataFromName(functionId, plugin))
+    }
+  }
 
   public static registerFunctionPlugin(plugin: FunctionPluginDefinition, translations?: FunctionTranslationsPackage): void {
     this.loadPluginFunctions(plugin, this.plugins)
@@ -100,6 +130,10 @@ export class FunctionRegistry {
     }
   }
 
+  public static functionIsProtected(functionId: string) {
+    return this._protectedPlugins.has(functionId)
+  }
+
   private static loadTranslations(translations: FunctionTranslationsPackage) {
     const registeredLanguages = new Set(HyperFormula.getRegisteredLanguagesCodes())
     Object.keys(translations).forEach(code => {
@@ -113,7 +147,7 @@ export class FunctionRegistry {
     Object.keys(plugin.implementedFunctions).forEach((functionName) => {
       this.loadPluginFunction(plugin, functionName, registry)
     })
-    if(plugin.aliases !== undefined) {
+    if (plugin.aliases !== undefined) {
       Object.keys(plugin.aliases).forEach((functionName) => {
         this.loadPluginFunction(plugin, functionName, registry)
       })
@@ -137,10 +171,6 @@ export class FunctionRegistry {
     }
   }
 
-  public static functionIsProtected(functionId: string) {
-    return this._protectedPlugins.has(functionId)
-  }
-
   private static* protectedFunctions(): IterableIterator<[string, FunctionPluginDefinition]> {
     for (const [functionId, plugin] of this._protectedPlugins) {
       if (plugin !== undefined) {
@@ -157,50 +187,25 @@ export class FunctionRegistry {
     }
   }
 
-  private readonly instancePlugins: Map<string, FunctionPluginDefinition>
-  private readonly functions: Map<string, [string, FunctionPlugin]> = new Map()
-  private readonly arraySizeFunctions: Map<string, [string, FunctionPlugin]> = new Map()
-
-  private readonly volatileFunctions: Set<string> = new Set()
-  private readonly arrayFunctions: Set<string> = new Set()
-  private readonly structuralChangeFunctions: Set<string> = new Set()
-  private readonly functionsWhichDoesNotNeedArgumentsToBeComputed: Set<string> = new Set()
-  private readonly functionsMetadata: Map<string, FunctionMetadata> = new Map()
-
-  constructor(private config: Config) {
-    if (config.functionPlugins.length > 0) {
-      this.instancePlugins = new Map()
-      for (const plugin of config.functionPlugins) {
-        FunctionRegistry.loadPluginFunctions(plugin, this.instancePlugins)
-      }
-    } else {
-      this.instancePlugins = new Map(FunctionRegistry.plugins)
-    }
-
-    for (const [functionId, plugin] of FunctionRegistry.protectedFunctions()) {
-      FunctionRegistry.loadFunctionUnprotected(plugin, functionId, this.instancePlugins)
-    }
-
-    for (const [functionId, plugin] of this.instancePlugins.entries()) {
-      this.categorizeFunction(functionId, validateAndReturnMetadataFromName(functionId, plugin))
-    }
-  }
-
-  public initializePlugins(interpreter: Interpreter): void {
+  public initializePlugins(interpreter: Interpreter, cellContentParser: CellContentParser): void {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const instances: any[] = []
     for (const [functionId, plugin] of this.instancePlugins.entries()) {
       let foundPluginInstance = instances.find(pluginInstance => pluginInstance instanceof plugin)
       if (foundPluginInstance === undefined) {
-        foundPluginInstance = new plugin(interpreter)
+        foundPluginInstance = new plugin(interpreter, cellContentParser)
         instances.push(foundPluginInstance)
       }
       const metadata = validateAndReturnMetadataFromName(functionId, plugin)
       const methodName = metadata.method
       this.functions.set(functionId, [methodName, foundPluginInstance])
       const arraySizeMethodName = metadata.arraySizeMethod
-      if(arraySizeMethodName !== undefined) {
+      if (arraySizeMethodName !== undefined) {
         this.arraySizeFunctions.set(functionId, [arraySizeMethodName, foundPluginInstance])
+      }
+
+      if (metadata.isAsyncMethod) {
+        this.asyncFunctions.set(functionId, [methodName, foundPluginInstance])
       }
     }
   }
@@ -216,7 +221,17 @@ export class FunctionRegistry {
     const pluginEntry = this.functions.get(functionId)
     if (pluginEntry !== undefined && this.config.translationPackage.isFunctionTranslated(functionId)) {
       const [pluginFunction, pluginInstance] = pluginEntry
-      return (ast, state) => (pluginInstance as any as Record<string, PluginFunctionType>)[pluginFunction](ast, state)
+      return (ast, state) => (pluginInstance as any as (Record<string, PluginFunctionType>))[pluginFunction](ast, state)
+    } else {
+      return undefined
+    }
+  }
+
+  public getAsyncFunction(functionId: string): Maybe<AsyncPluginFunctionType> {
+    const pluginEntry = this.asyncFunctions.get(functionId)
+    if (pluginEntry !== undefined && this.config.translationPackage.isFunctionTranslated(functionId)) {
+      const [pluginFunction, pluginInstance] = pluginEntry
+      return (ast, state) => (pluginInstance as any as (Record<string, AsyncPluginFunctionType>))[pluginFunction](ast, state)
     } else {
       return undefined
     }
@@ -255,6 +270,8 @@ export class FunctionRegistry {
   public isFunctionVolatile = (functionId: string): boolean => this.volatileFunctions.has(functionId)
 
   public isArrayFunction = (functionId: string): boolean => this.arrayFunctions.has(functionId)
+
+  public isAsyncFunction = (functionId: string): boolean => this.asyncFunctions.has(functionId)
 
   public isFunctionDependentOnSheetStructureChange = (functionId: string): boolean => this.structuralChangeFunctions.has(functionId)
 

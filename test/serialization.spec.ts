@@ -4,8 +4,8 @@ import {adr} from './testUtils'
 
 describe('serialization', () => {
   it('should not loose sheet information on serialization', () => {
-    const engine1 = HyperFormula.buildFromArray([
-      [1, '2', 'foo', true, '\'1', '33$', '12/01/15', '1%', '=FOO(', '#DIV/0!', new Date(1995, 11, 17) ]
+    const [engine1] =HyperFormula.buildFromArray([
+      [1, '2', 'foo', true, '\'1', '33$', '12/01/15', '1%', '=FOO(', '#DIV/0!', new Date(1995, 11, 17)]
     ])
 
     expect(engine1.getCellSerialized(adr('A1'))).toEqual(1)
@@ -48,7 +48,7 @@ describe('serialization', () => {
     expect(engine1.getCellValueFormat(adr('J1'))).toEqual(undefined)
     expect(engine1.getCellValueDetailedType(adr('J1'))).toEqual(CellValueDetailedType.ERROR)
 
-    expect(engine1.getCellSerialized(adr('K1'))).toEqual( new Date(1995, 11, 17))
+    expect(engine1.getCellSerialized(adr('K1'))).toEqual(new Date(1995, 11, 17))
     expect(engine1.getCellValueFormat(adr('K1'))).toEqual('Date()')
     expect(engine1.getCellValueDetailedType(adr('K1'))).toEqual(CellValueDetailedType.NUMBER_DATE)
 
@@ -56,7 +56,7 @@ describe('serialization', () => {
     const serialized = engine1.getAllSheetsSerialized()
 
     // reload data and "restore" the previous state
-    const engine2 = HyperFormula.buildFromSheets(serialized)
+    const [engine2] =HyperFormula.buildFromSheets(serialized)
 
     expect(engine2.getCellSerialized(adr('A1'))).toEqual(1)
     expect(engine2.getCellValueFormat(adr('A1'))).toEqual(undefined)
@@ -98,7 +98,7 @@ describe('serialization', () => {
     expect(engine1.getCellValueFormat(adr('J1'))).toEqual(undefined)
     expect(engine1.getCellValueDetailedType(adr('J1'))).toEqual(CellValueDetailedType.ERROR)
 
-    expect(engine1.getCellSerialized(adr('K1'))).toEqual( new Date(1995, 11, 17))
+    expect(engine1.getCellSerialized(adr('K1'))).toEqual(new Date(1995, 11, 17))
     expect(engine1.getCellValueFormat(adr('K1'))).toEqual('Date()')
     expect(engine1.getCellValueDetailedType(adr('K1'))).toEqual(CellValueDetailedType.NUMBER_DATE)
   })

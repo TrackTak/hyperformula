@@ -9,20 +9,20 @@ import {ArrayValue, ErroredArray, IArray, NotComputedArray} from '../ArrayValue'
 import {CellError, equalSimpleCellAddress, ErrorType, SimpleCellAddress} from '../Cell'
 import {RawCellContent} from '../CellContentParser'
 import {ErrorMessage} from '../error-message'
-import {EmptyValue, getRawValue, InternalScalarValue, InterpreterValue} from '../interpreter/InterpreterValue'
+import {AsyncInterpreterValue, EmptyValue, getRawValue, InternalScalarValue, InterpreterValue} from '../interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from '../LazilyTransformingAstService'
 import {Maybe} from '../Maybe'
 import {Ast} from '../parser'
 import {ColumnsSpan, RowsSpan} from '../Span'
 
-export abstract class FormulaVertex {
-  static fromAst(formula: Ast, address: SimpleCellAddress, size: ArraySize, version: number) {
-    if (size.isScalar()) {
-      return new FormulaCellVertex(formula, address, version)
-    } else {
-      return new ArrayVertex(formula, address, size, version)
-    }
-  }
+export interface AsyncVertex {
+  asyncResolveIndex?: number,
+  getPromise?: () => AsyncInterpreterValue,
+}
+
+export abstract class FormulaVertex implements AsyncVertex {
+  public asyncResolveIndex?: number
+  public getPromise?: () => AsyncInterpreterValue
 
   protected constructor(
     protected formula: Ast,
@@ -37,6 +37,14 @@ export abstract class FormulaVertex {
 
   public get height(): number {
     return 1
+  }
+
+  static fromAst(formula: Ast, address: SimpleCellAddress, size: ArraySize, version: number) {
+    if (size.isScalar()) {
+      return new FormulaCellVertex(formula, address, version)
+    } else {
+      return new ArrayVertex(formula, address, size, version)
+    }
   }
 
   /**
@@ -208,7 +216,8 @@ export class ArrayVertex extends FormulaVertex {
   /**
    * No-op as array vertices are transformed eagerly.
    * */
-  ensureRecentData(_updatingService: LazilyTransformingAstService) {}
+  ensureRecentData(_updatingService: LazilyTransformingAstService) {
+  }
 
   isLeftCorner(address: SimpleCellAddress): boolean {
     return equalSimpleCellAddress(this.cellAddress, address)
@@ -229,10 +238,8 @@ export class FormulaCellVertex extends FormulaVertex {
   constructor(
     /** Formula in AST format */
     formula: Ast,
-
     /** Address which this vertex represents */
     address: SimpleCellAddress,
-
     version: number,
   ) {
     super(formula, address, version)

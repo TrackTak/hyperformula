@@ -13,8 +13,16 @@ export interface CacheEntry {
   relativeDependencies: RelativeDependency[],
   hasVolatileFunction: boolean,
   hasStructuralChangeFunction: boolean,
+  hasAsyncFunction: boolean,
 }
-const buildCacheEntry = (ast: Ast, relativeDependencies: RelativeDependency[], hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean) => ({ ast, relativeDependencies, hasVolatileFunction, hasStructuralChangeFunction })
+
+const buildCacheEntry = (ast: Ast, relativeDependencies: RelativeDependency[], hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean) => ({
+  ast,
+  relativeDependencies,
+  hasVolatileFunction,
+  hasStructuralChangeFunction,
+  hasAsyncFunction
+})
 
 export class Cache {
   private cache: Map<string, CacheEntry> = new Map()
@@ -26,7 +34,7 @@ export class Cache {
 
   public set(hash: string, ast: Ast): CacheEntry {
     const astRelativeDependencies = collectDependencies(ast, this.functionRegistry)
-    const cacheEntry = buildCacheEntry(ast, astRelativeDependencies, doesContainFunctions(ast, this.functionRegistry.isFunctionVolatile), doesContainFunctions(ast, this.functionRegistry.isFunctionDependentOnSheetStructureChange))
+    const cacheEntry = buildCacheEntry(ast, astRelativeDependencies, doesContainFunctions(ast, this.functionRegistry.isFunctionVolatile), doesContainFunctions(ast, this.functionRegistry.isFunctionDependentOnSheetStructureChange), doesContainFunctions(ast, this.functionRegistry.isAsyncFunction))
     this.cache.set(hash, cacheEntry)
     return cacheEntry
   }

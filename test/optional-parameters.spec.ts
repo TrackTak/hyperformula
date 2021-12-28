@@ -5,20 +5,20 @@ import {ArgumentTypes, FunctionPlugin, FunctionPluginTypecheck} from '../src/int
 import {ProcedureAst} from '../src/parser'
 import {adr, detailedError} from './testUtils'
 
-class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlugin>{
+class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlugin> {
   public static implementedFunctions = {
     'FOO': {
       method: 'foo',
       parameters: [
-          { argumentType: ArgumentTypes.STRING, defaultValue: 'default1'},
-          { argumentType: ArgumentTypes.STRING, defaultValue: 'default2'},
-        ],
+        {argumentType: ArgumentTypes.STRING, defaultValue: 'default1'},
+        {argumentType: ArgumentTypes.STRING, defaultValue: 'default2'},
+      ],
     },
   }
 
   public foo(ast: ProcedureAst, state: InterpreterState) {
     return this.runFunction(ast.args, state, this.metadata('FOO'),
-      (arg1, arg2) => arg1+'+'+arg2
+      (arg1, arg2) => arg1 + '+' + arg2
     )
   }
 }
@@ -26,7 +26,7 @@ class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlu
 describe('Nonexistent metadata', () => {
   it('should work for function', () => {
     HyperFormula.getLanguage('enGB').extendFunctions({FOO: 'FOO'})
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=foo(1,2)'],
       ['=foo(,2)'],
       ['=foo( ,2)'],
@@ -46,7 +46,7 @@ describe('Nonexistent metadata', () => {
   })
 
   it('log fails with coerce to 0', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=LOG(10,)'],
     ])
 
@@ -54,7 +54,7 @@ describe('Nonexistent metadata', () => {
   })
 
   it('other function coerce EmptyValue', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=DATE(,1,1900)'],
       ['=SUM(,1)'],
       ['=CONCATENATE(,"abcd")']
@@ -64,6 +64,5 @@ describe('Nonexistent metadata', () => {
     expect(engine.getCellValue(adr('A2'))).toEqual(1)
     expect(engine.getCellValue(adr('A3'))).toEqual('abcd')
   })
-
 
 })

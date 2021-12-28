@@ -3,9 +3,9 @@ import {ErrorType} from '../../src/Cell'
 import {ErrorMessage} from '../../src/error-message'
 import {adr, detailedError} from '../testUtils'
 
-describe( 'decimal parsing', () => {
+describe('decimal parsing', () => {
   it('parsing decimal without leading zero', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['.1', '=.1'],
       ['-.1', '=-.1'],
       ['+.1', '=+.1'],

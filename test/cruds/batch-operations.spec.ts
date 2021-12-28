@@ -4,7 +4,7 @@ import {adr, expectArrayWithSameContent} from '../testUtils'
 
 describe('batch cruds', () => {
   it('should run batch cruds and call recompute only once', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       //
       ['foo'],
       //
@@ -26,7 +26,7 @@ describe('batch cruds', () => {
   })
 
   it('should run batch cruds unitl fail and call recompute only once', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       //
       ['foo'],
       //
@@ -43,7 +43,7 @@ describe('batch cruds', () => {
         engine.addRows(1, [0, 1]) // fail
         engine.addRows(0, [0, 1])
       })
-    } catch(e) {
+    } catch (e) {
       // empty line
     }
 

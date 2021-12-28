@@ -17,10 +17,12 @@ const dictionary: RawTranslationPackage = {
     REF: '#ADR!',
     SPILL: '#ROZLANIE!',
     VALUE: '#ARG!',
+    TIMEOUT: '#TIMEOUT!',
+    LOADING: 'Loading...'
   },
   functions: {
     FILTER: 'FILTER',
-    'ARRAY_CONSTRAIN' : 'ARRAY_CONSTRAIN',
+    'ARRAY_CONSTRAIN': 'ARRAY_CONSTRAIN',
     ARRAYFORMULA: 'ARRAYFORMULA',
     ABS: 'WART.BEZWGL',
     ACOS: 'ACOS',
@@ -410,7 +412,7 @@ const dictionary: RawTranslationPackage = {
   },
   langCode: 'plPL',
   ui: {
-    NEW_SHEET_PREFIX: 'Arkusz',
+    NEW_SHEET_PREFIX: 'Arkusz'
   },
 }
 

@@ -54,8 +54,8 @@ export class GraphBuilder {
   }
 
   private processDependencies(dependencies: Dependencies) {
-    dependencies.forEach((cellDependencies: CellDependency[], endVertex: Vertex) => {
-      this.dependencyGraph.processCellDependencies(cellDependencies, endVertex)
+    dependencies.forEach((cellPrecedents: CellDependency[], endVertex: Vertex) => {
+      this.dependencyGraph.processCellPrecedents(cellPrecedents, endVertex)
     })
   }
 }
@@ -71,7 +71,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
     private readonly parser: ParserWithCaching,
     private readonly stats: Statistics,
     private readonly cellContentParser: CellContentParser,
-    private readonly arraySizePredictor: ArraySizePredictor,
+    private readonly arraySizePredictor: ArraySizePredictor
   ) {
   }
 
@@ -97,7 +97,9 @@ export class SimpleStrategy implements GraphBuilderStrategy {
               this.dependencyGraph.addVertex(address, vertex)
             } else {
               this.shrinkArrayIfNeeded(address)
+              
               const size = this.arraySizePredictor.checkArraySize(parseResult.ast, address)
+              
               if (size.isScalar()) {
                 const vertex = new FormulaCellVertex(parseResult.ast, address, 0)
                 dependencies.set(vertex, absolutizeDependencies(parseResult.dependencies, address))
@@ -108,10 +110,17 @@ export class SimpleStrategy implements GraphBuilderStrategy {
                 if (parseResult.hasStructuralChangeFunction) {
                   this.dependencyGraph.markAsDependentOnStructureChange(vertex)
                 }
+                if (parseResult.hasAsyncFunction) {
+                  this.dependencyGraph.markAsAsync(vertex)
+                }
               } else {
                 const vertex = new ArrayVertex(parseResult.ast, address, new ArraySize(size.width, size.height))
                 dependencies.set(vertex, absolutizeDependencies(parseResult.dependencies, address))
                 this.dependencyGraph.addArrayVertex(address, vertex)
+
+                if (parseResult.hasAsyncFunction) {
+                  this.dependencyGraph.markAsAsync(vertex)
+                }
               }
             }
           } else if (parsedCellContent instanceof CellContent.Empty) {

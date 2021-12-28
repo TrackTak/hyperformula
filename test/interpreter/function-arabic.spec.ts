@@ -4,7 +4,7 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function ARABIC', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=ARABIC()', '=ARABIC(1, 1)'],
     ])
 
@@ -13,7 +13,7 @@ describe('Function ARABIC', () => {
   })
 
   it('should properly sanitize input', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=ARABIC(" XD ")'],
       ['=ARABIC("xd")'],
       ['=ARABIC(" xD ")'],
@@ -24,7 +24,7 @@ describe('Function ARABIC', () => {
   })
 
   it('should detect incorrect numerals', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=ARABIC("IMM")'],
       ['=ARABIC("MMMM")'],
       ['=ARABIC("IXC")'],
@@ -43,7 +43,7 @@ describe('Function ARABIC', () => {
   })
 
   it('works for border cases', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=ARABIC("MMMIMIDCCCICILXXXIXIVIII")'],
       ['=ARABIC("-I")'],
       ['=ARABIC(" ")'],
@@ -55,31 +55,31 @@ describe('Function ARABIC', () => {
 
   it('should output correct value for roman numerals from mode 0', () => {
     const [input, output] = inputOutput(0)
-    const engine = HyperFormula.buildFromArray([input])
+    const [engine] = HyperFormula.buildFromArray([input])
     expect(engine.getSheetValues(0)).toEqual([output])
   })
 
   it('should output correct value for roman numerals from mode 1', () => {
     const [input, output] = inputOutput(1)
-    const engine = HyperFormula.buildFromArray([input])
+    const [engine] = HyperFormula.buildFromArray([input])
     expect(engine.getSheetValues(0)).toEqual([output])
   })
 
   it('should output correct value for roman numerals from mode 2', () => {
     const [input, output] = inputOutput(2)
-    const engine = HyperFormula.buildFromArray([input])
+    const [engine] = HyperFormula.buildFromArray([input])
     expect(engine.getSheetValues(0)).toEqual([output])
   })
 
   it('should output correct value for roman numerals from mode 3', () => {
     const [input, output] = inputOutput(0)
-    const engine = HyperFormula.buildFromArray([input])
+    const [engine] = HyperFormula.buildFromArray([input])
     expect(engine.getSheetValues(0)).toEqual([output])
   })
 
   it('should output correct value for roman numerals from mode 4', () => {
     const [input, output] = inputOutput(4)
-    const engine = HyperFormula.buildFromArray([input])
+    const [engine] = HyperFormula.buildFromArray([input])
     expect(engine.getSheetValues(0)).toEqual([output])
   })
 })
@@ -88,9 +88,9 @@ function inputOutput(mode: number) {
   const arr = [mode0, mode1, mode2, mode3, mode4][mode]
   const input = []
   const output = []
-  for(let i=0;i<arr.length;i++) {
+  for (let i = 0; i < arr.length; i++) {
     input.push(`=ARABIC("${arr[i]}")`)
-    output.push(i+1)
+    output.push(i + 1)
   }
   return [input, output]
 }

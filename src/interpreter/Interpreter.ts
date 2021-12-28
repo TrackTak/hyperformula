@@ -6,10 +6,12 @@
 import {AbsoluteCellRange, AbsoluteColumnRange, AbsoluteRowRange} from '../AbsoluteCellRange'
 import {ArraySizePredictor} from '../ArraySize'
 import {ArrayValue, NotComputedArray} from '../ArrayValue'
-import {CellError, ErrorType, invalidSimpleCellAddress} from '../Cell'
+import {CellError, ErrorType, invalidSimpleCellAddress, withTimeout} from '../Cell'
+import { CellContentParser } from '../CellContentParser'
 import {Config} from '../Config'
 import {DateTimeHelper} from '../DateTimeHelper'
 import {DependencyGraph} from '../DependencyGraph'
+import {FormulaVertex} from '../DependencyGraph/FormulaCellVertex'
 import {ErrorMessage} from '../error-message'
 import {LicenseKeyValidityState} from '../helpers/licenseKeyValidator'
 import {ColumnSearchStrategy} from '../Lookup/SearchStrategy'
@@ -31,19 +33,21 @@ import {CriterionBuilder} from './Criterion'
 import {FunctionRegistry} from './FunctionRegistry'
 import {InterpreterState} from './InterpreterState'
 import {
+  AsyncInterpreterValue,
+  AsyncPromiseVertex,
   cloneNumber,
   EmptyValue,
   getRawValue,
   InternalScalarValue,
   InterpreterValue,
   isExtendedNumber,
+  OptionalInterpreterTuple,
 } from './InterpreterValue'
 import {SimpleRangeValue} from './SimpleRangeValue'
-import {FormulaVertex} from '../DependencyGraph/FormulaCellVertex'
 
 export class Interpreter {
-  private gpu?: any
   public readonly criterionBuilder: CriterionBuilder
+  private gpu?: any
 
   constructor(
     public readonly config: Config,
@@ -51,219 +55,37 @@ export class Interpreter {
     public readonly columnSearch: ColumnSearchStrategy,
     public readonly stats: Statistics,
     public readonly arithmeticHelper: ArithmeticHelper,
-    private readonly functionRegistry: FunctionRegistry,
+    public readonly functionRegistry: FunctionRegistry,
     private readonly namedExpressions: NamedExpressions,
     public readonly serialization: Serialization,
     public readonly arraySizePredictor: ArraySizePredictor,
-    public readonly dateTimeHelper: DateTimeHelper
+    public readonly dateTimeHelper: DateTimeHelper,
+    public readonly cellContentParser: CellContentParser
   ) {
-    this.functionRegistry.initializePlugins(this)
+    this.functionRegistry.initializePlugins(this, cellContentParser)
     this.criterionBuilder = new CriterionBuilder(config)
   }
 
-  public evaluateAst(ast: Ast, state: InterpreterState): InterpreterValue {
-    let val = this.evaluateAstWithoutPostprocessing(ast, state)
-    if (isExtendedNumber(val)) {
-      if (isNumberOverflow(getRawValue(val))) {
+  private convertPostProcessingValue(val: InterpreterValue, state: InterpreterState) {
+    let newVal = val
+
+    if (isExtendedNumber(newVal)) {
+      if (isNumberOverflow(getRawValue(newVal))) {
         return new CellError(ErrorType.NUM, ErrorMessage.NaN)
       } else {
-        val = cloneNumber(val, fixNegativeZero(getRawValue(val)))
+        newVal = cloneNumber(newVal, fixNegativeZero(getRawValue(newVal)))
       }
     }
-    if(val instanceof SimpleRangeValue && val.height() === 1 && val.width() === 1) {
-      [[val]] = val.data
+    if (newVal instanceof SimpleRangeValue && newVal.height() === 1 && newVal.width() === 1) {
+      [[newVal]] = newVal.data
     }
-    return wrapperForRootVertex(val, state.formulaVertex)
+    return wrapperForRootVertex(newVal, state.formulaVertex)
   }
 
-  /**
-   * Calculates cell value from formula abstract syntax tree
-   *
-   * @param formula - abstract syntax tree of formula
-   * @param formulaAddress - address of the cell in which formula is located
-   */
-  private evaluateAstWithoutPostprocessing(ast: Ast, state: InterpreterState): InterpreterValue {
-    switch (ast.type) {
-      case AstNodeType.EMPTY: {
-        return EmptyValue
-      }
-      case AstNodeType.CELL_REFERENCE: {
-        const address = ast.reference.toSimpleCellAddress(state.formulaAddress)
-        if (invalidSimpleCellAddress(address)) {
-          return new CellError(ErrorType.REF, ErrorMessage.BadRef)
-        }
-        return this.dependencyGraph.getCellValue(address)
-      }
-      case AstNodeType.NUMBER:
-      case AstNodeType.STRING: {
-        return ast.value
-      }
-      case AstNodeType.CONCATENATE_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.concatOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.EQUALS_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.equalOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.NOT_EQUAL_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.notEqualOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.GREATER_THAN_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.greaterThanOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.LESS_THAN_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.lessThanOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.GREATER_THAN_OR_EQUAL_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.greaterThanOrEqualOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.LESS_THAN_OR_EQUAL_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.lessThanOrEqualOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.PLUS_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.plusOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.MINUS_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.minusOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.TIMES_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.timesOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.POWER_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.powerOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.DIV_OP: {
-        const leftResult = this.evaluateAst(ast.left, state)
-        const rightResult = this.evaluateAst(ast.right, state)
-        return this.binaryRangeWrapper(this.divOp, leftResult, rightResult, state)
-      }
-      case AstNodeType.PLUS_UNARY_OP: {
-        const result = this.evaluateAst(ast.value, state)
-        return this.unaryRangeWrapper(this.unaryPlusOp, result, state)
-      }
-      case AstNodeType.MINUS_UNARY_OP: {
-        const result = this.evaluateAst(ast.value, state)
-        return this.unaryRangeWrapper(this.unaryMinusOp, result, state)
-      }
-      case AstNodeType.PERCENT_OP: {
-        const result = this.evaluateAst(ast.value, state)
-        return this.unaryRangeWrapper(this.percentOp, result, state)
-      }
-      case AstNodeType.FUNCTION_CALL: {
-        if (this.config.licenseKeyValidityState !== LicenseKeyValidityState.VALID && !FunctionRegistry.functionIsProtected(ast.procedureName)) {
-          return new CellError(ErrorType.LIC, ErrorMessage.LicenseKey(this.config.licenseKeyValidityState))
-        }
-        const pluginFunction = this.functionRegistry.getFunction(ast.procedureName)
-        if(pluginFunction!==undefined) {
-          return pluginFunction(ast, new InterpreterState(state.formulaAddress, state.arraysFlag || this.functionRegistry.isArrayFunction(ast.procedureName), state.formulaVertex))
-        } else {
-          return new CellError(ErrorType.NAME, ErrorMessage.FunctionName(ast.procedureName))
-        }
-      }
-      case AstNodeType.NAMED_EXPRESSION: {
-        const namedExpression = this.namedExpressions.nearestNamedExpression(ast.expressionName, state.formulaAddress.sheet)
-        if (namedExpression) {
-          return this.dependencyGraph.getCellValue(namedExpression.address)
-        } else {
-          return new CellError(ErrorType.NAME, ErrorMessage.NamedExpressionName(ast.expressionName))
-        }
-      }
-      case AstNodeType.CELL_RANGE: {
-        if (!this.rangeSpansOneSheet(ast)) {
-          return new CellError(ErrorType.REF, ErrorMessage.RangeManySheets)
-        }
-        const range = AbsoluteCellRange.fromCellRange(ast, state.formulaAddress)
-        const arrayVertex = this.dependencyGraph.getArray(range)
-        if (arrayVertex) {
-          const array = arrayVertex.array
-          if (array instanceof NotComputedArray) {
-            throw new Error('Array should be already computed')
-          } else if (array instanceof CellError) {
-            return array
-          } else if (array instanceof ArrayValue) {
-            return SimpleRangeValue.fromRange(array.raw(), range, this.dependencyGraph)
-          } else {
-            throw new Error('Unknown array')
-          }
-        } else {
-          return SimpleRangeValue.onlyRange(range, this.dependencyGraph)
-        }
-      }
-      case AstNodeType.COLUMN_RANGE: {
-        if (!this.rangeSpansOneSheet(ast)) {
-          return new CellError(ErrorType.REF, ErrorMessage.RangeManySheets)
-        }
-        const range = AbsoluteColumnRange.fromColumnRange(ast, state.formulaAddress)
-        return SimpleRangeValue.onlyRange(range, this.dependencyGraph)
-      }
-      case AstNodeType.ROW_RANGE: {
-        if (!this.rangeSpansOneSheet(ast)) {
-          return new CellError(ErrorType.REF, ErrorMessage.RangeManySheets)
-        }
-        const range = AbsoluteRowRange.fromRowRangeAst(ast, state.formulaAddress)
-        return SimpleRangeValue.onlyRange(range, this.dependencyGraph)
-      }
-      case AstNodeType.PARENTHESIS: {
-        return this.evaluateAst(ast.expression, state)
-      }
-      case AstNodeType.ARRAY: {
-        let totalWidth: Maybe<number> = undefined
-        const ret: InternalScalarValue[][] = []
-        for(const astRow of ast.args) {
-          let rowHeight: Maybe<number> = undefined
-          const rowRet: InternalScalarValue[][] = []
-          for(const astIt of astRow) {
-            const arr = coerceToRange(this.evaluateAst(astIt, state))
-            const height = arr.height()
-            if(rowHeight===undefined) {
-              rowHeight = height
-              rowRet.push(...arr.data)
-            } else if(rowHeight === height) {
-              for(let i=0;i<height;i++) {
-                rowRet[i].push(...arr.data[i])
-              }
-            } else {
-              return new CellError(ErrorType.REF, ErrorMessage.SizeMismatch)
-            }
-          }
-          const width = rowRet[0].length
-          if(totalWidth===undefined) {
-            totalWidth = width
-            ret.push(...rowRet)
-          } else if(totalWidth === width) {
-            ret.push(...rowRet)
-          } else {
-            return new CellError(ErrorType.REF, ErrorMessage.SizeMismatch)
-          }
-        }
-        return SimpleRangeValue.onlyValues(ret)
-      }
-      case AstNodeType.ERROR_WITH_RAW_INPUT:
-      case AstNodeType.ERROR: {
-        return ast.error
-      }
-    }
+  public evaluateAst(ast: Ast, state: InterpreterState): OptionalInterpreterTuple {
+    const val = this.evaluateAstWithoutPostprocessing(ast, state)
+
+    return [this.convertPostProcessingValue(val[0], state), val[1]]
   }
 
   public getGpuInstance(): any {
@@ -283,6 +105,348 @@ export class Interpreter {
 
   public destroyGpu() {
     this.gpu?.destroy()
+  }
+
+  /**
+   * Calculates cell value from formula abstract syntax tree
+   *
+   * @param formula - abstract syntax tree of formula
+   * @param formulaAddress - address of the cell in which formula is located
+   */
+  private evaluateAstWithoutPostprocessing(ast: Ast, state: InterpreterState): OptionalInterpreterTuple {
+    switch (ast.type) {
+      case AstNodeType.EMPTY: {
+        return [EmptyValue]
+      }
+      case AstNodeType.CELL_REFERENCE: {
+        const address = ast.reference.toSimpleCellAddress(state.formulaAddress)
+        if (invalidSimpleCellAddress(address)) {
+          return [new CellError(ErrorType.REF, ErrorMessage.BadRef)]
+        }
+        const cell = this.dependencyGraph.getCell(address)
+        const cellValue = this.dependencyGraph.getCellValue(address)
+
+        if (cell instanceof FormulaVertex ) {
+          const asyncPromiseVertex = {
+            asyncVertex: cell,
+          }
+
+          return [cellValue, asyncPromiseVertex]
+        }
+
+        return [cellValue]
+      }
+      case AstNodeType.NUMBER:
+      case AstNodeType.STRING: {
+        return [ast.value]
+      }
+      case AstNodeType.CONCATENATE_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.concatOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.EQUALS_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.equalOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.NOT_EQUAL_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.notEqualOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.GREATER_THAN_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.greaterThanOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.LESS_THAN_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.lessThanOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.GREATER_THAN_OR_EQUAL_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.greaterThanOrEqualOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.LESS_THAN_OR_EQUAL_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.lessThanOrEqualOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.PLUS_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.plusOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.MINUS_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.minusOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.TIMES_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.timesOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.POWER_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.powerOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.DIV_OP: {
+        const leftResult = this.evaluateAst(ast.left, state)
+        const rightResult = this.evaluateAst(ast.right, state)
+        return this.binaryAsyncRangeWrapper(this.divOp, leftResult, rightResult, state)
+      }
+      case AstNodeType.PLUS_UNARY_OP: {
+        const result = this.evaluateAst(ast.value, state)
+        return this.unaryAsyncRangeWrapper(this.unaryPlusOp, result, state)
+      }
+      case AstNodeType.MINUS_UNARY_OP: {
+        const result = this.evaluateAst(ast.value, state)
+        return this.unaryAsyncRangeWrapper(this.unaryMinusOp, result, state)
+      }
+      case AstNodeType.PERCENT_OP: {
+        const result = this.evaluateAst(ast.value, state)
+        return this.unaryAsyncRangeWrapper(this.percentOp, result, state)
+      }
+      case AstNodeType.FUNCTION_CALL: {
+        if (this.config.licenseKeyValidityState !== LicenseKeyValidityState.VALID && !FunctionRegistry.functionIsProtected(ast.procedureName)) {
+          return [new CellError(ErrorType.LIC, ErrorMessage.LicenseKey(this.config.licenseKeyValidityState))]
+        }
+    
+        const interpreterState = new InterpreterState(state.formulaAddress, state.arraysFlag || this.functionRegistry.isArrayFunction(ast.procedureName), state.formulaVertex)
+        const cellError = new CellError(ErrorType.NAME, ErrorMessage.FunctionName(ast.procedureName))
+    
+        const metadata = this.functionRegistry.getMetadata(ast.procedureName)
+
+        if (metadata?.isAsyncMethod) {
+          const pluginFunction = this.functionRegistry.getAsyncFunction(ast.procedureName)
+
+          if (pluginFunction === undefined) {
+            return [cellError]
+          }
+
+          const getPromise = () => new Promise<InterpreterValue>((resolve, reject) => {
+            const pluginFunctionValue = pluginFunction(ast, interpreterState)
+            const functionPromise = withTimeout(pluginFunctionValue, this.config.timeoutTime)
+
+            functionPromise.then((interpreterValue) => {
+              resolve(interpreterValue)
+            }).catch((error) => {
+              if (error instanceof CellError) {
+                resolve(error)
+              } else {
+                reject(error)
+              }
+            })
+          })
+
+          const asyncVertex = state.formulaVertex
+
+          if (asyncVertex) {
+            asyncVertex.getPromise = getPromise
+          }
+          
+          return [new CellError(ErrorType.LOADING, ErrorMessage.FunctionLoading), {
+            asyncVertex,
+            getPromise
+          }]
+        }
+
+        const pluginFunction = this.functionRegistry.getFunction(ast.procedureName)
+
+        if (pluginFunction === undefined) {
+          return [cellError]
+        }
+
+        const pluginFunctionValue = pluginFunction(ast, interpreterState)
+    
+        return [pluginFunctionValue]
+      }
+      case AstNodeType.NAMED_EXPRESSION: {
+        const namedExpression = this.namedExpressions.nearestNamedExpression(ast.expressionName, state.formulaAddress.sheet)
+        if (namedExpression) {
+          return [this.dependencyGraph.getCellValue(namedExpression.address)]
+        } else {
+          return [new CellError(ErrorType.NAME, ErrorMessage.NamedExpressionName(ast.expressionName))]
+        }
+      }
+      case AstNodeType.CELL_RANGE: {
+        if (!this.rangeSpansOneSheet(ast)) {
+          return [new CellError(ErrorType.REF, ErrorMessage.RangeManySheets)]
+        }
+        const range = AbsoluteCellRange.fromCellRange(ast, state.formulaAddress)
+        const arrayVertex = this.dependencyGraph.getArray(range)
+        if (arrayVertex) {
+          const array = arrayVertex.array
+          if (array instanceof NotComputedArray) {
+            throw new Error('Array should be already computed')
+          } else if (array instanceof CellError) {
+            return [array]
+          } else if (array instanceof ArrayValue) {
+            return [SimpleRangeValue.fromRange(array.raw(), range, this.dependencyGraph)]
+          } else {
+            throw new Error('Unknown array')
+          }
+        } else {
+          return [SimpleRangeValue.onlyRange(range, this.dependencyGraph)]
+        }
+      }
+      case AstNodeType.COLUMN_RANGE: {
+        if (!this.rangeSpansOneSheet(ast)) {
+          return [new CellError(ErrorType.REF, ErrorMessage.RangeManySheets)]
+        }
+        const range = AbsoluteColumnRange.fromColumnRange(ast, state.formulaAddress)
+        return [SimpleRangeValue.onlyRange(range, this.dependencyGraph)]
+      }
+      case AstNodeType.ROW_RANGE: {
+        if (!this.rangeSpansOneSheet(ast)) {
+          return [new CellError(ErrorType.REF, ErrorMessage.RangeManySheets)]
+        }
+        const range = AbsoluteRowRange.fromRowRangeAst(ast, state.formulaAddress)
+        return [SimpleRangeValue.onlyRange(range, this.dependencyGraph)]
+      }
+      case AstNodeType.PARENTHESIS: {
+        return this.evaluateAst(ast.expression, state)
+      }
+      case AstNodeType.ARRAY: {
+        const interpreterValues: InterpreterValue[][] = []
+        const asyncPromiseVertices: AsyncPromiseVertex[][] = []
+
+        for (let outerIndex = 0; outerIndex < ast.args.length; outerIndex++) {
+          const astRow = ast.args[outerIndex]
+          const rowRet: InterpreterValue[] = []
+          const asyncPromiseValueRowRet: AsyncPromiseVertex[] = []
+          
+          for (let innerIndex = 0; innerIndex < astRow.length; innerIndex++) {
+            const astIt = astRow[innerIndex]
+            const [value, asyncPromiseVertex] = this.evaluateAst(astIt, state)
+
+            if (asyncPromiseVertex) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              const promiseGetter = asyncPromiseVertex.getPromise!
+
+              const getPromise = () => new Promise<InterpreterValue>((resolve, reject) => {
+                promiseGetter().then((interpreterValue) => {
+                  resolve(interpreterValue)
+                }).catch(reject)
+              })
+
+              const newAsyncPromiseVertex = {
+                asyncVertex: asyncPromiseVertex.asyncVertex,
+                getPromise
+              }
+
+              asyncPromiseValueRowRet[innerIndex] = newAsyncPromiseVertex
+            }
+
+            rowRet.push(value)
+          }
+          interpreterValues.push(rowRet)
+
+          if (asyncPromiseValueRowRet.length) {
+            asyncPromiseVertices[outerIndex] = asyncPromiseValueRowRet
+          }
+        }
+        
+        const getPromise = () => new Promise<InterpreterValue>((resolve, reject) => {
+          const asyncInterpreterValuePromises: Promise<InterpreterValue[]>[] = []
+
+          asyncPromiseVertices.forEach((asyncPromiseVertexRow, outerIndex) => {
+            const asyncPromiseValueRowRet: AsyncInterpreterValue[] = []
+
+            asyncPromiseVertexRow.forEach((vertex, innerIndex) => {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              asyncPromiseValueRowRet[innerIndex] = vertex.getPromise!()
+            })
+
+            const promise = Promise.all(asyncPromiseValueRowRet)
+
+            asyncInterpreterValuePromises[outerIndex] = promise
+          })
+
+          const interpreterValuePromises = Promise.all(asyncInterpreterValuePromises)
+
+          interpreterValuePromises.then((values) => {
+            const newInterpreterValues = [...interpreterValues]
+
+            values.forEach((valueRow, outerIndex) => {
+              valueRow.forEach((value, innerIndex) => {
+                if (value !== undefined) {
+                  newInterpreterValues[outerIndex][innerIndex] = value
+                }
+              })
+            })
+            
+            const simpleRangeValues = this.getSimpleRangeValues(newInterpreterValues)
+
+            if (simpleRangeValues instanceof CellError) {
+              resolve(simpleRangeValues)
+              return
+            }
+
+            resolve(SimpleRangeValue.onlyValues(simpleRangeValues))
+          }).catch(reject)
+        })
+
+        const asyncPromiseVertex: AsyncPromiseVertex = {
+          asyncVertex: state.formulaVertex,
+          getPromise
+        }
+
+        const simpleRangeValues = this.getSimpleRangeValues(interpreterValues)
+
+        if (simpleRangeValues instanceof CellError) {
+          return [simpleRangeValues, asyncPromiseVertex]
+        }
+
+        return [SimpleRangeValue.onlyValues(simpleRangeValues), asyncPromiseVertex]
+      }
+      case AstNodeType.ERROR_WITH_RAW_INPUT:
+      case AstNodeType.ERROR: {
+        return [ast.error]
+      }
+    }
+  }
+
+  private getSimpleRangeValues(interpreterValues: InterpreterValue[][]): InternalScalarValue[][] | CellError {
+    const ret: InternalScalarValue[][] = []
+    let totalWidth: Maybe<number> = undefined
+
+    for (const interpreterValueRow of interpreterValues) {
+      let rowHeight: Maybe<number> = undefined
+      const rowRet: InternalScalarValue[][] = []
+
+      for (const interpreterValue of interpreterValueRow) {
+        const simpleRangeValue = coerceToRange(interpreterValue)
+        const height = simpleRangeValue.height()
+
+        if (rowHeight === undefined) {
+          rowHeight = height
+          rowRet.push(...simpleRangeValue.data)
+        } else if (rowHeight === height) {
+          for (let i = 0; i < height; i++) {
+            rowRet[i].push(...simpleRangeValue.data[i])
+          }
+        } else {
+          return new CellError(ErrorType.REF, ErrorMessage.SizeMismatch)
+        }
+      }
+      const width = rowRet[0].length
+      if (totalWidth === undefined) {
+        totalWidth = width
+        ret.push(...rowRet)
+      } else if (totalWidth === width) {
+        ret.push(...rowRet)
+      } else {
+        return new CellError(ErrorType.REF, ErrorMessage.SizeMismatch)
+      }
+    }
+
+    return ret
   }
 
   private rangeSpansOneSheet(ast: CellRangeAst | ColumnRangeAst | RowRangeAst): boolean {
@@ -308,43 +472,43 @@ export class Interpreter {
     binaryErrorWrapper(this.arithmeticHelper.leq, arg1, arg2)
 
   private concatOp = (arg1: InternalScalarValue, arg2: InternalScalarValue): InternalScalarValue =>
-       binaryErrorWrapper(this.arithmeticHelper.concat,
-        coerceScalarToString(arg1),
-        coerceScalarToString(arg2)
-      )
+    binaryErrorWrapper(this.arithmeticHelper.concat,
+      coerceScalarToString(arg1),
+      coerceScalarToString(arg2)
+    )
 
   private plusOp = (arg1: InternalScalarValue, arg2: InternalScalarValue): InternalScalarValue =>
-      binaryErrorWrapper(this.arithmeticHelper.addWithEpsilon,
-        this.arithmeticHelper.coerceScalarToNumberOrError(arg1),
-        this.arithmeticHelper.coerceScalarToNumberOrError(arg2)
-      )
+    binaryErrorWrapper(this.arithmeticHelper.addWithEpsilon,
+      this.arithmeticHelper.coerceScalarToNumberOrError(arg1),
+      this.arithmeticHelper.coerceScalarToNumberOrError(arg2)
+    )
 
   private minusOp = (arg1: InternalScalarValue, arg2: InternalScalarValue): InternalScalarValue =>
-      binaryErrorWrapper(this.arithmeticHelper.subtract,
-        this.arithmeticHelper.coerceScalarToNumberOrError(arg1),
-        this.arithmeticHelper.coerceScalarToNumberOrError(arg2)
-      )
+    binaryErrorWrapper(this.arithmeticHelper.subtract,
+      this.arithmeticHelper.coerceScalarToNumberOrError(arg1),
+      this.arithmeticHelper.coerceScalarToNumberOrError(arg2)
+    )
 
   private timesOp = (arg1: InternalScalarValue, arg2: InternalScalarValue): InternalScalarValue =>
-      binaryErrorWrapper(
-        this.arithmeticHelper.multiply,
-        this.arithmeticHelper.coerceScalarToNumberOrError(arg1),
-        this.arithmeticHelper.coerceScalarToNumberOrError(arg2)
-      )
+    binaryErrorWrapper(
+      this.arithmeticHelper.multiply,
+      this.arithmeticHelper.coerceScalarToNumberOrError(arg1),
+      this.arithmeticHelper.coerceScalarToNumberOrError(arg2)
+    )
 
   private powerOp = (arg1: InternalScalarValue, arg2: InternalScalarValue): InternalScalarValue =>
-      binaryErrorWrapper(
-        this.arithmeticHelper.pow,
-        this.arithmeticHelper.coerceScalarToNumberOrError(arg1),
-        this.arithmeticHelper.coerceScalarToNumberOrError(arg2)
-      )
+    binaryErrorWrapper(
+      this.arithmeticHelper.pow,
+      this.arithmeticHelper.coerceScalarToNumberOrError(arg1),
+      this.arithmeticHelper.coerceScalarToNumberOrError(arg2)
+    )
 
   private divOp = (arg1: InternalScalarValue, arg2: InternalScalarValue): InternalScalarValue =>
-      binaryErrorWrapper(
-        this.arithmeticHelper.divide,
-        this.arithmeticHelper.coerceScalarToNumberOrError(arg1),
-        this.arithmeticHelper.coerceScalarToNumberOrError(arg2)
-      )
+    binaryErrorWrapper(
+      this.arithmeticHelper.divide,
+      this.arithmeticHelper.coerceScalarToNumberOrError(arg1),
+      this.arithmeticHelper.coerceScalarToNumberOrError(arg2)
+    )
 
   private unaryMinusOp = (arg: InternalScalarValue): InternalScalarValue =>
     unaryErrorWrapper(this.arithmeticHelper.unaryMinus,
@@ -352,18 +516,43 @@ export class Interpreter {
 
   private percentOp = (arg: InternalScalarValue): InternalScalarValue =>
     unaryErrorWrapper(this.arithmeticHelper.unaryPercent,
-        this.arithmeticHelper.coerceScalarToNumberOrError(arg))
+      this.arithmeticHelper.coerceScalarToNumberOrError(arg))
 
   private unaryPlusOp = (arg: InternalScalarValue): InternalScalarValue => this.arithmeticHelper.unaryPlus(arg)
 
+  private unaryAsyncRangeWrapper(op: (arg: InternalScalarValue) => InternalScalarValue, arg: OptionalInterpreterTuple, state: InterpreterState): OptionalInterpreterTuple {
+    const getValue = (arg: InterpreterValue) => this.unaryRangeWrapper(op, arg, state)
+    const value = getValue(arg[0])
+    const asyncArg = arg[1]
+
+    if (asyncArg === undefined) {
+      return [value]
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const getPromise1 = asyncArg.getPromise!
+
+    const getPromise = () => new Promise<InterpreterValue>((resolve, reject) => {
+      getPromise1().then((value) => {
+        const interpreterValue = getValue(value)
+
+        resolve(interpreterValue)
+      }).catch(reject)
+    })
+
+    asyncArg.getPromise = getPromise
+
+    return [value, asyncArg]
+  }
+
   private unaryRangeWrapper(op: (arg: InternalScalarValue) => InternalScalarValue, arg: InterpreterValue, state: InterpreterState): InterpreterValue {
-    if(arg instanceof SimpleRangeValue && !state.arraysFlag) {
+    if (arg instanceof SimpleRangeValue && !state.arraysFlag) {
       arg = coerceRangeToScalar(arg, state) ?? new CellError(ErrorType.VALUE, ErrorMessage.ScalarExpected)
     }
     if (arg instanceof CellError) {
       return arg
     }
-    if(arg instanceof SimpleRangeValue) {
+    if (arg instanceof SimpleRangeValue) {
       const newRaw = arg.data.map(
         (row) => row.map(op)
       )
@@ -373,25 +562,59 @@ export class Interpreter {
     return op(arg)
   }
 
+  private binaryAsyncRangeWrapper(op: (arg1: InternalScalarValue, arg2: InternalScalarValue) => InternalScalarValue, arg1: OptionalInterpreterTuple, arg2: OptionalInterpreterTuple, state: InterpreterState): OptionalInterpreterTuple {
+    const getValue = (arg1: InterpreterValue, arg2: InterpreterValue) => this.binaryRangeWrapper(op, arg1, arg2, state)
+    const value = getValue(arg1[0], arg2[0])
+    const asyncArg1 = arg1[1]
+    const asyncArg2 = arg2[1]
+    const getPromise1 = asyncArg1?.getPromise ? asyncArg1.getPromise : () => undefined
+    const getPromise2 = asyncArg2?.getPromise ? asyncArg2.getPromise : () => undefined
+
+    if (asyncArg1 === undefined && asyncArg2 === undefined) {
+      return [value]
+    }
+
+    const getPromise = () => new Promise<InterpreterValue>((resolve, reject) => {  
+      const promise1 = getPromise1()
+      const promise2 = getPromise2()
+
+      Promise.all([promise1, promise2]).then(([leftValue, rightValue]) => {
+        const arg1AsyncVertex = arg1[1]?.asyncVertex as FormulaVertex | undefined
+        const arg2AsyncVertex = arg2[1]?.asyncVertex as FormulaVertex | undefined
+
+        const interpreterValue = getValue(leftValue ?? arg1AsyncVertex?.getCellValue() ?? arg1[0], rightValue ?? arg2AsyncVertex?.getCellValue() ?? arg2[0])
+
+        resolve(interpreterValue)
+      }).catch(reject)
+    })
+
+    const asyncPromiseVertex: AsyncPromiseVertex = {
+      getPromise,
+      asyncVertex: state.formulaVertex
+    }
+
+    return [value, asyncPromiseVertex]
+  }
+
   private binaryRangeWrapper(op: (arg1: InternalScalarValue, arg2: InternalScalarValue) => InternalScalarValue, arg1: InterpreterValue, arg2: InterpreterValue, state: InterpreterState): InterpreterValue {
-    if(arg1 instanceof SimpleRangeValue && !state.arraysFlag) {
+    if (arg1 instanceof SimpleRangeValue && !state.arraysFlag) {
       arg1 = coerceRangeToScalar(arg1, state) ?? new CellError(ErrorType.VALUE, ErrorMessage.ScalarExpected)
     }
     if (arg1 instanceof CellError) {
       return arg1
     }
-    if(arg2 instanceof SimpleRangeValue && !state.arraysFlag) {
+    if (arg2 instanceof SimpleRangeValue && !state.arraysFlag) {
       arg2 = coerceRangeToScalar(arg2, state) ?? new CellError(ErrorType.VALUE, ErrorMessage.ScalarExpected)
     }
     if (arg2 instanceof CellError) {
       return arg2
     }
-    if(arg1 instanceof SimpleRangeValue || arg2 instanceof SimpleRangeValue) {
-      if(!(arg1 instanceof SimpleRangeValue)) {
-        if((arg2 as SimpleRangeValue).isAdHoc()) {
+    if (arg1 instanceof SimpleRangeValue || arg2 instanceof SimpleRangeValue) {
+      if (!(arg1 instanceof SimpleRangeValue)) {
+        if ((arg2 as SimpleRangeValue).isAdHoc()) {
           const raw2 = (arg2 as SimpleRangeValue).data
-          for(let i=0;i<raw2.length;i++) {
-            for(let j=0;j<raw2[0].length;j++) {
+          for (let i = 0; i < raw2.length; i++) {
+            for (let j = 0; j < raw2[0].length; j++) {
               raw2[i][j] = op(arg1, raw2[i][j])
             }
           }
@@ -400,11 +623,11 @@ export class Interpreter {
           arg1 = SimpleRangeValue.fromScalar(arg1)
         }
       }
-      if(!(arg2 instanceof SimpleRangeValue)) {
-        if(arg1.isAdHoc()) {
+      if (!(arg2 instanceof SimpleRangeValue)) {
+        if (arg1.isAdHoc()) {
           const raw1 = arg1.data
-          for(let i=0;i<raw1.length;i++) {
-            for(let j=0;j<raw1[0].length;j++) {
+          for (let i = 0; i < raw1.length; i++) {
+            for (let j = 0; j < raw1[0].length; j++) {
               raw1[i][j] = op(raw1[i][j], arg2)
             }
           }
@@ -413,22 +636,22 @@ export class Interpreter {
           arg2 = SimpleRangeValue.fromScalar(arg2)
         }
       }
-      if(arg1.width()===arg2.width() && arg1.height()===arg2.height()) {
-        if(arg1.isAdHoc()) {
+      if (arg1.width() === arg2.width() && arg1.height() === arg2.height()) {
+        if (arg1.isAdHoc()) {
           const raw1 = arg1.data
           const raw2 = arg2.data
-          for(let i=0;i<raw1.length;i++) {
-            for(let j=0;j<raw1[0].length;j++) {
+          for (let i = 0; i < raw1.length; i++) {
+            for (let j = 0; j < raw1[0].length; j++) {
               raw1[i][j] = op(raw1[i][j], raw2[i][j])
             }
           }
           return SimpleRangeValue.onlyValues(raw1)
         }
-        if(arg2.isAdHoc()) {
+        if (arg2.isAdHoc()) {
           const raw1 = arg1.data
           const raw2 = arg2.data
-          for(let i=0;i<raw1.length;i++) {
-            for(let j=0;j<raw1[0].length;j++) {
+          for (let i = 0; i < raw1.length; i++) {
+            for (let j = 0; j < raw1[0].length; j++) {
               raw2[i][j] = op(raw1[i][j], raw2[i][j])
             }
           }
@@ -438,19 +661,19 @@ export class Interpreter {
       const width = Math.max(arg1.width(), arg2.width())
       const height = Math.max(arg1.height(), arg2.height())
       const ret: InternalScalarValue[][] = Array(height)
-      for(let i=0;i<height;i++) {
+      for (let i = 0; i < height; i++) {
         ret[i] = Array(width)
       }
-      for(let i=0;i<height;i++) {
+      for (let i = 0; i < height; i++) {
         const i1 = (arg1.height() !== 1) ? i : 0
         const i2 = (arg2.height() !== 1) ? i : 0
-        for(let j=0;j<width;j++) {
+        for (let j = 0; j < width; j++) {
           const j1 = (arg1.width() !== 1) ? j : 0
           const j2 = (arg2.width() !== 1) ? j : 0
-          if(i1 < arg1.height() && i2 < arg2.height() && j1 < arg1.width() && j2 < arg2.width()) {
+          if (i1 < arg1.height() && i2 < arg2.height() && j1 < arg1.width() && j2 < arg2.width()) {
             ret[i][j] = op(arg1.data[i1][j1], arg2.data[i2][j2])
           } else {
-            ret[i][j] =  new CellError(ErrorType.NA)
+            ret[i][j] = new CellError(ErrorType.NA)
           }
         }
       }

@@ -13,7 +13,7 @@ import {VersionPlugin} from '../src/interpreter/plugin/VersionPlugin'
 import {ProcedureAst} from '../src/parser'
 import {adr, detailedError, expectArrayWithSameContent} from './testUtils'
 
-class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlugin>{
+class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlugin> {
   public static implementedFunctions = {
     'FOO': {
       method: 'foo',
@@ -57,7 +57,7 @@ class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlu
   }
 }
 
-class SumWithExtra extends FunctionPlugin implements FunctionPluginTypecheck<SumWithExtra>{
+class SumWithExtra extends FunctionPlugin implements FunctionPluginTypecheck<SumWithExtra> {
   public static implementedFunctions = {
     'SUM': {
       method: 'sum',
@@ -75,7 +75,7 @@ class SumWithExtra extends FunctionPlugin implements FunctionPluginTypecheck<Sum
   }
 }
 
-class InvalidPlugin extends FunctionPlugin implements FunctionPluginTypecheck<InvalidPlugin>{
+class InvalidPlugin extends FunctionPlugin implements FunctionPluginTypecheck<InvalidPlugin> {
   public static implementedFunctions = {
     'FOO': {
       method: 'foo',
@@ -87,8 +87,7 @@ class InvalidPlugin extends FunctionPlugin implements FunctionPluginTypecheck<In
   }
 }
 
-
-class EmptyAliasPlugin extends FunctionPlugin implements FunctionPluginTypecheck<EmptyAliasPlugin>{
+class EmptyAliasPlugin extends FunctionPlugin implements FunctionPluginTypecheck<EmptyAliasPlugin> {
   public static implementedFunctions = {
     'FOO': {
       method: 'foo',
@@ -100,7 +99,7 @@ class EmptyAliasPlugin extends FunctionPlugin implements FunctionPluginTypecheck
   }
 }
 
-class OverloadedAliasPlugin extends FunctionPlugin implements FunctionPluginTypecheck<OverloadedAliasPlugin>{
+class OverloadedAliasPlugin extends FunctionPlugin implements FunctionPluginTypecheck<OverloadedAliasPlugin> {
   public static implementedFunctions = {
     'FOO': {
       method: 'foo',
@@ -115,7 +114,7 @@ class OverloadedAliasPlugin extends FunctionPlugin implements FunctionPluginType
   }
 }
 
-class ReservedNamePlugin extends FunctionPlugin implements FunctionPluginTypecheck<ReservedNamePlugin>{
+class ReservedNamePlugin extends FunctionPlugin implements FunctionPluginTypecheck<ReservedNamePlugin> {
   public static implementedFunctions = {
     'VERSION': {
       method: 'version',
@@ -126,7 +125,6 @@ class ReservedNamePlugin extends FunctionPlugin implements FunctionPluginTypeche
     return 'foo'
   }
 }
-
 
 describe('Register static custom plugin', () => {
   it('should register plugin with translations', () => {
@@ -141,7 +139,7 @@ describe('Register static custom plugin', () => {
   it('should register single function with translations', () => {
     HyperFormula.registerFunction('FOO', FooPlugin, FooPlugin.translations)
 
-    const engine = HyperFormula.buildFromArray([['=FOO()']])
+    const [engine] = HyperFormula.buildFromArray([['=FOO()']])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('foo')
   })
@@ -159,7 +157,7 @@ describe('Register static custom plugin', () => {
   it('should register all formulas from plugin', () => {
     HyperFormula.registerFunctionPlugin(FooPlugin, FooPlugin.translations)
 
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=foo()', '=bar()']
     ])
 
@@ -171,7 +169,7 @@ describe('Register static custom plugin', () => {
 
   it('should register single formula from plugin', () => {
     HyperFormula.registerFunction('BAR', FooPlugin, FooPlugin.translations)
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=foo()', '=bar()']
     ])
 
@@ -183,7 +181,7 @@ describe('Register static custom plugin', () => {
 
   it('should register single array functions', () => {
     HyperFormula.registerFunction('ARRAYFOO', FooPlugin, FooPlugin.translations)
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=ARRAYFOO()']
     ])
 
@@ -192,7 +190,7 @@ describe('Register static custom plugin', () => {
 
   it('should override one formula with custom implementation', () => {
     HyperFormula.registerFunction('SUM', SumWithExtra)
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=SUM(1, 2)', '=MAX(1, 2)']
     ])
 
@@ -202,7 +200,7 @@ describe('Register static custom plugin', () => {
 
   it('should allow to register only alias', () => {
     HyperFormula.registerFunction('SUMALIAS', SumWithExtra, {'enGB': {'SUMALIAS': 'SUMALIAS'}})
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=SUMALIAS(1, 2)', '=MAX(1, 2)']
     ])
 
@@ -263,13 +261,13 @@ describe('Instance level formula registry', () => {
   })
 
   it('should return registered formula ids', () => {
-    const engine = HyperFormula.buildFromArray([], {functionPlugins: [FooPlugin, SumWithExtra]})
+    const [engine] = HyperFormula.buildFromArray([], {functionPlugins: [FooPlugin, SumWithExtra]})
 
     expectArrayWithSameContent(engine.getRegisteredFunctionNames(), ['SUM', 'FOO', 'BAR', 'VERSION'])
   })
 
   it('should create engine only with plugins passed to configuration', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=foo()', '=bar()', '=SUM(1, 2)']
     ], {functionPlugins: [FooPlugin]})
 
@@ -281,7 +279,7 @@ describe('Instance level formula registry', () => {
 
   it('modifying static plugins should not affect existing engine instance registry', () => {
     HyperFormula.registerFunctionPlugin(FooPlugin)
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=foo()', '=bar()']
     ])
     HyperFormula.unregisterFunction('FOO')
@@ -294,13 +292,13 @@ describe('Instance level formula registry', () => {
   })
 
   it('should return registered plugins', () => {
-    const engine = HyperFormula.buildFromArray([], {functionPlugins: [SumifPlugin, NumericAggregationPlugin, SumWithExtra]})
+    const [engine] = HyperFormula.buildFromArray([], {functionPlugins: [SumifPlugin, NumericAggregationPlugin, SumWithExtra]})
 
     expectArrayWithSameContent(engine.getAllFunctionPlugins(), [SumifPlugin, NumericAggregationPlugin, SumWithExtra])
   })
 
   it('should instantiate engine with additional plugin', () => {
-    const engine = HyperFormula.buildFromArray([], {
+    const [engine] = HyperFormula.buildFromArray([], {
       functionPlugins: [...HyperFormula.getAllFunctionPlugins(), FooPlugin]
     })
 
@@ -311,7 +309,7 @@ describe('Instance level formula registry', () => {
   })
 
   it('should rebuild engine and override plugins', () => {
-    const engine = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray([])
 
     let registeredPlugins = new Set(engine.getAllFunctionPlugins())
     expect(registeredPlugins.has(SumifPlugin)).toBe(true)
@@ -324,7 +322,7 @@ describe('Instance level formula registry', () => {
   })
 
   it('should return plugin for given functionId', () => {
-    const engine = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray([])
 
     expect(engine.getFunctionPlugin('SUMIF')).toBe(SumifPlugin)
   })
@@ -370,13 +368,13 @@ describe('Reserved functions', () => {
 
 describe('aliases', () => {
   it('should validate that alias target exists', () => {
-    expect( () => {
+    expect(() => {
       HyperFormula.registerFunctionPlugin(EmptyAliasPlugin)
     }).toThrow(FunctionPluginValidationError.functionMethodNotFound('foo', 'EmptyAliasPlugin'))
   })
 
   it('should validate that alias key is available', () => {
-    expect( () => {
+    expect(() => {
       HyperFormula.registerFunctionPlugin(OverloadedAliasPlugin)
     }).toThrow(new AliasAlreadyExisting('FOO', 'OverloadedAliasPlugin'))
   })

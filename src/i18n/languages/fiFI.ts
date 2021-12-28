@@ -17,10 +17,12 @@ const dictionary: RawTranslationPackage = {
     REF: '#VIITTAUS!',
     SPILL: '#LEVITTYMINEN!',
     VALUE: '#ARVO!',
+    TIMEOUT: '#TIMEOUT!',
+    LOADING: 'Loading...'
   },
   functions: {
     FILTER: 'FILTER',
-    'ARRAY_CONSTRAIN' : 'ARRAY_CONSTRAIN',
+    'ARRAY_CONSTRAIN': 'ARRAY_CONSTRAIN',
     ARRAYFORMULA: 'ARRAYFORMULA',
     ABS: 'ITSEISARVO',
     ACOS: 'ACOS',

@@ -17,10 +17,12 @@ const dictionary: RawTranslationPackage = {
     REF: '#BAŞV!',
     SPILL: '#TAŞMA!',
     VALUE: '#DEĞER!',
+    TIMEOUT: '#TIMEOUT!',
+    LOADING: 'Loading...'
   },
   functions: {
     FILTER: 'FILTER',
-    'ARRAY_CONSTRAIN' : 'ARRAY_CONSTRAIN',
+    'ARRAY_CONSTRAIN': 'ARRAY_CONSTRAIN',
     ARRAYFORMULA: 'ARRAYFORMULA',
     ABS: 'MUTLAK',
     ACOS: 'ACOS',
@@ -410,7 +412,7 @@ const dictionary: RawTranslationPackage = {
   },
   langCode: 'trTR',
   ui: {
-    NEW_SHEET_PREFIX: 'Sheet',
+    NEW_SHEET_PREFIX: 'Sheet'
   },
 }
 

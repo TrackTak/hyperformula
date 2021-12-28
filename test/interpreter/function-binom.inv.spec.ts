@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function BINOM.INV', () => {
   it('should return error for wrong number of arguments', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=BINOM.INV(1, 2)'],
       ['=BINOM.INV(1, 2, 3, 4)'],
     ])
@@ -15,7 +15,7 @@ describe('Function BINOM.INV', () => {
   })
 
   it('should return error for arguments of wrong type', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=BINOM.INV("foo", 0.5, 3)'],
       ['=BINOM.INV(1, "baz", 3)'],
       ['=BINOM.INV(1, 0.5, "baz")'],
@@ -27,31 +27,31 @@ describe('Function BINOM.INV', () => {
   })
 
   it('should work', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=BINOM.INV(10, 0.5, 0.001)',
-      '=BINOM.INV(10, 0.5, 0.01)',
-      '=BINOM.INV(10, 0.5, 0.025)',
-      '=BINOM.INV(10, 0.5, 0.05)',
-      '=BINOM.INV(10, 0.5, 0.1)',
-      '=BINOM.INV(10, 0.5, 0.2)',
-      '=BINOM.INV(10, 0.5, 0.3)',
-      '=BINOM.INV(10, 0.5, 0.4)',
-      '=BINOM.INV(10, 0.5, 0.5)',
-      '=BINOM.INV(10, 0.5, 0.6)',
-      '=BINOM.INV(10, 0.5, 0.7)',
-      '=BINOM.INV(10, 0.5, 0.8)',
-      '=BINOM.INV(10, 0.5, 0.9)',
-      '=BINOM.INV(10, 0.5, 0.95)',
-      '=BINOM.INV(10, 0.5, 0.975)',
-      '=BINOM.INV(10, 0.5, 0.99)',
-      '=BINOM.INV(10, 0.5, 0.999)'],
+        '=BINOM.INV(10, 0.5, 0.01)',
+        '=BINOM.INV(10, 0.5, 0.025)',
+        '=BINOM.INV(10, 0.5, 0.05)',
+        '=BINOM.INV(10, 0.5, 0.1)',
+        '=BINOM.INV(10, 0.5, 0.2)',
+        '=BINOM.INV(10, 0.5, 0.3)',
+        '=BINOM.INV(10, 0.5, 0.4)',
+        '=BINOM.INV(10, 0.5, 0.5)',
+        '=BINOM.INV(10, 0.5, 0.6)',
+        '=BINOM.INV(10, 0.5, 0.7)',
+        '=BINOM.INV(10, 0.5, 0.8)',
+        '=BINOM.INV(10, 0.5, 0.9)',
+        '=BINOM.INV(10, 0.5, 0.95)',
+        '=BINOM.INV(10, 0.5, 0.975)',
+        '=BINOM.INV(10, 0.5, 0.99)',
+        '=BINOM.INV(10, 0.5, 0.999)'],
     ])
 
     expect(engine.getSheetValues(0)).toEqual([[1, 1, 2, 2, 3, 4, 4, 5, 5, 5, 6, 6, 7, 8, 8, 9, 9]])
   })
 
   it('should work, different p-value', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=BINOM.INV(10, 0.8, 0.001)',
         '=BINOM.INV(10, 0.8, 0.1)',
         '=BINOM.INV(10, 0.8, 0.2)',
@@ -69,7 +69,7 @@ describe('Function BINOM.INV', () => {
   })
 
   it('should work, small number of trials', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=BINOM.INV(0, 0.8, 0.001)',
         '=BINOM.INV(0, 0.8, 0.1)',
         '=BINOM.INV(0, 0.8, 0.2)',
@@ -87,7 +87,7 @@ describe('Function BINOM.INV', () => {
   })
 
   it('should work, another small number of trials', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=BINOM.INV(1, 0.8, 0.001)',
         '=BINOM.INV(1, 0.8, 0.1)',
         '=BINOM.INV(1, 0.8, 0.2)',
@@ -106,7 +106,7 @@ describe('Function BINOM.INV', () => {
   })
 
   it('should work, large number of trials', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=BINOM.INV(1000, 0.8, 0.001)',
         '=BINOM.INV(1000, 0.8, 0.1)',
         '=BINOM.INV(1000, 0.8, 0.2)',
@@ -124,7 +124,7 @@ describe('Function BINOM.INV', () => {
   })
 
   it('truncation works', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=BINOM.INV(1000.1, 0.8, 0.001)',
         '=BINOM.INV(1000.2, 0.8, 0.1)',
         '=BINOM.INV(1000.3, 0.8, 0.2)',
@@ -142,7 +142,7 @@ describe('Function BINOM.INV', () => {
   })
 
   it('checks bounds', () => {
-    const engine = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray([
       ['=BINOM.INV(0, 0.5, 0.5)'],
       ['=BINOM.INV(-0.001, 0.5, 0.5)'],
       ['=BINOM.INV(10, 0, 0.5)'],

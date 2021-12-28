@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
- /**
+/**
  * This is a class for detailed error messages across HyperFormula.
  */
 export class ErrorMessage {
@@ -75,4 +75,6 @@ export class ErrorMessage {
   public static FunctionName = (arg: string) => `Function name ${arg} not recognized.`
   public static NamedExpressionName = (arg: string) => `Named expression ${arg} not recognized.`
   public static LicenseKey = (arg: string) => `License key is ${arg}.`
+  public static FunctionTimeout = 'Function took too long to resolve.'
+  public static FunctionLoading = 'Loading data...'
 }

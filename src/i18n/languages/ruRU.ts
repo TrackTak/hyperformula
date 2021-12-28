@@ -17,10 +17,12 @@ const dictionary: RawTranslationPackage = {
     REF: '#ССЫЛКА!',
     SPILL: '#ПЕРЕНОС!',
     VALUE: '#ЗНАЧ!',
+    TIMEOUT: '#TIMEOUT!',
+    LOADING: 'Loading...'
   },
   functions: {
     FILTER: 'FILTER',
-    'ARRAY_CONSTRAIN' : 'ARRAY_CONSTRAIN',
+    'ARRAY_CONSTRAIN': 'ARRAY_CONSTRAIN',
     ARRAYFORMULA: 'ARRAYFORMULA',
     ABS: 'ABS',
     ACOS: 'ACOS',
@@ -410,7 +412,7 @@ const dictionary: RawTranslationPackage = {
   },
   langCode: 'ruRU',
   ui: {
-    NEW_SHEET_PREFIX: 'Sheet',
+    NEW_SHEET_PREFIX: 'Sheet'
   },
 }
 

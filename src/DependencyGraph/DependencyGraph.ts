@@ -14,6 +14,7 @@ import {ContentChanges} from '../ContentChanges'
 import {ErrorMessage} from '../error-message'
 import {FunctionRegistry} from '../interpreter/FunctionRegistry'
 import {
+  AsyncPromiseVertex,
   EmptyValue,
   getRawValue,
   InternalScalarValue,
@@ -47,6 +48,22 @@ import {SheetMapping} from './SheetMapping'
 import {RawAndParsedValue} from './ValueCellVertex'
 
 export class DependencyGraph {
+  public readonly graph: Graph<Vertex>
+  private changes: ContentChanges = ContentChanges.empty()
+
+  constructor(
+    public readonly addressMapping: AddressMapping,
+    public readonly rangeMapping: RangeMapping,
+    public readonly sheetMapping: SheetMapping,
+    public readonly arrayMapping: ArrayMapping,
+    public readonly stats: Statistics,
+    public readonly lazilyTransformingAstService: LazilyTransformingAstService,
+    public readonly functionRegistry: FunctionRegistry,
+    public readonly namedExpressions: NamedExpressions,
+  ) {
+    this.graph = new Graph<Vertex>(this.dependencyQueryVertices)
+  }
+
   /**
    * Invariants:
    * - empty cell has associated EmptyCellVertex if and only if it is a dependency (possibly indirect, through range) to some formula
@@ -65,34 +82,27 @@ export class DependencyGraph {
     )
   }
 
-  private changes: ContentChanges = ContentChanges.empty()
-
-  public readonly graph: Graph<Vertex>
-
-  constructor(
-    public readonly addressMapping: AddressMapping,
-    public readonly rangeMapping: RangeMapping,
-    public readonly sheetMapping: SheetMapping,
-    public readonly arrayMapping: ArrayMapping,
-    public readonly stats: Statistics,
-    public readonly lazilyTransformingAstService: LazilyTransformingAstService,
-    public readonly functionRegistry: FunctionRegistry,
-    public readonly namedExpressions: NamedExpressions,
-  ) {
-    this.graph = new Graph<Vertex>(this.dependencyQueryVertices)
-  }
-
-  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, dependencies: CellDependency[], size: ArraySize, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean): ContentChanges {
+  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean, markNodeAsSpecialRecentlyChanged = true): ContentChanges {
     const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version())
+    
+    if (hasAsyncFunction) {
+      this.markAsAsync(newVertex)
+    }
+
     this.exchangeOrAddFormulaVertex(newVertex)
-    this.processCellDependencies(dependencies, newVertex)
-    this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
+    this.processCellPrecedents(precedents, newVertex)
+    
+    if (markNodeAsSpecialRecentlyChanged) {
+      this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
+    }
+
     if (hasVolatileFunction) {
       this.markAsVolatile(newVertex)
     }
     if (hasStructuralChangeFunction) {
       this.markAsDependentOnStructureChange(newVertex)
     }
+
     this.correctInfiniteRangesDependency(address)
     return this.getAndClearContentChanges()
   }
@@ -167,8 +177,32 @@ export class DependencyGraph {
     return new Set([...this.graph.specialNodesRecentlyChanged, ...this.volatileVertices()])
   }
 
-  public processCellDependencies(cellDependencies: CellDependency[], endVertex: Vertex) {
-    cellDependencies.forEach((dep: CellDependency) => {
+  private processAsyncCellDependencies(startVertex: Vertex) {
+    const asyncVertices = this.asyncVertices()
+    const dependencyVertices = this.graph.adjacentNodes(startVertex)
+    const vertices = [...dependencyVertices]
+    
+    if (startVertex instanceof FormulaVertex && startVertex.asyncResolveIndex === undefined) {
+      vertices.unshift(startVertex)
+    }
+
+    vertices.forEach((vertex) => {
+      if (vertex instanceof FormulaVertex) {
+        const asyncVertex = asyncVertices.get(vertex)
+        const depIndex = this.graph.dependencyIndexes.get(startVertex) ?? -1
+        // If vertex is async then increment it to the next index
+        // so that Promise.all() can work later
+        const newIndex = asyncVertex ? depIndex + 1 : depIndex
+
+        this.graph.dependencyIndexes.set(vertex, newIndex)
+
+        vertex.asyncResolveIndex = newIndex
+      }
+    })
+  }
+
+  public processCellPrecedents(cellPrecedents: CellDependency[], endVertex: Vertex) {
+    const precedents = cellPrecedents.map((dep: CellDependency) => {
       if (dep instanceof AbsoluteCellRange) {
         const range = dep
 
@@ -209,13 +243,26 @@ export class DependencyGraph {
         if (range.isFinite()) {
           this.correctInfiniteRangesDependenciesByRangeVertex(rangeVertex)
         }
+        return rangeVertex
       } else if (dep instanceof NamedExpressionDependency) {
         const sheetOfVertex = (endVertex as FormulaCellVertex).getAddress(this.lazilyTransformingAstService).sheet
         const namedExpressionVertex = this.fetchNamedExpressionVertex(dep.name, sheetOfVertex)
+      
         this.graph.addEdge(namedExpressionVertex, endVertex)
+       return namedExpressionVertex
       } else {
-        this.graph.addEdge(this.fetchCellOrCreateEmpty(dep), endVertex)
+        const depVertex = this.fetchCellOrCreateEmpty(dep)
+
+        this.graph.addEdge(depVertex, endVertex)
+
+        return depVertex
       }
+    })
+
+    const vertices = [endVertex, ...precedents]
+
+    vertices.forEach((vertex) => {
+      this.processAsyncCellDependencies(vertex)
     })
   }
 
@@ -314,7 +361,6 @@ export class DependencyGraph {
       }
     })
 
-
     this.stats.measure(StatType.ADJUSTING_RANGES, () => {
       const rangesToRemove = this.rangeMapping.removeRangesInSheet(removedSheetId)
       for (const range of rangesToRemove) {
@@ -406,7 +452,7 @@ export class DependencyGraph {
 
     this.addStructuralNodesToChangeSet()
 
-    return { affectedArrays }
+    return {affectedArrays}
   }
 
   public addColumns(addedColumns: ColumnsSpan): EagerChangesGraphChangeResult {
@@ -441,7 +487,7 @@ export class DependencyGraph {
 
   public isThereSpaceForArray(arrayVertex: ArrayVertex): boolean {
     const range = arrayVertex.getRangeOrUndef()
-    if(range===undefined) {
+    if (range === undefined) {
       return false
     }
     for (const address of range.addresses(this)) {
@@ -622,6 +668,10 @@ export class DependencyGraph {
     this.graph.markNodeAsSpecial(vertex)
   }
 
+  public markAsAsync(vertex: Vertex) {
+    this.graph.markNodeAsSpecialAsync(vertex)
+  }
+
   public markAsDependentOnStructureChange(vertex: Vertex) {
     this.graph.markNodeAsChangingWithStructure(vertex)
   }
@@ -632,6 +682,26 @@ export class DependencyGraph {
         vertex.ensureRecentData(this.lazilyTransformingAstService)
       }
     }
+  }
+
+  public getAsyncGroupedVertices(vertices: AsyncPromiseVertex[]) {
+    const asyncGroupedVertices: AsyncPromiseVertex[][] = []
+
+    for (const vertex of vertices) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const index = vertex.asyncVertex!.asyncResolveIndex!
+
+      asyncGroupedVertices[index] = asyncGroupedVertices[index] ? [
+        ...asyncGroupedVertices[index],
+        vertex
+      ] : [vertex]
+    }
+
+    return asyncGroupedVertices
+  }
+
+  public asyncVertices() {
+    return this.graph.specialNodesAsync
   }
 
   public volatileVertices() {
@@ -983,7 +1053,7 @@ export class DependencyGraph {
     }
 
     const range = AbsoluteCellRange.spanFromOrUndef(formulaAddress, vertex.width, vertex.height)
-    if(range === undefined) {
+    if (range === undefined) {
       return
     }
     this.setArray(range, vertex)
@@ -1046,7 +1116,6 @@ export class DependencyGraph {
       }
     }
   }
-
 
   private fixArraysAfterAddingColumn(sheet: number, columnStart: number, numberOfColumns: number) {
     this.arrayMapping.moveArrayVerticesAfterColumnByColumns(sheet, columnStart, numberOfColumns)

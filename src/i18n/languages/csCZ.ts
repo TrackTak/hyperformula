@@ -17,10 +17,12 @@ const dictionary: RawTranslationPackage = {
     REF: '#ODKAZ!',
     SPILL: '#PRESAH!',
     VALUE: '#HODNOTA!',
+    TIMEOUT: '#TIMEOUT!',
+    LOADING: 'Loading...'
   },
   functions: {
     FILTER: 'FILTER',
-    'ARRAY_CONSTRAIN' : 'ARRAY_CONSTRAIN',
+    'ARRAY_CONSTRAIN': 'ARRAY_CONSTRAIN',
     ARRAYFORMULA: 'ARRAYFORMULA',
     ABS: 'ABS',
     ACOS: 'ARCCOS',
@@ -410,7 +412,7 @@ const dictionary: RawTranslationPackage = {
   },
   langCode: 'csCZ',
   ui: {
-    NEW_SHEET_PREFIX: 'Sheet',
+    NEW_SHEET_PREFIX: 'Sheet'
   },
 }
 

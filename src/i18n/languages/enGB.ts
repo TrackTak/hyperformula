@@ -17,10 +17,12 @@ const dictionary: RawTranslationPackage = {
     REF: '#REF!',
     SPILL: '#SPILL!',
     VALUE: '#VALUE!',
+    TIMEOUT: '#TIMEOUT!',
+    LOADING: 'Loading...'
   },
   functions: {
     FILTER: 'FILTER',
-    'ARRAY_CONSTRAIN' : 'ARRAY_CONSTRAIN',
+    'ARRAY_CONSTRAIN': 'ARRAY_CONSTRAIN',
     ARRAYFORMULA: 'ARRAYFORMULA',
     ABS: 'ABS',
     ACOS: 'ACOS',
@@ -179,7 +181,7 @@ const dictionary: RawTranslationPackage = {
     ROUNDUP: 'ROUNDUP',
     ROW: 'ROW',
     ROWS: 'ROWS',
-    RRI : 'RRI',
+    RRI: 'RRI',
     SEARCH: 'SEARCH',
     SEC: 'SEC',
     SECH: 'SECH',

@@ -6,7 +6,8 @@
 export type DependencyQuery<T> = (vertex: T) => T[]
 
 export interface TopSortResult<T> {
-  sorted: T[], cycled: T[], 
+  sorted: T[],
+  cycled: T[],
 }
 
 enum NodeVisitStatus {
@@ -27,7 +28,9 @@ export class Graph<T> {
   /** Set with nodes in graph. */
   public nodes: Set<T> = new Set()
 
+  public dependencyIndexes: Map<T, number> = new Map()
   public specialNodes: Set<T> = new Set()
+  public specialNodesAsync: Map<T, T> = new Map()
   public specialNodesStructuralChanges: Set<T> = new Set()
   public specialNodesRecentlyChanged: Set<T> = new Set()
   public infiniteRanges: Set<T> = new Set()
@@ -136,14 +139,21 @@ export class Graph<T> {
     this.edges.delete(node)
     this.nodes.delete(node)
     this.specialNodes.delete(node)
+    this.specialNodesAsync.delete(node)
     this.specialNodesRecentlyChanged.delete(node)
     this.specialNodesStructuralChanges.delete(node)
     this.infiniteRanges.delete(node)
+    this.dependencyIndexes.delete(node)
+
     return this.removeDependencies(node)
   }
 
   public markNodeAsSpecial(node: T) {
     this.specialNodes.add(node)
+  }
+
+  public markNodeAsSpecialAsync(node: T) {
+    this.specialNodesAsync.set(node, node)
   }
 
   public markNodeAsSpecialRecentlyChanged(node: T) {
@@ -158,6 +168,10 @@ export class Graph<T> {
 
   public clearSpecialNodesRecentlyChanged() {
     this.specialNodesRecentlyChanged.clear()
+  }
+
+  public clearSpecialNodesAsync() {
+    this.specialNodesAsync.clear()
   }
 
   public markNodeAsInfiniteRange(node: T) {
@@ -178,7 +192,8 @@ export class Graph<T> {
    * return a topological sort order, but separates vertices that exist in some cycle
    */
   public topSortWithScc(): TopSortResult<T> {
-    return this.getTopSortedWithSccSubgraphFrom(Array.from(this.nodes), () => true, () => {})
+    return this.getTopSortedWithSccSubgraphFrom(Array.from(this.nodes), () => true, () => {
+    })
   }
 
   /**
@@ -207,24 +222,24 @@ export class Graph<T> {
     const sccNonSingletons: Set<T> = new Set()
 
     modifiedNodes.reverse()
-    modifiedNodes.forEach( (v: T) => {
+    modifiedNodes.forEach((v: T) => {
       if (nodeStatus.get(v) !== undefined) {
         return
       }
       const DFSstack: T[] = [v]
       const SCCstack: T[] = []
       nodeStatus.set(v, NodeVisitStatus.ON_STACK)
-      while ( DFSstack.length > 0 ) {
-        const u = DFSstack[ DFSstack.length - 1 ]
+      while (DFSstack.length > 0) {
+        const u = DFSstack[DFSstack.length - 1]
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        switch(nodeStatus.get(u)!) {
+        switch (nodeStatus.get(u)!) {
           case NodeVisitStatus.ON_STACK: {
             entranceTime.set(u, time)
             low.set(u, time)
             SCCstack.push(u)
             time++
-            this.adjacentNodes(u).forEach( (t: T) => {
-              if(entranceTime.get(t) === undefined) {
+            this.adjacentNodes(u).forEach((t: T) => {
+              if (entranceTime.get(t) === undefined) {
                 DFSstack.push(t)
                 parent.set(t, u)
                 nodeStatus.set(t, NodeVisitStatus.ON_STACK)
@@ -259,7 +274,7 @@ export class Graph<T> {
                 inSCC.add(t)
               })
               order.push(...currentSCC)
-              if(currentSCC.length>1) {
+              if (currentSCC.length > 1) {
                 currentSCC.forEach((t) => {
                   sccNonSingletons.add(t)
                 })
@@ -282,20 +297,20 @@ export class Graph<T> {
     const sorted: T[] = []
     const cycled: T[] = []
     order.reverse()
-    order.forEach( (t: T) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        if (sccNonSingletons.has(t) || this.adjacentNodes(t).has(t)) {
-          cycled.push(t)
-          onCycle(t)
-          this.adjacentNodes(t).forEach( (s: T) => shouldBeUpdatedMapping.add(s) )
-        } else {
-          sorted.push(t)
-          if ( shouldBeUpdatedMapping.has(t) && operatingFunction(t)) {
-            this.adjacentNodes(t).forEach( (s: T) => shouldBeUpdatedMapping.add(s) )
-          }
+    order.forEach((t: T) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      if (sccNonSingletons.has(t) || this.adjacentNodes(t).has(t)) {
+        cycled.push(t)
+        onCycle(t)
+        this.adjacentNodes(t).forEach((s: T) => shouldBeUpdatedMapping.add(s))
+      } else {
+        sorted.push(t)
+        if (shouldBeUpdatedMapping.has(t) && operatingFunction(t)) {
+          this.adjacentNodes(t).forEach((s: T) => shouldBeUpdatedMapping.add(s))
         }
-      })
-    return { sorted, cycled }
+      }
+    })
+    return {sorted, cycled}
   }
 
   public getDependencies(vertex: T): T[] {

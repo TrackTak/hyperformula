@@ -35,6 +35,7 @@ export interface ParsingResult {
   dependencies: RelativeDependency[],
   hasVolatileFunction: boolean,
   hasStructuralChangeFunction: boolean,
+  hasAsyncFunction: boolean,
 }
 
 /**
@@ -64,8 +65,8 @@ export class ParserWithCaching {
    * @param text - formula to parse
    * @param formulaAddress - address with regard to which formula should be parsed. Impacts computed addresses in R0C0 format.
    */
-  public parse(text: string, formulaAddress: SimpleCellAddress): ParsingResult {
-    const lexerResult = this.lexer.tokenizeFormula(text)
+  public parse(text: string, formulaAddress: SimpleCellAddress, stripWhitespaces = true): ParsingResult {
+    const lexerResult = this.lexer.tokenizeFormula(text, stripWhitespaces)
 
     if (lexerResult.errors.length > 0) {
       const errors = lexerResult.errors.map((e) =>
@@ -74,7 +75,14 @@ export class ParserWithCaching {
           message: e.message,
         }),
       )
-      return { ast: buildParsingErrorAst(), errors, hasVolatileFunction: false, hasStructuralChangeFunction: false, dependencies: [] }
+      return {
+        ast: buildParsingErrorAst(),
+        errors,
+        hasVolatileFunction: false,
+        hasStructuralChangeFunction: false,
+        hasAsyncFunction: false,
+        dependencies: []
+      }
     }
 
     const hash = this.computeHashFromTokens(lexerResult.tokens, formulaAddress)
@@ -87,14 +95,14 @@ export class ParserWithCaching {
       const parsingResult = this.formulaParser.parseFromTokens(processedTokens, formulaAddress)
 
       if (parsingResult.errors.length > 0) {
-        return { ...parsingResult, hasVolatileFunction: false, hasStructuralChangeFunction: false, dependencies: [] }
+        return {...parsingResult, hasVolatileFunction: false, hasStructuralChangeFunction: false, hasAsyncFunction: false, dependencies: []}
       } else {
         cacheResult = this.cache.set(hash, parsingResult.ast)
       }
     }
-    const {ast, hasVolatileFunction, hasStructuralChangeFunction, relativeDependencies} = cacheResult
+    const {ast, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, relativeDependencies} = cacheResult
 
-    return {ast, errors: [], hasVolatileFunction, hasStructuralChangeFunction, dependencies: relativeDependencies}
+    return {ast, errors: [], hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, dependencies: relativeDependencies}
   }
 
   public fetchCachedResultForAst(ast: Ast): ParsingResult {
@@ -107,8 +115,8 @@ export class ParserWithCaching {
     if (cacheResult === undefined) {
       throw new Error('There is no AST with such key in the cache')
     } else {
-      const {ast, hasVolatileFunction, hasStructuralChangeFunction, relativeDependencies} = cacheResult
-      return {ast, errors: [], hasVolatileFunction, hasStructuralChangeFunction, dependencies: relativeDependencies}
+      const {ast, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, relativeDependencies} = cacheResult
+      return {ast, errors: [], hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, dependencies: relativeDependencies}
     }
   }
 
@@ -128,7 +136,7 @@ export class ParserWithCaching {
         const procedureName = token.image.toUpperCase().slice(0, -1)
         const canonicalProcedureName = this.lexerConfig.functionMapping[procedureName] ?? procedureName
         hash = hash.concat(canonicalProcedureName, '(')
-      } else if (tokenMatcher(token, ColumnRange)){
+      } else if (tokenMatcher(token, ColumnRange)) {
         const [start, end] = token.image.split(':')
         const startAddress = columnAddressFromString(this.sheetMapping, start, baseAddress)
         const endAddress = columnAddressFromString(this.sheetMapping, end, baseAddress)
@@ -137,15 +145,15 @@ export class ParserWithCaching {
         } else {
           hash = hash.concat(startAddress.hash(true), ':', endAddress.hash(true))
         }
-      } else if (tokenMatcher(token, RowRange)){
-      const [start, end] = token.image.split(':')
-      const startAddress = rowAddressFromString(this.sheetMapping, start, baseAddress)
-      const endAddress = rowAddressFromString(this.sheetMapping, end, baseAddress)
-      if (startAddress === undefined || endAddress === undefined) {
-        hash = hash.concat('!REF')
-      } else {
-        hash = hash.concat(startAddress.hash(true), ':', endAddress.hash(true))
-      }
+      } else if (tokenMatcher(token, RowRange)) {
+        const [start, end] = token.image.split(':')
+        const startAddress = rowAddressFromString(this.sheetMapping, start, baseAddress)
+        const endAddress = rowAddressFromString(this.sheetMapping, end, baseAddress)
+        if (startAddress === undefined || endAddress === undefined) {
+          hash = hash.concat('!REF')
+        } else {
+          hash = hash.concat(startAddress.hash(true), ':', endAddress.hash(true))
+        }
       } else {
         hash = hash.concat(token.image)
       }
@@ -212,7 +220,7 @@ export class ParserWithCaching {
       }
       case AstNodeType.ARRAY: {
         const args = ast.args.map(row => row.map(val => this.computeHashOfAstNode(val)).join(',')).join(';')
-        return imageWithWhitespace('{'+args+imageWithWhitespace('}', ast.internalWhitespace), ast.leadingWhitespace)
+        return imageWithWhitespace('{' + args + imageWithWhitespace('}', ast.internalWhitespace), ast.leadingWhitespace)
       }
       case AstNodeType.PARENTHESIS: {
         const expression = this.computeHashOfAstNode(ast.expression)
