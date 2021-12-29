@@ -1,10 +1,10 @@
-import {RawCellContent, Sheet} from '../../../src'
+import {DataRawCellContent, Sheet} from '../../../src'
 import {columnIndexToLabel, simpleCellAddressToString} from '../../../src/parser/addressRepresentationConverters'
 
 export function sheet(cols: number = 50) {
   const sheet: Sheet = []
 
-  const firstRow: RawCellContent[] = [1]
+  const firstRow: DataRawCellContent[] = [1]
 
   for (let i = 1; i < cols; ++i) {
     const adr = simpleCellAddressToString(() => '', {sheet: 0, row: 0, col: i - 1}, 0)
@@ -14,7 +14,7 @@ export function sheet(cols: number = 50) {
   sheet.push(firstRow)
 
   for (let i = 1; i < cols; ++i) {
-    const rowToPush: RawCellContent[] = []
+    const rowToPush: DataRawCellContent[] = []
 
     rowToPush.push(...Array(i).fill(null))
 

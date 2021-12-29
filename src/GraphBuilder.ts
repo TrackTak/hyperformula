@@ -3,6 +3,7 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
+import { DataRawCellContent } from '.'
 import {absolutizeDependencies} from './absolutizeDependencies'
 import {ArraySize, ArraySizePredictor} from './ArraySize'
 import {AsyncPromiseFetcher} from './AsyncPromise'
@@ -12,12 +13,13 @@ import {CellDependency} from './CellDependency'
 import {
   ArrayVertex,
   DependencyGraph,
+  EmptyCellVertex,
   FormulaCellVertex,
   ParsingErrorVertex,
   ValueCellVertex,
   Vertex
 } from './DependencyGraph'
-import {getRawValue} from './interpreter/InterpreterValue'
+import {CellMetadata, getRawValue} from './interpreter/InterpreterValue'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import {ParserWithCaching} from './parser'
 import {Sheets} from './Sheet'
@@ -90,56 +92,82 @@ export class SimpleStrategy implements GraphBuilderStrategy {
         for (let j = 0; j < row.length; ++j) {
           const cellContent = row[j]
           const address = simpleCellAddress(sheetId, j, i)
-
           const parsedCellContent = this.cellContentParser.parse(cellContent)
-          if (parsedCellContent instanceof CellContent.Formula) {
-            const parseResult = this.stats.measure(StatType.PARSER, () => this.parser.parse(parsedCellContent.formula, address))
-            if (parseResult.errors.length > 0) {
-              this.shrinkArrayIfNeeded(address)
-              const vertex = new ParsingErrorVertex(parseResult.errors, parsedCellContent.formula)
-              this.dependencyGraph.addVertex(address, vertex)
-            } else {
-              this.shrinkArrayIfNeeded(address)
- 
-              const asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(parseResult.ast, address)
-              const size = this.arraySizePredictor.checkArraySize(parseResult.ast, address)
+          const dependency = this.setDependency(address, cellContent, parsedCellContent)
 
-              if (size.isScalar()) {
-                const vertex = new FormulaCellVertex(parseResult.ast, address, 0, asyncPromises)
-                dependencies.set(vertex, absolutizeDependencies(parseResult.dependencies, address))
-                this.dependencyGraph.addVertex(address, vertex)
-                if (parseResult.hasVolatileFunction) {
-                  this.dependencyGraph.markAsVolatile(vertex)
-                }
-                if (parseResult.hasStructuralChangeFunction) {
-                  this.dependencyGraph.markAsDependentOnStructureChange(vertex)
-                }
-                if (parseResult.hasAsyncFunction) {
-                  this.dependencyGraph.markAsAsync(vertex)
-                }
-              } else {
-                const vertex = new ArrayVertex(parseResult.ast, address, new ArraySize(size.width, size.height), asyncPromises)
-                dependencies.set(vertex, absolutizeDependencies(parseResult.dependencies, address))
-                this.dependencyGraph.addArrayVertex(address, vertex)
+          if (dependency) {
+            const [vertex, cellDependency] = dependency
 
-                if (parseResult.hasAsyncFunction) {
-                  this.dependencyGraph.markAsAsync(vertex)
-                }
-              }
-            }
-          } else if (parsedCellContent instanceof CellContent.Empty) {
-            /* we don't care about empty cells here */
-          } else {
-            this.shrinkArrayIfNeeded(address)
-            const vertex = new ValueCellVertex(parsedCellContent.value, cellContent)
-            this.columnIndex.add(getRawValue(parsedCellContent.value), address)
-            this.dependencyGraph.addVertex(address, vertex)
+            dependencies.set(vertex, cellDependency)
           }
         }
       }
     }
 
     return dependencies
+  }
+
+  private setDependency(address: SimpleCellAddress, rawCellContent: DataRawCellContent, parsedCellContent: CellContent.Type, cellMetadata?: CellMetadata): null | [Vertex, CellDependency[]] {
+    if (parsedCellContent instanceof CellContent.CellData) {
+      return this.setDependency(address, rawCellContent, parsedCellContent.cellValue, parsedCellContent.metadata)
+    }
+    
+    if (parsedCellContent instanceof CellContent.Formula) {
+      const parseResult = this.stats.measure(StatType.PARSER, () => this.parser.parse(parsedCellContent.formula, address))
+      if (parseResult.errors.length > 0) {
+        this.shrinkArrayIfNeeded(address)
+        const vertex = new ParsingErrorVertex(parseResult.errors, parsedCellContent.formula, cellMetadata)
+
+        this.dependencyGraph.addVertex(address, vertex)
+      } else {
+        this.shrinkArrayIfNeeded(address)
+
+        const asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(parseResult.ast, address)
+        const size = this.arraySizePredictor.checkArraySize(parseResult.ast, address)
+
+        if (size.isScalar()) {
+          const vertex = new FormulaCellVertex(parseResult.ast, address, 0, asyncPromises, cellMetadata)
+
+          this.dependencyGraph.addVertex(address, vertex)
+
+          if (parseResult.hasVolatileFunction) {
+            this.dependencyGraph.markAsVolatile(vertex)
+          }
+          if (parseResult.hasStructuralChangeFunction) {
+            this.dependencyGraph.markAsDependentOnStructureChange(vertex)
+          }
+          if (parseResult.hasAsyncFunction) {
+            this.dependencyGraph.markAsAsync(vertex)
+          }
+
+          return [vertex, absolutizeDependencies(parseResult.dependencies, address)]
+        } else {
+          const vertex = new ArrayVertex(parseResult.ast, address, new ArraySize(size.width, size.height), asyncPromises, cellMetadata)
+
+          this.dependencyGraph.addArrayVertex(address, vertex)
+
+          if (parseResult.hasAsyncFunction) {
+            this.dependencyGraph.markAsAsync(vertex)
+          }
+
+          return [vertex, absolutizeDependencies(parseResult.dependencies, address)]
+        }
+      }
+    } else if (parsedCellContent instanceof CellContent.Empty) {
+      if (cellMetadata) {
+        const vertex = new EmptyCellVertex(address, cellMetadata)
+
+        this.dependencyGraph.addEmptyCellVertex(address, vertex)
+      }
+
+      return null
+    } else {
+      this.shrinkArrayIfNeeded(address)
+      const vertex = new ValueCellVertex(parsedCellContent.value, rawCellContent, cellMetadata)
+      this.columnIndex.add(getRawValue(parsedCellContent.value), address)
+      this.dependencyGraph.addVertex(address, vertex)
+    }
+    return null
   }
 
   private shrinkArrayIfNeeded(address: SimpleCellAddress) {

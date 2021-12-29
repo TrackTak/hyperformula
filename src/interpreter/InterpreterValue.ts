@@ -13,20 +13,40 @@ export type EmptyValueType = typeof EmptyValue
 export type InternalNoErrorScalarValue = RichNumber | RawNoErrorScalarValue
 
 export type InternalScalarValue = RichNumber | RawScalarValue
+export type DataInternalScalarValue = InternalScalarValue | CellData<InternalScalarValue>
 export type AsyncInternalScalarValue = Promise<InternalScalarValue>
 
 export type InterpreterValue = RichNumber | RawInterpreterValue
+export type DataInterpreterValue = InterpreterValue | CellData<InterpreterValue>
 export type AsyncInterpreterValue = Promise<InterpreterValue>
 
 export type RawNoErrorScalarValue = number | string | boolean | EmptyValueType
 export type RawScalarValue = RawNoErrorScalarValue | CellError
+export type DataRawScalarValue = RawScalarValue | CellData<RawScalarValue>
+
 export type RawInterpreterValue = RawScalarValue | SimpleRangeValue
+export type DataRawInterpreterValue = RawInterpreterValue | CellData<RawInterpreterValue>
+
+export type CellMetadata = Record<string | number, any>
 
 export function getRawValue<T>(num: RichNumber | T): number | T {
   if (num instanceof RichNumber) {
     return num.val
   } else {
     return num
+  }
+}
+
+export function getCellValue<T>(cell: CellData<T> | T) {
+  if (cell instanceof CellData) {
+    return cell.cellValue
+  }
+
+  return cell
+}
+
+export class CellData<T> {
+  constructor(public cellValue: T, public metadata?: CellMetadata) {
   }
 }
 

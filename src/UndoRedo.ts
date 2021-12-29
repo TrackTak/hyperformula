@@ -4,9 +4,11 @@
  */
 
 import {equalSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
-import {RawCellContent} from './CellContentParser'
+import {DataRawCellContent, RawCellContent} from './CellContentParser'
 import {ClipboardCell} from './ClipboardOperations'
 import {Config} from './Config'
+import { CellMetadata } from './interpreter/InterpreterValue'
+import { Maybe } from './Maybe'
 import {InternalNamedExpression, NamedExpressionOptions} from './NamedExpressions'
 import {
   AddColumnsCommand,
@@ -125,7 +127,7 @@ export class SetSheetContentUndoEntry extends BaseUndoEntry {
   constructor(
     public readonly sheetId: number,
     public readonly oldSheetContent: ClipboardCell[][],
-    public readonly newSheetContent: RawCellContent[][],
+    public readonly newSheetContent: DataRawCellContent[][],
   ) {
     super()
   }
@@ -297,7 +299,7 @@ export class SetCellContentsUndoEntry extends BaseUndoEntry {
   constructor(
     public readonly cellContents: {
       address: SimpleCellAddress,
-      newContent: RawCellContent,
+      newContent: DataRawCellContent,
       oldContent: [SimpleCellAddress, ClipboardCell],
     }[],
   ) {
@@ -412,7 +414,7 @@ export class BatchUndoEntry extends BaseUndoEntry {
 }
 
 export class UndoRedo {
-  public oldData: Map<number, [SimpleCellAddress, string][]> = new Map()
+  public oldData: Map<number, [SimpleCellAddress, Maybe<CellMetadata>, string][]> = new Map()
   private undoStack: UndoEntry[] = []
   private redoStack: UndoEntry[] = []
   private readonly undoLimit: number
@@ -445,12 +447,12 @@ export class UndoRedo {
     this.batchUndoEntry = undefined
   }
 
-  public storeDataForVersion(version: number, address: SimpleCellAddress, astHash: string) {
+  public storeDataForVersion(version: number, address: SimpleCellAddress, astHash: string, metadata: Maybe<CellMetadata>) {
     if (!this.oldData.has(version)) {
       this.oldData.set(version, [])
     }
     const currentOldData = this.oldData.get(version)!
-    currentOldData.push([address, astHash])
+    currentOldData.push([address, metadata, astHash])
   }
 
   public clearRedoStack() {
@@ -539,7 +541,7 @@ export class UndoRedo {
       const address = cellContentData.address
       const [oldContentAddress, oldContent] = cellContentData.oldContent
       if (!equalSimpleCellAddress(address, oldContentAddress)) {
-        this.operations.setCellEmpty(address)
+        this.operations.setCellEmpty(address, oldContent.metadata)
       }
       this.operations.restoreCell(oldContentAddress, oldContent)
     }
@@ -777,8 +779,8 @@ export class UndoRedo {
   private restoreOldDataFromVersion(version: number) {
     const oldDataToRestore = this.oldData.get(version) || []
     for (const entryToRestore of oldDataToRestore) {
-      const [address, hash] = entryToRestore
-      this.operations.setFormulaToCellFromCache(hash, address)
+      const [address, metadata, hash] = entryToRestore
+      this.operations.setFormulaToCellFromCache(hash, address, metadata)
     }
   }
 }

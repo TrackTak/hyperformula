@@ -4,17 +4,19 @@
  */
 
 import {CellError} from '../Cell'
+import { CellData, CellMetadata } from '../interpreter/InterpreterValue'
 import {ParsingError} from '../parser/Ast'
 
 export class ParsingErrorVertex {
   constructor(
     public readonly errors: ParsingError[],
-    public readonly rawInput: string
+    public readonly rawInput: string,
+    public readonly metadata?: CellMetadata
   ) {
   }
 
-  public getCellValue(): CellError {
-    return CellError.parsingError()
+  public getCellValue(): CellData<CellError> {
+    return new CellData(CellError.parsingError(), this.metadata) 
   }
 
   public getFormula(): string {

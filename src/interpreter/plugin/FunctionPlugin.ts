@@ -408,7 +408,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
       const rowArr: InternalScalarValue[] = []
 
       for (const value of row) {
-        const ret = this.returnNumberWrapper(value, metadata)
+        const ret = this.returnInferedType(value, metadata)
     
         if (maxHeight === 1 && maxWidth === 1) {
           return ret
@@ -444,7 +444,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
       const rowArr: InternalScalarValue[] = []
 
       for (const { argCoerceFailure, coercedArguments } of row) {
-        const ret = argCoerceFailure ?? this.returnNumberWrapper(fn(...coercedArguments), metadata)
+        const ret = argCoerceFailure ?? this.returnInferedType(fn(...coercedArguments), metadata)
     
         if (maxHeight === 1 && maxWidth === 1) {
           return ret
@@ -471,7 +471,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     nonReferenceCallback: (...arg: any) => InternalScalarValue = () => new CellError(ErrorType.NA, ErrorMessage.CellRefExpected)
   ) => {
     if (args.length === 0) {
-      return this.returnNumberWrapper(noArgCallback(), metadata)
+      return this.returnInferedType(noArgCallback(), metadata)
     } else if (args.length > 1) {
       return new CellError(ErrorType.NA, ErrorMessage.WrongArgNumber)
     }
@@ -494,7 +494,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     }
 
     if (cellReference !== undefined) {
-      return this.returnNumberWrapper(referenceCallback(cellReference), metadata)
+      return this.returnInferedType(referenceCallback(cellReference), metadata)
     }
 
     return this.runFunction(args, state, metadata, nonReferenceCallback)
@@ -599,7 +599,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     return { maxWidth, maxHeight, retArr}
   }
 
-  private returnNumberWrapper<T>(val: T | ExtendedNumber, metadata: FunctionMetadata): T | InterpreterValue | ExtendedNumber {
+  private returnInferedType<T>(val: T | ExtendedNumber, metadata: FunctionMetadata): T | InterpreterValue | ExtendedNumber {
     const {inferReturnType, returnNumberType} = metadata
     
     if (returnNumberType !== undefined && isExtendedNumber(val)) {
@@ -623,11 +623,15 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     }
   }
 
-  private parseReturnVal<T>(val: T | ExtendedNumber) {
+  private parseReturnVal<T>(val: T | ExtendedNumber): any {
     if (typeof val === 'string' || 
       typeof val === 'boolean' || 
       typeof val === 'number') {
       const parsedValue = this.cellContentParser.parse(val)
+
+      if (parsedValue instanceof CellContent.CellData) {
+        return this.parseReturnVal(parsedValue.cellValue)
+      }
     
       if (parsedValue instanceof CellContent.Formula) {
         return parsedValue.formula

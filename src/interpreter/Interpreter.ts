@@ -33,12 +33,14 @@ import {CriterionBuilder} from './Criterion'
 import {FunctionRegistry} from './FunctionRegistry'
 import {InterpreterState} from './InterpreterState'
 import {
+  CellData,
   cloneNumber,
   EmptyValue,
   getRawValue,
   InternalScalarValue,
   InterpreterValue,
   isExtendedNumber,
+  RawInterpreterValue,
 } from './InterpreterValue'
 import {SimpleRangeValue} from './SimpleRangeValue'
 

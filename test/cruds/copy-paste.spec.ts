@@ -15,7 +15,7 @@ import {
   rowStart,
 } from '../testUtils'
 
-describe('Copy - paste integration', () => {
+describe.only('Copy - paste integration', () => {
   it('copy should validate arguments', () => {
     const [engine] = HyperFormula.buildFromArray([])
 
@@ -85,6 +85,17 @@ describe('Copy - paste integration', () => {
     expectArrayWithSameContent([new ExportedCellChange(adr('A2'), null)], changes)
   })
 
+  it('should copy empty cell vertex with metadata', () => {
+    const [engine] = HyperFormula.buildFromArray([
+      [{ cellValue: null, metadata: {test: 'value'}}, '=A1']
+    ])
+
+    engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
+    const [changes] = engine.paste(adr('A2'))
+
+    expectArrayWithSameContent([new ExportedCellChange(adr('A2'), { cellValue: null, metadata: {test: 'value'}})], changes)
+  })
+
   it('should work for single number', () => {
     const [engine] = HyperFormula.buildFromArray([
       ['1']
@@ -94,6 +105,17 @@ describe('Copy - paste integration', () => {
     engine.paste(adr('B1'))
 
     expect(engine.getCellValue(adr('B1'))).toEqual(1)
+  })
+
+  it.only('should work for single number with metadata', () => {
+    const [engine] = HyperFormula.buildFromArray([
+      [{ cellValue: '1', metadata: {test: 'value'}}]
+    ])
+
+    engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
+    engine.paste(adr('B1'))
+
+    expect(engine.getCellValue(adr('B1'))).toEqual({ cellValue: '1', metadata: {test: 'value'}})
   })
 
   it('should work for parsing error', () => {

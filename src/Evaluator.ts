@@ -19,7 +19,7 @@ import {ArrayVertex, DependencyGraph, RangeVertex, Vertex} from './DependencyGra
 import {FormulaVertex} from './DependencyGraph/FormulaCellVertex'
 import {Interpreter} from './interpreter/Interpreter'
 import {InterpreterState} from './interpreter/InterpreterState'
-import {EmptyValue, getRawValue, InterpreterValue} from './interpreter/InterpreterValue'
+import {EmptyValue, getRawValue, InterpreterValue, RawInterpreterValue} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
@@ -110,10 +110,12 @@ export class Evaluator {
         this.recomputeFormulaVertexValue(newVertex, false)
 
         const newCellValue = newVertex.getCellValue()
+        const currentRawValue = getRawValue(currentValue) as RawInterpreterValue
+        const newRawValue = getRawValue(newCellValue)
 
-        changes.addChange(newCellValue, address)
+        changes.addChange(newCellValue, address, newVertex.metadata)
 
-        this.columnSearch.change(getRawValue(currentValue), getRawValue(newCellValue), address)
+        this.columnSearch.change(currentRawValue, newRawValue, address)
       }
     }
 
@@ -143,8 +145,12 @@ export class Evaluator {
 
             if (newCellValue !== currentValue) {
               const address = vertex.getAddress(this.lazilyTransformingAstService)
-              changes.addChange(newCellValue, address)
-              this.columnSearch.change(getRawValue(currentValue), getRawValue(newCellValue), address)
+              const currentRawValue = getRawValue(currentValue) as RawInterpreterValue
+              const newRawValue = getRawValue(newCellValue)
+
+              changes.addChange(newCellValue, address, vertex.metadata)
+
+              this.columnSearch.change(currentRawValue, newRawValue, address)
               return true
             }
             return false
@@ -160,10 +166,12 @@ export class Evaluator {
             vertex.clearCache()
           } else if (vertex instanceof FormulaVertex) {
             const address = vertex.getAddress(this.lazilyTransformingAstService)
-            this.columnSearch.remove(getRawValue(vertex.valueOrUndef()), address)
+            const rawValue = getRawValue(vertex.valueOrUndef()) as RawInterpreterValue
+
+            this.columnSearch.remove(rawValue, address)
             const error = new CellError(ErrorType.CYCLE, undefined, vertex)
             vertex.setCellValue(error)
-            changes.addChange(error, address)
+            changes.addChange(error, address, vertex.metadata)
           }
         },
       )
@@ -225,8 +233,9 @@ export class Evaluator {
       if (vertex instanceof FormulaVertex) {
         const newCellValue = this.recomputeFormulaVertexValue(vertex, true)
         const address = vertex.getAddress(this.lazilyTransformingAstService)
+        const rawValue = getRawValue(newCellValue)
 
-        this.columnSearch.add(getRawValue(newCellValue), address)
+        this.columnSearch.add(rawValue, address)
 
         if (vertex.hasAsyncPromisesPending()) {
           asyncVertices.push(vertex)

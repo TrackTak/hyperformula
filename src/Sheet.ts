@@ -3,13 +3,13 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import {RawCellContent} from './CellContentParser'
+import {DataRawCellContent} from './CellContentParser'
 import {InvalidArgumentsError} from './errors'
 
 /**
  * Two-dimenstional array representation of sheet
  */
-export type Sheet = RawCellContent[][]
+export type Sheet = DataRawCellContent[][]
 
 export type Sheets = Record<string, Sheet>
 

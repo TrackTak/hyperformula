@@ -8,18 +8,23 @@ import {absolutizeDependencies} from '../absolutizeDependencies'
 import {ArraySize} from '../ArraySize'
 import {AsyncPromise, AsyncPromiseFetcher} from '../AsyncPromise'
 import {CellError, ErrorType, isSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from '../Cell'
-import {RawCellContent} from '../CellContentParser'
+import {DataRawCellContent} from '../CellContentParser'
 import {CellDependency} from '../CellDependency'
 import {Config} from '../Config'
 import {ContentChanges} from '../ContentChanges'
 import {ErrorMessage} from '../error-message'
 import {FunctionRegistry} from '../interpreter/FunctionRegistry'
 import {
+  CellData,
+  CellMetadata,
+  DataInternalScalarValue,
+  DataInterpreterValue,
+  DataRawScalarValue,
   EmptyValue,
+  getCellValue,
   getRawValue,
   InternalScalarValue,
   InterpreterValue,
-  RawScalarValue
 } from '../interpreter/InterpreterValue'
 import {SimpleRangeValue} from '../interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from '../LazilyTransformingAstService'
@@ -84,8 +89,8 @@ export class DependencyGraph {
     )
   }
 
-  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: AsyncPromise[] | undefined, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean, markNodeAsSpecialRecentlyChanged = true): ContentChanges {
-    const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version(), asyncPromises)
+  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: Maybe<AsyncPromise[]>, metadata: Maybe<CellMetadata>, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean, markNodeAsSpecialRecentlyChanged = true): ContentChanges {
+    const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version(), asyncPromises, metadata)
 
     this.exchangeOrAddFormulaVertex(newVertex)
     this.processCellPrecedents(precedents, newVertex)
@@ -132,7 +137,7 @@ export class DependencyGraph {
         this.graph.markNodeAsSpecialRecentlyChanged(vertex)
       }
     } else {
-      const newVertex = new ValueCellVertex(value.parsedValue, value.rawValue)
+      const newVertex = new ValueCellVertex(value.parsedValue, value.rawValue, value.metadata)
       this.exchangeOrAddGraphNode(vertex, newVertex)
       this.addressMapping.setCell(address, newVertex)
       this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
@@ -143,13 +148,13 @@ export class DependencyGraph {
     return this.getAndClearContentChanges()
   }
 
-  public setCellEmpty(address: SimpleCellAddress): ContentChanges {
+  public setCellEmpty(address: SimpleCellAddress, metadata: Maybe<CellMetadata>): ContentChanges {
     const vertex = this.shrinkPossibleArrayAndGetCell(address)
     if (vertex === undefined) {
       return ContentChanges.empty()
     }
     if (this.graph.adjacentNodes(vertex).size > 0) {
-      const emptyVertex = new EmptyCellVertex(address)
+      const emptyVertex = new EmptyCellVertex(address, metadata)
       this.exchangeGraphNode(vertex, emptyVertex)
       if (this.graph.adjacentNodesCount(emptyVertex) === 0) {
         this.removeVertex(emptyVertex)
@@ -265,8 +270,8 @@ export class DependencyGraph {
     let vertex = this.addressMapping.getCell(address)
     if (vertex === undefined) {
       vertex = new EmptyCellVertex(address)
-      this.graph.addNode(vertex)
-      this.addressMapping.setCell(address, vertex)
+      
+      this.addEmptyCellVertex(address, vertex)
     }
     return vertex
   }
@@ -353,7 +358,7 @@ export class DependencyGraph {
       if (vertex instanceof ArrayVertex) {
         arrays.add(vertex)
       } else {
-        this.setCellEmpty(address)
+        this.setCellEmpty(address, undefined)
       }
     }
 
@@ -555,6 +560,11 @@ export class DependencyGraph {
     this.addressMapping.setCell(address, vertex)
   }
 
+  public addEmptyCellVertex(address: SimpleCellAddress, vertex: EmptyCellVertex): void {
+    this.graph.addNode(vertex)
+    this.addressMapping.setCell(address, vertex)
+  }
+
   public addArrayVertex(address: SimpleCellAddress, vertex: ArrayVertex): void {
     this.graph.addNode(vertex)
     this.setAddressMappingForArrayVertex(vertex, address)
@@ -588,20 +598,32 @@ export class DependencyGraph {
     return this.addressMapping.getCell(address)
   }
 
-  public getCellValue(address: SimpleCellAddress): InterpreterValue {
+  public getCellValue(address: SimpleCellAddress): DataInterpreterValue {
     return this.addressMapping.getCellValue(address)
   }
 
-  public getRawValue(address: SimpleCellAddress): RawCellContent {
+  public getRawValue(address: SimpleCellAddress): DataRawCellContent {
     return this.addressMapping.getRawValue(address)
   }
 
-  public getScalarValue(address: SimpleCellAddress): InternalScalarValue {
-    const value = this.addressMapping.getCellValue(address)
-    if (value instanceof SimpleRangeValue) {
-      return new CellError(ErrorType.VALUE, ErrorMessage.ScalarExpected)
+  public getScalarValue(address: SimpleCellAddress): DataInternalScalarValue {
+    const cell = this.addressMapping.getCellValue(address)
+
+    const castSimpleRangeValue = (value: InterpreterValue) => {
+      if (value instanceof SimpleRangeValue) {
+        return new CellError(ErrorType.VALUE, ErrorMessage.ScalarExpected)
+      }
+      return value
     }
-    return value
+    
+    if (cell instanceof CellData) {
+      return {
+        cellValue: castSimpleRangeValue(cell.cellValue),
+        metadata: cell.metadata
+      }
+    }
+    
+    return castSimpleRangeValue(cell)
   }
 
   public existsEdge(fromNode: Vertex, toNode: Vertex): boolean {
@@ -717,11 +739,18 @@ export class DependencyGraph {
     return new Set(...arrayVertices)
   }
 
-  public* rawValuesFromRange(range: AbsoluteCellRange): IterableIterator<[RawScalarValue, SimpleCellAddress]> {
+  public* rawValuesFromRange(range: AbsoluteCellRange): IterableIterator<[DataRawScalarValue, SimpleCellAddress]> {
     for (const address of range.addresses(this)) {
-      const value = this.getScalarValue(address)
-      if (value !== EmptyValue) {
-        yield [getRawValue(value), address]
+      const cell = this.getScalarValue(address)
+      if (cell !== EmptyValue) {
+        if (cell instanceof CellData) {
+          yield [{
+            cellValue: getRawValue(cell.cellValue),
+            metadata: cell.metadata
+          }, address]
+        } else {
+          yield [getRawValue(cell), address]
+        }
       }
     }
   }
@@ -799,7 +828,8 @@ export class DependencyGraph {
   public computeListOfValuesInRange(range: AbsoluteCellRange): InternalScalarValue[] {
     const values: InternalScalarValue[] = []
     for (const cellFromRange of range.addresses(this)) {
-      const value = this.getScalarValue(cellFromRange)
+      const value = getCellValue(this.getScalarValue(cellFromRange)) 
+
       values.push(value)
     }
     return values
@@ -873,13 +903,13 @@ export class DependencyGraph {
       const oldValue = vertex.getArrayCellValue(address)
       if (this.getCell(address) === vertex) {
         if (vertex.isLeftCorner(address)) {
-          this.changes.addChange(new CellError(ErrorType.REF), address, oldValue)
+          this.changes.addChange(new CellError(ErrorType.REF), address, vertex.metadata, oldValue)
         } else {
           this.addressMapping.removeCell(address)
-          this.changes.addChange(EmptyValue, address, oldValue)
+          this.changes.addChange(EmptyValue, address, vertex.metadata, oldValue)
         }
       } else {
-        this.changes.addChange(EmptyValue, address, oldValue)
+        this.changes.addChange(EmptyValue, address, vertex.metadata, oldValue)
       }
     }
   }
@@ -1092,8 +1122,9 @@ export class DependencyGraph {
           const destination = simpleCellAddress(sheet, col, row)
           const source = simpleCellAddress(sheet, col, row + numberOfRows)
           const value = array.getArrayCellValue(destination)
+
           this.addressMapping.moveCell(source, destination)
-          this.changes.addChange(EmptyValue, source, value)
+          this.changes.addChange(EmptyValue, source, undefined, value)
         }
       }
     }
@@ -1127,8 +1158,9 @@ export class DependencyGraph {
           const destination = simpleCellAddress(sheet, col, row)
           const source = simpleCellAddress(sheet, col + numberOfColumns, row)
           const value = array.getArrayCellValue(destination)
+          
           this.addressMapping.moveCell(source, destination)
-          this.changes.addChange(EmptyValue, source, value)
+          this.changes.addChange(EmptyValue, source, undefined, value)
         }
       }
     }

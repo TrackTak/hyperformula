@@ -4,9 +4,9 @@
  */
 
 import {SimpleCellAddress} from '../../Cell'
-import {RawCellContent} from '../../CellContentParser'
+import {DataRawCellContent} from '../../CellContentParser'
 import {NoSheetWithIdError} from '../../errors'
-import {EmptyValue, InterpreterValue} from '../../interpreter/InterpreterValue'
+import {DataInterpreterValue, EmptyValue, InterpreterValue} from '../../interpreter/InterpreterValue'
 import {Maybe} from '../../Maybe'
 import {Sheet, SheetBoundaries} from '../../Sheet'
 import {ColumnsSpan, RowsSpan} from '../../Span'
@@ -67,7 +67,7 @@ export class AddressMapping {
     this.addSheet(sheetId, new strategyConstructor(width, height))
   }
 
-  public getCellValue(address: SimpleCellAddress): InterpreterValue {
+  public getCellValue(address: SimpleCellAddress): DataInterpreterValue {
     const vertex = this.getCell(address)
 
     if (vertex === undefined) {
@@ -79,7 +79,7 @@ export class AddressMapping {
     }
   }
 
-  public getRawValue(address: SimpleCellAddress): RawCellContent {
+  public getRawValue(address: SimpleCellAddress): DataRawCellContent {
     const vertex = this.getCell(address)
     if (vertex instanceof ValueCellVertex) {
       return vertex.getValues().rawValue

@@ -5,11 +5,13 @@
 
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {invalidSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
-import {RawCellContent} from './CellContentParser'
+import {DataRawCellContent} from './CellContentParser'
 import {Config} from './Config'
 import {DependencyGraph} from './DependencyGraph'
 import {ValueCellVertexValue} from './DependencyGraph/ValueCellVertex'
 import {InvalidArgumentsError, SheetSizeLimitExceededError} from './errors'
+import { CellMetadata } from './interpreter/InterpreterValue'
+import { Maybe } from './Maybe'
 import {Operations} from './Operations'
 import {ParsingError} from './parser/Ast'
 
@@ -30,22 +32,26 @@ export enum ClipboardCellType {
 export interface ClipboardCellValue {
   type: ClipboardCellType.VALUE,
   parsedValue: ValueCellVertexValue,
-  rawValue: RawCellContent,
+  rawValue: DataRawCellContent,
+  metadata: Maybe<CellMetadata>,
 }
 
 export interface ClipboardCellEmpty {
   type: ClipboardCellType.EMPTY,
+  metadata: Maybe<CellMetadata>,
 }
 
 export interface ClipboardCellFormula {
   type: ClipboardCellType.FORMULA,
   hash: string,
+  metadata: Maybe<CellMetadata>,
 }
 
 export interface ClipboardCellParsingError {
   type: ClipboardCellType.PARSING_ERROR,
   rawInput: string,
   errors: ParsingError[],
+  metadata: Maybe<CellMetadata>,
 }
 
 class Clipboard {

@@ -4,14 +4,16 @@
  */
 
 import {CellError} from '../Cell'
-import {RawCellContent} from '../CellContentParser'
-import {ExtendedNumber} from '../interpreter/InterpreterValue'
+import {DataRawCellContent} from '../CellContentParser'
+import {CellData, CellMetadata, ExtendedNumber} from '../interpreter/InterpreterValue'
+import { Maybe } from '../Maybe'
 
-export type ValueCellVertexValue = ExtendedNumber | boolean | string | CellError
+export type ValueCellVertexValue = CellData<ExtendedNumber | boolean | string | CellError>
 
 export interface RawAndParsedValue {
   parsedValue: ValueCellVertexValue,
-  rawValue: RawCellContent,
+  rawValue: DataRawCellContent,
+  metadata: Maybe<CellMetadata>,
 }
 
 /**
@@ -19,11 +21,11 @@ export interface RawAndParsedValue {
  */
 export class ValueCellVertex {
   /** Static cell value. */
-  constructor(private parsedValue: ValueCellVertexValue, private rawValue: RawCellContent) {
+  constructor(private parsedValue: ValueCellVertexValue, private rawValue: DataRawCellContent, public readonly metadata?: CellMetadata) {
   }
 
   public getValues(): RawAndParsedValue {
-    return {parsedValue: this.parsedValue, rawValue: this.rawValue}
+    return {parsedValue: this.parsedValue, rawValue: this.rawValue, metadata: this.metadata}
   }
 
   public setValues(values: RawAndParsedValue) {

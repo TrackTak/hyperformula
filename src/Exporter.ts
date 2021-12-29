@@ -8,7 +8,7 @@ import {CellValue, DetailedCellError} from './CellValue'
 import {Config} from './Config'
 import {CellValueChange, ChangeExporter} from './ContentChanges'
 import {ErrorMessage} from './error-message'
-import {EmptyValue, getRawValue, InterpreterValue, isExtendedNumber} from './interpreter/InterpreterValue'
+import {CellData, DataInterpreterValue, EmptyValue, getCellValue, getRawValue, InterpreterValue, isExtendedNumber} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {NamedExpressions} from './NamedExpressions'
@@ -22,7 +22,7 @@ export type ExportedChange = ExportedCellChange | ExportedNamedExpressionChange
 export class ExportedCellChange {
   constructor(
     public readonly address: SimpleCellAddress,
-    public readonly newValue: CellValue,
+    public readonly newValue: CellValue | CellData<CellValue>,
   ) {
   }
 
@@ -71,7 +71,7 @@ export class Exporter implements ChangeExporter<ExportedChange> {
       }
       return new ExportedNamedExpressionChange(
         namedExpression.displayName,
-        this.exportScalarOrRange(value),
+        this.parseExportedScalarOrRange(getCellValue(value)),
       )
     } else if (value instanceof SimpleRangeValue) {
       const result: ExportedChange[] = []
@@ -90,7 +90,29 @@ export class Exporter implements ChangeExporter<ExportedChange> {
     }
   }
 
-  public exportValue(value: InterpreterValue): CellValue {
+  public exportValue(cell: InterpreterValue | DataInterpreterValue): CellValue | CellData<CellValue> {
+    if (cell instanceof CellData) {
+      return {
+        cellValue: this.parseExportedValue(cell.cellValue),
+        metadata: cell.metadata
+      }
+    }
+
+    return this.parseExportedValue(cell)
+  }
+
+  public exportScalarOrRange(cell: InterpreterValue | DataInterpreterValue): CellValue | CellValue[][] | CellData<CellValue | CellValue[][]> {
+    if (cell instanceof CellData) {
+      return {
+        cellValue: this.parseExportedScalarOrRange(cell.cellValue),
+        metadata: cell.metadata
+      }
+    }
+
+    return this.parseExportedScalarOrRange(cell)
+  }
+
+  private parseExportedValue(value: InterpreterValue) {
     if (value instanceof SimpleRangeValue) {
       return this.detailedError(new CellError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
     } else if (this.config.smartRounding && isExtendedNumber(value)) {
@@ -99,17 +121,17 @@ export class Exporter implements ChangeExporter<ExportedChange> {
       return this.detailedError(value)
     } else if (value === EmptyValue) {
       return null
-    } else {
-      return getRawValue(value)
     }
+    
+    return getRawValue(value)
   }
 
-  public exportScalarOrRange(value: InterpreterValue): CellValue | CellValue[][] {
+  private parseExportedScalarOrRange(value: InterpreterValue): CellValue | CellValue[][] {
     if (value instanceof SimpleRangeValue) {
-      return value.rawData().map(row => row.map(v => this.exportValue(v)))
-    } else {
-      return this.exportValue(value)
+      return value.rawData().map(row => row.map(v => this.parseExportedValue(v)))
     }
+
+    return this.parseExportedValue(value) 
   }
 
   private detailedError(error: CellError): DetailedCellError {

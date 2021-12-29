@@ -10,6 +10,8 @@
  import {UnableToParseError} from './errors'
  import {fixNegativeZero, isNumberOverflow} from './interpreter/ArithmeticHelper'
  import {
+   CellData,
+   CellMetadata,
    cloneNumber,
    CurrencyNumber,
    DateNumber,
@@ -23,7 +25,12 @@
  import {NumberLiteralHelper} from './NumberLiteralHelper'
  
  export type RawCellContent = Date | string | number | boolean | null | undefined
- 
+
+ export type DataRawCellContent = RawCellContent | {
+  cellValue: RawCellContent,
+  metadata?: CellMetadata,
+ }
+
  export namespace CellContent {
    export class Number {
      constructor(public readonly value: ExtendedNumber) {
@@ -57,6 +64,11 @@
      constructor(public readonly formula: string) {
      }
    }
+
+   export class CellData<PrimitiveType> {
+    constructor(public cellValue: PrimitiveType, public metadata?: CellMetadata) {
+    }
+   }
  
    export class Error {
      public readonly value: CellError
@@ -65,8 +77,10 @@
        this.value = new CellError(errorType, message)
      }
    }
+
+   type PrimitiveType = Number | String | Boolean | Empty | Formula | Error
  
-   export type Type = Number | String | Boolean | Empty | Formula | Error
+   export type Type = PrimitiveType | CellData<PrimitiveType>
  }
  
  /**
@@ -94,6 +108,17 @@
    const errorRegex = /#[A-Za-z0-9\/]+[?!]?/
    return errorRegex.test(upperCased) && Object.prototype.hasOwnProperty.call(errorMapping, upperCased)
  }
+
+ export function isCellData(obj: CellData<RawCellContent>) {
+  const isObject = obj!= null && obj.constructor.name === 'Object'
+  const keys = Object.keys(obj ?? {})
+
+  if (!isObject || !keys.length) return false
+
+  const isCellData = keys.every(key => key === 'cellValue' || key === 'metadata')
+
+  return isCellData
+ }
  
  export class CellContentParser {
    constructor(
@@ -102,7 +127,7 @@
      private readonly numberLiteralsHelper: NumberLiteralHelper) {
    }
  
-   public parse(content: RawCellContent): CellContent.Type {
+   public parse(content: DataRawCellContent): CellContent.Type {
      if (content === undefined || content === null) {
        return CellContent.Empty.getSingletonInstance()
      } else if (typeof content === 'number') {
@@ -187,6 +212,8 @@
            return new CellContent.String(this.getSlicedContentString(content))
          }
        }
+     } else if (isCellData(content)) {
+       return new CellContent.CellData(this.parse(content.cellValue), content.metadata)
      } else {
        throw new UnableToParseError(content)
      }

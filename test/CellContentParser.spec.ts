@@ -28,6 +28,34 @@ describe('CellContentParser', () => {
     expect(cellContentParser.parse(undefined)).toEqual(new CellContent.Empty())
   })
 
+  it('cell data with value and metadata', () => {
+    expect(cellContentParser.parse({
+      cellValue: 'value',
+      metadata: {
+        test: 3
+      }
+    })).toEqual(new CellContent.CellData(new CellContent.String('value'), {
+      test: 3
+    }))
+  })
+
+  it('cell data with no value and metadata', () => {
+    expect(cellContentParser.parse({
+      cellValue: undefined,
+      metadata: {
+        test: 3
+      }
+    })).toEqual(new CellContent.CellData(new CellContent.Empty(), {
+      test: 3
+    }))
+  })
+
+  it('cell data with value and no metadata', () => {
+    expect(cellContentParser.parse({
+      cellValue: 3,
+    })).toEqual(new CellContent.CellData(new CellContent.Number(3)))
+  })
+
   it('numbers', () => {
     expect(cellContentParser.parse('42')).toEqual(new CellContent.Number(42))
     expect(cellContentParser.parse('+42')).toEqual(new CellContent.Number(42))

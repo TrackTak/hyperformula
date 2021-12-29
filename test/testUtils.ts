@@ -7,6 +7,7 @@ import {ArrayVertex, FormulaCellVertex, RangeVertex} from '../src/DependencyGrap
 import {ErrorMessage} from '../src/error-message'
 import {defaultStringifyDateTime} from '../src/format/format'
 import {complex} from '../src/interpreter/ArithmeticHelper'
+import { CellData, getCellValue } from '../src/interpreter/InterpreterValue'
 import {ColumnIndex} from '../src/Lookup/ColumnIndex'
 import {
   AstNodeType,
@@ -98,7 +99,7 @@ export const expectArrayWithSameContent = (expected: any[], actual: any[]) => {
 export const expectToBeCloseForComplex = (engine: HyperFormula, cell: string, expected: string, precision?: number) => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
-  const coerce = (arg: CellValue): complex => engine.evaluator.interpreter.arithmeticHelper.coerceScalarToComplex(arg)
+  const coerce = (arg: CellValue | CellData<CellValue>): complex => engine.evaluator.interpreter.arithmeticHelper.coerceScalarToComplex(getCellValue(arg))
   const actualVal: complex = coerce(engine.getCellValue(adr(cell)))
   const expectedVal: complex = coerce(expected)
   expect(expectedVal[0]).toBeCloseTo(actualVal[0], precision)
@@ -169,21 +170,25 @@ export const expectEngineToBeTheSameAs = (actual: HyperFormula, expected: HyperF
   comparator.compare()
 }
 
-export function dateNumberToString(dateNumber: CellValue, config: Config): string | DetailedCellError {
-  if (dateNumber instanceof DetailedCellError) {
-    return dateNumber
+export function dateNumberToString(dateNumber: CellValue | CellData<CellValue>, config: Config): string | DetailedCellError {
+  const value = getCellValue(dateNumber)
+
+  if (value instanceof DetailedCellError) {
+    return value
   }
   const dateTimeHelper = new DateTimeHelper(config)
-  const dateString = defaultStringifyDateTime(dateTimeHelper.numberToSimpleDateTime(dateNumber as number), config.dateFormats[0])
+  const dateString = defaultStringifyDateTime(dateTimeHelper.numberToSimpleDateTime(value as number), config.dateFormats[0])
   return dateString ?? ''
 }
 
-export function timeNumberToString(timeNumber: CellValue, config: Config): string | DetailedCellError {
-  if (timeNumber instanceof DetailedCellError) {
-    return timeNumber
+export function timeNumberToString(timeNumber: CellValue | CellData<CellValue>, config: Config): string | DetailedCellError {
+  const value = getCellValue(timeNumber)
+
+  if (value instanceof DetailedCellError) {
+    return value
   }
   const dateTimeHelper = new DateTimeHelper(config)
-  const timeString = defaultStringifyDateTime(dateTimeHelper.numberToSimpleDateTime(timeNumber as number), 'hh:mm:ss.sss')
+  const timeString = defaultStringifyDateTime(dateTimeHelper.numberToSimpleDateTime(value as number), 'hh:mm:ss.sss')
   return timeString ?? ''
 }
 

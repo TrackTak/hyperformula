@@ -8,9 +8,9 @@ import {ArraySize} from '../ArraySize'
 import {ArrayValue, ErroredArray, IArray, NotComputedArray} from '../ArrayValue'
 import { AsyncPromise } from '../AsyncPromise'
 import {CellError, equalSimpleCellAddress, ErrorType, SimpleCellAddress} from '../Cell'
-import {RawCellContent} from '../CellContentParser'
+import {DataRawCellContent} from '../CellContentParser'
 import {ErrorMessage} from '../error-message'
-import {EmptyValue, getRawValue, InternalScalarValue, InterpreterValue} from '../interpreter/InterpreterValue'
+import {CellMetadata, EmptyValue, getRawValue, InternalScalarValue, InterpreterValue} from '../interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from '../LazilyTransformingAstService'
 import {Maybe} from '../Maybe'
 import {Ast} from '../parser'
@@ -24,6 +24,7 @@ export abstract class FormulaVertex {
     protected cellAddress: SimpleCellAddress,
     public version: number,
     protected asyncPromises?: AsyncPromise[],
+    public readonly metadata?: CellMetadata
   ) {
   }
 
@@ -63,11 +64,11 @@ export abstract class FormulaVertex {
     return 1
   }
 
-  static fromAst(formula: Ast, address: SimpleCellAddress, size: ArraySize, version: number, asyncPromises?: AsyncPromise[]) {
+  static fromAst(formula: Ast, address: SimpleCellAddress, size: ArraySize, version: number, asyncPromises?: AsyncPromise[], metadata?: CellMetadata) {
     if (size.isScalar()) {
-      return new FormulaCellVertex(formula, address, version, asyncPromises)
+      return new FormulaCellVertex(formula, address, version, asyncPromises, metadata)
     } else {
-      return new ArrayVertex(formula, address, size, asyncPromises, version)
+      return new ArrayVertex(formula, address, size, asyncPromises, metadata, version)
     }
   }
 
@@ -81,7 +82,7 @@ export abstract class FormulaVertex {
 
   public ensureRecentData(updatingService: LazilyTransformingAstService) {
     if (this.version != updatingService.version()) {
-      const [newAst, newAddress, newVersion] = updatingService.applyTransformations(this.formula, this.cellAddress, this.version)
+      const [newAst, newAddress, newVersion] = updatingService.applyTransformations(this.formula, this.cellAddress, this.metadata, this.version)
       this.formula = newAst
       this.cellAddress = newAddress
       this.version = newVersion
@@ -127,8 +128,8 @@ export abstract class FormulaVertex {
 export class ArrayVertex extends FormulaVertex {
   array: IArray
 
-  constructor(formula: Ast, cellAddress: SimpleCellAddress, size: ArraySize, asyncPromises?: AsyncPromise[], version: number = 0) {
-    super(formula, cellAddress, version, asyncPromises)
+  constructor(formula: Ast, cellAddress: SimpleCellAddress, size: ArraySize, asyncPromises?: AsyncPromise[], metadata?: CellMetadata, version: number = 0) {
+    super(formula, cellAddress, version, asyncPromises, metadata)
     if (size.isRef) {
       this.array = new ErroredArray(new CellError(ErrorType.REF, ErrorMessage.NoSpaceForArrayResult), ArraySize.error())
     } else {
@@ -188,7 +189,7 @@ export class ArrayVertex extends FormulaVertex {
     }
   }
 
-  getArrayCellRawValue(address: SimpleCellAddress): Maybe<RawCellContent> {
+  getArrayCellRawValue(address: SimpleCellAddress): Maybe<DataRawCellContent> {
     const val = this.getArrayCellValue(address)
     if (val instanceof CellError || val === EmptyValue) {
       return undefined
@@ -279,8 +280,9 @@ export class FormulaCellVertex extends FormulaVertex {
     address: SimpleCellAddress,
     version: number,
     asyncPromises?: AsyncPromise[],
+    metadata?: CellMetadata
   ) {
-    super(formula, address, version, asyncPromises)
+    super(formula, address, version, asyncPromises, metadata)
   }
 
   public valueOrUndef(): Maybe<InterpreterValue> {

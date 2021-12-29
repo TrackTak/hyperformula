@@ -5,7 +5,7 @@
 
 import {SimpleCellRange} from './AbsoluteCellRange'
 import {CellError, CellType, CellValueDetailedType, CellValueType, ErrorType, SimpleCellAddress} from './Cell'
-import {RawCellContent} from './CellContentParser'
+import {DataRawCellContent, RawCellContent} from './CellContentParser'
 import {CellValue, DetailedCellError, NoErrorCellValue} from './CellValue'
 import {Config, ConfigParams} from './Config'
 import {ColumnRowIndex} from './CrudOperations'
@@ -119,6 +119,7 @@ export {
   ConfigParams,
   ExportedChange,
   RawCellContent,
+  DataRawCellContent,
   FormatInfo,
   Sheet,
   Sheets,

@@ -7,10 +7,11 @@ import {ArrayVertex, CellVertex, FormulaCellVertex, ParsingErrorVertex, ValueCel
 import {FormulaVertex} from './DependencyGraph/FormulaCellVertex'
 import {ErrorMessage} from './error-message'
 import {
+  CellData,
+  DataInterpreterValue,
   EmptyValue,
   getFormatOfExtendedNumber,
   getTypeOfExtendedNumber,
-  InterpreterValue,
   isExtendedNumber,
   NumberType,
 } from './interpreter/InterpreterValue'
@@ -94,13 +95,27 @@ export enum CellValueJustNumber {
   NUMBER = 'NUMBER'
 }
 
+export class CellDataType {
+  constructor(public cellValueType: CellValueType) {
+  }
+}
+
+export class CellDataDetailedType {
+  constructor(public cellValueDetailedType: CellValueDetailedType) {
+  }
+}
+
 export type CellValueType = CellValueNoNumber | CellValueJustNumber
 export const CellValueType = {...CellValueNoNumber, ...CellValueJustNumber}
 
 export type CellValueDetailedType = CellValueNoNumber | NumberType
 export const CellValueDetailedType = {...CellValueNoNumber, ...NumberType}
 
-export const CellValueTypeOrd = (arg: CellValueType): number => {
+export const CellValueTypeOrd = (arg: CellValueType | CellDataType): number => {
+  if (arg instanceof CellDataType) {
+    return CellValueTypeOrd(arg.cellValueType)
+  }
+
   switch (arg) {
     case CellValueType.EMPTY:
       return 0
@@ -131,7 +146,13 @@ export const withTimeout = <T>(promise: Promise<T>, ms: number) => {
   ])
 }
 
-export const getCellValueType = (cellValue: InterpreterValue): CellValueType => {
+export const getCellValueType = (cellValue: DataInterpreterValue): CellValueType | CellDataType => {
+  if (cellValue instanceof CellData) {
+    const type = getCellValueType(cellValue.cellValue) as CellValueType
+
+    return new CellDataType(type)
+  }
+
   if (cellValue === EmptyValue) {
     return CellValueType.EMPTY
   }
@@ -151,7 +172,13 @@ export const getCellValueType = (cellValue: InterpreterValue): CellValueType => 
   throw new Error('Cell value not computed')
 }
 
-export const getCellValueDetailedType = (cellValue: InterpreterValue): CellValueDetailedType => {
+export const getCellValueDetailedType = (cellValue: DataInterpreterValue): CellValueDetailedType | CellDataDetailedType => {
+  if (cellValue instanceof CellData) {
+    const detailedType = getCellValueDetailedType(cellValue.cellValue) as CellValueDetailedType
+
+    return new CellDataDetailedType(detailedType)
+  }
+
   if (isExtendedNumber(cellValue)) {
     return getTypeOfExtendedNumber(cellValue)
   } else {
@@ -159,7 +186,11 @@ export const getCellValueDetailedType = (cellValue: InterpreterValue): CellValue
   }
 }
 
-export const getCellValueFormat = (cellValue: InterpreterValue): string | undefined => {
+export const getCellValueFormat = (cellValue: DataInterpreterValue): string | undefined => {
+  if (cellValue instanceof CellData) {
+    return getCellValueFormat(cellValue.cellValue)
+  }
+
   if (isExtendedNumber(cellValue)) {
     return getFormatOfExtendedNumber(cellValue)
   } else {
