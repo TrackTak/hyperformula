@@ -1007,7 +1007,7 @@ function arrayAscending(a: number, b: number) {
 }
 
 export function percentile(arr: number[], k: number, exclusive: boolean) {
-  const sortedNumbers = arr.slice().sort(arrayAscending)
+  const sortedNumbers = [...arr].sort(arrayAscending)
   const realIndex =
     k * (sortedNumbers.length + (exclusive ? 1 : -1)) + (exclusive ? 0 : 1)
   const index = Math.trunc(realIndex)
