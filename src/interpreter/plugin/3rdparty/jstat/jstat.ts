@@ -1002,12 +1002,10 @@ export function corrcoeff(arr1: number[], arr2: number[]): number {
     stdev(arr2, 1)
 }
 
-function arrayAscending(a: number, b: number) {
-  return a - b
-}
-
 export function percentile(arr: number[], k: number, exclusive: boolean) {
-  const sortedNumbers = [...arr].sort(arrayAscending)
+  const sortedNumbers = [...arr].sort(((a: number, b: number) => {
+    return a - b
+  }))
   const realIndex =
     k * (sortedNumbers.length + (exclusive ? 1 : -1)) + (exclusive ? 0 : 1)
   const index = Math.trunc(realIndex)

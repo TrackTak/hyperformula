@@ -13,9 +13,6 @@ import {InternalScalarValue, isExtendedNumber} from './InterpreterValue'
 export type AsyncSimpleRangeValue = Promise<SimpleRangeValue>
 
 export class SimpleRangeValue {
-  slice() {
-    throw new Error('Method not implemented.')
-  }
   public readonly size: ArraySize
 
   constructor(
