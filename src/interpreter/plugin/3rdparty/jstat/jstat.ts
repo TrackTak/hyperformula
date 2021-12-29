@@ -1001,3 +1001,23 @@ export function corrcoeff(arr1: number[], arr2: number[]): number {
     stdev(arr1, 1) /
     stdev(arr2, 1)
 }
+
+function arrayAscending(a: number, b: number) {
+  return a - b
+}
+
+export function percentile(arr: number[], k: number, exclusive: boolean) {
+  const sortedNumbers = arr.slice().sort(arrayAscending)
+  const realIndex =
+    k * (sortedNumbers.length + (exclusive ? 1 : -1)) + (exclusive ? 0 : 1)
+  const index = Math.trunc(realIndex)
+  const fraction = realIndex - index
+  if (index + 1 < sortedNumbers.length) {
+    return (
+      sortedNumbers[index - 1] +
+      fraction * (sortedNumbers[index] - sortedNumbers[index - 1])
+    )
+  } else {
+    return sortedNumbers[index - 1]
+  }
+}

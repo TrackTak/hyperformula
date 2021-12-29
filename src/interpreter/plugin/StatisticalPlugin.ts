@@ -8,6 +8,7 @@ import {ErrorMessage} from '../../error-message'
 import {ProcedureAst} from '../../parser'
 import {InterpreterState} from '../InterpreterState'
 import {InterpreterValue} from '../InterpreterValue'
+import { SimpleRangeValue } from '../SimpleRangeValue'
 import {besseli, besselj, besselk, bessely} from './3rdparty/bessel/bessel'
 import {
   beta,
@@ -25,6 +26,7 @@ import {
   negbin,
   normal,
   normalci,
+  percentile,
   poisson,
   studentt,
   tci,
@@ -387,6 +389,20 @@ export class StatisticalPlugin extends FunctionPlugin implements FunctionPluginT
         {argumentType: ArgumentTypes.NUMBER, greaterThan: 0},
       ],
     },
+    'PERCENTILE.INC': {
+      method: 'percentileInc',
+      parameters: [
+        { argumentType: ArgumentTypes.RANGE },
+        { argumentType: ArgumentTypes.NUMBER },
+      ],
+    },
+    'PERCENTILE.EXC': {
+      method: 'percentileExc',
+      parameters: [
+        { argumentType: ArgumentTypes.RANGE },
+        { argumentType: ArgumentTypes.NUMBER },
+      ],
+    },
   }
 
   public static aliases = {
@@ -424,6 +440,7 @@ export class StatisticalPlugin extends FunctionPlugin implements FunctionPluginT
     CHIINVRT: 'CHISQ.INV.RT',
     LOGNORMINV: 'LOGNORM.INV',
     POISSONDIST: 'POISSON.DIST',
+    PERCENTILE: 'PERCENTILE.INC',
   }
 
   public erf(ast: ProcedureAst, state: InterpreterState): InterpreterValue {
@@ -837,6 +854,30 @@ export class StatisticalPlugin extends FunctionPlugin implements FunctionPluginT
   public standardize(ast: ProcedureAst, state: InterpreterState): InterpreterValue {
     return this.runFunction(ast.args, state, this.metadata('STANDARDIZE'),
       (x: number, mean: number, stddev: number) => (x - mean) / stddev
+    )
+  }
+
+  public percentileExc(ast: ProcedureAst, state: InterpreterState): InterpreterValue {
+    return this.runFunction(ast.args, state, this.metadata('PERCENTILE.EXC'),
+      (range: SimpleRangeValue, k: number) => {
+        const arr = this.arithmeticHelper.manyToOnlyNumbersDropNulls(range.valuesFromTopLeftCorner())
+        if (arr instanceof CellError) {
+          return arr
+        }
+        return percentile(arr, k, true)
+      }
+    )
+  }
+
+  public percentileInc(ast: ProcedureAst, state: InterpreterState): InterpreterValue {
+    return this.runFunction(ast.args, state, this.metadata('PERCENTILE.INC'),
+      (range: SimpleRangeValue, k: number) => {
+        const arr = this.arithmeticHelper.manyToOnlyNumbersDropNulls(range.valuesFromTopLeftCorner())
+        if (arr instanceof CellError) {
+          return arr
+        }
+        return percentile(arr, k, false)
+      }
     )
   }
 }
