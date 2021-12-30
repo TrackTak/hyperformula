@@ -1,4 +1,5 @@
 import {CellValueChange, ChangeExporter, ContentChanges} from '../src/ContentChanges'
+import { CellData } from '../src/interpreter/InterpreterValue'
 import {SimpleRangeValue} from '../src/interpreter/SimpleRangeValue'
 import {adr} from './testUtils'
 
@@ -34,8 +35,8 @@ describe('ContentChanges', () => {
   it('should replace simple value change', () => {
     const contentChanges = ContentChanges.empty()
 
-    contentChanges.addChange(1, adr('A1'), undefined)
-    contentChanges.addChange(2, adr('A1'), undefined)
+    contentChanges.addChange(new CellData(1), adr('A1'))
+    contentChanges.addChange(new CellData(2), adr('A1'))
 
     const exportedChanges = contentChanges.exportChanges(simpleChangeExporter)
     expect(exportedChanges.length).toEqual(1)
@@ -45,7 +46,7 @@ describe('ContentChanges', () => {
   it('should export simple value change', () => {
     const contentChanges = ContentChanges.empty()
 
-    contentChanges.addChange(1, adr('A1'), undefined)
+    contentChanges.addChange(new CellData(1), adr('A1'))
 
     const exportedChanges = contentChanges.exportChanges(simpleChangeExporter)
 
@@ -57,7 +58,7 @@ describe('ContentChanges', () => {
   it('should export SimpleRangeValue change', () => {
     const contentChanges = ContentChanges.empty()
 
-    contentChanges.addChange(SimpleRangeValue.onlyValues([['foo', 'bar']]), adr('A1'), undefined)
+    contentChanges.addChange(new CellData(SimpleRangeValue.onlyValues([['foo', 'bar']])), adr('A1'))
 
     const exportedChanges = contentChanges.exportChanges(simpleChangeExporter)
 
@@ -67,10 +68,10 @@ describe('ContentChanges', () => {
 
   it('should add all changes', () => {
     const contentChanges = ContentChanges.empty()
-    contentChanges.addChange(1, adr('A1'), undefined)
+    contentChanges.addChange(new CellData(1), adr('A1'))
 
     const otherChanges = ContentChanges.empty()
-    otherChanges.addChange(2, adr('A2'), undefined)
+    otherChanges.addChange(new CellData(2), adr('A2'))
     contentChanges.addAll(otherChanges)
 
     const exportedChanges = contentChanges.exportChanges(simpleChangeExporter)
@@ -81,7 +82,7 @@ describe('ContentChanges', () => {
 
   it('should handle array change', () => {
     const contentChanges = ContentChanges.empty()
-    contentChanges.addChange(SimpleRangeValue.onlyValues([[1, 2], ['foo', 'bar']]), adr('A1'), undefined)
+    contentChanges.addChange(new CellData(SimpleRangeValue.onlyValues([[1, 2], ['foo', 'bar']])), adr('A1'))
 
     const exportedChanges = contentChanges.exportChanges(new SpreadRangeExporter())
 

@@ -19,7 +19,7 @@ import {ArrayVertex, DependencyGraph, RangeVertex, Vertex} from './DependencyGra
 import {FormulaVertex} from './DependencyGraph/FormulaCellVertex'
 import {Interpreter} from './interpreter/Interpreter'
 import {InterpreterState} from './interpreter/InterpreterState'
-import {CellData, DataInterpreterValue, EmptyValue, getRawValue, InterpreterValue, RawInterpreterValue} from './interpreter/InterpreterValue'
+import {CellData, DataInterpreterValue, EmptyValue, getRawValue, InterpreterValue} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
@@ -110,8 +110,8 @@ export class Evaluator {
         this.recomputeFormulaVertexValue(newVertex, false)
 
         const newCellValue = newVertex.getCellValue()
-        const currentRawValue = getRawValue(currentValue) as RawInterpreterValue
-        const newRawValue = getRawValue(newCellValue) as RawInterpreterValue
+        const currentRawValue = getRawValue(currentValue?.cellValue)
+        const newRawValue = getRawValue(newCellValue.cellValue)
 
         changes.addChange(newCellValue, address)
 
@@ -145,7 +145,7 @@ export class Evaluator {
 
             if (newCellValue !== currentValue) {
               const address = vertex.getAddress(this.lazilyTransformingAstService)
-              const currentRawValue = getRawValue(currentValue?.cellValue) as RawInterpreterValue
+              const currentRawValue = getRawValue(currentValue?.cellValue)
               const newRawValue = getRawValue(newCellValue.cellValue)
 
               changes.addChange(newCellValue, address)
@@ -166,7 +166,7 @@ export class Evaluator {
             vertex.clearCache()
           } else if (vertex instanceof FormulaVertex) {
             const address = vertex.getAddress(this.lazilyTransformingAstService)
-            const rawValue = getRawValue(vertex.valueOrUndef()) as RawInterpreterValue
+            const rawValue = getRawValue(vertex.valueOrUndef()?.cellValue)
 
             this.columnSearch.remove(rawValue, address)
             const error = new CellError(ErrorType.CYCLE, undefined, vertex)

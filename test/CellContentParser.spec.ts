@@ -4,6 +4,7 @@ import {Config} from '../src/Config'
 import {DateTimeHelper} from '../src/DateTimeHelper'
 import {ErrorMessage} from '../src/error-message'
 import {
+  CellData,
   CurrencyNumber,
   DateNumber,
   DateTimeNumber,
@@ -34,7 +35,7 @@ describe('CellContentParser', () => {
       metadata: {
         test: 3
       }
-    }).cellValue).toEqual(new CellContent.CellData(new CellContent.String('value'), {
+    })).toEqual(new CellData(new CellContent.String('value'), {
       test: 3
     }))
   })
@@ -45,7 +46,7 @@ describe('CellContentParser', () => {
       metadata: {
         test: 3
       }
-    }).cellValue).toEqual(new CellContent.CellData(new CellContent.Empty(), {
+    })).toEqual(new CellData(new CellContent.Empty(), {
       test: 3
     }))
   })
@@ -53,7 +54,7 @@ describe('CellContentParser', () => {
   it('cell data with value and no metadata', () => {
     expect(cellContentParser.parse({
       cellValue: 3,
-    }).cellValue).toEqual(new CellContent.CellData(new CellContent.Number(3)))
+    })).toEqual(new CellData(new CellContent.Number(3)))
   })
 
   it('numbers', () => {
