@@ -4,6 +4,7 @@
  */
 
 import {CellError} from '../Cell'
+import { isCellData } from '../CellContentParser'
 import {SimpleRangeValue} from './SimpleRangeValue'
 
 export const EmptyValue = Symbol('Empty value')
@@ -37,9 +38,9 @@ export function getRawValue<T>(num: RichNumber | T): number | T {
   }
 }
 
-export function getCellDataValue<T>(cell: CellData<T> | T) {
-  if (cell instanceof CellData) {
-    return cell.cellValue
+export function getCellDataValue<T>(cell: CellData<T> | T): T {
+  if (cell instanceof CellData || isCellData(cell)) {
+    return cell.cellValue as T
   }
 
   return cell

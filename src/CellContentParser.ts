@@ -31,16 +31,6 @@
   metadata?: CellMetadata,
  }
 
- export function getCellDataRawValue(cell: DataRawCellContent): RawCellContent {
-  if (isCellData(cell)) {
-    const { cellValue } = cell as CellData<RawCellContent>
-  
-    return cellValue
-  }
-
-  return cell as RawCellContent
-}
-
  export namespace CellContent {
    export class Number {
      constructor(public readonly value: ExtendedNumber) {
@@ -117,8 +107,11 @@
    return errorRegex.test(upperCased) && Object.prototype.hasOwnProperty.call(errorMapping, upperCased)
  }
 
- export function isCellData(obj: DataRawCellContent) {
-  const isObject = obj!= null && obj.constructor.name === 'Object'
+ export function isCellData<T extends Object>(obj: T | DataRawCellContent): obj is {
+  cellValue: RawCellContent,
+  metadata?: CellMetadata,
+ } {
+  const isObject = obj != null && obj.constructor.name === 'Object'
   const keys = Object.keys(obj ?? {})
 
   if (!isObject || !keys.length) return false
@@ -137,12 +130,12 @@
  
    public parse(content: DataRawCellContent): CellData<CellContent.Type> {
      if (isCellData(content)) {
-       const { cellValue, metadata } = content as CellData<RawCellContent>
+       const { cellValue, metadata } = content
 
        return new CellData(this.parseRawCellContent(cellValue), metadata)
      }
 
-     return new CellData(this.parseRawCellContent(content as RawCellContent))
+     return new CellData(this.parseRawCellContent(content))
    }
 
    public isCurrency(text: string): boolean {

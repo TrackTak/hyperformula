@@ -3,12 +3,12 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import { DataRawCellContent } from '.'
+import { DataRawCellContent, getCellDataValue } from '.'
 import {absolutizeDependencies} from './absolutizeDependencies'
 import {ArraySize, ArraySizePredictor} from './ArraySize'
 import {AsyncPromiseFetcher} from './AsyncPromise'
 import {SimpleCellAddress, simpleCellAddress} from './Cell'
-import {CellContent, CellContentParser, getCellDataRawValue} from './CellContentParser'
+import {CellContent, CellContentParser} from './CellContentParser'
 import {CellDependency} from './CellDependency'
 import {
   ArrayVertex,
@@ -161,7 +161,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
       return null
     } else {      
       this.shrinkArrayIfNeeded(address)
-      const vertex = new ValueCellVertex(cellValue.value, getCellDataRawValue(rawCellContent), metadata)
+      const vertex = new ValueCellVertex(cellValue.value, getCellDataValue(rawCellContent), metadata)
 
       this.columnIndex.add(getRawValue(cellValue.value), address)
       this.dependencyGraph.addVertex(address, vertex)

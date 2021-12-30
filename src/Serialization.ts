@@ -5,7 +5,7 @@
 
 import { RawCellContent } from '.'
 import {simpleCellAddress, SimpleCellAddress} from './Cell'
-import {DataRawCellContent, getCellDataRawValue} from './CellContentParser'
+import {DataRawCellContent} from './CellContentParser'
 import {CellValue} from './CellValue'
 import {Config} from './Config'
 import {ArrayVertex, CellVertex, DependencyGraph, FormulaCellVertex, ParsingErrorVertex} from './DependencyGraph'
@@ -170,7 +170,7 @@ export class Serialization {
     return this.dependencyGraph.namedExpressions.getAllNamedExpressions().map((entry) => {
       return {
         name: entry.expression.displayName,
-        expression: getCellDataRawValue(this.getCellSerialized(entry.expression.address)),
+        expression: getCellDataValue(this.getCellSerialized(entry.expression.address)),
         scope: entry.scope !== undefined ? idMap[entry.scope] : undefined,
         options: entry.expression.options
       }

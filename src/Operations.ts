@@ -8,7 +8,7 @@ import {absolutizeDependencies, filterDependenciesOutOfScope} from './absolutize
 import {ArraySize, ArraySizePredictor} from './ArraySize'
 import {AsyncPromise, AsyncPromiseFetcher } from './AsyncPromise'
 import {equalSimpleCellAddress, invalidSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
-import {CellContent, CellContentParser, RawCellContent, DataRawCellContent, getCellDataRawValue} from './CellContentParser'
+import {CellContent, CellContentParser, RawCellContent, DataRawCellContent} from './CellContentParser'
 import {ClipboardCell, ClipboardCellType} from './ClipboardOperations'
 import {Config} from './Config'
 import {ContentChanges} from './ContentChanges'
@@ -516,7 +516,7 @@ export class Operations {
         return {type: ClipboardCellType.EMPTY, metadata}
       }
 
-      return {type: ClipboardCellType.VALUE, parsedValue: val.cellValue, rawValue: getCellDataRawValue(vertex.getArrayCellRawValue(address)), metadata}
+      return {type: ClipboardCellType.VALUE, parsedValue: val.cellValue, rawValue: getCellDataValue(vertex.getArrayCellRawValue(address)), metadata}
     } else if (vertex instanceof FormulaCellVertex) {
       return {
         type: ClipboardCellType.FORMULA,
@@ -688,7 +688,7 @@ export class Operations {
     } else if (cellValue instanceof CellContent.Empty) {
       this.setCellEmpty(address, metadata)
     } else {
-      this.setValueToCell({parsedValue: cellValue.value, rawValue: getCellDataRawValue(rawCellContent), metadata}, address)
+      this.setValueToCell({parsedValue: cellValue.value, rawValue: getCellDataValue(rawCellContent), metadata}, address)
     }
 
     return oldContent
