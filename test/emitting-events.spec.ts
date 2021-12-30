@@ -137,7 +137,7 @@ describe('Events', () => {
 
     await engine.setCellContents(adr('B1'), [['=ASYNC_FOO()']])[1]
 
-    expect(handler).toHaveBeenCalledTimes(1)
+    expect(handler).toHaveBeenCalledTimes(2)
     expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), 1)])
   })
 
@@ -155,7 +155,7 @@ describe('Events', () => {
     expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 42)])
   })
 
-  it.only('suspension and resuming of evaluation', async() => {
+  it('suspension and resuming of evaluation', async() => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
     const [engine, promise] = HyperFormula.buildFromArray([

@@ -858,7 +858,7 @@ describe('column index', () => {
     expectArrayWithSameContent([0], index.getValueIndex(0, 1, 1).index)
   })
 
-  it.only('should update column index when moving cell - REFs', () => {
+  it('should update column index when moving cell - REFs', () => {
     const [engine] = HyperFormula.buildFromArray([
       ['=B1', '1'],
       ['3', '2'],

@@ -6,6 +6,7 @@ import {Config} from '../../src/Config'
 import {ArrayVertex, EmptyCellVertex, ValueCellVertex} from '../../src/DependencyGraph'
 import {ErrorMessage} from '../../src/error-message'
 import {SheetSizeLimitExceededError} from '../../src/errors'
+import { CellData } from '../../src/interpreter/InterpreterValue'
 import {ColumnIndex} from '../../src/Lookup/ColumnIndex'
 import {
   adr,
@@ -441,6 +442,32 @@ describe('changing cell content', () => {
     const [engine] = HyperFormula.buildFromArray(sheet)
 
     const [changes] = engine.setCellContents(adr('A1'), '2')
+
+    expect(changes.length).toBe(1)
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), 2))
+  })
+
+  it('returns cell data change if has metadata', () => {
+    const sheet = [
+      ['1'],
+    ]
+
+    const [engine] = HyperFormula.buildFromArray(sheet)
+
+    const [changes] = engine.setCellContents(adr('A1'), { cellValue: '2', metadata: { test: 'value'}})
+
+    expect(changes.length).toBe(1)
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), new CellData(2, { test: 'value'})))
+  })
+
+  it('returns cell value change if has no metadata', () => {
+    const sheet = [
+      ['1'],
+    ]
+
+    const [engine] = HyperFormula.buildFromArray(sheet)
+
+    const [changes] = engine.setCellContents(adr('A1'), { cellValue: '2' })
 
     expect(changes.length).toBe(1)
     expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), 2))
