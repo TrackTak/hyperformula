@@ -4,7 +4,7 @@
  */
 
 import {SimpleCellRange} from './AbsoluteCellRange'
-import {CellError, CellType, CellValueDetailedType, CellValueType, ErrorType, SimpleCellAddress} from './Cell'
+import {CellDataDetailedType, CellDataType, CellError, CellType, CellValueDetailedType, CellValueType, ErrorType, SimpleCellAddress} from './Cell'
 import {DataRawCellContent, RawCellContent} from './CellContentParser'
 import {CellValue, DetailedCellError, NoErrorCellValue} from './CellValue'
 import {Config, ConfigParams} from './Config'
@@ -135,6 +135,8 @@ export {
   NamedExpressionOptions,
   HyperFormula,
   CellType,
+  CellDataType,
+  CellDataDetailedType,
   CellValueType,
   CellValueDetailedType,
   ErrorType,
