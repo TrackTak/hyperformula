@@ -93,10 +93,7 @@ export class Exporter implements ChangeExporter<ExportedChange> {
   public exportValue(cell: InterpreterValue | DataInterpreterValue): CellValue | CellData<CellValue> {
     if (cell instanceof CellData) {
       if (cell.metadata) {
-        return {
-          cellValue: this.parseExportedValue(cell.cellValue),
-          metadata: cell.metadata
-        }
+        return new CellData(this.parseExportedValue(cell.cellValue), cell.metadata)
       }
       return this.parseExportedValue(cell.cellValue)
     }
@@ -106,10 +103,7 @@ export class Exporter implements ChangeExporter<ExportedChange> {
   public exportScalarOrRange(cell: InterpreterValue | DataInterpreterValue): CellValue | CellValue[][] | CellData<CellValue | CellValue[][]> {
     if (cell instanceof CellData) {
       if (cell.metadata) {
-        return {
-          cellValue: this.parseExportedScalarOrRange(cell.cellValue),
-          metadata: cell.metadata
-        }
+        return new CellData(this.parseExportedScalarOrRange(cell.cellValue), cell.metadata)
       }
       return this.parseExportedScalarOrRange(cell.cellValue)
     }
