@@ -8,7 +8,7 @@ import {CellValue, DetailedCellError} from './CellValue'
 import {Config} from './Config'
 import {CellValueChange, ChangeExporter} from './ContentChanges'
 import {ErrorMessage} from './error-message'
-import {CellData, DataInterpreterValue, EmptyValue, getCellValue, getRawValue, InterpreterValue, isExtendedNumber} from './interpreter/InterpreterValue'
+import {CellData, DataInterpreterValue, EmptyValue, getCellDataValue, getRawValue, InterpreterValue, isExtendedNumber} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {NamedExpressions} from './NamedExpressions'
@@ -71,7 +71,7 @@ export class Exporter implements ChangeExporter<ExportedChange> {
       }
       return new ExportedNamedExpressionChange(
         namedExpression.displayName,
-        this.parseExportedScalarOrRange(getCellValue(value)),
+        this.parseExportedScalarOrRange(getCellDataValue(value)),
       )
     } else if (value instanceof SimpleRangeValue) {
       const result: ExportedChange[] = []

@@ -8,7 +8,7 @@ import {absolutizeDependencies} from './absolutizeDependencies'
 import {ArraySize, ArraySizePredictor} from './ArraySize'
 import {AsyncPromiseFetcher} from './AsyncPromise'
 import {SimpleCellAddress, simpleCellAddress} from './Cell'
-import {CellContent, CellContentParser} from './CellContentParser'
+import {CellContent, CellContentParser, getCellDataRawValue} from './CellContentParser'
 import {CellDependency} from './CellDependency'
 import {
   ArrayVertex,
@@ -19,7 +19,7 @@ import {
   ValueCellVertex,
   Vertex
 } from './DependencyGraph'
-import {CellData, getCellValue, getRawValue} from './interpreter/InterpreterValue'
+import {CellData, getRawValue} from './interpreter/InterpreterValue'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import {ParserWithCaching} from './parser'
 import {Sheets} from './Sheet'
@@ -161,7 +161,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
       return null
     } else {      
       this.shrinkArrayIfNeeded(address)
-      const vertex = new ValueCellVertex(cellValue.value, getCellValue(rawCellContent), metadata)
+      const vertex = new ValueCellVertex(cellValue.value, getCellDataRawValue(rawCellContent), metadata)
 
       this.columnIndex.add(getRawValue(cellValue.value), address)
       this.dependencyGraph.addVertex(address, vertex)

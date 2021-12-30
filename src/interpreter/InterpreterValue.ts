@@ -37,7 +37,7 @@ export function getRawValue<T>(num: RichNumber | T): number | T {
   }
 }
 
-export function getCellValue<T>(cell: CellData<T> | T) {
+export function getCellDataValue<T>(cell: CellData<T> | T) {
   if (cell instanceof CellData) {
     return cell.cellValue
   }

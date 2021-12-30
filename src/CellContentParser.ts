@@ -31,6 +31,16 @@
   metadata?: CellMetadata,
  }
 
+ export function getCellDataRawValue(cell: DataRawCellContent): RawCellContent {
+  if (isCellData(cell)) {
+    const { cellValue } = cell as CellData<RawCellContent>
+  
+    return cellValue
+  }
+
+  return cell as RawCellContent
+}
+
  export namespace CellContent {
    export class Number {
      constructor(public readonly value: ExtendedNumber) {

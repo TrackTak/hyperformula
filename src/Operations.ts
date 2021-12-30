@@ -8,7 +8,7 @@ import {absolutizeDependencies, filterDependenciesOutOfScope} from './absolutize
 import {ArraySize, ArraySizePredictor} from './ArraySize'
 import {AsyncPromise, AsyncPromiseFetcher } from './AsyncPromise'
 import {equalSimpleCellAddress, invalidSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
-import {CellContent, CellContentParser, RawCellContent, DataRawCellContent} from './CellContentParser'
+import {CellContent, CellContentParser, RawCellContent, DataRawCellContent, getCellDataRawValue} from './CellContentParser'
 import {ClipboardCell, ClipboardCellType} from './ClipboardOperations'
 import {Config} from './Config'
 import {ContentChanges} from './ContentChanges'
@@ -42,7 +42,7 @@ import {
   SourceLocationHasArrayError,
   TargetLocationHasArrayError
 } from './errors'
-import {CellData, CellMetadata, EmptyValue, getCellValue, getRawValue} from './interpreter/InterpreterValue'
+import {CellData, CellMetadata, EmptyValue, getCellDataValue, getRawValue} from './interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import { Maybe } from './Maybe'
@@ -516,7 +516,7 @@ export class Operations {
         return {type: ClipboardCellType.EMPTY, metadata}
       }
 
-      return {type: ClipboardCellType.VALUE, parsedValue: val.cellValue, rawValue: getCellValue(vertex.getArrayCellRawValue(address)), metadata}
+      return {type: ClipboardCellType.VALUE, parsedValue: val.cellValue, rawValue: getCellDataRawValue(vertex.getArrayCellRawValue(address)), metadata}
     } else if (vertex instanceof FormulaCellVertex) {
       return {
         type: ClipboardCellType.FORMULA,
@@ -575,7 +575,7 @@ export class Operations {
     const vertex = new ParsingErrorVertex(errors, rawInput, metadata)
     const arrayChanges = this.dependencyGraph.setParsingErrorToCell(address, vertex)
     
-    this.columnSearch.remove(getRawValue(getCellValue(oldValue)), address)
+    this.columnSearch.remove(getRawValue(getCellDataValue(oldValue)), address)
     this.columnSearch.applyChanges(arrayChanges.getChanges())
     this.changes.addAll(arrayChanges)
     this.changes.addChange(vertex.getCellValue(), address)
@@ -688,7 +688,7 @@ export class Operations {
     } else if (cellValue instanceof CellContent.Empty) {
       this.setCellEmpty(address, metadata)
     } else {
-      this.setValueToCell({parsedValue: cellValue.value, rawValue: getCellValue(rawCellContent), metadata}, address)
+      this.setValueToCell({parsedValue: cellValue.value, rawValue: getCellDataRawValue(rawCellContent), metadata}, address)
     }
 
     return oldContent

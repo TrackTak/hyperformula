@@ -11,7 +11,7 @@ import {split} from '../generatorUtils'
 import {Maybe} from '../Maybe'
 import {CriterionLambda, CriterionPackage} from './Criterion'
 import {Interpreter} from './Interpreter'
-import {getCellValue, getRawValue, InternalScalarValue, RawScalarValue} from './InterpreterValue'
+import {getCellDataValue, getRawValue, InternalScalarValue, RawScalarValue} from './InterpreterValue'
 import {SimpleRangeValue} from './SimpleRangeValue'
 
 const findSmallerRangeForMany = (dependencyGraph: DependencyGraph, conditionRanges: AbsoluteCellRange[], valuesRange: AbsoluteCellRange): { smallerRangeVertex?: RangeVertex, restConditionRanges: AbsoluteCellRange[], restValuesRange: AbsoluteCellRange } => {
@@ -147,7 +147,7 @@ export class Condition {
 
 function* getRangeValues(dependencyGraph: DependencyGraph, cellRange: AbsoluteCellRange): IterableIterator<RawScalarValue> {
   for (const cellFromRange of cellRange.addresses(dependencyGraph)) {
-    yield getRawValue(getCellValue(dependencyGraph.getScalarValue(cellFromRange)))
+    yield getRawValue(getCellDataValue(dependencyGraph.getScalarValue(cellFromRange)))
   }
 }
 

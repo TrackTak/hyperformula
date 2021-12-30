@@ -5,12 +5,12 @@
 
 import { RawCellContent } from '.'
 import {simpleCellAddress, SimpleCellAddress} from './Cell'
-import {DataRawCellContent} from './CellContentParser'
+import {DataRawCellContent, getCellDataRawValue} from './CellContentParser'
 import {CellValue} from './CellValue'
 import {Config} from './Config'
 import {ArrayVertex, CellVertex, DependencyGraph, FormulaCellVertex, ParsingErrorVertex} from './DependencyGraph'
 import {Exporter} from './Exporter'
-import {CellData, DataInterpreterValue, getCellValue, InterpreterValue} from './interpreter/InterpreterValue'
+import {CellData, DataInterpreterValue, getCellDataValue, InterpreterValue} from './interpreter/InterpreterValue'
 import {Maybe} from './Maybe'
 import {NamedExpressionOptions, NamedExpressions} from './NamedExpressions'
 import {buildLexerConfig, Unparser} from './parser'
@@ -64,7 +64,10 @@ export class Serialization {
   }
 
   public getCellSerialized(address: SimpleCellAddress, targetAddress?: SimpleCellAddress): DataRawCellContent {
-    return this.getCellFormula(address, targetAddress) ?? this.getRawValue(address)
+    const cellFormula = this.getCellFormula(address, targetAddress)
+    const cellFormulaValue = getCellDataValue(cellFormula)
+
+    return cellFormulaValue !== undefined ? cellFormula : this.getRawValue(address)
   }
 
   public getCellValue(address: SimpleCellAddress): CellValue | CellData<CellValue> {
@@ -167,7 +170,7 @@ export class Serialization {
     return this.dependencyGraph.namedExpressions.getAllNamedExpressions().map((entry) => {
       return {
         name: entry.expression.displayName,
-        expression: getCellValue(this.getCellSerialized(entry.expression.address)),
+        expression: getCellDataRawValue(this.getCellSerialized(entry.expression.address)),
         scope: entry.scope !== undefined ? idMap[entry.scope] : undefined,
         options: entry.expression.options
       }

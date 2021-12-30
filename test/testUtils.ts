@@ -7,7 +7,7 @@ import {ArrayVertex, FormulaCellVertex, RangeVertex} from '../src/DependencyGrap
 import {ErrorMessage} from '../src/error-message'
 import {defaultStringifyDateTime} from '../src/format/format'
 import {complex} from '../src/interpreter/ArithmeticHelper'
-import { CellData, getCellValue } from '../src/interpreter/InterpreterValue'
+import { CellData, getCellDataValue } from '../src/interpreter/InterpreterValue'
 import {ColumnIndex} from '../src/Lookup/ColumnIndex'
 import {
   AstNodeType,
@@ -99,7 +99,7 @@ export const expectArrayWithSameContent = (expected: any[], actual: any[]) => {
 export const expectToBeCloseForComplex = (engine: HyperFormula, cell: string, expected: string, precision?: number) => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
-  const coerce = (arg: CellValue | CellData<CellValue>): complex => engine.evaluator.interpreter.arithmeticHelper.coerceScalarToComplex(getCellValue(arg))
+  const coerce = (arg: CellValue | CellData<CellValue>): complex => engine.evaluator.interpreter.arithmeticHelper.coerceScalarToComplex(getCellDataValue(arg))
   const actualVal: complex = coerce(engine.getCellValue(adr(cell)))
   const expectedVal: complex = coerce(expected)
   expect(expectedVal[0]).toBeCloseTo(actualVal[0], precision)
@@ -171,7 +171,7 @@ export const expectEngineToBeTheSameAs = (actual: HyperFormula, expected: HyperF
 }
 
 export function dateNumberToString(dateNumber: CellValue | CellData<CellValue>, config: Config): string | DetailedCellError {
-  const value = getCellValue(dateNumber)
+  const value = getCellDataValue(dateNumber)
 
   if (value instanceof DetailedCellError) {
     return value
@@ -182,7 +182,7 @@ export function dateNumberToString(dateNumber: CellValue | CellData<CellValue>, 
 }
 
 export function timeNumberToString(timeNumber: CellValue | CellData<CellValue>, config: Config): string | DetailedCellError {
-  const value = getCellValue(timeNumber)
+  const value = getCellDataValue(timeNumber)
 
   if (value instanceof DetailedCellError) {
     return value

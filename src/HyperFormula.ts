@@ -50,7 +50,7 @@ import {LicenseKeyValidityState} from './helpers/licenseKeyValidator'
 import {buildTranslationPackage, RawTranslationPackage, TranslationPackage} from './i18n'
 import {FunctionPluginDefinition} from './interpreter'
 import {FunctionRegistry, FunctionTranslationsPackage} from './interpreter/FunctionRegistry'
-import {CellData, FormatInfo, getCellValue} from './interpreter/InterpreterValue'
+import {CellData, FormatInfo, getCellDataValue} from './interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import {NamedExpression, NamedExpressionOptions, NamedExpressions} from './NamedExpressions'
@@ -3644,7 +3644,7 @@ export class HyperFormula implements TypedEmitter {
     this._crudOperations.ensureScopeIdIsValid(scope)
     const namedExpression = this._namedExpressions.namedExpressionForScope(expressionName, scope)
     if (namedExpression) {
-      return getCellValue(this._serialization.getCellValue(namedExpression.address))
+      return getCellDataValue(this._serialization.getCellValue(namedExpression.address))
     } else {
       return undefined
     }
@@ -3685,7 +3685,7 @@ export class HyperFormula implements TypedEmitter {
     if (namedExpression === undefined) {
       return undefined
     } else {
-      return getCellValue(this._serialization.getCellFormula(namedExpression.address))
+      return getCellDataValue(this._serialization.getCellFormula(namedExpression.address))
     }
   }
 
@@ -3729,7 +3729,7 @@ export class HyperFormula implements TypedEmitter {
       return undefined
     }
 
-    const expression = getCellValue(this._serialization.getCellFormula(namedExpression.address))
+    const expression = getCellDataValue(this._serialization.getCellFormula(namedExpression.address))
 
     return {
       name: expressionName,

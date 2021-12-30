@@ -35,7 +35,7 @@ import {InterpreterState} from './InterpreterState'
 import {
   cloneNumber,
   EmptyValue,
-  getCellValue,
+  getCellDataValue,
   getRawValue,
   InternalScalarValue,
   InterpreterValue,
@@ -121,7 +121,7 @@ export class Interpreter {
         if (invalidSimpleCellAddress(address)) {
           return new CellError(ErrorType.REF, ErrorMessage.BadRef)
         }
-        const cellValue = getCellValue(this.dependencyGraph.getCellValue(address))
+        const cellValue = getCellDataValue(this.dependencyGraph.getCellValue(address))
    
         return cellValue
       }

@@ -88,7 +88,7 @@ describe('changing cell content', () => {
     expect(engine.getCellValue(adr('C1'))).toBe(2)
   })
 
-  it('update formula to number cell vertex', () => {
+  it.only('update formula to number cell vertex', () => {
     const sheet = [
       ['1', '=A1'],
     ]
@@ -98,8 +98,8 @@ describe('changing cell content', () => {
 
     expect(engine.graph.existsEdge(a1, b1)).toBe(true)
     expect(engine.getCellValue(adr('B1'))).toBe(1)
-    engine.setCellContents(adr('B1'), [['7']])
-    expect(engine.getCellValue(adr('B1'))).toBe(7)
+    engine.setCellContents(adr('B1'), [[{ cellValue: '7', metadata: {test: 'value'} }]])
+    expect(engine.getCellValue(adr('B1'))).toEqual(new CellData(7, { test: 'value'}))
     expect(engine.graph.existsEdge(a1, b1)).toBe(false)
   })
 
