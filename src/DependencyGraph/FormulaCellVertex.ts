@@ -10,7 +10,7 @@ import { AsyncPromise } from '../AsyncPromise'
 import {CellError, equalSimpleCellAddress, ErrorType, SimpleCellAddress} from '../Cell'
 import {DataRawCellContent} from '../CellContentParser'
 import {ErrorMessage} from '../error-message'
-import {CellMetadata, EmptyValue, getRawValue, InternalScalarValue, InterpreterValue} from '../interpreter/InterpreterValue'
+import {CellData, CellMetadata, DataInternalScalarValue, DataInterpreterValue, EmptyValue, getRawValue, InternalScalarValue, InterpreterValue} from '../interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from '../LazilyTransformingAstService'
 import {Maybe} from '../Maybe'
 import {Ast} from '../parser'
@@ -24,7 +24,7 @@ export abstract class FormulaVertex {
     protected cellAddress: SimpleCellAddress,
     public version: number,
     protected asyncPromises?: AsyncPromise[],
-    public readonly metadata?: CellMetadata
+    public metadata?: CellMetadata
   ) {
   }
 
@@ -113,14 +113,14 @@ export abstract class FormulaVertex {
   /**
    * Sets computed cell value stored in this vertex
    */
-  public abstract setCellValue(cellValue: InterpreterValue): InterpreterValue
+  public abstract setCellValue(cellValue: DataInterpreterValue): DataInterpreterValue
 
   /**
    * Returns cell value stored in vertex
    */
-  public abstract getCellValue(): InterpreterValue
+  public abstract getCellValue(): DataInterpreterValue
 
-  public abstract valueOrUndef(): Maybe<InterpreterValue>
+  public abstract valueOrUndef(): Maybe<DataInterpreterValue>
 
   public abstract isComputed(): boolean
 }
@@ -153,48 +153,51 @@ export class ArrayVertex extends FormulaVertex {
     return this.cellAddress
   }
 
-  setCellValue(value: InterpreterValue): InterpreterValue {
-    if (value instanceof CellError) {
-      this.setErrorValue(value)
-      return value
+  setCellValue(cell: DataInterpreterValue): DataInterpreterValue {
+    this.metadata = cell.metadata
+
+    if (cell.cellValue instanceof CellError) {
+      this.setErrorValue(cell.cellValue)
+      return cell
     }
-    const array = ArrayValue.fromInterpreterValue(value)
+    const array = ArrayValue.fromInterpreterValue(cell.cellValue)
     array.resize(this.array.size)
     this.array = array
-    return value
+    
+    return cell
   }
 
-  getCellValue(): InterpreterValue {
+  getCellValue(): DataInterpreterValue {
     if (this.array instanceof NotComputedArray) {
       throw Error('Array not computed yet.')
     }
-    return this.array.simpleRangeValue()
+    return new CellData(this.array.simpleRangeValue(), this.metadata)
   }
 
-  public valueOrUndef(): Maybe<InterpreterValue> {
+  public valueOrUndef(): Maybe<DataInterpreterValue> {
     if (this.array instanceof NotComputedArray) {
       return undefined
     }
-    return this.array.simpleRangeValue()
+    return new CellData(this.array.simpleRangeValue(), this.metadata)
   }
 
-  getArrayCellValue(address: SimpleCellAddress): InternalScalarValue {
+  getArrayCellValue(address: SimpleCellAddress): DataInternalScalarValue {
     const col = address.col - this.cellAddress.col
     const row = address.row - this.cellAddress.row
 
     try {
-      return this.array.get(col, row)
+      return new CellData(this.array.get(col, row), this.metadata)
     } catch (e) {
-      return new CellError(ErrorType.REF)
+      return new CellData(new CellError(ErrorType.REF), this.metadata)
     }
   }
 
   getArrayCellRawValue(address: SimpleCellAddress): Maybe<DataRawCellContent> {
     const val = this.getArrayCellValue(address)
-    if (val instanceof CellError || val === EmptyValue) {
-      return undefined
+    if (val.cellValue instanceof CellError || val.cellValue === EmptyValue) {
+      return new CellData(undefined, this.metadata)
     } else {
-      return getRawValue(val)
+      return new CellData(getRawValue(val.cellValue), this.metadata)
     }
   }
 
@@ -206,7 +209,7 @@ export class ArrayVertex extends FormulaVertex {
     }
   }
 
-  setNoSpace(): InterpreterValue {
+  setNoSpace(): DataInterpreterValue {
     this.array = new ErroredArray(new CellError(ErrorType.SPILL, ErrorMessage.NoSpaceForArrayResult), ArraySize.error())
     return this.getCellValue()
   }
@@ -271,7 +274,7 @@ export class ArrayVertex extends FormulaVertex {
  */
 export class FormulaCellVertex extends FormulaVertex {
   /** Most recently computed value of this formula. */
-  private cachedCellValue?: InterpreterValue
+  private cachedCellValue?: DataInterpreterValue
 
   constructor(
     /** Formula in AST format */
@@ -285,14 +288,14 @@ export class FormulaCellVertex extends FormulaVertex {
     super(formula, address, version, asyncPromises, metadata)
   }
 
-  public valueOrUndef(): Maybe<InterpreterValue> {
+  public valueOrUndef(): Maybe<DataInterpreterValue> {
     return this.cachedCellValue
   }
 
   /**
    * Sets computed cell value stored in this vertex
    */
-  public setCellValue(cellValue: InterpreterValue): InterpreterValue {
+  public setCellValue(cellValue: DataInterpreterValue): DataInterpreterValue {
     this.cachedCellValue = cellValue
     return this.cachedCellValue
   }
@@ -300,7 +303,7 @@ export class FormulaCellVertex extends FormulaVertex {
   /**
    * Returns cell value stored in vertex
    */
-  public getCellValue(): InterpreterValue {
+  public getCellValue(): DataInterpreterValue {
     if (this.cachedCellValue !== undefined) {
       return this.cachedCellValue
     } else {

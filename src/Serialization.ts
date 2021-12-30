@@ -10,7 +10,7 @@ import {CellValue} from './CellValue'
 import {Config} from './Config'
 import {ArrayVertex, CellVertex, DependencyGraph, FormulaCellVertex, ParsingErrorVertex} from './DependencyGraph'
 import {Exporter} from './Exporter'
-import {CellData, getCellValue} from './interpreter/InterpreterValue'
+import {CellData, DataInterpreterValue, getCellValue, InterpreterValue} from './interpreter/InterpreterValue'
 import {Maybe} from './Maybe'
 import {NamedExpressionOptions, NamedExpressions} from './NamedExpressions'
 import {buildLexerConfig, Unparser} from './parser'
@@ -56,11 +56,8 @@ export class Serialization {
 
     if (!cell) return undefined
 
-    if (cell instanceof CellData) {
-      return {
-        cellValue: this.parseCellFormula(cell.cellValue, address, targetAddress),
-        metadata: cell.metadata  
-      }
+    if (cell.metadata) {
+      return new CellData(this.parseCellFormula(cell, address, targetAddress), cell.metadata)
     }
  
     return this.parseCellFormula(cell, address, targetAddress)
@@ -71,11 +68,28 @@ export class Serialization {
   }
 
   public getCellValue(address: SimpleCellAddress): CellValue | CellData<CellValue> {
-    return this.exporter.exportValue(this.dependencyGraph.getScalarValue(address))
+    const cell = this.dependencyGraph.getScalarValue(address)
+    let value: InterpreterValue | DataInterpreterValue = cell
+
+    if (cell instanceof CellData) {
+      value = cell.metadata ? cell : cell.cellValue
+    }
+
+    return this.exporter.exportValue(value)
   }
 
   public getRawValue(address: SimpleCellAddress): DataRawCellContent {
-    return this.dependencyGraph.getRawValue(address)
+    const cell = this.dependencyGraph.getRawValue(address)
+
+    if (cell instanceof CellData) {
+      if (cell.metadata) {
+        return cell
+      }
+
+      return cell.cellValue
+    }
+
+    return cell
   }
 
   public getSheetValues(sheet: number): (CellValue | CellData<CellValue>)[][] {

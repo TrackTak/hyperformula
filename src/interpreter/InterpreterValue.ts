@@ -13,19 +13,19 @@ export type EmptyValueType = typeof EmptyValue
 export type InternalNoErrorScalarValue = RichNumber | RawNoErrorScalarValue
 
 export type InternalScalarValue = RichNumber | RawScalarValue
-export type DataInternalScalarValue = InternalScalarValue | CellData<InternalScalarValue>
+export type DataInternalScalarValue = CellData<InternalScalarValue>
 export type AsyncInternalScalarValue = Promise<InternalScalarValue>
 
 export type InterpreterValue = RichNumber | RawInterpreterValue
-export type DataInterpreterValue = InterpreterValue | CellData<InterpreterValue>
+export type DataInterpreterValue = CellData<InterpreterValue>
 export type AsyncInterpreterValue = Promise<InterpreterValue>
 
 export type RawNoErrorScalarValue = number | string | boolean | EmptyValueType
 export type RawScalarValue = RawNoErrorScalarValue | CellError
-export type DataRawScalarValue = RawScalarValue | CellData<RawScalarValue>
+export type DataRawScalarValue = CellData<RawScalarValue>
 
 export type RawInterpreterValue = RawScalarValue | SimpleRangeValue
-export type DataRawInterpreterValue = RawInterpreterValue | CellData<RawInterpreterValue>
+export type DataRawInterpreterValue = CellData<RawInterpreterValue>
 
 export type CellMetadata = Record<string | number, any>
 

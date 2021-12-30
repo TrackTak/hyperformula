@@ -6,7 +6,7 @@
 import {SimpleCellAddress} from '../../Cell'
 import {DataRawCellContent} from '../../CellContentParser'
 import {NoSheetWithIdError} from '../../errors'
-import {DataInterpreterValue, EmptyValue, InterpreterValue} from '../../interpreter/InterpreterValue'
+import {CellData, DataInterpreterValue, EmptyValue} from '../../interpreter/InterpreterValue'
 import {Maybe} from '../../Maybe'
 import {Sheet, SheetBoundaries} from '../../Sheet'
 import {ColumnsSpan, RowsSpan} from '../../Span'
@@ -35,7 +35,7 @@ export class AddressMapping {
   public fetchCell(address: SimpleCellAddress): CellVertex {
     const sheetMapping = this.mapping.get(address.sheet)
     if (sheetMapping === undefined) {
-      throw  new NoSheetWithIdError(address.sheet)
+      throw new NoSheetWithIdError(address.sheet)
     }
     const vertex = sheetMapping.getCell(address)
     if (!vertex) {
@@ -71,7 +71,7 @@ export class AddressMapping {
     const vertex = this.getCell(address)
 
     if (vertex === undefined) {
-      return EmptyValue
+      return new CellData(EmptyValue)
     } else if (vertex instanceof ArrayVertex) {
       return vertex.getArrayCellValue(address)
     } else {
@@ -81,8 +81,11 @@ export class AddressMapping {
 
   public getRawValue(address: SimpleCellAddress): DataRawCellContent {
     const vertex = this.getCell(address)
+
     if (vertex instanceof ValueCellVertex) {
-      return vertex.getValues().rawValue
+      const values = vertex.getValues()
+
+      return new CellData(values.rawValue, values.metadata)
     } else if (vertex instanceof ArrayVertex) {
       return vertex.getArrayCellRawValue(address)
     } else {

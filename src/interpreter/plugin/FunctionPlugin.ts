@@ -623,25 +623,21 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     }
   }
 
-  private parseReturnVal<T>(val: T | ExtendedNumber): any {
+  private parseReturnVal<T>(val: T | ExtendedNumber) {
     if (typeof val === 'string' || 
       typeof val === 'boolean' || 
       typeof val === 'number') {
-      const parsedValue = this.cellContentParser.parse(val)
-
-      if (parsedValue instanceof CellContent.CellData) {
-        return this.parseReturnVal(parsedValue.cellValue)
-      }
+      const cellValue = this.cellContentParser.parse(val).cellValue
     
-      if (parsedValue instanceof CellContent.Formula) {
-        return parsedValue.formula
+      if (cellValue instanceof CellContent.Formula) {
+        return cellValue.formula
       }
 
-      if (parsedValue instanceof CellContent.Empty) {
+      if (cellValue instanceof CellContent.Empty) {
         return val
       }
     
-      return parsedValue.value
+      return cellValue.value
     }
 
     return val

@@ -15,7 +15,7 @@ import {
   rowStart,
 } from '../testUtils'
 
-describe.only('Copy - paste integration', () => {
+describe('Copy - paste integration', () => {
   it('copy should validate arguments', () => {
     const [engine] = HyperFormula.buildFromArray([])
 
@@ -107,7 +107,7 @@ describe.only('Copy - paste integration', () => {
     expect(engine.getCellValue(adr('B1'))).toEqual(1)
   })
 
-  it.only('should work for single number with metadata', () => {
+  it('should work for single number with metadata', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '1', metadata: {test: 'value'}}]
     ])
@@ -115,7 +115,7 @@ describe.only('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('B1'))
 
-    expect(engine.getCellValue(adr('B1'))).toEqual({ cellValue: '1', metadata: {test: 'value'}})
+    expect(engine.getCellValue(adr('B1'))).toEqual({ cellValue: 1, metadata: {test: 'value'}})
   })
 
   it('should work for parsing error', () => {
@@ -153,8 +153,8 @@ describe.only('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 1))
     engine.paste(adr('A2'))
 
-    expect(engine.dependencyGraph.getCellValue(adr('A2'))).toEqual(1.0000000001)
-    expect(engine.dependencyGraph.getCellValue(adr('B2'))).toEqual(1.000000000000001)
+    expect(engine.dependencyGraph.getCellValue(adr('A2')).cellValue).toEqual(1.0000000001)
+    expect(engine.dependencyGraph.getCellValue(adr('B2')).cellValue).toEqual(1.000000000000001)
   })
 
   it('should work for cell reference inside copied area', () => {

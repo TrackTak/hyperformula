@@ -19,7 +19,7 @@ import {
   ValueCellVertex,
   Vertex
 } from './DependencyGraph'
-import {CellMetadata, getRawValue} from './interpreter/InterpreterValue'
+import {CellData, getCellValue, getRawValue} from './interpreter/InterpreterValue'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import {ParserWithCaching} from './parser'
 import {Sheets} from './Sheet'
@@ -107,16 +107,14 @@ export class SimpleStrategy implements GraphBuilderStrategy {
     return dependencies
   }
 
-  private setDependency(address: SimpleCellAddress, rawCellContent: DataRawCellContent, parsedCellContent: CellContent.Type, cellMetadata?: CellMetadata): null | [Vertex, CellDependency[]] {
-    if (parsedCellContent instanceof CellContent.CellData) {
-      return this.setDependency(address, rawCellContent, parsedCellContent.cellValue, parsedCellContent.metadata)
-    }
+  private setDependency(address: SimpleCellAddress, rawCellContent: DataRawCellContent, parsedCellContent: CellData<CellContent.Type>): null | [Vertex, CellDependency[]] {
+    const { cellValue, metadata } = parsedCellContent
     
-    if (parsedCellContent instanceof CellContent.Formula) {
-      const parseResult = this.stats.measure(StatType.PARSER, () => this.parser.parse(parsedCellContent.formula, address))
+    if (cellValue instanceof CellContent.Formula) {
+      const parseResult = this.stats.measure(StatType.PARSER, () => this.parser.parse(cellValue.formula, address))
       if (parseResult.errors.length > 0) {
         this.shrinkArrayIfNeeded(address)
-        const vertex = new ParsingErrorVertex(parseResult.errors, parsedCellContent.formula, cellMetadata)
+        const vertex = new ParsingErrorVertex(parseResult.errors, cellValue.formula, metadata)
 
         this.dependencyGraph.addVertex(address, vertex)
       } else {
@@ -126,7 +124,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
         const size = this.arraySizePredictor.checkArraySize(parseResult.ast, address)
 
         if (size.isScalar()) {
-          const vertex = new FormulaCellVertex(parseResult.ast, address, 0, asyncPromises, cellMetadata)
+          const vertex = new FormulaCellVertex(parseResult.ast, address, 0, asyncPromises, metadata)
 
           this.dependencyGraph.addVertex(address, vertex)
 
@@ -142,7 +140,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
 
           return [vertex, absolutizeDependencies(parseResult.dependencies, address)]
         } else {
-          const vertex = new ArrayVertex(parseResult.ast, address, new ArraySize(size.width, size.height), asyncPromises, cellMetadata)
+          const vertex = new ArrayVertex(parseResult.ast, address, new ArraySize(size.width, size.height), asyncPromises, metadata)
 
           this.dependencyGraph.addArrayVertex(address, vertex)
 
@@ -153,18 +151,19 @@ export class SimpleStrategy implements GraphBuilderStrategy {
           return [vertex, absolutizeDependencies(parseResult.dependencies, address)]
         }
       }
-    } else if (parsedCellContent instanceof CellContent.Empty) {
-      if (cellMetadata) {
-        const vertex = new EmptyCellVertex(address, cellMetadata)
+    } else if (cellValue instanceof CellContent.Empty) {
+      if (metadata) {
+        const vertex = new EmptyCellVertex(address, metadata)
 
         this.dependencyGraph.addEmptyCellVertex(address, vertex)
       }
 
       return null
-    } else {
+    } else {      
       this.shrinkArrayIfNeeded(address)
-      const vertex = new ValueCellVertex(parsedCellContent.value, rawCellContent, cellMetadata)
-      this.columnIndex.add(getRawValue(parsedCellContent.value), address)
+      const vertex = new ValueCellVertex(cellValue.value, getCellValue(rawCellContent), metadata)
+
+      this.columnIndex.add(getRawValue(cellValue.value), address)
       this.dependencyGraph.addVertex(address, vertex)
     }
     return null

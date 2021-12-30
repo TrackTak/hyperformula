@@ -4,14 +4,13 @@
  */
 
 import {addressKey, SimpleCellAddress} from './Cell'
-import {CellData, CellMetadata, DataInterpreterValue, InterpreterValue} from './interpreter/InterpreterValue'
+import {DataInterpreterValue, InterpreterValue} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
-import { Maybe } from './Maybe'
 
 export interface CellValueChange {
   address: SimpleCellAddress,
-  value: DataInterpreterValue,
-  oldValue?: DataInterpreterValue,
+  value: InterpreterValue | DataInterpreterValue,
+  oldValue?: InterpreterValue | DataInterpreterValue,
 }
 
 export interface ChangeExporter<T> {
@@ -34,8 +33,8 @@ export class ContentChanges {
     return this
   }
 
-  public addChange(newValue: InterpreterValue, address: SimpleCellAddress, metadata: Maybe<CellMetadata>, oldValue?: DataInterpreterValue): void {
-    this.addInterpreterValue(metadata ? new CellData(newValue, metadata) : newValue, address, oldValue)
+  public addChange(newValue: DataInterpreterValue, address: SimpleCellAddress, oldValue?: DataInterpreterValue): void {
+    this.addInterpreterValue(newValue, address, oldValue)
   }
 
   public exportChanges<T>(exporter: ChangeExporter<T>): T[] {
@@ -72,8 +71,8 @@ export class ContentChanges {
   private addInterpreterValue(value: DataInterpreterValue, address: SimpleCellAddress, oldValue?: DataInterpreterValue) {
     this.add(address, {
       address,
-      value,
-      oldValue
+      value: value.metadata ? value : value.cellValue,
+      oldValue: oldValue?.metadata ? oldValue : oldValue?.cellValue
     })
   }
 }

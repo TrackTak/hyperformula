@@ -19,7 +19,7 @@ import {ArrayVertex, DependencyGraph, RangeVertex, Vertex} from './DependencyGra
 import {FormulaVertex} from './DependencyGraph/FormulaCellVertex'
 import {Interpreter} from './interpreter/Interpreter'
 import {InterpreterState} from './interpreter/InterpreterState'
-import {EmptyValue, getRawValue, InterpreterValue, RawInterpreterValue} from './interpreter/InterpreterValue'
+import {CellData, DataInterpreterValue, EmptyValue, getRawValue, InterpreterValue, RawInterpreterValue} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
@@ -111,9 +111,9 @@ export class Evaluator {
 
         const newCellValue = newVertex.getCellValue()
         const currentRawValue = getRawValue(currentValue) as RawInterpreterValue
-        const newRawValue = getRawValue(newCellValue)
+        const newRawValue = getRawValue(newCellValue) as RawInterpreterValue
 
-        changes.addChange(newCellValue, address, newVertex.metadata)
+        changes.addChange(newCellValue, address)
 
         this.columnSearch.change(currentRawValue, newRawValue, address)
       }
@@ -145,10 +145,10 @@ export class Evaluator {
 
             if (newCellValue !== currentValue) {
               const address = vertex.getAddress(this.lazilyTransformingAstService)
-              const currentRawValue = getRawValue(currentValue) as RawInterpreterValue
-              const newRawValue = getRawValue(newCellValue)
+              const currentRawValue = getRawValue(currentValue?.cellValue) as RawInterpreterValue
+              const newRawValue = getRawValue(newCellValue.cellValue)
 
-              changes.addChange(newCellValue, address, vertex.metadata)
+              changes.addChange(newCellValue, address)
 
               this.columnSearch.change(currentRawValue, newRawValue, address)
               return true
@@ -170,8 +170,10 @@ export class Evaluator {
 
             this.columnSearch.remove(rawValue, address)
             const error = new CellError(ErrorType.CYCLE, undefined, vertex)
-            vertex.setCellValue(error)
-            changes.addChange(error, address, vertex.metadata)
+            const value = new CellData(error, vertex.metadata)
+
+            vertex.setCellValue(value)
+            changes.addChange(value, address)
           }
         },
       )
@@ -223,7 +225,7 @@ export class Evaluator {
   private recomputeFormulas(cycled: Vertex[], sorted: Vertex[]): Promise<ContentChanges> {
     cycled.forEach((vertex: Vertex) => {
       if (vertex instanceof FormulaVertex) {
-        vertex.setCellValue(new CellError(ErrorType.CYCLE, undefined, vertex))
+        vertex.setCellValue(new CellData(new CellError(ErrorType.CYCLE, undefined, vertex), vertex.metadata))
       }
     })
 
@@ -233,7 +235,7 @@ export class Evaluator {
       if (vertex instanceof FormulaVertex) {
         const newCellValue = this.recomputeFormulaVertexValue(vertex, true)
         const address = vertex.getAddress(this.lazilyTransformingAstService)
-        const rawValue = getRawValue(newCellValue)
+        const rawValue = getRawValue(newCellValue.cellValue)
 
         this.columnSearch.add(rawValue, address)
 
@@ -249,7 +251,7 @@ export class Evaluator {
     return this.recomputeAsyncFunctions(asyncVertices)
   }
 
-  private recomputeFormulaVertexValue(vertex: FormulaVertex, recalculateAsyncPromises: boolean): InterpreterValue {
+  private recomputeFormulaVertexValue(vertex: FormulaVertex, recalculateAsyncPromises: boolean): DataInterpreterValue {
     const address = vertex.getAddress(this.lazilyTransformingAstService)
     if (vertex instanceof ArrayVertex && (vertex.array.size.isRef || !this.dependencyGraph.isThereSpaceForArray(vertex))) {
       return vertex.setNoSpace()
@@ -261,7 +263,7 @@ export class Evaluator {
       const formula = vertex.getFormula(this.lazilyTransformingAstService)
       const newCellValue = this.evaluateAstToCellValue(formula, new InterpreterState(address, this.config.useArrayArithmetic, vertex))
       
-      return vertex.setCellValue(newCellValue)
+      return vertex.setCellValue(new CellData(newCellValue, vertex.metadata))
     }
   }
 

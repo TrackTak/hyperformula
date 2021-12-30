@@ -78,7 +78,7 @@ export class Exporter implements ChangeExporter<ExportedChange> {
       for (const [cellValue, cellAddress] of value.entriesFromTopLeftCorner(address)) {
         result.push(new ExportedCellChange(
           cellAddress,
-          this.exportValue(cellValue)
+          this.exportValue(new CellData(cellValue, value instanceof CellData ? value.metadata : undefined))
         ))
       }
       return result
@@ -92,21 +92,26 @@ export class Exporter implements ChangeExporter<ExportedChange> {
 
   public exportValue(cell: InterpreterValue | DataInterpreterValue): CellValue | CellData<CellValue> {
     if (cell instanceof CellData) {
-      return {
-        cellValue: this.parseExportedValue(cell.cellValue),
-        metadata: cell.metadata
+      if (cell.metadata) {
+        return {
+          cellValue: this.parseExportedValue(cell.cellValue),
+          metadata: cell.metadata
+        }
       }
+      return this.parseExportedValue(cell.cellValue)
     }
-
     return this.parseExportedValue(cell)
   }
 
   public exportScalarOrRange(cell: InterpreterValue | DataInterpreterValue): CellValue | CellValue[][] | CellData<CellValue | CellValue[][]> {
     if (cell instanceof CellData) {
-      return {
-        cellValue: this.parseExportedScalarOrRange(cell.cellValue),
-        metadata: cell.metadata
+      if (cell.metadata) {
+        return {
+          cellValue: this.parseExportedScalarOrRange(cell.cellValue),
+          metadata: cell.metadata
+        }
       }
+      return this.parseExportedScalarOrRange(cell.cellValue)
     }
 
     return this.parseExportedScalarOrRange(cell)

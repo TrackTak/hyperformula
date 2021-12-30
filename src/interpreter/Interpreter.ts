@@ -33,14 +33,13 @@ import {CriterionBuilder} from './Criterion'
 import {FunctionRegistry} from './FunctionRegistry'
 import {InterpreterState} from './InterpreterState'
 import {
-  CellData,
   cloneNumber,
   EmptyValue,
+  getCellValue,
   getRawValue,
   InternalScalarValue,
   InterpreterValue,
   isExtendedNumber,
-  RawInterpreterValue,
 } from './InterpreterValue'
 import {SimpleRangeValue} from './SimpleRangeValue'
 
@@ -122,7 +121,7 @@ export class Interpreter {
         if (invalidSimpleCellAddress(address)) {
           return new CellError(ErrorType.REF, ErrorMessage.BadRef)
         }
-        const cellValue = this.dependencyGraph.getCellValue(address)
+        const cellValue = getCellValue(this.dependencyGraph.getCellValue(address))
    
         return cellValue
       }
@@ -236,7 +235,7 @@ export class Interpreter {
       case AstNodeType.NAMED_EXPRESSION: {
         const namedExpression = this.namedExpressions.nearestNamedExpression(ast.expressionName, state.formulaAddress.sheet)
         if (namedExpression) {
-          return this.dependencyGraph.getCellValue(namedExpression.address)
+          return this.dependencyGraph.getCellValue(namedExpression.address).cellValue
         } else {
           return new CellError(ErrorType.NAME, ErrorMessage.NamedExpressionName(ast.expressionName))
         }

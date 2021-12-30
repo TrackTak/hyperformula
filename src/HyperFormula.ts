@@ -4057,11 +4057,11 @@ export class HyperFormula implements TypedEmitter {
     
     const newPromise = new Promise<CellValue | CellValue[][]>((resolve, reject) => {
       promise?.then((value) => {
-        resolve(getCellValue(this._exporter.exportScalarOrRange(value)))
+        resolve(this._exporter.exportScalarOrRange(value) as CellValue | CellValue[][])
       }).catch(reject)
     })
 
-    return [getCellValue(this._exporter.exportScalarOrRange(interpreterValue)), newPromise]
+    return [this._exporter.exportScalarOrRange(interpreterValue) as CellValue | CellValue[][], newPromise]
   }
 
   /**
@@ -4357,7 +4357,8 @@ export class HyperFormula implements TypedEmitter {
   }
 
   private extractTemporaryFormula(formulaString: string, sheetId: number = 1, stripWhitespaces = true): { ast?: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[] } {
-    const parsedCellContent = this._cellContentParser.parse(formulaString)
+    const parsedCellContent = this._cellContentParser.parse(formulaString).cellValue
+    
     const address = {sheet: sheetId, col: 0, row: 0}
     if (!(parsedCellContent instanceof CellContent.Formula)) {
       return {address, dependencies: []}

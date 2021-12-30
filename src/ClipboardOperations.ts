@@ -3,9 +3,9 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
+import { RawCellContent } from '.'
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {invalidSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
-import {DataRawCellContent} from './CellContentParser'
 import {Config} from './Config'
 import {DependencyGraph} from './DependencyGraph'
 import {ValueCellVertexValue} from './DependencyGraph/ValueCellVertex'
@@ -32,7 +32,7 @@ export enum ClipboardCellType {
 export interface ClipboardCellValue {
   type: ClipboardCellType.VALUE,
   parsedValue: ValueCellVertexValue,
-  rawValue: DataRawCellContent,
+  rawValue: RawCellContent,
   metadata: Maybe<CellMetadata>,
 }
 

@@ -12,6 +12,7 @@ import {
   EmptyValue,
   getFormatOfExtendedNumber,
   getTypeOfExtendedNumber,
+  InterpreterValue,
   isExtendedNumber,
   NumberType,
 } from './interpreter/InterpreterValue'
@@ -146,11 +147,14 @@ export const withTimeout = <T>(promise: Promise<T>, ms: number) => {
   ])
 }
 
-export const getCellValueType = (cellValue: DataInterpreterValue): CellValueType | CellDataType => {
+export const getCellValueType = (cellValue: DataInterpreterValue | InterpreterValue): CellValueType | CellDataType => {
   if (cellValue instanceof CellData) {
-    const type = getCellValueType(cellValue.cellValue) as CellValueType
+    if (cellValue.metadata) {
+      const type = getCellValueType(cellValue.cellValue) as CellValueType
 
-    return new CellDataType(type)
+      return new CellDataType(type)  
+    }
+    return getCellValueType(cellValue.cellValue)
   }
 
   if (cellValue === EmptyValue) {
@@ -172,11 +176,14 @@ export const getCellValueType = (cellValue: DataInterpreterValue): CellValueType
   throw new Error('Cell value not computed')
 }
 
-export const getCellValueDetailedType = (cellValue: DataInterpreterValue): CellValueDetailedType | CellDataDetailedType => {
+export const getCellValueDetailedType = (cellValue: DataInterpreterValue | InterpreterValue): CellValueDetailedType | CellDataDetailedType => {
   if (cellValue instanceof CellData) {
-    const detailedType = getCellValueDetailedType(cellValue.cellValue) as CellValueDetailedType
+    if (cellValue.metadata) {
+      const detailedType = getCellValueDetailedType(cellValue.cellValue) as CellValueDetailedType
 
-    return new CellDataDetailedType(detailedType)
+      return new CellDataDetailedType(detailedType)  
+    }
+    return getCellValueDetailedType(cellValue.cellValue)
   }
 
   if (isExtendedNumber(cellValue)) {
@@ -186,7 +193,7 @@ export const getCellValueDetailedType = (cellValue: DataInterpreterValue): CellV
   }
 }
 
-export const getCellValueFormat = (cellValue: DataInterpreterValue): string | undefined => {
+export const getCellValueFormat = (cellValue: DataInterpreterValue | InterpreterValue): string | undefined => {
   if (cellValue instanceof CellData) {
     return getCellValueFormat(cellValue.cellValue)
   }
