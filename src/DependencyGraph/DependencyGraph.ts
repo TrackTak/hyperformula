@@ -129,11 +129,8 @@ export class DependencyGraph {
       this.arrayMapping.removeArray(vertex.getRange())
     }
     if (vertex instanceof ValueCellVertex) {
-      const oldValues = vertex.getValues()
-      if (oldValues.rawValue !== value.rawValue) {
-        vertex.setValues(value, value.metadata)
-        this.graph.markNodeAsSpecialRecentlyChanged(vertex)
-      }
+      vertex.setValues(value, value.metadata)
+      this.graph.markNodeAsSpecialRecentlyChanged(vertex)
     } else {
       const newVertex = new ValueCellVertex(value.parsedValue, value.rawValue, value.metadata)
       this.exchangeOrAddGraphNode(vertex, newVertex)
