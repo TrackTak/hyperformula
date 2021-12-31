@@ -88,7 +88,7 @@ describe('changing cell content', () => {
     expect(engine.getCellValue(adr('C1'))).toBe(2)
   })
 
-  it.only('update formula to number cell vertex', () => {
+  it('update formula to number cell vertex', () => {
     const sheet = [
       ['1', '=A1'],
     ]
@@ -100,6 +100,19 @@ describe('changing cell content', () => {
     expect(engine.getCellValue(adr('B1'))).toBe(1)
     engine.setCellContents(adr('B1'), [[{ cellValue: '7', metadata: {test: 'value'} }]])
     expect(engine.getCellValue(adr('B1'))).toEqual(new CellData(7, { test: 'value'}))
+    expect(engine.graph.existsEdge(a1, b1)).toBe(false)
+  })
+
+  it('update formula to metadata cell vertex', () => {
+    const sheet = [
+      ['1', '=A1'],
+    ]
+    const [engine] = HyperFormula.buildFromArray(sheet)
+    const a1 = engine.addressMapping.fetchCell(adr('A1'))
+    const b1 = engine.addressMapping.fetchCell(adr('B1'))
+
+    engine.setCellContents(adr('B1'), [[{ cellValue: undefined, metadata: {test: 'value'} }]])
+    expect(engine.getCellValue(adr('B1'))).toEqual(new CellData(null, { test: 'value'}))
     expect(engine.graph.existsEdge(a1, b1)).toBe(false)
   })
 
@@ -191,7 +204,25 @@ describe('changing cell content', () => {
     engine.setCellContents(adr('B1'), [['2']])
 
     expect(b1setCellValueSpy).not.toHaveBeenCalled()
-    expect(c1setCellValueSpy).not.toHaveBeenCalled()
+    expect(c1setCellValueSpy).toHaveBeenCalled()
+  })
+
+  it('update value cell to value cell with the same value with metadata', () => {
+    const sheet = [
+      ['1', {cellValue: '2', metadata: {test: 'value'} }, '=SUM(A1:B1)'],
+    ]
+    const [engine] = HyperFormula.buildFromArray(sheet)
+    const b1 = engine.addressMapping.getCell(adr('B1'))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const b1setCellValueSpy = spyOn(b1 as any, 'setCellValue')
+    const c1 = engine.addressMapping.getCell(adr('C1'))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c1setCellValueSpy = spyOn(c1 as any, 'setCellValue')
+
+    engine.setCellContents(adr('B1'), [[{cellValue: '2', metadata: {test: 'value'} }]])
+
+    expect(b1setCellValueSpy).not.toHaveBeenCalled()
+    expect(c1setCellValueSpy).toHaveBeenCalled()
   })
 
   it('update value cell to empty', () => {

@@ -128,8 +128,9 @@ export class DependencyGraph {
     if (vertex instanceof ArrayVertex) {
       this.arrayMapping.removeArray(vertex.getRange())
     }
-    if (vertex instanceof ValueCellVertex) {
+    if (vertex instanceof ValueCellVertex) {      
       vertex.setValues(value, value.metadata)
+
       this.graph.markNodeAsSpecialRecentlyChanged(vertex)
     } else {
       const newVertex = new ValueCellVertex(value.parsedValue, value.rawValue, value.metadata)
@@ -145,24 +146,43 @@ export class DependencyGraph {
 
   public setCellEmpty(address: SimpleCellAddress, metadata: Maybe<CellMetadata>): ContentChanges {
     const vertex = this.shrinkPossibleArrayAndGetCell(address)
+
+    const emptyVertex = new EmptyCellVertex(address, metadata)
+
+    if (vertex === undefined && metadata !== undefined) {
+      this.graph.markNodeAsSpecialRecentlyChanged(emptyVertex)
+      this.addressMapping.setCell(address, emptyVertex)
+
+      return this.getAndClearContentChanges()
+    } 
+
     if (vertex === undefined) {
       return ContentChanges.empty()
     }
+     
     if (this.graph.adjacentNodes(vertex).size > 0) {
-      const emptyVertex = new EmptyCellVertex(address, metadata)
       this.exchangeGraphNode(vertex, emptyVertex)
+
       if (this.graph.adjacentNodesCount(emptyVertex) === 0) {
         this.removeVertex(emptyVertex)
         this.addressMapping.removeCell(address)
-      } else {
-        this.graph.markNodeAsSpecialRecentlyChanged(emptyVertex)
-        this.addressMapping.setCell(address, emptyVertex)
+
+        return this.getAndClearContentChanges()
       }
-    } else {
-      this.removeVertex(vertex)
-      this.addressMapping.removeCell(address)
+      this.graph.markNodeAsSpecialRecentlyChanged(emptyVertex)
+      this.addressMapping.setCell(address, emptyVertex)
+
+      return this.getAndClearContentChanges()
     }
 
+    this.removeVertex(vertex)
+    this.addressMapping.removeCell(address)
+
+    if (metadata) {
+      this.graph.markNodeAsSpecialRecentlyChanged(emptyVertex)
+      this.addressMapping.setCell(address, emptyVertex)
+    }
+  
     return this.getAndClearContentChanges()
   }
 
