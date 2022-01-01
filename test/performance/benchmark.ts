@@ -40,7 +40,7 @@ export interface BenchmarkResult {
 }
 
 export function benchmark(name: string, sheet: Sheet, expectedValues: ExpectedValue[], config: Partial<Config> = defaultConfig): Maybe<BenchmarkResult> {
-  const runEngine = (engineConfig?: Partial<ConfigParams>) => HyperFormula.buildFromArray(sheet, engineConfig)
+  const runEngine = (engineConfig?: Partial<ConfigParams>) => HyperFormula.buildFromArray(sheet, engineConfig)[0]
   return benchmarkBuild(name, runEngine, expectedValues, config)
 }
 
