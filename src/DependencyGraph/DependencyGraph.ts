@@ -144,23 +144,16 @@ export class DependencyGraph {
     return this.getAndClearContentChanges()
   }
 
-  public setCellEmpty(address: SimpleCellAddress, metadata: Maybe<CellMetadata>): ContentChanges {
+  public setCellEmpty(address: SimpleCellAddress): ContentChanges {
     const vertex = this.shrinkPossibleArrayAndGetCell(address)
-
-    const emptyVertex = new EmptyCellVertex(address, metadata)
-
-    if (vertex === undefined && metadata !== undefined) {
-      this.graph.markNodeAsSpecialRecentlyChanged(emptyVertex)
-      this.addressMapping.setCell(address, emptyVertex)
-
-      return this.getAndClearContentChanges()
-    } 
 
     if (vertex === undefined) {
       return ContentChanges.empty()
     }
-     
+
     if (this.graph.adjacentNodes(vertex).size > 0) {
+      const emptyVertex = new EmptyCellVertex(address)
+
       this.exchangeGraphNode(vertex, emptyVertex)
 
       if (this.graph.adjacentNodesCount(emptyVertex) === 0) {
@@ -176,13 +169,8 @@ export class DependencyGraph {
     }
 
     this.removeVertex(vertex)
-    this.addressMapping.removeCell(address)
+    this.addressMapping.removeCell(address)  
 
-    if (metadata) {
-      this.graph.markNodeAsSpecialRecentlyChanged(emptyVertex)
-      this.addressMapping.setCell(address, emptyVertex)
-    }
-  
     return this.getAndClearContentChanges()
   }
 
@@ -286,7 +274,7 @@ export class DependencyGraph {
     if (vertex === undefined) {
       vertex = new EmptyCellVertex(address)
       
-      this.addEmptyCellVertex(address, vertex)
+      this.addVertex(address, vertex)
     }
     return vertex
   }
@@ -373,7 +361,7 @@ export class DependencyGraph {
       if (vertex instanceof ArrayVertex) {
         arrays.add(vertex)
       } else {
-        this.setCellEmpty(address, undefined)
+        this.setCellEmpty(address)
       }
     }
 
@@ -571,11 +559,6 @@ export class DependencyGraph {
   }
 
   public addVertex(address: SimpleCellAddress, vertex: CellVertex): void {
-    this.graph.addNode(vertex)
-    this.addressMapping.setCell(address, vertex)
-  }
-
-  public addEmptyCellVertex(address: SimpleCellAddress, vertex: EmptyCellVertex): void {
     this.graph.addNode(vertex)
     this.addressMapping.setCell(address, vertex)
   }

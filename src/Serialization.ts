@@ -8,7 +8,7 @@ import {simpleCellAddress, SimpleCellAddress} from './Cell'
 import {DataRawCellContent} from './CellContentParser'
 import {CellValue} from './CellValue'
 import {Config} from './Config'
-import {ArrayVertex, CellVertex, DependencyGraph, FormulaCellVertex, ParsingErrorVertex} from './DependencyGraph'
+import {ArrayVertex, CellVertex, DependencyGraph, EmptyCellVertex, FormulaCellVertex, ParsingErrorVertex} from './DependencyGraph'
 import {Exporter} from './Exporter'
 import {CellData, DataInterpreterValue, getCellDataValue, InterpreterValue} from './interpreter/InterpreterValue'
 import {Maybe} from './Maybe'
@@ -54,7 +54,7 @@ export class Serialization {
   public getCellFormula(address: SimpleCellAddress, targetAddress?: SimpleCellAddress): Maybe<string | CellData<string | undefined>> {
     const cell = this.dependencyGraph.getCell(address)
 
-    if (!cell) return undefined
+    if (!cell || cell instanceof EmptyCellVertex) return undefined
 
     if (cell.metadata) {
       return new CellData(this.parseCellFormula(cell, address, targetAddress), cell.metadata)

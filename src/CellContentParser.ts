@@ -49,7 +49,6 @@
    }
  
    export class Empty {
- 
      private static instance: Empty
  
      public static getSingletonInstance() {
@@ -59,6 +58,13 @@
        return Empty.instance
      }
    }
+
+   export class OnlyMetadata {
+    public readonly value = ''
+
+    constructor() {
+    }
+  }
  
    export class Formula {
      constructor(public readonly formula: string) {
@@ -111,7 +117,7 @@
   cellValue: RawCellContent,
   metadata?: CellMetadata,
  } {
-  const isObject = obj != null && obj.constructor.name === 'Object'
+  const isObject = obj != null && typeof obj === 'object' && !Array.isArray(obj)
   const keys = Object.keys(obj ?? {})
 
   if (!isObject || !keys.length) return false
@@ -132,7 +138,7 @@
      if (isCellData(content)) {
        const { cellValue, metadata } = content
 
-       return new CellData(this.parseRawCellContent(cellValue), metadata)
+       return new CellData(this.parseRawCellContent(cellValue, metadata), metadata)
      }
 
      return new CellData(this.parseRawCellContent(content))
@@ -144,9 +150,13 @@
      return !!this.currencyMatcher(trimmedContent)
    }
 
-   private parseRawCellContent(content: RawCellContent): CellContent.Type {
+   private parseRawCellContent(content: RawCellContent, metadata?: CellMetadata): CellContent.Type {
       if (content === undefined || content === null) {
-        return CellContent.Empty.getSingletonInstance()
+        if (metadata) {
+          return new CellContent.OnlyMetadata()
+        } else {
+          return CellContent.Empty.getSingletonInstance()
+        }
       } else if (typeof content === 'number') {
         if (isNumberOverflow(content)) {
           return new CellContent.Error(ErrorType.NUM, ErrorMessage.ValueLarge)

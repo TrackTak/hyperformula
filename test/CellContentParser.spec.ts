@@ -46,7 +46,7 @@ describe('CellContentParser', () => {
       metadata: {
         test: 3
       }
-    })).toEqual(new CellData(new CellContent.Empty(), {
+    })).toEqual(new CellData(new CellContent.OnlyMetadata(), {
       test: 3
     }))
   })

@@ -501,12 +501,36 @@ describe('Undo - setting cell content', () => {
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
   })
 
+  it('works for empty values with metadata', () => {
+    const sheet = [
+      [null],
+    ]
+    const [engine] = HyperFormula.buildFromArray(sheet)
+    engine.setCellContents(adr('A1'), { cellValue: null, metadata: {test: '3'}})
+
+    engine.undo()
+
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+  })
+
   it('works for formula values', () => {
     const sheet = [
       ['=42'],
     ]
     const [engine] = HyperFormula.buildFromArray(sheet)
     engine.setCellContents(adr('A1'), '100')
+
+    engine.undo()
+
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+  })
+
+  it('works for formula values with metadata', () => {
+    const sheet = [
+      ['=42'],
+    ]
+    const [engine] = HyperFormula.buildFromArray(sheet)
+    engine.setCellContents(adr('A1'), { cellValue: '100', metadata: {test: '3'}})
 
     engine.undo()
 
@@ -1173,11 +1197,26 @@ describe('Redo - setting cell content', () => {
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromSheets(snapshot)[0])
   })
 
-  it('works for formula values', () => {
+  it('works for empty values with metadata', () => {
     const [engine] = HyperFormula.buildFromArray([
       ['3'],
     ])
-    engine.setCellContents(adr('A1'), '=42')
+    engine.setCellContents(adr('A1'), { cellValue: null, metadata: { test: 'value' }})
+    const snapshot = engine.getAllSheetsSerialized()
+    engine.undo()
+
+    engine.redo()
+
+    expect(engine.getCellValue(adr('A1'))).toEqual({ cellValue: '', metadata: { test: 'value' }})
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromSheets(snapshot)[0])
+  })
+
+  it('works for formula values with metadata', () => {
+    const [engine] = HyperFormula.buildFromArray([
+      ['3'],
+    ])
+    engine.setCellContents(adr('A1'), { cellValue: '=42', metadata: { test: 'value' }})
+
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
 

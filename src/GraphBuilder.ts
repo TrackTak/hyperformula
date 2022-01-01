@@ -13,7 +13,6 @@ import {CellDependency} from './CellDependency'
 import {
   ArrayVertex,
   DependencyGraph,
-  EmptyCellVertex,
   FormulaCellVertex,
   ParsingErrorVertex,
   ValueCellVertex,
@@ -152,14 +151,8 @@ export class SimpleStrategy implements GraphBuilderStrategy {
         }
       }
     } else if (cellValue instanceof CellContent.Empty) {
-      if (metadata) {
-        const vertex = new EmptyCellVertex(address, metadata)
-
-        this.dependencyGraph.addEmptyCellVertex(address, vertex)
-      }
-
       return null
-    } else {      
+    } else {
       this.shrinkArrayIfNeeded(address)
       const vertex = new ValueCellVertex(cellValue.value, getCellDataValue(rawCellContent), metadata)
 
