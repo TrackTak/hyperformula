@@ -48,7 +48,7 @@ import {HyperFormula} from './HyperFormula'
 import {RawTranslationPackage} from './i18n'
 import enGB from './i18n/languages/enGB'
 import {FunctionArgument, FunctionPlugin, FunctionPluginDefinition} from './interpreter'
-import {CellData, FormatInfo, getCellDataValue} from './interpreter/InterpreterValue'
+import {CellData, FormatInfo, getCellDataValue, CellMetadata} from './interpreter/InterpreterValue'
 import * as plugins from './interpreter/plugin'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {NamedExpression, NamedExpressionOptions} from './NamedExpressions'
@@ -135,6 +135,7 @@ export {
   NamedExpression,
   NamedExpressionOptions,
   HyperFormula,
+  CellMetadata,
   CellType,
   CellDataType,
   CellDataDetailedType,
