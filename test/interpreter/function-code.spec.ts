@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function CODE', () => {
   it('should not work for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CODE()'],
-      ['=CODE("foo", "bar")'],
+      [{ cellValue: '=CODE()' }],
+      [{ cellValue: '=CODE("foo", "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function CODE', () => {
 
   it('should not work for empty strings', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CODE("")'],
+      [{ cellValue: '=CODE("")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.EmptyString))
@@ -23,14 +23,14 @@ describe('Function CODE', () => {
 
   it('should work for single chars', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CODE("")'],
-      ['=CODE("!")'],
-      ['=CODE("A")'],
-      ['=CODE("Z")'],
-      ['=CODE("Ñ")'],
-      ['=CODE("ÿ")'],
-      ['=CODE(TRUE())'],
-      ['=CODE("€")'],
+      [{ cellValue: '=CODE("")' }],
+      [{ cellValue: '=CODE("!")' }],
+      [{ cellValue: '=CODE("A")' }],
+      [{ cellValue: '=CODE("Z")' }],
+      [{ cellValue: '=CODE("Ñ")' }],
+      [{ cellValue: '=CODE("ÿ")' }],
+      [{ cellValue: '=CODE(TRUE())' }],
+      [{ cellValue: '=CODE("€")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -45,8 +45,8 @@ describe('Function CODE', () => {
 
   it('should return code of first character', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CODE("Abar")'],
-      ['=CODE("Ñbaz")'],
+      [{ cellValue: '=CODE("Abar")' }],
+      [{ cellValue: '=CODE("Ñbaz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(65)
@@ -55,7 +55,7 @@ describe('Function CODE', () => {
 
   it('should return number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CODE("foo")']
+      [{ cellValue: '=CODE("foo")' }]
     ])
 
     expect(engine.getCellValueType(adr('A1'))).toEqual(CellValueType.NUMBER)
@@ -63,9 +63,9 @@ describe('Function CODE', () => {
 
   it('should be identity when composed with CHAR', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CODE(CHAR(1))'],
-      ['=CODE(CHAR(128))'],
-      ['=CODE(CHAR(255))']
+      [{ cellValue: '=CODE(CHAR(1))' }],
+      [{ cellValue: '=CODE(CHAR(128))' }],
+      [{ cellValue: '=CODE(CHAR(255))' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)

@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function T.DIST', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST(1, 2)'],
-      ['=T.DIST(1, 2, 3, 4)'],
+      [{ cellValue: '=T.DIST(1, 2)' }],
+      [{ cellValue: '=T.DIST(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function T.DIST', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST("foo", 2, TRUE())'],
-      ['=T.DIST(1, "baz", TRUE())'],
-      ['=T.DIST(1, 2, "abcd")'],
+      [{ cellValue: '=T.DIST("foo", 2, TRUE())' }],
+      [{ cellValue: '=T.DIST(1, "baz", TRUE())' }],
+      [{ cellValue: '=T.DIST(1, 2, "abcd")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,8 +28,8 @@ describe('Function T.DIST', () => {
 
   it('should work as cdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST(1, 1, TRUE())'],
-      ['=T.DIST(3, 2, TRUE())'],
+      [{ cellValue: '=T.DIST(1, 1, TRUE())' }],
+      [{ cellValue: '=T.DIST(3, 2, TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.75, 6)
@@ -38,8 +38,8 @@ describe('Function T.DIST', () => {
 
   it('should work as pdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST(1, 1, FALSE())'],
-      ['=T.DIST(3, 2, FALSE())'],
+      [{ cellValue: '=T.DIST(1, 1, FALSE())' }],
+      [{ cellValue: '=T.DIST(3, 2, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.159154942198517, 6)
@@ -48,8 +48,8 @@ describe('Function T.DIST', () => {
 
   it('should truncate input', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST(1, 1.9, TRUE())'],
-      ['=T.DIST(3, 2.9, TRUE())'],
+      [{ cellValue: '=T.DIST(1, 1.9, TRUE())' }],
+      [{ cellValue: '=T.DIST(3, 2.9, TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.75, 6)
@@ -58,8 +58,8 @@ describe('Function T.DIST', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST(-1, 1, FALSE())'],
-      ['=T.DIST(1, 0.9, FALSE())'],
+      [{ cellValue: '=T.DIST(-1, 1, FALSE())' }],
+      [{ cellValue: '=T.DIST(1, 0.9, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0.159154942198517)

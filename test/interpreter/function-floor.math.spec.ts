@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function FLOOR.MATH', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FLOOR.MATH()'],
-      ['=FLOOR.MATH(1, 2, 3, 4)'],
+      [{ cellValue: '=FLOOR.MATH()' }],
+      [{ cellValue: '=FLOOR.MATH(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function FLOOR.MATH', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FLOOR.MATH("foo")'],
-      ['=FLOOR.MATH(1, "bar")'],
-      ['=FLOOR.MATH(1, 2, "baz")'],
+      [{ cellValue: '=FLOOR.MATH("foo")' }],
+      [{ cellValue: '=FLOOR.MATH(1, "bar")' }],
+      [{ cellValue: '=FLOOR.MATH(1, 2, "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,14 +28,14 @@ describe('Function FLOOR.MATH', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FLOOR.MATH(4.43, 0.3)'],
-      ['=FLOOR.MATH(4.43, 0.6)'],
-      ['=FLOOR.MATH(4.43, 2)'],
-      ['=FLOOR.MATH(4.43)'],
-      ['=FLOOR.MATH(-4.43)'],
-      ['=FLOOR.MATH(-3.14, -1.8)'],
-      ['=FLOOR.MATH(-3.14, 0)'],
-      ['=FLOOR.MATH(3.14, 0)'],
+      [{ cellValue: '=FLOOR.MATH(4.43, 0.3)' }],
+      [{ cellValue: '=FLOOR.MATH(4.43, 0.6)' }],
+      [{ cellValue: '=FLOOR.MATH(4.43, 2)' }],
+      [{ cellValue: '=FLOOR.MATH(4.43)' }],
+      [{ cellValue: '=FLOOR.MATH(-4.43)' }],
+      [{ cellValue: '=FLOOR.MATH(-3.14, -1.8)' }],
+      [{ cellValue: '=FLOOR.MATH(-3.14, 0)' }],
+      [{ cellValue: '=FLOOR.MATH(3.14, 0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(4.2)
@@ -50,11 +50,11 @@ describe('Function FLOOR.MATH', () => {
 
   it('should work with mode for negative numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FLOOR.MATH(-11, -2)'],
-      ['=FLOOR.MATH(-11, -2, 0)'],
-      ['=FLOOR.MATH(-11, -2, 1)'],
-      ['=FLOOR.MATH(-11, 0, 1)'],
-      ['=FLOOR.MATH(-11, 0, 0)'],
+      [{ cellValue: '=FLOOR.MATH(-11, -2)' }],
+      [{ cellValue: '=FLOOR.MATH(-11, -2, 0)' }],
+      [{ cellValue: '=FLOOR.MATH(-11, -2, 1)' }],
+      [{ cellValue: '=FLOOR.MATH(-11, 0, 1)' }],
+      [{ cellValue: '=FLOOR.MATH(-11, 0, 0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(-12)
@@ -66,14 +66,14 @@ describe('Function FLOOR.MATH', () => {
 
   it('negative values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FLOOR.MATH(11, 2, 0)'],
-      ['=FLOOR.MATH(-11, 2, 0)'],
-      ['=FLOOR.MATH(11, -2, 0)'],
-      ['=FLOOR.MATH(-11, -2, 0)'],
-      ['=FLOOR.MATH(11, 2, 1)'],
-      ['=FLOOR.MATH(-11, 2, 1)'],
-      ['=FLOOR.MATH(11, -2, 1)'],
-      ['=FLOOR.MATH(-11, -2, 1)'],
+      [{ cellValue: '=FLOOR.MATH(11, 2, 0)' }],
+      [{ cellValue: '=FLOOR.MATH(-11, 2, 0)' }],
+      [{ cellValue: '=FLOOR.MATH(11, -2, 0)' }],
+      [{ cellValue: '=FLOOR.MATH(-11, -2, 0)' }],
+      [{ cellValue: '=FLOOR.MATH(11, 2, 1)' }],
+      [{ cellValue: '=FLOOR.MATH(-11, 2, 1)' }],
+      [{ cellValue: '=FLOOR.MATH(11, -2, 1)' }],
+      [{ cellValue: '=FLOOR.MATH(-11, -2, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(10)

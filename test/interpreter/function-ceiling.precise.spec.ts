@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function CEILING.PRECISE', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING.PRECISE()'],
-      ['=CEILING.PRECISE(1, 2, 3)'],
+      [{ cellValue: '=CEILING.PRECISE()' }],
+      [{ cellValue: '=CEILING.PRECISE(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,8 +15,8 @@ describe('Function CEILING.PRECISE', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING.PRECISE(1, "bar")'],
-      ['=CEILING.PRECISE("bar", 1)'],
+      [{ cellValue: '=CEILING.PRECISE(1, "bar")' }],
+      [{ cellValue: '=CEILING.PRECISE("bar", 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -25,14 +25,14 @@ describe('Function CEILING.PRECISE', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING.PRECISE(4.43, 0.3)'],
-      ['=CEILING.PRECISE(4.43, 0.6)'],
-      ['=CEILING.PRECISE(4.43, 2)'],
-      ['=CEILING.PRECISE(-3.14, -1.8)'],
-      ['=CEILING.PRECISE(-3.14, 0)'],
-      ['=CEILING.PRECISE(3.14, 0)'],
-      ['=CEILING.PRECISE(3.14)'],
-      ['=CEILING.PRECISE(-3.14)'],
+      [{ cellValue: '=CEILING.PRECISE(4.43, 0.3)' }],
+      [{ cellValue: '=CEILING.PRECISE(4.43, 0.6)' }],
+      [{ cellValue: '=CEILING.PRECISE(4.43, 2)' }],
+      [{ cellValue: '=CEILING.PRECISE(-3.14, -1.8)' }],
+      [{ cellValue: '=CEILING.PRECISE(-3.14, 0)' }],
+      [{ cellValue: '=CEILING.PRECISE(3.14, 0)' }],
+      [{ cellValue: '=CEILING.PRECISE(3.14)' }],
+      [{ cellValue: '=CEILING.PRECISE(-3.14)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(4.5)
@@ -47,10 +47,10 @@ describe('Function CEILING.PRECISE', () => {
 
   it('negative values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING.PRECISE(11, 2)'],
-      ['=CEILING.PRECISE(-11, 2)'],
-      ['=CEILING.PRECISE(11, -2)'],
-      ['=CEILING.PRECISE(-11, -2)'],
+      [{ cellValue: '=CEILING.PRECISE(11, 2)' }],
+      [{ cellValue: '=CEILING.PRECISE(-11, 2)' }],
+      [{ cellValue: '=CEILING.PRECISE(11, -2)' }],
+      [{ cellValue: '=CEILING.PRECISE(-11, -2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(12)

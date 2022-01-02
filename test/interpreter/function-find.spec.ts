@@ -5,9 +5,9 @@ import {adr, detailedError} from '../testUtils'
 describe('Function FIND', () => {
   it('should return N/A when number of arguments is incorrect', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FIND()'],
-      ['=FIND("foo")'],
-      ['=FIND("foo", 1, 2, 3)']
+      [{ cellValue: '=FIND()' }],
+      [{ cellValue: '=FIND("foo")' }],
+      [{ cellValue: '=FIND("foo", 1, 2, 3)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -17,7 +17,7 @@ describe('Function FIND', () => {
 
   it('should return VALUE when wrong type of third parameter', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FIND("foo", "bar", "baz")'],
+      [{ cellValue: '=FIND("foo", "bar", "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -25,9 +25,9 @@ describe('Function FIND', () => {
 
   it('should return VALUE if third parameter is not between 1 and text length', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FIND("foo", "bar", 0)'],
-      ['=FIND("foo", "bar", -1)'],
-      ['=FIND("foo", "bar", 4)'],
+      [{ cellValue: '=FIND("foo", "bar", 0)' }],
+      [{ cellValue: '=FIND("foo", "bar", -1)' }],
+      [{ cellValue: '=FIND("foo", "bar", 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.IndexBounds))
@@ -37,12 +37,12 @@ describe('Function FIND', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FIND("f", "foo")'],
-      ['=FIND("o", "foo")'],
-      ['=FIND("o", "foo", 3)'],
-      ['=FIND("g", "foo")'],
-      ['=FIND("?o", "?o")'],
-      ['=FIND("?o", "oo")'],
+      [{ cellValue: '=FIND("f", "foo")' }],
+      [{ cellValue: '=FIND("o", "foo")' }],
+      [{ cellValue: '=FIND("o", "foo", 3)' }],
+      [{ cellValue: '=FIND("g", "foo")' }],
+      [{ cellValue: '=FIND("?o", "?o")' }],
+      [{ cellValue: '=FIND("?o", "oo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -55,10 +55,10 @@ describe('Function FIND', () => {
 
   it('should be case sensitive', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FIND("R", "bar")'],
-      ['=FIND("r", "bar")'],
-      ['=FIND("r", "baR")'],
-      ['=FIND("R", "baR")'],
+      [{ cellValue: '=FIND("R", "bar")' }],
+      [{ cellValue: '=FIND("r", "bar")' }],
+      [{ cellValue: '=FIND("r", "baR")' }],
+      [{ cellValue: '=FIND("R", "baR")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.PatternNotFound))
@@ -69,9 +69,9 @@ describe('Function FIND', () => {
 
   it('should coerce other types to string', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FIND(1, 1, 1)'],
-      ['=FIND(0, 5+5)'],
-      ['=FIND("U", TRUE())'],
+      [{ cellValue: '=FIND(1, 1, 1)' }],
+      [{ cellValue: '=FIND(0, 5+5)' }],
+      [{ cellValue: '=FIND("U", TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)

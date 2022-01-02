@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function DOLLARFR', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DOLLARFR(1)', '=DOLLARFR(1, 1, 1)'],
+      [{ cellValue: '=DOLLARFR(1)' }, { cellValue: '=DOLLARFR(1, 1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,7 +14,7 @@ describe('Function DOLLARFR', () => {
 
   it('div/0 when second argument too small', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DOLLARFR(1,0)', '=DOLLARFR(1, 0.9)'],
+      [{ cellValue: '=DOLLARFR(1,0)' }, { cellValue: '=DOLLARFR(1, 0.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

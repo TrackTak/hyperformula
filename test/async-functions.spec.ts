@@ -67,7 +67,7 @@ class AsyncPlugin extends FunctionPlugin implements FunctionPluginTypecheck<Asyn
 
   public asyncArrayFoo(_ast: ProcedureAst, _state: InterpreterState): AsyncSimpleRangeValue {
     return new Promise(resolve => setTimeout(() => {
-      resolve(SimpleRangeValue.onlyValues([[1, 1], [1, 1]]))
+      resolve(SimpleRangeValue.onlyValues([[{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }]]))
     }, 100))
   }
 
@@ -119,20 +119,20 @@ describe('async functions', () => {
   describe('operations buildFromArray', () => {
     it('plus op', async() => {
       const [engine, promise] = HyperFormula.buildFromArray([
-        [1, '=ASYNC_FOO()+ASYNC_FOO(A1)'],
+        [{ cellValue: 1 }, { cellValue: '=ASYNC_FOO()+ASYNC_FOO(A1)' }],
       ])
   
       expect(engine.getSheetValues(0)).toEqual([[1, getLoadingError('Sheet1!B1')]])
   
       await promise
   
-      expect(engine.getSheetValues(0)).toEqual([[1, 7]])
+      expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 7 }]])
     })
 
     it('nested cell reference op', async() => {
       const [engine, promise] = HyperFormula.buildFromArray([
-        ['=ASYNC_FOO() / 10'],
-        ['=A1+1']
+        [{ cellValue: '=ASYNC_FOO() / 10' }],
+        [{ cellValue: '=A1+1' }]
       ])
     
       await promise
@@ -154,7 +154,7 @@ describe('async functions', () => {
 
     it('unary minus op', async() => {
       const [engine, promise] = HyperFormula.buildFromArray([
-        [1, '=-ASYNC_FOO()'],
+        [{ cellValue: 1 }, { cellValue: '=-ASYNC_FOO()' }],
       ])
   
       expect(engine.getSheetValues(0)).toEqual([[1, getLoadingError('Sheet1!B1')]])
@@ -169,7 +169,7 @@ describe('async functions', () => {
     it('async values are calculated after promises resolve', async() => {
       const [engine] = HyperFormula.buildFromArray([])
 
-      const [, promise] = engine.setSheetContent(0, [[1, '=ASYNC_FOO()', '=SUM(A1:B1)', '=ASYNC_FOO(A1)']])
+      const [, promise] = engine.setSheetContent(0, [[{ cellValue: 1 }, { cellValue: '=ASYNC_FOO()' }, { cellValue: '=SUM(A1:B1)' }, { cellValue: '=ASYNC_FOO(A1)'}]])
 
       const changes = await promise
 
@@ -182,11 +182,11 @@ describe('async functions', () => {
 
       engine.on(Events.AsyncValuesUpdated, handler)
 
-      await engine.setSheetContent(0, [['=ASYNC_FOO()']])[1]
+      await engine.setSheetContent(0, [[{ cellValue: '=ASYNC_FOO()' }]])[1]
 
       expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 1)])
 
-      const changes = await engine.setSheetContent(0, [['=ASYNC_FOO()', '=ASYNC_FOO()', '=ASYNC_FOO()']])[1]
+      const changes = await engine.setSheetContent(0, [[{ cellValue: '=ASYNC_FOO()' }, { cellValue: '=ASYNC_FOO()' }, { cellValue: '=ASYNC_FOO()' }]])[1]
 
       await engine.setCellContents(adr('D1'), 'test')[1]
 
@@ -197,7 +197,7 @@ describe('async functions', () => {
 
   it('should return #TIMEOUT error if function does not resolve due to the request taking too long', async() => {
     const [engine, promise] = HyperFormula.buildFromArray([
-      ['=TIMEOUT_FOO()', 'foo'],
+      [{ cellValue: '=TIMEOUT_FOO()' }, { cellValue: 'foo' }],
     ])
 
     await promise
@@ -208,7 +208,7 @@ describe('async functions', () => {
 
   it('should throw an error if function does not resolve', async() => {      
     const [, promise] = HyperFormula.buildFromArray([
-      ['=ASYNC_ERROR_FOO()'],
+      [{ cellValue: '=ASYNC_ERROR_FOO()' }],
     ])
 
     try {
@@ -220,14 +220,14 @@ describe('async functions', () => {
 
   it('rebuildAndRecalculate', async() => {
     const [engine, promise] = HyperFormula.buildFromArray([
-      ['=ASYNC_FOO()+2'],
+      [{ cellValue: '=ASYNC_FOO()+2' }],
     ])
 
     await promise
 
     await engine.rebuildAndRecalculate()
 
-    expect(engine.getSheetValues(0)).toEqual([[3]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 3 }]])
   })
 
   it('handles promise races gracefully', async() => {
@@ -244,7 +244,7 @@ describe('async functions', () => {
       cellContentPromise
     ])
 
-    expect(engine.getSheetValues(0)).toEqual([[1, '1 longAsyncFoo']])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: '1 longAsyncFoo' }]])
   })
 
   it('works with multiple async functions one after another', async() => {
@@ -323,7 +323,7 @@ describe('async functions', () => {
 
     const asyncChanges = await promise
 
-    expect(engine.getSheetValues(0)).toEqual([[1, 1]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 1 }]])
     expect(asyncChanges).toEqual([new ExportedCellChange(adr('B1'), 1)])
   })
 

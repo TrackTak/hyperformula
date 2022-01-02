@@ -308,7 +308,7 @@ describe('Graph#getTopologicallySortedSubgraphFrom', () => {
 
   it('does call if some previous vertex marked as changed', () => {
     const graph = new Graph<string>(dummyGetDependenciesQuery)
-    const nodes = ['foo', 'bar', 'baz']
+    const nodes = [{ cellValue: 'foo' }, { cellValue: 'bar' }, { cellValue: 'baz' }]
 
     nodes.forEach((n) => graph.addNode(n))
     graph.addEdge(nodes[0], nodes[2])
@@ -325,7 +325,7 @@ describe('Graph#getTopologicallySortedSubgraphFrom', () => {
 
   it('returns cycled vertices', () => {
     const graph = new Graph<string>(dummyGetDependenciesQuery)
-    const nodes = ['foo', 'c0', 'c1', 'c2']
+    const nodes = [{ cellValue: 'foo' }, { cellValue: 'c0' }, { cellValue: 'c1' }, { cellValue: 'c2'}]
 
     nodes.forEach((n) => graph.addNode(n))
     graph.addEdge(nodes[0], nodes[1])
@@ -343,7 +343,7 @@ describe('Graph#getTopologicallySortedSubgraphFrom', () => {
 
   it('doesnt call first one of the given vertices if its on cycle', () => {
     const graph = new Graph<string>(dummyGetDependenciesQuery)
-    const nodes = ['c0', 'c1', 'c2']
+    const nodes = [{ cellValue: 'c0' }, { cellValue: 'c1' }, { cellValue: 'c2' }]
     nodes.forEach((n) => graph.addNode(n))
     graph.addEdge(nodes[0], nodes[1])
     graph.addEdge(nodes[1], nodes[2])
@@ -359,7 +359,7 @@ describe('Graph#getTopologicallySortedSubgraphFrom', () => {
 
   it('returns cycled vertices even if they were not tried to be computed', () => {
     const graph = new Graph<string>(dummyGetDependenciesQuery)
-    const nodes = ['foo', 'c0', 'c1', 'c2']
+    const nodes = [{ cellValue: 'foo' }, { cellValue: 'c0' }, { cellValue: 'c1' }, { cellValue: 'c2'}]
     nodes.forEach((n) => graph.addNode(n))
     graph.addEdge(nodes[0], nodes[1])
     graph.addEdge(nodes[1], nodes[2])

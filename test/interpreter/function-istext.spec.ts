@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function ISTEXT', () => {
   it('should return true for text', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISTEXT("abcd")', '=ISTEXT(A2)'],
-      ['abcd'],
+      [{ cellValue: '=ISTEXT("abcd")' }, { cellValue: '=ISTEXT(A2)' }],
+      [{ cellValue: 'abcd' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(true)
@@ -16,8 +16,8 @@ describe('Function ISTEXT', () => {
 
   it('should return false for nontext', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISTEXT(-0)', '=ISTEXT(A2)', '=ISTEXT(1<1)'],
-      [null],
+      [{ cellValue: '=ISTEXT(-0)' }, { cellValue: '=ISTEXT(A2)' }, { cellValue: '=ISTEXT(1<1)' }],
+      [{ cellValue: null }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual(false)
     expect(engine.getCellValue(adr('B1'))).toEqual(false)
@@ -26,7 +26,7 @@ describe('Function ISTEXT', () => {
 
   it('takes exactly one argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISTEXT(1, 2)', '=ISTEXT()'],
+      [{ cellValue: '=ISTEXT(1, 2)' }, { cellValue: '=ISTEXT()' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -34,10 +34,10 @@ describe('Function ISTEXT', () => {
 
   it('range value results in VALUE error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=4/1'],
-      ['=4/0'],
-      ['=4/2'],
-      ['=ISTEXT(A1:A3)'],
+      [{ cellValue: '=4/1' }],
+      [{ cellValue: '=4/0' }],
+      [{ cellValue: '=4/2' }],
+      [{ cellValue: '=ISTEXT(A1:A3)' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))

@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function IMDIV', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMDIV(1)'],
-      ['=IMDIV(1, 2, 3)'],
+      [{ cellValue: '=IMDIV(1)' }],
+      [{ cellValue: '=IMDIV(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,8 +15,8 @@ describe('Function IMDIV', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMDIV("foo", 1)'],
-      ['=IMDIV(1, "foo")'],
+      [{ cellValue: '=IMDIV("foo", 1)' }],
+      [{ cellValue: '=IMDIV(1, "foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -25,9 +25,9 @@ describe('Function IMDIV', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMDIV(0, 1)'],
-      ['=IMDIV("i", "-i")'],
-      ['=IMDIV("-3+4i", "1+i")'],
+      [{ cellValue: '=IMDIV(0, 1)' }],
+      [{ cellValue: '=IMDIV("i", "-i")' }],
+      [{ cellValue: '=IMDIV("-3+4i", "1+i")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('0')

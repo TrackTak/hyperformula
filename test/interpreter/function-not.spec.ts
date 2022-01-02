@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function NOT', () => {
   it('number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NOT()', '=NOT(TRUE(), TRUE())'],
+      [{ cellValue: '=NOT()' }, { cellValue: '=NOT(TRUE(), TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function NOT', () => {
 
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NOT(TRUE())', '=NOT(FALSE())'],
+      [{ cellValue: '=NOT(TRUE())' }, { cellValue: '=NOT(FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(false)
@@ -24,7 +24,7 @@ describe('Function NOT', () => {
 
   it('use coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NOT("FALSE")'],
+      [{ cellValue: '=NOT("FALSE")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -32,8 +32,8 @@ describe('Function NOT', () => {
 
   it('propagates error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=4/0'],
-      ['=NOT(A1)'],
+      [{ cellValue: '=4/0' }],
+      [{ cellValue: '=NOT(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

@@ -4,14 +4,14 @@ import {adr} from '../testUtils'
 describe('Date arithmetic', () => {
   it('subtract two dates', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['02/02/2020', '06/02/2019', '=A1-B1'],
+      [{ cellValue: '02/02/2020' }, { cellValue: '06/02/2019' }, { cellValue: '=A1-B1' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toBe(361)
   })
   it('compare two dates', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['02/02/2020', '02/06/2019', '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1'],
+      [{ cellValue: '02/02/2020' }, { cellValue: '02/06/2019' }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toBe(true)
@@ -21,7 +21,7 @@ describe('Date arithmetic', () => {
   })
   it('compare two datestrings', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="02/02/2020"', '="02/06/2019"', '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1'],
+      [{ cellValue: '="02/02/2020"' }, { cellValue: '="02/06/2019"' }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toBe(true)
@@ -32,7 +32,7 @@ describe('Date arithmetic', () => {
 
   it('compare date with datestring, different dates', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="02/02/2020"', '02/06/2019', '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1', '=A1=B1', '=A1<>B1'],
+      [{ cellValue: '="02/02/2020"' }, { cellValue: '02/06/2019' }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }, { cellValue: '=A1=B1' }, { cellValue: '=A1<>B1' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toBe(true)
@@ -45,7 +45,7 @@ describe('Date arithmetic', () => {
 
   it('compare date with datestring, the same dates', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="02/02/2020"', '02/02/2020', '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1', '=A1=B1', '=A1<>B1'],
+      [{ cellValue: '="02/02/2020"' }, { cellValue: '02/02/2020' }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }, { cellValue: '=A1=B1' }, { cellValue: '=A1<>B1' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toBe(false)
@@ -57,7 +57,7 @@ describe('Date arithmetic', () => {
   })
   it('compare date with bool', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="02/02/2020"', '=TRUE()', '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1'],
+      [{ cellValue: '="02/02/2020"' }, { cellValue: '=TRUE()' }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toBe(false)
@@ -67,7 +67,7 @@ describe('Date arithmetic', () => {
   })
   it('compare date with number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['02/02/2020', '2', '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1'],
+      [{ cellValue: '02/02/2020' }, { cellValue: '2' }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toBe(true)
@@ -77,21 +77,21 @@ describe('Date arithmetic', () => {
   })
   it('sum date with number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['02/02/2020', '2', '=A1+B1'],
+      [{ cellValue: '02/02/2020' }, { cellValue: '2' }, { cellValue: '=A1+B1' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toBe(43865)
   })
   it('sum date with boolean', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['02/02/2020', '=TRUE()', '=A1+B1'],
+      [{ cellValue: '02/02/2020' }, { cellValue: '=TRUE()' }, { cellValue: '=A1+B1' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toBe(43864)
   })
   it('functions on dates', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISEVEN("02/02/2020")', '=COS("02/02/2020")', '=BITOR("02/02/2020","16/08/1985")'],
+      [{ cellValue: '=ISEVEN("02/02/2020")' }, { cellValue: '=COS("02/02/2020")' }, { cellValue: '=BITOR("02/02/2020","16/08/1985")' }],
     ], {smartRounding: false})
 
     expect(engine.getCellValue(adr('A1'))).toBe(false)

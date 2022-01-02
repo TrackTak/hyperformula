@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function SERIESSUM', () => {
   it('checks required number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SERIESSUM(1,2,3)'],
-      ['=SERIESSUM(1,2,3,4,5)'],
+      [{ cellValue: '=SERIESSUM(1,2,3)' }],
+      [{ cellValue: '=SERIESSUM(1,2,3,4,5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,8 +15,8 @@ describe('Function SERIESSUM', () => {
 
   it('computes correct answer', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SERIESSUM(2,3,4,A2:D2)'],
-      [1, 2, 3, 4]
+      [{ cellValue: '=SERIESSUM(2,3,4,A2:D2)' }],
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(137480)
@@ -24,8 +24,8 @@ describe('Function SERIESSUM', () => {
 
   it('ignores nulls', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SERIESSUM(2,3,4,A2:D2)'],
-      [1, null, 3, 4]
+      [{ cellValue: '=SERIESSUM(2,3,4,A2:D2)' }],
+      [{ cellValue: 1 }, { cellValue: null }, { cellValue: 3 }, { cellValue: 4}]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(8584)
@@ -33,7 +33,7 @@ describe('Function SERIESSUM', () => {
 
   it('throws error for non-numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SERIESSUM(2,3,4,A2:D2)'],
+      [{ cellValue: '=SERIESSUM(2,3,4,A2:D2)' }],
       [1, '\'1', 3, 4]
     ])
 
@@ -42,9 +42,9 @@ describe('Function SERIESSUM', () => {
 
   it('works for non-integer args', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SERIESSUM(2,3.1,4,A3:D3)'],
-      ['=SERIESSUM(2,3,4.1,A3:D3)'],
-      [1, 2, 3, 4]
+      [{ cellValue: '=SERIESSUM(2,3.1,4,A3:D3)' }],
+      [{ cellValue: '=SERIESSUM(2,3,4.1,A3:D3)' }],
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(147347.41562949, 6)
@@ -53,8 +53,8 @@ describe('Function SERIESSUM', () => {
 
   it('propagates errors', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SERIESSUM(2,3,4,A2:D2)'],
-      [1, '=NA()', 3, 4]
+      [{ cellValue: '=SERIESSUM(2,3,4,A2:D2)' }],
+      [{ cellValue: 1 }, { cellValue: '=NA()' }, { cellValue: 3 }, { cellValue: 4}]
     ])
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))
   })

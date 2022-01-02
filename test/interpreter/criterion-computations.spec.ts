@@ -4,10 +4,10 @@ import {adr} from '../testUtils'
 describe('Criterions - operators computations', () => {
   it('usage of greater than operator', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A3, ">1", B1:B3)'],
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A3, ">1", B1:B3)' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(7)
@@ -15,10 +15,10 @@ describe('Criterions - operators computations', () => {
 
   it('usage of greater than or equal operator', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A3, ">=1", B1:B3)'],
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A3, ">=1", B1:B3)' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(12)
@@ -26,10 +26,10 @@ describe('Criterions - operators computations', () => {
 
   it('usage of less than operator', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A2, "<1", B1:B2)'],
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A2, "<1", B1:B2)' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(3)
@@ -37,10 +37,10 @@ describe('Criterions - operators computations', () => {
 
   it('usage of less than or equal operator', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A3, "<=1", B1:B3)'],
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A3, "<=1", B1:B3)' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(8)
@@ -48,10 +48,10 @@ describe('Criterions - operators computations', () => {
 
   it('usage of equal operator', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A3, "=1", B1:B3)'],
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A3, "=1", B1:B3)' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(5)
@@ -59,10 +59,10 @@ describe('Criterions - operators computations', () => {
 
   it('usage of not equal operator', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A3, "<>1", B1:B3)'],
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A3, "<>1", B1:B3)' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(10)
@@ -70,10 +70,10 @@ describe('Criterions - operators computations', () => {
 
   it('empty values #1', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', ''],
-      ['2', '8'],
-      ['3', '9'],
-      ['=SUMIF(B1:B3, "=", A1:A3)'],
+      [{ cellValue: '1' }, { cellValue: '' }],
+      [{ cellValue: '2' }, { cellValue: '8' }],
+      [{ cellValue: '3' }, { cellValue: '9' }],
+      [{ cellValue: '=SUMIF(B1:B3, "=", A1:A3)' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(0)
@@ -81,10 +81,10 @@ describe('Criterions - operators computations', () => {
 
   it('empty values #2', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', ''],
-      ['2', '8'],
-      ['3', '9'],
-      ['=SUMIF(B1:B3, "<>", A1:A3)'],
+      [{ cellValue: '1' }, { cellValue: '' }],
+      [{ cellValue: '2' }, { cellValue: '8' }],
+      [{ cellValue: '3' }, { cellValue: '9' }],
+      [{ cellValue: '=SUMIF(B1:B3, "<>", A1:A3)' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(6)
@@ -92,10 +92,10 @@ describe('Criterions - operators computations', () => {
 
   it('empty values #3', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', ' '],
-      ['2', '1'],
-      ['3', 'TRUE'],
-      ['=SUMIF(B1:B3, "=0", A1:A3)'],
+      [{ cellValue: '1' }, { cellValue: ' ' }],
+      [{ cellValue: '2' }, { cellValue: '1' }],
+      [{ cellValue: '3' }, { cellValue: 'TRUE' }],
+      [{ cellValue: '=SUMIF(B1:B3, "=0", A1:A3)' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(0)
@@ -103,10 +103,10 @@ describe('Criterions - operators computations', () => {
 
   it('empty values #4', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [''],
-      ['8'],
-      ['9'],
-      ['=COUNTIF(A1:A3, "=")'],
+      [{ cellValue: '' }],
+      [{ cellValue: '8' }],
+      [{ cellValue: '9' }],
+      [{ cellValue: '=COUNTIF(A1:A3, "=")' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(0)
@@ -163,10 +163,10 @@ describe('big test', () => {
       ['w 3h1 1s1 F', 12.2000000000116],
       ['w 3h1 1s1 F 1r1', 12.1999999999971],
       ['w 3h1 1s1 Fx', 24.5],
-      ['w 3h1 1s1 F', 10],
+      [{ cellValue: 'w 3h1 1s1 F' }, { cellValue: 10 }],
       ['w 3h1 1s1 F', 12.1999999999971],
       [],
-      ['=COUNTA(A1:A49)', '=SUM(B1:B50)', null, null, 'codes counted  >  ', '=SUM(F1:F20)', '=SUM(G1:G21)'],
+      [{ cellValue: '=COUNTA(A1:A49)' }, { cellValue: '=SUM(B1:B50)' }, { cellValue: null }, { cellValue: null}, {cellValue: 'codes counted  >  ' }, { cellValue: '=SUM(F1:F20)' }, { cellValue: '=SUM(G1:G21)' }],
     ]
 
     const [engine] = HyperFormula.buildFromArray(formulas, {useRegularExpressions: true, precisionRounding: 13})
@@ -219,7 +219,7 @@ describe('big test', () => {
 
   it('Gnumeric test file', () => {
     const formulas = [
-      [null, null, '=IF(AND(C10:C49), "All ok", "Bug!")'],
+      [{ cellValue: null }, { cellValue: null }, { cellValue: '=IF(AND(C10:C49), "All ok", "Bug!")' }],
       [],
       [],
       [],
@@ -228,46 +228,46 @@ describe('big test', () => {
       ['2', '8', null, null, '2', '1', null, 'FALSE', '8', null, '\'TRUE', '1', 'apples'],
       ['3', '9', null, null, '3', 'TRUE', null, '\'1.0', '9', null, null, '\'1.0', ],
       [],
-      ['=SUMIF($B$6:$B$8, "=", $A$6:$A$8)', '1', '=A10=B10'],
-      ['=SUMIF($B$6:$B$8, ">=", $A$6:$A$8)', '0', '=A11=B11'],
-      ['=SUMIF($B$6:$B$8, "<=", $A$6:$A$8)', '0', '=A12=B12'],
-      ['=SUMIF($B$6:$B$8, "<>", $A$6:$A$8)', '5', '=A13=B13'],
-      ['=SUMIF($B$6:$B$8, "<>x", $A$6:$A$8)', '6', '=A14=B14'],
-      ['=SUMIF($B$6:$B$8, ">", $A$6:$A$8)', '0', '=A15=B15'],
-      ['=SUMIF($B$6:$B$8, "<", $A$6:$A$8)', '0', '=A16=B16'],
-      ['=SUMIF($B$6:$B$8, "=8.0", $A$6:$A$8)', '2', '=A17=B17'],
-      ['=SUMIF($B$6:$B$8, "= 8.0", $A$6:$A$8)', '2', '=A18=B18'],
-      ['=SUMIF($B$6:$B$8, "= 8.0 ", $A$6:$A$8)', '2', '=A19=B19'],
-      ['=SUMIF($B$6:$B$8, "= 8.0 ", $A$6:$A$8)', '2', '=A20=B20'],
-      ['=SUMIF($F$6:$F$8, "=TRUE", $E$6:$E$8)', '3', '=A21=B21'],
-      ['=SUMIF($F$6:$F$8, "=1", $E$6:$E$8)', '2', '=A22=B22'],
-      ['=SUMIF($F$6:$F$8, "=0", $E$6:$E$8)', '0', '=A23=B23'],
-      ['=SUMIF($F$6:$F$8, "=FALSE", $E$6:$E$8)', '0', '=A24=B24'],
-      ['=SUMIF($F$6:$F$8, "=T", $E$6:$E$8)', '0', '=A25=B25'],
-      ['=SUMIF($F$6:$F$8, "=1.0", $E$6:$E$8)', '2', '=A26=B26'],
-      ['=SUMIF($F$6:$F$8, "=x", $E$6:$E$8)', '0', '=A27=B27'],
-      ['=SUMIF($I$6:$I$8, "=", $H$6:$H$8)', '0', '=A28=B28'],
-      ['=SUMIF($I$6:$I$8, "=9", $H$6:$H$8)', '0', '=A29=B29'],
-      ['=SUMIF($I$6:$I$8, "=1.0", $H$6:$H$8)', '0', '=A30=B30'],
-      ['=COUNTIF($I$6:$I$8, "=")', '1', '=A31=B31'],
-      ['=COUNTIF($H$6:$H$8, "1")', '1', '=A32=B32'],
-      ['=SUMIF($H$6:$H$8, "=TRUE")', '0', '=A33=B33'],
-      ['=COUNTIF($K$6:$K$6, "TRUE")', '1', '=A34=B34'],
-      ['=COUNTIF($K$6:$K$6, TRUE)', '1', '=A35=B35'],
-      ['=COUNTIF($K$7:$K$7, "TRUE")', '0', '=A36=B36'],
-      ['=COUNTIF($K$7:$K$7, TRUE)', '0', '=A37=B37'],
-      ['=COUNTIF($K$6:$K$8, "TRUE")', '1', '=A38=B38'],
-      ['=COUNTIF($K$6:$K$8, "=TRUE")', '1', '=A39=B39'],
-      ['=COUNTIF($K$6:$K$8, "~TRUE")', '0', '=A40=B40'],
-      ['=COUNTIF($K$6:$K$8, TRUE)', '1', '=A41=B41'],
-      ['=COUNTIF($L$6:$L$8, "1")', '3', '=A42=B42'],
-      ['=COUNTIF($L$6:$L$8, "1.0")', '3', '=A43=B43'],
-      ['=COUNTIF($L$6:$L$8, 1)', '3', '=A44=B44'],
-      ['=COUNTIF($M$6:$M$7, "es")', '0', '=A45=B45'],
-      ['=COUNTIF($M$6:$M$7, "*es")', '1', '=A46=B46'],
-      ['=COUNTIF($M$6:$M$7, "es*")', '0', '=A47=B47'],
-      ['=COUNTIF($M$6:$M$7, "*es*")', '2', '=A48=B48'],
-      ['=COUNTIF($M$6:$M$7, "*ES*")', '2', '=A49=B49']
+      [{ cellValue: '=SUMIF($B$6:$B$8, "=", $A$6:$A$8)' }, { cellValue: '1' }, { cellValue: '=A10=B10' }],
+      [{ cellValue: '=SUMIF($B$6:$B$8, ">=", $A$6:$A$8)' }, { cellValue: '0' }, { cellValue: '=A11=B11' }],
+      [{ cellValue: '=SUMIF($B$6:$B$8, "<=", $A$6:$A$8)' }, { cellValue: '0' }, { cellValue: '=A12=B12' }],
+      [{ cellValue: '=SUMIF($B$6:$B$8, "<>", $A$6:$A$8)' }, { cellValue: '5' }, { cellValue: '=A13=B13' }],
+      [{ cellValue: '=SUMIF($B$6:$B$8, "<>x", $A$6:$A$8)' }, { cellValue: '6' }, { cellValue: '=A14=B14' }],
+      [{ cellValue: '=SUMIF($B$6:$B$8, ">", $A$6:$A$8)' }, { cellValue: '0' }, { cellValue: '=A15=B15' }],
+      [{ cellValue: '=SUMIF($B$6:$B$8, "<", $A$6:$A$8)' }, { cellValue: '0' }, { cellValue: '=A16=B16' }],
+      [{ cellValue: '=SUMIF($B$6:$B$8, "=8.0", $A$6:$A$8)' }, { cellValue: '2' }, { cellValue: '=A17=B17' }],
+      [{ cellValue: '=SUMIF($B$6:$B$8, "= 8.0", $A$6:$A$8)' }, { cellValue: '2' }, { cellValue: '=A18=B18' }],
+      [{ cellValue: '=SUMIF($B$6:$B$8, "= 8.0 ", $A$6:$A$8)' }, { cellValue: '2' }, { cellValue: '=A19=B19' }],
+      [{ cellValue: '=SUMIF($B$6:$B$8, "= 8.0 ", $A$6:$A$8)' }, { cellValue: '2' }, { cellValue: '=A20=B20' }],
+      [{ cellValue: '=SUMIF($F$6:$F$8, "=TRUE", $E$6:$E$8)' }, { cellValue: '3' }, { cellValue: '=A21=B21' }],
+      [{ cellValue: '=SUMIF($F$6:$F$8, "=1", $E$6:$E$8)' }, { cellValue: '2' }, { cellValue: '=A22=B22' }],
+      [{ cellValue: '=SUMIF($F$6:$F$8, "=0", $E$6:$E$8)' }, { cellValue: '0' }, { cellValue: '=A23=B23' }],
+      [{ cellValue: '=SUMIF($F$6:$F$8, "=FALSE", $E$6:$E$8)' }, { cellValue: '0' }, { cellValue: '=A24=B24' }],
+      [{ cellValue: '=SUMIF($F$6:$F$8, "=T", $E$6:$E$8)' }, { cellValue: '0' }, { cellValue: '=A25=B25' }],
+      [{ cellValue: '=SUMIF($F$6:$F$8, "=1.0", $E$6:$E$8)' }, { cellValue: '2' }, { cellValue: '=A26=B26' }],
+      [{ cellValue: '=SUMIF($F$6:$F$8, "=x", $E$6:$E$8)' }, { cellValue: '0' }, { cellValue: '=A27=B27' }],
+      [{ cellValue: '=SUMIF($I$6:$I$8, "=", $H$6:$H$8)' }, { cellValue: '0' }, { cellValue: '=A28=B28' }],
+      [{ cellValue: '=SUMIF($I$6:$I$8, "=9", $H$6:$H$8)' }, { cellValue: '0' }, { cellValue: '=A29=B29' }],
+      [{ cellValue: '=SUMIF($I$6:$I$8, "=1.0", $H$6:$H$8)' }, { cellValue: '0' }, { cellValue: '=A30=B30' }],
+      [{ cellValue: '=COUNTIF($I$6:$I$8, "=")' }, { cellValue: '1' }, { cellValue: '=A31=B31' }],
+      [{ cellValue: '=COUNTIF($H$6:$H$8, "1")' }, { cellValue: '1' }, { cellValue: '=A32=B32' }],
+      [{ cellValue: '=SUMIF($H$6:$H$8, "=TRUE")' }, { cellValue: '0' }, { cellValue: '=A33=B33' }],
+      [{ cellValue: '=COUNTIF($K$6:$K$6, "TRUE")' }, { cellValue: '1' }, { cellValue: '=A34=B34' }],
+      [{ cellValue: '=COUNTIF($K$6:$K$6, TRUE)' }, { cellValue: '1' }, { cellValue: '=A35=B35' }],
+      [{ cellValue: '=COUNTIF($K$7:$K$7, "TRUE")' }, { cellValue: '0' }, { cellValue: '=A36=B36' }],
+      [{ cellValue: '=COUNTIF($K$7:$K$7, TRUE)' }, { cellValue: '0' }, { cellValue: '=A37=B37' }],
+      [{ cellValue: '=COUNTIF($K$6:$K$8, "TRUE")' }, { cellValue: '1' }, { cellValue: '=A38=B38' }],
+      [{ cellValue: '=COUNTIF($K$6:$K$8, "=TRUE")' }, { cellValue: '1' }, { cellValue: '=A39=B39' }],
+      [{ cellValue: '=COUNTIF($K$6:$K$8, "~TRUE")' }, { cellValue: '0' }, { cellValue: '=A40=B40' }],
+      [{ cellValue: '=COUNTIF($K$6:$K$8, TRUE)' }, { cellValue: '1' }, { cellValue: '=A41=B41' }],
+      [{ cellValue: '=COUNTIF($L$6:$L$8, "1")' }, { cellValue: '3' }, { cellValue: '=A42=B42' }],
+      [{ cellValue: '=COUNTIF($L$6:$L$8, "1.0")' }, { cellValue: '3' }, { cellValue: '=A43=B43' }],
+      [{ cellValue: '=COUNTIF($L$6:$L$8, 1)' }, { cellValue: '3' }, { cellValue: '=A44=B44' }],
+      [{ cellValue: '=COUNTIF($M$6:$M$7, "es")' }, { cellValue: '0' }, { cellValue: '=A45=B45' }],
+      [{ cellValue: '=COUNTIF($M$6:$M$7, "*es")' }, { cellValue: '1' }, { cellValue: '=A46=B46' }],
+      [{ cellValue: '=COUNTIF($M$6:$M$7, "es*")' }, { cellValue: '0' }, { cellValue: '=A47=B47' }],
+      [{ cellValue: '=COUNTIF($M$6:$M$7, "*es*")' }, { cellValue: '2' }, { cellValue: '=A48=B48' }],
+      [{ cellValue: '=COUNTIF($M$6:$M$7, "*ES*")' }, { cellValue: '2' }, { cellValue: '=A49=B49' }]
     ]
     const [engine] = HyperFormula.buildFromArray([])
     engine.addNamedExpression('TRUE', '=TRUE()', undefined)

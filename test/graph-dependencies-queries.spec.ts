@@ -5,9 +5,9 @@ import {adr} from './testUtils'
 describe('address queries', () => {
   it('reverse dependencies should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [1, 2, 3],
-      ['=SUM(A1:B1)', '=SUMSQ(A1:B1)'],
-      ['=A2+B2'],
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }],
+      [{ cellValue: '=SUM(A1:B1)' }, { cellValue: '=SUMSQ(A1:B1)' }],
+      [{ cellValue: '=A2+B2' }],
     ])
     expect(engine.getCellDependents(adr('A1'))).toEqual([simpleCellRange(adr('A1'), adr('B1'))])
     expect(engine.getCellDependents(adr('D1'))).toEqual([])
@@ -21,9 +21,9 @@ describe('address queries', () => {
 
   it('dependencies should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [1, 2, 3],
-      ['=SUM(A1:B1)', '=SUMSQ(A1:B1)'],
-      ['=A2+B2'],
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }],
+      [{ cellValue: '=SUM(A1:B1)' }, { cellValue: '=SUMSQ(A1:B1)' }],
+      [{ cellValue: '=A2+B2' }],
     ])
     expect(engine.getCellPrecedents(adr('A1'))).toEqual([])
     expect(engine.getCellPrecedents(adr('D1'))).toEqual([])

@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function ERFC', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ERFC()'],
-      ['=ERFC(1, 2)'],
+      [{ cellValue: '=ERFC()' }],
+      [{ cellValue: '=ERFC(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,7 +16,7 @@ describe('Function ERFC', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ERFC("foo")'],
+      [{ cellValue: '=ERFC("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -24,9 +24,9 @@ describe('Function ERFC', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ERFC(0)'],
-      ['=ERFC(2)'],
-      ['=ERFC(0.5)'],
+      [{ cellValue: '=ERFC(0)' }],
+      [{ cellValue: '=ERFC(2)' }],
+      [{ cellValue: '=ERFC(0.5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -36,8 +36,8 @@ describe('Function ERFC', () => {
 
   it('should work for negative numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ERFC(-10.123)'],
-      ['=ERFC(-14.8)'],
+      [{ cellValue: '=ERFC(-10.123)' }],
+      [{ cellValue: '=ERFC(-14.8)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(2)

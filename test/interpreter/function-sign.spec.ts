@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function SIGN', () => {
   it('should not work for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SIGN()'],
-      ['=SIGN(1, 2)'],
+      [{ cellValue: '=SIGN()' }],
+      [{ cellValue: '=SIGN(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,7 +16,7 @@ describe('Function SIGN', () => {
 
   it('should not work for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SIGN("foo")'],
+      [{ cellValue: '=SIGN("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -24,9 +24,9 @@ describe('Function SIGN', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SIGN(5)'],
-      ['=SIGN(0)'],
-      ['=SIGN(-12.1)'],
+      [{ cellValue: '=SIGN(5)' }],
+      [{ cellValue: '=SIGN(0)' }],
+      [{ cellValue: '=SIGN(-12.1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)

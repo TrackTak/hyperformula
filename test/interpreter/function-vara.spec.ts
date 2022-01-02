@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function VARA', () => {
   it('should take at least two arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=VARA()'],
-      ['=VARA(1)']
+      [{ cellValue: '=VARA()' }],
+      [{ cellValue: '=VARA(1)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,14 +15,14 @@ describe('Function VARA', () => {
 
   it('should calculate variance (sample)', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=VARA(2, 3)'],
+      [{ cellValue: '=VARA(2, 3)' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.5, 6)
   })
 
   it('should coerce explicit argument to numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=VARA(2, 3, 4, TRUE(), FALSE(), "1",)'],
+      [{ cellValue: '=VARA(2, 3, 4, TRUE(), FALSE(), "1",)' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(2.28571428571429)
   })

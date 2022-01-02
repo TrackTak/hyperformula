@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function COMBINA', () => {
   it('checks number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COMBINA(1)', '=COMBINA(1, 2, 3)'],
+      [{ cellValue: '=COMBINA(1)' }, { cellValue: '=COMBINA(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,16 +14,16 @@ describe('Function COMBINA', () => {
 
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COMBINA(0,0)'],
-      ['=COMBINA(1,0)'],
-      ['=COMBINA(2,2)'],
-      ['=COMBINA(0,2)'],
-      ['=COMBINA(10,10)'],
-      ['=COMBINA(20,10)'],
-      ['=COMBINA(30,10)'],
-      ['=COMBINA(100,500)'],
-      ['=COMBINA(100,8)'],
-      ['=COMBINA(518,512)'],
+      [{ cellValue: '=COMBINA(0,0)' }],
+      [{ cellValue: '=COMBINA(1,0)' }],
+      [{ cellValue: '=COMBINA(2,2)' }],
+      [{ cellValue: '=COMBINA(0,2)' }],
+      [{ cellValue: '=COMBINA(10,10)' }],
+      [{ cellValue: '=COMBINA(20,10)' }],
+      [{ cellValue: '=COMBINA(30,10)' }],
+      [{ cellValue: '=COMBINA(100,500)' }],
+      [{ cellValue: '=COMBINA(100,8)' }],
+      [{ cellValue: '=COMBINA(518,512)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(1)
@@ -40,8 +40,8 @@ describe('Function COMBINA', () => {
 
   it('truncates argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COMBINA(9.9,6.6)'],
-      ['=COMBINA(518, 512.9)'],
+      [{ cellValue: '=COMBINA(9.9,6.6)' }],
+      [{ cellValue: '=COMBINA(518, 512.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(3003)
@@ -50,10 +50,10 @@ describe('Function COMBINA', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COMBINA(2, -1)'],
-      ['=COMBINA(-1, 2)'],
-      ['=COMBINA(1031, 0)'],
-      ['=COMBINA(518, 513)'],
+      [{ cellValue: '=COMBINA(2, -1)' }],
+      [{ cellValue: '=COMBINA(-1, 2)' }],
+      [{ cellValue: '=COMBINA(1031, 0)' }],
+      [{ cellValue: '=COMBINA(518, 513)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -64,7 +64,7 @@ describe('Function COMBINA', () => {
 
   it('uses coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COMBINA(TRUE(),"0")'],
+      [{ cellValue: '=COMBINA(TRUE(),"0")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(1)
@@ -72,7 +72,7 @@ describe('Function COMBINA', () => {
 
   it('propagates error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COMBINA(NA(), NA())'],
+      [{ cellValue: '=COMBINA(NA(), NA())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))

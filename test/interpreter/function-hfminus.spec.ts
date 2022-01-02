@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function HF.MINUS', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.MINUS(1)', '=HF.MINUS(1, 1, 1)'],
+      [{ cellValue: '=HF.MINUS(1)' }, { cellValue: '=HF.MINUS(1, 1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,10 +15,10 @@ describe('Function HF.MINUS', () => {
 
   it('should calculate the correct value with correct defaults', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.MINUS(2,3)'],
-      ['=HF.MINUS(1.0000000000001,1)'],
-      ['=HF.MINUS(1,)'],
-      ['=HF.MINUS(,)']
+      [{ cellValue: '=HF.MINUS(2,3)' }],
+      [{ cellValue: '=HF.MINUS(1.0000000000001,1)' }],
+      [{ cellValue: '=HF.MINUS(1,)' }],
+      [{ cellValue: '=HF.MINUS(,)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(-1)
@@ -29,8 +29,8 @@ describe('Function HF.MINUS', () => {
 
   it('should coerce to correct types', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.MINUS(TRUE(),B1)'],
-      ['=HF.MINUS("1",)'],
+      [{ cellValue: '=HF.MINUS(TRUE(),B1)' }],
+      [{ cellValue: '=HF.MINUS("1",)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -39,9 +39,9 @@ describe('Function HF.MINUS', () => {
 
   it('should throw correct error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.MINUS("abcd",)'],
-      ['=HF.MINUS(NA(),)'],
-      ['=HF.MINUS(B3:C3,)'],
+      [{ cellValue: '=HF.MINUS("abcd",)' }],
+      [{ cellValue: '=HF.MINUS(NA(),)' }],
+      [{ cellValue: '=HF.MINUS(B3:C3,)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -50,7 +50,7 @@ describe('Function HF.MINUS', () => {
   })
 
   it('passes subtypes', () => {
-    const [engine] = HyperFormula.buildFromArray([['=HF.MINUS(B1,C1)', '1$', 1]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=HF.MINUS(B1,C1)' }, { cellValue: '1$' }, { cellValue: 1 }]])
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
   })
 })

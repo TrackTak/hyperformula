@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function EVEN', () => {
   it('number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EVEN()', '=EVEN(1, 2)'],
+      [{ cellValue: '=EVEN()' }, { cellValue: '=EVEN(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function EVEN', () => {
 
   it('works for positive numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EVEN(0.3)', '=EVEN(1.7)'],
+      [{ cellValue: '=EVEN(0.3)' }, { cellValue: '=EVEN(1.7)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(2)
@@ -24,7 +24,7 @@ describe('Function EVEN', () => {
 
   it('works for negative numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EVEN(-0.3)', '=EVEN(-1.7)'],
+      [{ cellValue: '=EVEN(-0.3)' }, { cellValue: '=EVEN(-1.7)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(-2)
@@ -33,7 +33,7 @@ describe('Function EVEN', () => {
 
   it('use coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EVEN("42.3")'],
+      [{ cellValue: '=EVEN("42.3")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(44)
@@ -41,8 +41,8 @@ describe('Function EVEN', () => {
 
   it('propagates error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=4/0'],
-      ['=EVEN(A1)'],
+      [{ cellValue: '=4/0' }],
+      [{ cellValue: '=EVEN(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

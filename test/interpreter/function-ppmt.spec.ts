@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function PPMT', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=PPMT(1,1)', '=PPMT(1, 1, 1, 1, 1, 1, 1)'],
+      [{ cellValue: '=PPMT(1,1)' }, { cellValue: '=PPMT(1, 1, 1, 1, 1, 1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function PPMT', () => {
 
   it('should calculate the correct value with correct arguments and defaults', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=PPMT(1%, 1, 360, 10000)', '=PPMT(1%, 1, 360, 10000, 3000)', '=PPMT(1%, 1, 360, 10000, 3000, 1)'],
+      [{ cellValue: '=PPMT(1%, 1, 360, 10000)' }, { cellValue: '=PPMT(1%, 1, 360, 10000, 3000)' }, { cellValue: '=PPMT(1%, 1, 360, 10000, 3000, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(-2.86125969255043)

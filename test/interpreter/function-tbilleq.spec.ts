@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function TBILLEQ', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TBILLEQ(1,1)', '=TBILLEQ(1, 1, 1, 1)'],
+      [{ cellValue: '=TBILLEQ(1,1)' }, { cellValue: '=TBILLEQ(1, 1, 1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,12 +15,12 @@ describe('Function TBILLEQ', () => {
 
   it('should calculate the correct value with correct arguments and defaults', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TBILLEQ(0, 100, 0.1)'],
+      [{ cellValue: '=TBILLEQ(0, 100, 0.1)' }],
       ['=TBILLEQ(0, 360, 0.1)', '=TBILLEQ(0, 183, 0.1)', ],
       ['=TBILLEQ(0, 180, 1.9)', '=TBILLEQ(0, 180, 2)', '=TBILLEQ(0, 180, 2.1)', ],
       ['=TBILLEQ("1/2/2000", "31/1/2001", 0.1)', '=TBILLEQ(0, 365, 0.1)', ],
-      ['=TBILLEQ("28/2/2003", "29/2/2004", 0.1)'],
-      ['=TBILLEQ(2, 2.1, 0.1)'],
+      [{ cellValue: '=TBILLEQ("28/2/2003", "29/2/2004", 0.1)' }],
+      [{ cellValue: '=TBILLEQ(2, 2.1, 0.1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.104285714285714, 6)

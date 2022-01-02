@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function EXP', () => {
   it('happy path', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EXP(0)', '=EXP(2)'],
+      [{ cellValue: '=EXP(0)' }, { cellValue: '=EXP(2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -15,7 +15,7 @@ describe('Function EXP', () => {
 
   it('given wrong argument type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EXP("foo")'],
+      [{ cellValue: '=EXP("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -23,8 +23,8 @@ describe('Function EXP', () => {
 
   it('use number coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="2"', '=EXP(A1)'],
-      ['=FALSE()', '=EXP(A2)'],
+      [{ cellValue: '="2"' }, { cellValue: '=EXP(A1)' }],
+      [{ cellValue: '=FALSE()' }, { cellValue: '=EXP(A2)' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toBeCloseTo(7.38905609893065)
@@ -33,8 +33,8 @@ describe('Function EXP', () => {
 
   it('given wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EXP()'],
-      ['=EXP(1, 2)'],
+      [{ cellValue: '=EXP()' }],
+      [{ cellValue: '=EXP(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -43,7 +43,7 @@ describe('Function EXP', () => {
 
   it('errors propagation', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EXP(4/0)'],
+      [{ cellValue: '=EXP(4/0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

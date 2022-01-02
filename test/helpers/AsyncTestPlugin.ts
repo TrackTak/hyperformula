@@ -65,7 +65,7 @@ class AsyncTestPlugin extends FunctionPlugin implements FunctionPluginTypecheck<
 
   public asyncArrayFoo(_ast: ProcedureAst, _state: InterpreterState): AsyncSimpleRangeValue {
     return new Promise(resolve => setTimeout(() => {
-      resolve(SimpleRangeValue.onlyValues([[1, 1], [1, 1]]))
+      resolve(SimpleRangeValue.onlyValues([[{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }]]))
     }, 100))
   }
 

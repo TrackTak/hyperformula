@@ -5,8 +5,8 @@ import {adr, detailedError, expectToBeCloseForComplex} from '../testUtils'
 describe('Function IMSECH', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMSECH()'],
-      ['=IMSECH(1, 2)'],
+      [{ cellValue: '=IMSECH()' }],
+      [{ cellValue: '=IMSECH(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function IMSECH', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMSECH("foo")'],
+      [{ cellValue: '=IMSECH("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -23,9 +23,9 @@ describe('Function IMSECH', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMSECH(0)'],
-      ['=IMSECH("i")'],
-      ['=IMSECH("-3+4i")'],
+      [{ cellValue: '=IMSECH(0)' }],
+      [{ cellValue: '=IMSECH("i")' }],
+      [{ cellValue: '=IMSECH("-3+4i")' }],
     ])
 
     expectToBeCloseForComplex(engine, 'A1', '1')

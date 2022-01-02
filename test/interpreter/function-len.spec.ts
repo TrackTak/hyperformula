@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function LEN', () => {
   it('should return N/A when number of arguments is incorrect', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LEN()'],
-      ['=LEN("foo", "bar")']
+      [{ cellValue: '=LEN()' }],
+      [{ cellValue: '=LEN("foo", "bar")' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function LEN', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LEN("foo")']
+      [{ cellValue: '=LEN("foo")' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(3)
@@ -23,9 +23,9 @@ describe('Function LEN', () => {
 
   it('should coerce other types to string', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LEN(1)'],
-      ['=LEN(5+5)'],
-      ['=LEN(TRUE())'],
+      [{ cellValue: '=LEN(1)' }],
+      [{ cellValue: '=LEN(5+5)' }],
+      [{ cellValue: '=LEN(TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)

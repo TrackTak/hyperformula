@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function IMARGUMENT', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMARGUMENT()'],
-      ['=IMARGUMENT(1, 2)'],
+      [{ cellValue: '=IMARGUMENT()' }],
+      [{ cellValue: '=IMARGUMENT(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function IMARGUMENT', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMARGUMENT("foo")'],
+      [{ cellValue: '=IMARGUMENT("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -23,9 +23,9 @@ describe('Function IMARGUMENT', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMARGUMENT(0)'],
-      ['=IMARGUMENT("i")'],
-      ['=IMARGUMENT("-3+4i")'],
+      [{ cellValue: '=IMARGUMENT(0)' }],
+      [{ cellValue: '=IMARGUMENT("i")' }],
+      [{ cellValue: '=IMARGUMENT("-3+4i")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

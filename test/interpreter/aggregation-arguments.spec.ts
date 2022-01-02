@@ -4,7 +4,7 @@ import {adr} from '../testUtils'
 describe('AVERAGE function', () => {
   it('should work for empty arg', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AVERAGE(1,)'],
+      [{ cellValue: '=AVERAGE(1,)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0.5)
@@ -12,8 +12,8 @@ describe('AVERAGE function', () => {
 
   it('should work for empty reference', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AVERAGE(A2,B2)'],
-      [1, null]
+      [{ cellValue: '=AVERAGE(A2,B2)' }],
+      [{ cellValue: 1 }, { cellValue: null }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -21,8 +21,8 @@ describe('AVERAGE function', () => {
 
   it('should work for range with empty val', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AVERAGE(A2:B2)'],
-      [1, null]
+      [{ cellValue: '=AVERAGE(A2:B2)' }],
+      [{ cellValue: 1 }, { cellValue: null }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -30,8 +30,8 @@ describe('AVERAGE function', () => {
 
   it('should work for empty reference + empty arg', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AVERAGE(A2,B2,)'],
-      [1, null]
+      [{ cellValue: '=AVERAGE(A2,B2,)' }],
+      [{ cellValue: 1 }, { cellValue: null }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0.5)
@@ -39,8 +39,8 @@ describe('AVERAGE function', () => {
 
   it('should work for range with empty val + empty arg', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AVERAGE(A2:B2,)'],
-      [1, null]
+      [{ cellValue: '=AVERAGE(A2:B2,)' }],
+      [{ cellValue: 1 }, { cellValue: null }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0.5)
@@ -48,7 +48,7 @@ describe('AVERAGE function', () => {
 
   it('should work for coercible arg', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AVERAGE(2,TRUE())'],
+      [{ cellValue: '=AVERAGE(2,TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1.5)
@@ -56,8 +56,8 @@ describe('AVERAGE function', () => {
 
   it('should work for coercible value in reference', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AVERAGE(A2,B2)'],
-      [2, true]
+      [{ cellValue: '=AVERAGE(A2,B2)' }],
+      [{ cellValue: 2 }, { cellValue: true }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(2)
@@ -65,8 +65,8 @@ describe('AVERAGE function', () => {
 
   it('should work for coercible value in range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AVERAGE(A2:B2)'],
-      [2, true]
+      [{ cellValue: '=AVERAGE(A2:B2)' }],
+      [{ cellValue: 2 }, { cellValue: true }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(2)

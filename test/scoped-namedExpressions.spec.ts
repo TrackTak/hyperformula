@@ -15,7 +15,7 @@ describe('scoped named expressions', () => {
   })
 
   it('removal should work with undo of sheet', () => {
-    const [engine] = HyperFormula.buildFromArray([['=TRUE']])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=TRUE' }]])
     engine.addNamedExpression('TRUE', true, 0)
     engine.removeSheet(0)
     engine.undo()
@@ -23,7 +23,7 @@ describe('scoped named expressions', () => {
   })
 
   it('removal should work with undo of named expression', () => {
-    const [engine] = HyperFormula.buildFromArray([['=TRUE']])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=TRUE' }]])
     engine.addNamedExpression('TRUE', true, 0)
     engine.removeNamedExpression('TRUE', 0)
     engine.undo()

@@ -4,9 +4,9 @@ import {adr} from '../testUtils'
 describe('numeric aggreagtion functions', () => {
   it('should use separate caches', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [1, 2, 5, 10, 20],
-      ['=MIN(A1:E1)', '=MAX(A1:E1)', '=SUM(A1:E1)', '=SUMSQ(A1:E1)', '=AVERAGE(A1:E1)'],
-      ['=MIN(A1:E1)', '=MAX(A1:E1)', '=SUM(A1:E1)', '=SUMSQ(A1:E1)', '=AVERAGE(A1:E1)'],
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 5 }, { cellValue: 10}, {cellValue: 20 }],
+      [{ cellValue: '=MIN(A1:E1)' }, { cellValue: '=MAX(A1:E1)' }, { cellValue: '=SUM(A1:E1)' }, { cellValue: '=SUMSQ(A1:E1)'}, {cellValue: '=AVERAGE(A1:E1)' }],
+      [{ cellValue: '=MIN(A1:E1)' }, { cellValue: '=MAX(A1:E1)' }, { cellValue: '=SUM(A1:E1)' }, { cellValue: '=SUMSQ(A1:E1)'}, {cellValue: '=AVERAGE(A1:E1)' }],
     ])
     expect(engine.getCellValue(adr('A3'))).toEqual(1)
     expect(engine.getCellValue(adr('B3'))).toEqual(20)

@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function IMAGINARY', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMAGINARY()'],
-      ['=IMAGINARY(1, 2)'],
+      [{ cellValue: '=IMAGINARY()' }],
+      [{ cellValue: '=IMAGINARY(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function IMAGINARY', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMAGINARY("foo")'],
+      [{ cellValue: '=IMAGINARY("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -23,9 +23,9 @@ describe('Function IMAGINARY', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMAGINARY(0)'],
-      ['=IMAGINARY("i")'],
-      ['=IMAGINARY("-3+4i")'],
+      [{ cellValue: '=IMAGINARY(0)' }],
+      [{ cellValue: '=IMAGINARY("i")' }],
+      [{ cellValue: '=IMAGINARY("-3+4i")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)

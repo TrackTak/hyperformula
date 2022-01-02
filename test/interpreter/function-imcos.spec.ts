@@ -5,8 +5,8 @@ import {adr, detailedError, expectToBeCloseForComplex} from '../testUtils'
 describe('Function IMCOS', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMCOS()'],
-      ['=IMCOS(1, 2)'],
+      [{ cellValue: '=IMCOS()' }],
+      [{ cellValue: '=IMCOS(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function IMCOS', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMCOS("foo")'],
+      [{ cellValue: '=IMCOS("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -23,9 +23,9 @@ describe('Function IMCOS', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMCOS(0)'],
-      ['=IMCOS("i")'],
-      ['=IMCOS("-3+4i")'],
+      [{ cellValue: '=IMCOS(0)' }],
+      [{ cellValue: '=IMCOS("i")' }],
+      [{ cellValue: '=IMCOS("-3+4i")' }],
     ])
 
     expectToBeCloseForComplex(engine, 'A1', '1')

@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function CHISQ.INV', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CHISQ.INV(1)'],
-      ['=CHISQ.INV(1, 2, 3)'],
+      [{ cellValue: '=CHISQ.INV(1)' }],
+      [{ cellValue: '=CHISQ.INV(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,8 +16,8 @@ describe('Function CHISQ.INV', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CHISQ.INV("foo", 2)'],
-      ['=CHISQ.INV(1, "baz")'],
+      [{ cellValue: '=CHISQ.INV("foo", 2)' }],
+      [{ cellValue: '=CHISQ.INV(1, "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -26,8 +26,8 @@ describe('Function CHISQ.INV', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CHISQ.INV(0.1, 1)'],
-      ['=CHISQ.INV(0.9, 2)'],
+      [{ cellValue: '=CHISQ.INV(0.1, 1)' }],
+      [{ cellValue: '=CHISQ.INV(0.9, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.0157907740934326, 6)
@@ -36,8 +36,8 @@ describe('Function CHISQ.INV', () => {
 
   it('truncates second arg', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CHISQ.INV(0.1, 1.9)'],
-      ['=CHISQ.INV(0.9, 2.9)'],
+      [{ cellValue: '=CHISQ.INV(0.1, 1.9)' }],
+      [{ cellValue: '=CHISQ.INV(0.9, 2.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.0157907740934326, 6)
@@ -46,9 +46,9 @@ describe('Function CHISQ.INV', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CHISQ.INV(0.5, 0.999)'],
-      ['=CHISQ.INV(-0.0001, 2)'],
-      ['=CHISQ.INV(1.0001, 2)'],
+      [{ cellValue: '=CHISQ.INV(0.5, 0.999)' }],
+      [{ cellValue: '=CHISQ.INV(-0.0001, 2)' }],
+      [{ cellValue: '=CHISQ.INV(1.0001, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))

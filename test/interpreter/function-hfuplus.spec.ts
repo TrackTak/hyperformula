@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function HF.UPLUS', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UPLUS()', '=HF.UPLUS(1, 1)'],
+      [{ cellValue: '=HF.UPLUS()' }, { cellValue: '=HF.UPLUS(1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,8 +14,8 @@ describe('Function HF.UPLUS', () => {
 
   it('should calculate the correct value with correct defaults', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UPLUS(2)'],
-      ['=HF.UPLUS(-3)'],
+      [{ cellValue: '=HF.UPLUS(2)' }],
+      [{ cellValue: '=HF.UPLUS(-3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(2)
@@ -24,9 +24,9 @@ describe('Function HF.UPLUS', () => {
 
   it('should coerce to correct types', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UPLUS(TRUE())'],
-      ['=HF.UPLUS(B2)'],
-      ['=HF.UPLUS("1")'],
+      [{ cellValue: '=HF.UPLUS(TRUE())' }],
+      [{ cellValue: '=HF.UPLUS(B2)' }],
+      [{ cellValue: '=HF.UPLUS("1")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -36,9 +36,9 @@ describe('Function HF.UPLUS', () => {
 
   it('should throw correct error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UPLUS("abcd")'],
-      ['=HF.UPLUS(NA())'],
-      ['=HF.UPLUS(B3:C3)'],
+      [{ cellValue: '=HF.UPLUS("abcd")' }],
+      [{ cellValue: '=HF.UPLUS(NA())' }],
+      [{ cellValue: '=HF.UPLUS(B3:C3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))

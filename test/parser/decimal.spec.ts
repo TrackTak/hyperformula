@@ -6,16 +6,16 @@ import {adr, detailedError} from '../testUtils'
 describe('decimal parsing', () => {
   it('parsing decimal without leading zero', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['.1', '=.1'],
-      ['-.1', '=-.1'],
-      ['+.1', '=+.1'],
-      ['+.1', '=+.1+.2'],
-      ['=SUM(A1:A4, 0.3, .3)', '=SUM(B1:B4)'],
-      ['.1.4', '=..1'],
-      ['1.', '=1.'],
-      ['1e1', '=1e1'],
-      ['1e+1', '=1e+1'],
-      ['1e-1', '=1e-1'],
+      [{ cellValue: '.1' }, { cellValue: '=.1' }],
+      [{ cellValue: '-.1' }, { cellValue: '=-.1' }],
+      [{ cellValue: '+.1' }, { cellValue: '=+.1' }],
+      [{ cellValue: '+.1' }, { cellValue: '=+.1+.2' }],
+      [{ cellValue: '=SUM(A1:A4, 0.3, .3)' }, { cellValue: '=SUM(B1:B4)' }],
+      [{ cellValue: '.1.4' }, { cellValue: '=..1' }],
+      [{ cellValue: '1.' }, { cellValue: '=1.' }],
+      [{ cellValue: '1e1' }, { cellValue: '=1e1' }],
+      [{ cellValue: '1e+1' }, { cellValue: '=1e+1' }],
+      [{ cellValue: '1e-1' }, { cellValue: '=1e-1' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(0.1)

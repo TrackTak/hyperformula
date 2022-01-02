@@ -58,12 +58,12 @@ describe('ContentChanges', () => {
   it('should export SimpleRangeValue change', () => {
     const contentChanges = ContentChanges.empty()
 
-    contentChanges.addChange(new CellData(SimpleRangeValue.onlyValues([['foo', 'bar']])), adr('A1'))
+    contentChanges.addChange(new CellData(SimpleRangeValue.onlyValues([[{ cellValue: 'foo' }, { cellValue: 'bar' }]])), adr('A1'))
 
     const exportedChanges = contentChanges.exportChanges(simpleChangeExporter)
 
     expect(exportedChanges.length).toEqual(1)
-    expect(exportedChanges).toContainEqual({address: adr('A1'), value: SimpleRangeValue.onlyValues([['foo', 'bar']])})
+    expect(exportedChanges).toContainEqual({address: adr('A1'), value: SimpleRangeValue.onlyValues([[{ cellValue: 'foo' }, { cellValue: 'bar' }]])})
   })
 
   it('should add all changes', () => {
@@ -82,7 +82,7 @@ describe('ContentChanges', () => {
 
   it('should handle array change', () => {
     const contentChanges = ContentChanges.empty()
-    contentChanges.addChange(new CellData(SimpleRangeValue.onlyValues([[1, 2], ['foo', 'bar']])), adr('A1'))
+    contentChanges.addChange(new CellData(SimpleRangeValue.onlyValues([[{ cellValue: 1 }, { cellValue: 2 }], [{ cellValue: 1 }, { cellValue: 2 }]])), adr('A1'))
 
     const exportedChanges = contentChanges.exportChanges(new SpreadRangeExporter())
 

@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('function BIN2DEC', () => {
   it('should work only for one argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BIN2DEC(101)'],
+      [{ cellValue: '=BIN2DEC(101)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(5)
@@ -14,9 +14,9 @@ describe('function BIN2DEC', () => {
 
   it('should not work for non-binary arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BIN2DEC("foo")'],
-      ['=BIN2DEC(1234)'],
-      ['=BIN2DEC(TRUE())'],
+      [{ cellValue: '=BIN2DEC("foo")' }],
+      [{ cellValue: '=BIN2DEC(1234)' }],
+      [{ cellValue: '=BIN2DEC(TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotBinary))
@@ -26,8 +26,8 @@ describe('function BIN2DEC', () => {
 
   it('should work only for 10 bits', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BIN2DEC(10101010101010)'],
-      ['=BIN2DEC(1010101010)'],
+      [{ cellValue: '=BIN2DEC(10101010101010)' }],
+      [{ cellValue: '=BIN2DEC(1010101010)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotBinary))
@@ -36,11 +36,11 @@ describe('function BIN2DEC', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BIN2DEC(1111111111)'],
-      ['=BIN2DEC(1000000000)'],
-      ['=BIN2DEC(111111111)'],
-      ['=BIN2DEC(101)'],
-      ['=BIN2DEC(000101)'],
+      [{ cellValue: '=BIN2DEC(1111111111)' }],
+      [{ cellValue: '=BIN2DEC(1000000000)' }],
+      [{ cellValue: '=BIN2DEC(111111111)' }],
+      [{ cellValue: '=BIN2DEC(101)' }],
+      [{ cellValue: '=BIN2DEC(000101)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(-1)
@@ -53,8 +53,8 @@ describe('function BIN2DEC', () => {
 
   it('should work with references', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1101'],
-      ['=BIN2DEC(A1)'],
+      [{ cellValue: '1101' }],
+      [{ cellValue: '=BIN2DEC(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqual(13)
@@ -62,7 +62,7 @@ describe('function BIN2DEC', () => {
 
   it('should return numeric type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BIN2DEC(101)'],
+      [{ cellValue: '=BIN2DEC(101)' }],
     ])
     expect(engine.getCellValueType(adr('A1'))).toBe(CellValueType.NUMBER)
   })

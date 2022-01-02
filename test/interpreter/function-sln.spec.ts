@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function SLN', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SLN(1,1)', '=SLN(1, 1, 1, 1)'],
+      [{ cellValue: '=SLN(1,1)' }, { cellValue: '=SLN(1, 1, 1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function SLN', () => {
 
   it('should calculate the correct value with correct arguments and defaults', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SLN(1, 2, 1)', '=SLN(2, 1, -2)', '=SLN(3, 2, 0)'],
+      [{ cellValue: '=SLN(1, 2, 1)' }, { cellValue: '=SLN(2, 1, -2)' }, { cellValue: '=SLN(3, 2, 0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(-1)

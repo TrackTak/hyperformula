@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function GAMMA', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAMMA()'],
-      ['=GAMMA(1, 2)'],
+      [{ cellValue: '=GAMMA()' }],
+      [{ cellValue: '=GAMMA(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function GAMMA', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAMMA("foo")'],
+      [{ cellValue: '=GAMMA("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -23,10 +23,10 @@ describe('Function GAMMA', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAMMA(1)'],
-      ['=GAMMA(0.5)'],
-      ['=GAMMA(10.5)'],
-      ['=GAMMA(-2.5)'],
+      [{ cellValue: '=GAMMA(1)' }],
+      [{ cellValue: '=GAMMA(0.5)' }],
+      [{ cellValue: '=GAMMA(10.5)' }],
+      [{ cellValue: '=GAMMA(-2.5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -38,9 +38,9 @@ describe('Function GAMMA', () => {
 
   it('should return nan', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAMMA(0)'],
-      ['=GAMMA(-1)'],
-      ['=GAMMA(180)'],
+      [{ cellValue: '=GAMMA(0)' }],
+      [{ cellValue: '=GAMMA(-1)' }],
+      [{ cellValue: '=GAMMA(180)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NaN))

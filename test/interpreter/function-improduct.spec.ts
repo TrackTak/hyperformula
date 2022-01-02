@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function IMPRODUCT', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMPRODUCT()'],
+      [{ cellValue: '=IMPRODUCT()' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -13,10 +13,10 @@ describe('Function IMPRODUCT', () => {
 
   it('should coerce explicit arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMPRODUCT(0)'],
-      ['=IMPRODUCT("i", "-1.5")'],
-      ['=IMPRODUCT("-3+4i", "1+i", 1, 2, "3")'],
-      ['=IMPRODUCT("i",)'],
+      [{ cellValue: '=IMPRODUCT(0)' }],
+      [{ cellValue: '=IMPRODUCT("i", "-1.5")' }],
+      [{ cellValue: '=IMPRODUCT("-3+4i", "1+i", 1, 2, "3")' }],
+      [{ cellValue: '=IMPRODUCT("i",)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('0')
@@ -27,8 +27,8 @@ describe('Function IMPRODUCT', () => {
 
   it('should fail for non-coercible explicit arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMPRODUCT(1, TRUE())'],
-      ['=IMPRODUCT(2, "abcd")'],
+      [{ cellValue: '=IMPRODUCT(1, TRUE())' }],
+      [{ cellValue: '=IMPRODUCT(2, "abcd")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -37,10 +37,10 @@ describe('Function IMPRODUCT', () => {
 
   it('should not coerce range arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMPRODUCT(B1:C1)', 1, '2+i'],
-      ['=IMPRODUCT(B2:D2)', 1, null, null],
-      ['=IMPRODUCT(B3:D3)', 'i', 'abcd', true],
-      ['=IMPRODUCT(B4:D4,)', 'i', '=NA()', 1],
+      [{ cellValue: '=IMPRODUCT(B1:C1)' }, { cellValue: 1 }, { cellValue: '2+i' }],
+      [{ cellValue: '=IMPRODUCT(B2:D2)' }, { cellValue: 1 }, { cellValue: null }, { cellValue: null}],
+      [{ cellValue: '=IMPRODUCT(B3:D3)' }, { cellValue: 'i' }, { cellValue: 'abcd' }, { cellValue: true}],
+      [{ cellValue: '=IMPRODUCT(B4:D4,)' }, { cellValue: 'i' }, { cellValue: '=NA()' }, { cellValue: 1}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('2+i')

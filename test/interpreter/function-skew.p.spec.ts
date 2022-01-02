@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function SKEW.P', () => {
   it('simple case', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SKEW.P(1, 2, 4, 8)'],
+      [{ cellValue: '=SKEW.P(1, 2, 4, 8)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.6568077345, 6)
@@ -14,8 +14,8 @@ describe('Function SKEW.P', () => {
 
   it('works with ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '9', '0', '10'],
-      ['=SKEW.P(A1:D1)'],
+      [{ cellValue: '0' }, { cellValue: '9' }, { cellValue: '0' }, { cellValue: '10'}],
+      [{ cellValue: '=SKEW.P(A1:D1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.0164833284967738, 6)
@@ -23,7 +23,7 @@ describe('Function SKEW.P', () => {
 
   it('propagates error from regular argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NA()', '=SKEW.P(A1)'],
+      [{ cellValue: '=NA()' }, { cellValue: '=SKEW.P(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA))
@@ -31,7 +31,7 @@ describe('Function SKEW.P', () => {
 
   it('propagates first error from range argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NA()', '=FOO(', '=SKEW.P(A1:B1)'],
+      [{ cellValue: '=NA()' }, { cellValue: '=FOO(' }, { cellValue: '=SKEW.P(A1:B1)' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.NA))
@@ -42,7 +42,7 @@ describe('Function SKEW.P', () => {
    */
   it('does coercions of nonnumeric explicit arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SKEW.P(TRUE(),FALSE(),)']
+      [{ cellValue: '=SKEW.P(TRUE(),FALSE(),)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.707106781186548, 6)
@@ -50,7 +50,7 @@ describe('Function SKEW.P', () => {
 
   it('ignores nonnumeric values in ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SKEW.P(A2:F2)'],
+      [{ cellValue: '=SKEW.P(A2:F2)' }],
       [1, 0, 0, false, null, '\'0']
     ])
 
@@ -59,7 +59,7 @@ describe('Function SKEW.P', () => {
 
   it('validates range size', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SKEW.P(0,0)'],
+      [{ cellValue: '=SKEW.P(0,0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.ThreeValues))

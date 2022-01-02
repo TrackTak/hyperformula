@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function NETWORKDAYS', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NETWORKDAYS(1)', '=NETWORKDAYS(1, 1, 1, 1)'],
+      [{ cellValue: '=NETWORKDAYS(1)' }, { cellValue: '=NETWORKDAYS(1, 1, 1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,10 +14,10 @@ describe('Function NETWORKDAYS', () => {
 
   it('works correctly for first two arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NETWORKDAYS(0, 1)'],
-      ['=NETWORKDAYS(0, 6)'],
-      ['=NETWORKDAYS(0, 6.9)'],
-      ['=NETWORKDAYS(6.9,0.1)'],
+      [{ cellValue: '=NETWORKDAYS(0, 1)' }],
+      [{ cellValue: '=NETWORKDAYS(0, 6)' }],
+      [{ cellValue: '=NETWORKDAYS(0, 6.9)' }],
+      [{ cellValue: '=NETWORKDAYS(6.9,0.1)' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual(0)
     expect(engine.getCellValue(adr('A2'))).toEqual(5)
@@ -27,12 +27,12 @@ describe('Function NETWORKDAYS', () => {
 
   it('this year', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['29/09/2020', '=A1+0.1', '31/12/2019', '01/01/2021', '27/09/2020'],
-      ['=NETWORKDAYS("01/01/2020", "31/12/2020")'],
-      ['=NETWORKDAYS("01/01/2020", "31/12/2020", A1:A1)'],
-      ['=NETWORKDAYS("01/01/2020", "31/12/2020", A1:B1)'],
-      ['=NETWORKDAYS("01/01/2020", "31/12/2020", A1:D1)'],
-      ['=NETWORKDAYS("01/01/2020", "31/12/2020", A1:E1)'],
+      [{ cellValue: '29/09/2020' }, { cellValue: '=A1+0.1' }, { cellValue: '31/12/2019' }, { cellValue: '01/01/2021'}, {cellValue: '27/09/2020' }],
+      [{ cellValue: '=NETWORKDAYS("01/01/2020", "31/12/2020")' }],
+      [{ cellValue: '=NETWORKDAYS("01/01/2020", "31/12/2020", A1:A1)' }],
+      [{ cellValue: '=NETWORKDAYS("01/01/2020", "31/12/2020", A1:B1)' }],
+      [{ cellValue: '=NETWORKDAYS("01/01/2020", "31/12/2020", A1:D1)' }],
+      [{ cellValue: '=NETWORKDAYS("01/01/2020", "31/12/2020", A1:E1)' }],
     ])
     expect(engine.getCellValue(adr('A2'))).toEqual(262)
     expect(engine.getCellValue(adr('A3'))).toEqual(261)
@@ -43,12 +43,12 @@ describe('Function NETWORKDAYS', () => {
 
   it('should output correct values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['01/01/2020', '=A1+5', '=A1+8', '=A1+9', '=A1+15', '=A1+18', '=A1+19', '=A1+32', '=A1+54', '=A1+55'],
-      ['=NETWORKDAYS(A1, A1+100, A1:J1)'],
-      ['=NETWORKDAYS(A1+7, A1+20, A1:J1)'],
-      ['=NETWORKDAYS(A1+7, A1+100, A1:J1)'],
-      ['=NETWORKDAYS(A1+13, A1+50, A1:J1)'],
-      ['=NETWORKDAYS(A1+50, A1+56, A1:J1)'],
+      [{ cellValue: '01/01/2020' }, { cellValue: '=A1+5' }, { cellValue: '=A1+8' }, { cellValue: '=A1+9'}, {cellValue: '=A1+15' }, { cellValue: '=A1+18' }, { cellValue: '=A1+19' }, { cellValue: '=A1+32' }, { cellValue: '=A1+54' }, { cellValue: '=A1+55' }],
+      [{ cellValue: '=NETWORKDAYS(A1, A1+100, A1:J1)' }],
+      [{ cellValue: '=NETWORKDAYS(A1+7, A1+20, A1:J1)' }],
+      [{ cellValue: '=NETWORKDAYS(A1+7, A1+100, A1:J1)' }],
+      [{ cellValue: '=NETWORKDAYS(A1+13, A1+50, A1:J1)' }],
+      [{ cellValue: '=NETWORKDAYS(A1+50, A1+56, A1:J1)' }],
     ])
     expect(engine.getCellValue(adr('A2'))).toEqual(65)
     expect(engine.getCellValue(adr('A3'))).toEqual(6)
@@ -60,10 +60,10 @@ describe('Function NETWORKDAYS', () => {
   it('checks types in last argument', () => {
     const [engine] = HyperFormula.buildFromArray([
       [true, '\'1', null, '=NA()'],
-      ['=NETWORKDAYS(1000, 1, A1:A1)'],
-      ['=NETWORKDAYS(1000, 1, B1:B1)'],
-      ['=NETWORKDAYS(1000, 1, C1:C1)'],
-      ['=NETWORKDAYS(1000, 1, A1:D1)'],
+      [{ cellValue: '=NETWORKDAYS(1000, 1, A1:A1)' }],
+      [{ cellValue: '=NETWORKDAYS(1000, 1, B1:B1)' }],
+      [{ cellValue: '=NETWORKDAYS(1000, 1, C1:C1)' }],
+      [{ cellValue: '=NETWORKDAYS(1000, 1, A1:D1)' }],
     ])
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
     expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))

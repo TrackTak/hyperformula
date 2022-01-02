@@ -7,8 +7,8 @@ describe('Function LOGNORM.DIST', () => {
   //in product #1, this function takes 3 arguments
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOGNORM.DIST(1, 2, 3)'],
-      ['=LOGNORM.DIST(1, 2, 3, 4, 5)'],
+      [{ cellValue: '=LOGNORM.DIST(1, 2, 3)' }],
+      [{ cellValue: '=LOGNORM.DIST(1, 2, 3, 4, 5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -18,10 +18,10 @@ describe('Function LOGNORM.DIST', () => {
   //in product #1, this function takes 3 arguments
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOGNORM.DIST("foo", 2, 3, TRUE())'],
-      ['=LOGNORM.DIST(1, "baz", 3, TRUE())'],
-      ['=LOGNORM.DIST(1, 2, "baz", TRUE())'],
-      ['=LOGNORM.DIST(1, 2, 3, "abcd")'],
+      [{ cellValue: '=LOGNORM.DIST("foo", 2, 3, TRUE())' }],
+      [{ cellValue: '=LOGNORM.DIST(1, "baz", 3, TRUE())' }],
+      [{ cellValue: '=LOGNORM.DIST(1, 2, "baz", TRUE())' }],
+      [{ cellValue: '=LOGNORM.DIST(1, 2, 3, "abcd")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -33,8 +33,8 @@ describe('Function LOGNORM.DIST', () => {
   //in product #1, this function takes 3 arguments
   it('should work as cdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOGNORM.DIST(0.1, 1, 2, TRUE())'],
-      ['=LOGNORM.DIST(0.5, 2, 4, TRUE())'],
+      [{ cellValue: '=LOGNORM.DIST(0.1, 1, 2, TRUE())' }],
+      [{ cellValue: '=LOGNORM.DIST(0.5, 2, 4, TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.0493394267528022, 6)
@@ -44,8 +44,8 @@ describe('Function LOGNORM.DIST', () => {
   //in product #1, this function takes 3 arguments
   it('should work as pdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOGNORM.DIST(0.1, 1, 2, FALSE())'],
-      ['=LOGNORM.DIST(0.5, 2, 4, FALSE())'],
+      [{ cellValue: '=LOGNORM.DIST(0.1, 1, 2, FALSE())' }],
+      [{ cellValue: '=LOGNORM.DIST(0.5, 2, 4, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.510234855730895, 6)
@@ -55,9 +55,9 @@ describe('Function LOGNORM.DIST', () => {
   //in product #1, this function takes 3 arguments
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOGNORM.DIST(0.01, 0, 0.01, FALSE())'],
-      ['=LOGNORM.DIST(0, 0, 0.01, FALSE())'],
-      ['=LOGNORM.DIST(0.01, 0, 0, FALSE())'],
+      [{ cellValue: '=LOGNORM.DIST(0.01, 0, 0.01, FALSE())' }],
+      [{ cellValue: '=LOGNORM.DIST(0, 0, 0.01, FALSE())' }],
+      [{ cellValue: '=LOGNORM.DIST(0.01, 0, 0, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)

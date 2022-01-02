@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function HF.ADD', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.ADD(1)', '=HF.ADD(1, 1, 1)'],
+      [{ cellValue: '=HF.ADD(1)' }, { cellValue: '=HF.ADD(1, 1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,10 +15,10 @@ describe('Function HF.ADD', () => {
 
   it('should calculate the correct value with correct defaults', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.ADD(2,3)'],
-      ['=HF.ADD(1.0000000000001,-1)'],
-      ['=HF.ADD(1,)'],
-      ['=HF.ADD(,)']
+      [{ cellValue: '=HF.ADD(2,3)' }],
+      [{ cellValue: '=HF.ADD(1.0000000000001,-1)' }],
+      [{ cellValue: '=HF.ADD(1,)' }],
+      [{ cellValue: '=HF.ADD(,)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(5)
@@ -29,8 +29,8 @@ describe('Function HF.ADD', () => {
 
   it('should coerce to correct types', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.ADD(TRUE(),B1)'],
-      ['=HF.ADD("1",)'],
+      [{ cellValue: '=HF.ADD(TRUE(),B1)' }],
+      [{ cellValue: '=HF.ADD("1",)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -39,9 +39,9 @@ describe('Function HF.ADD', () => {
 
   it('should throw correct error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.ADD("abcd",)'],
-      ['=HF.ADD(NA(),)'],
-      ['=HF.ADD(B3:C3,)'],
+      [{ cellValue: '=HF.ADD("abcd",)' }],
+      [{ cellValue: '=HF.ADD(NA(),)' }],
+      [{ cellValue: '=HF.ADD(B3:C3,)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -50,7 +50,7 @@ describe('Function HF.ADD', () => {
   })
 
   it('passes subtypes', () => {
-    const [engine] = HyperFormula.buildFromArray([['=HF.ADD(B1,C1)', '1$', 1]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=HF.ADD(B1,C1)' }, { cellValue: '1$' }, { cellValue: 1 }]])
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
   })
 })

@@ -6,10 +6,10 @@ import {adr, detailedError} from '../testUtils'
 describe('Function XOR', () => {
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XOR(TRUE(), TRUE())'],
-      ['=XOR(TRUE(), FALSE())'],
-      ['=XOR(FALSE(), TRUE())'],
-      ['=XOR(FALSE(), FALSE())'],
+      [{ cellValue: '=XOR(TRUE(), TRUE())' }],
+      [{ cellValue: '=XOR(TRUE(), FALSE())' }],
+      [{ cellValue: '=XOR(FALSE(), TRUE())' }],
+      [{ cellValue: '=XOR(FALSE(), FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(false)
@@ -20,7 +20,7 @@ describe('Function XOR', () => {
 
   it('at least one argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XOR()'],
+      [{ cellValue: '=XOR()' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -28,8 +28,8 @@ describe('Function XOR', () => {
 
   it('for one argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XOR(TRUE())'],
-      ['=XOR(FALSE())'],
+      [{ cellValue: '=XOR(TRUE())' }],
+      [{ cellValue: '=XOR(FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -38,9 +38,9 @@ describe('Function XOR', () => {
 
   it('use coercion #1', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XOR("TRUE")'],
-      ['=XOR(1)'],
-      ['=XOR(1, "foo")'],
+      [{ cellValue: '=XOR("TRUE")' }],
+      [{ cellValue: '=XOR(1)' }],
+      [{ cellValue: '=XOR(1, "foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -50,10 +50,10 @@ describe('Function XOR', () => {
 
   it('use coercion #2', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XOR(A4:B4)'],
-      ['=XOR(C4:D4)'],
-      ['=XOR(C4:D4, "foo")'],
-      ['TRUE', 1, 'foo', '=TRUE()'],
+      [{ cellValue: '=XOR(A4:B4)' }],
+      [{ cellValue: '=XOR(C4:D4)' }],
+      [{ cellValue: '=XOR(C4:D4, "foo")' }],
+      [{ cellValue: 'TRUE' }, { cellValue: 1 }, { cellValue: 'foo' }, { cellValue: '=TRUE()'}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(false)
@@ -63,7 +63,7 @@ describe('Function XOR', () => {
 
   it('when no coercible to number arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XOR("foo")'],
+      [{ cellValue: '=XOR("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
@@ -71,9 +71,9 @@ describe('Function XOR', () => {
 
   it('returns TRUE iff odd number of TRUEs present', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XOR(TRUE(), TRUE(), TRUE())'],
-      ['=XOR(TRUE(), TRUE(), TRUE(), TRUE())'],
-      ['=XOR(TRUE(), TRUE(), TRUE(), TRUE(), TRUE())'],
+      [{ cellValue: '=XOR(TRUE(), TRUE(), TRUE())' }],
+      [{ cellValue: '=XOR(TRUE(), TRUE(), TRUE(), TRUE())' }],
+      [{ cellValue: '=XOR(TRUE(), TRUE(), TRUE(), TRUE(), TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -83,9 +83,9 @@ describe('Function XOR', () => {
 
   it('if error in range found, returns first one in row-by-row order', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '=4/0'],
-      ['=FOOBAR()', '1'],
-      ['=XOR(A1:B2)'],
+      [{ cellValue: '0' }, { cellValue: '=4/0' }],
+      [{ cellValue: '=FOOBAR()' }, { cellValue: '1' }],
+      [{ cellValue: '=XOR(A1:B2)' }],
     ])
 
     expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -93,9 +93,9 @@ describe('Function XOR', () => {
 
   it('works with ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '0'],
-      ['0', '1'],
-      ['=XOR(A1:B2)'],
+      [{ cellValue: '0' }, { cellValue: '0' }],
+      [{ cellValue: '0' }, { cellValue: '1' }],
+      [{ cellValue: '=XOR(A1:B2)' }],
     ])
 
     expect(engine.getCellValue(adr('A3'))).toEqual(true)
@@ -103,9 +103,9 @@ describe('Function XOR', () => {
 
   it('is computed eagerly', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '=4/0'],
-      ['0', '1'],
-      ['=XOR(A1:B2)'],
+      [{ cellValue: '1' }, { cellValue: '=4/0' }],
+      [{ cellValue: '0' }, { cellValue: '1' }],
+      [{ cellValue: '=XOR(A1:B2)' }],
     ])
 
     expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

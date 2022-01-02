@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function ISPMT', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISPMT(1,1,1)', '=ISPMT(1, 1, 1, 1, 1)'],
+      [{ cellValue: '=ISPMT(1,1,1)' }, { cellValue: '=ISPMT(1, 1, 1, 1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,7 +14,7 @@ describe('Function ISPMT', () => {
 
   it('should calculate the correct value with correct arguments and defaults', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISPMT(1, 1, 10, 1)', '=ISPMT(1, 1, 0, 1)', '=ISPMT(1, -1, 1, 1)', '=ISPMT(-1, -1, 1, -1)'],
+      [{ cellValue: '=ISPMT(1, 1, 10, 1)' }, { cellValue: '=ISPMT(1, 1, 0, 1)' }, { cellValue: '=ISPMT(1, -1, 1, 1)' }, { cellValue: '=ISPMT(-1, -1, 1, -1)'}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(-0.9)

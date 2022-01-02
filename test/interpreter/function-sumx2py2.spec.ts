@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function SUMX2PY2', () => {
   it('should validate number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUMX2PY2(1)'],
-      ['=SUMX2PY2(1,2,3)']
+      [{ cellValue: '=SUMX2PY2(1)' }],
+      [{ cellValue: '=SUMX2PY2(1,2,3)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,32 +15,32 @@ describe('Function SUMX2PY2', () => {
 
   it('should return correct output', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUMX2PY2(A2:D2, A3:D3)'],
-      [1, 2, 3, 4],
-      [5, 4, 2, 1],
+      [{ cellValue: '=SUMX2PY2(A2:D2, A3:D3)' }],
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}],
+      [{ cellValue: 5 }, { cellValue: 4 }, { cellValue: 2 }, { cellValue: 1}],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual(76)
   })
 
   it('should validate that ranges are of equal length', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUMX2PY2(A2:F2, A3:E3)'],
+      [{ cellValue: '=SUMX2PY2(A2:F2, A3:E3)' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
   })
 
   it('should propagate errors', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUMX2PY2(A2:E2, A3:E3)'],
-      [1, 2, 3, '=NA()', 5, 6],
-      [5, 4, 2, 1, 5, 10],
+      [{ cellValue: '=SUMX2PY2(A2:E2, A3:E3)' }],
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: '=NA()'}, {cellValue: 5 }, { cellValue: 6 }],
+      [{ cellValue: 5 }, { cellValue: 4 }, { cellValue: 2 }, { cellValue: 1}, {cellValue: 5 }, { cellValue: 10 }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))
   })
 
   it('should ignore non-number inputs', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUMX2PY2(A2:D2, A3:D3)'],
+      [{ cellValue: '=SUMX2PY2(A2:D2, A3:D3)' }],
       [null, 2, '\'1', 4],
       [5, '\'abcd', 2, true],
     ])

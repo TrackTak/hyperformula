@@ -50,7 +50,7 @@ class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlu
   }
 
   public arrayfoo(_ast: ProcedureAst, _state: InterpreterState): SimpleRangeValue {
-    return SimpleRangeValue.onlyValues([[1, 1], [1, 1]])
+    return SimpleRangeValue.onlyValues([[{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }]])
   }
 
   public arraysizeFoo(_ast: ProcedureAst, _state: InterpreterState): ArraySize {
@@ -140,7 +140,7 @@ describe('Register static custom plugin', () => {
   it('should register single function with translations', () => {
     HyperFormula.registerFunction('FOO', FooPlugin, FooPlugin.translations)
 
-    const [engine] = HyperFormula.buildFromArray([['=FOO()']])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=FOO()' }]])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('foo')
   })
@@ -159,7 +159,7 @@ describe('Register static custom plugin', () => {
     HyperFormula.registerFunctionPlugin(FooPlugin, FooPlugin.translations)
 
     const [engine] = HyperFormula.buildFromArray([
-      ['=foo()', '=bar()']
+      [{ cellValue: '=foo()' }, { cellValue: '=bar()' }]
     ])
 
     expect(HyperFormula.getRegisteredFunctionNames('enGB')).toContain('FOO')
@@ -171,7 +171,7 @@ describe('Register static custom plugin', () => {
   it('should register single formula from plugin', () => {
     HyperFormula.registerFunction('BAR', FooPlugin, FooPlugin.translations)
     const [engine] = HyperFormula.buildFromArray([
-      ['=foo()', '=bar()']
+      [{ cellValue: '=foo()' }, { cellValue: '=bar()' }]
     ])
 
     expect(HyperFormula.getRegisteredFunctionNames('enGB')).not.toContain('FOO')
@@ -183,16 +183,16 @@ describe('Register static custom plugin', () => {
   it('should register single array functions', () => {
     HyperFormula.registerFunction('ARRAYFOO', FooPlugin, FooPlugin.translations)
     const [engine] = HyperFormula.buildFromArray([
-      ['=ARRAYFOO()']
+      [{ cellValue: '=ARRAYFOO()' }]
     ])
 
-    expect(engine.getSheetValues(0)).toEqual([[1, 1], [1, 1]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }]])
   })
 
   it('should override one formula with custom implementation', () => {
     HyperFormula.registerFunction('SUM', SumWithExtra)
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUM(1, 2)', '=MAX(1, 2)']
+      [{ cellValue: '=SUM(1, 2)' }, { cellValue: '=MAX(1, 2)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(45)
@@ -202,7 +202,7 @@ describe('Register static custom plugin', () => {
   it('should allow to register only alias', () => {
     HyperFormula.registerFunction('SUMALIAS', SumWithExtra, {'enGB': {'SUMALIAS': 'SUMALIAS'}})
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUMALIAS(1, 2)', '=MAX(1, 2)']
+      [{ cellValue: '=SUMALIAS(1, 2)' }, { cellValue: '=MAX(1, 2)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(45)
@@ -264,12 +264,12 @@ describe('Instance level formula registry', () => {
   it('should return registered formula ids', () => {
     const [engine] = HyperFormula.buildFromArray([], {functionPlugins: [FooPlugin, SumWithExtra]})
 
-    expectArrayWithSameContent(engine.getRegisteredFunctionNames(), ['SUM', 'FOO', 'BAR', 'VERSION'])
+    expectArrayWithSameContent(engine.getRegisteredFunctionNames(), [{ cellValue: 'SUM' }, { cellValue: 'FOO' }, { cellValue: 'BAR' }, { cellValue: 'VERSION'}])
   })
 
   it('should create engine only with plugins passed to configuration', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=foo()', '=bar()', '=SUM(1, 2)']
+      [{ cellValue: '=foo()' }, { cellValue: '=bar()' }, { cellValue: '=SUM(1, 2)' }]
     ], {functionPlugins: [FooPlugin]})
 
     expectArrayWithSameContent(['FOO', 'BAR', 'VERSION'], engine.getRegisteredFunctionNames())
@@ -281,7 +281,7 @@ describe('Instance level formula registry', () => {
   it('modifying static plugins should not affect existing engine instance registry', () => {
     HyperFormula.registerFunctionPlugin(FooPlugin)
     const [engine] = HyperFormula.buildFromArray([
-      ['=foo()', '=bar()']
+      [{ cellValue: '=foo()' }, { cellValue: '=bar()' }]
     ])
     HyperFormula.unregisterFunction('FOO')
 

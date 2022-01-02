@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function ROMAN', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROMAN()', '=ROMAN(1, 1, 1)'],
+      [{ cellValue: '=ROMAN()' }, { cellValue: '=ROMAN(1, 1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,11 +14,11 @@ describe('Function ROMAN', () => {
 
   it('should properly truncate values and use defaults', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROMAN(499)'],
-      ['=ROMAN(499, TRUE())'],
-      ['=ROMAN(499, FALSE())'],
-      ['=ROMAN(499.9)'],
-      ['=ROMAN(499, 1.1)'],
+      [{ cellValue: '=ROMAN(499)' }],
+      [{ cellValue: '=ROMAN(499, TRUE())' }],
+      [{ cellValue: '=ROMAN(499, FALSE())' }],
+      [{ cellValue: '=ROMAN(499.9)' }],
+      [{ cellValue: '=ROMAN(499, 1.1)' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual('CDXCIX')
     expect(engine.getCellValue(adr('A2'))).toEqual('CDXCIX')
@@ -29,11 +29,11 @@ describe('Function ROMAN', () => {
 
   it('should throw correct error if arguments are out of bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROMAN(0)'],
-      ['=ROMAN(4000)'],
-      ['=ROMAN(-1)'],
-      ['=ROMAN(1,"a")'],
-      ['=ROMAN(1,5)'],
+      [{ cellValue: '=ROMAN(0)' }],
+      [{ cellValue: '=ROMAN(4000)' }],
+      [{ cellValue: '=ROMAN(-1)' }],
+      [{ cellValue: '=ROMAN(1,"a")' }],
+      [{ cellValue: '=ROMAN(1,5)' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))

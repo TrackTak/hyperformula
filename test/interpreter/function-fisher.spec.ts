@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function FISHER', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FISHER()'],
-      ['=FISHER(1, 2)'],
+      [{ cellValue: '=FISHER()' }],
+      [{ cellValue: '=FISHER(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,7 +16,7 @@ describe('Function FISHER', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FISHER("foo")'],
+      [{ cellValue: '=FISHER("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -24,8 +24,8 @@ describe('Function FISHER', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FISHER(0)'],
-      ['=FISHER(0.5)'],
+      [{ cellValue: '=FISHER(0)' }],
+      [{ cellValue: '=FISHER(0.5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)
@@ -34,8 +34,8 @@ describe('Function FISHER', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FISHER(-1)'],
-      ['=FISHER(1)'],
+      [{ cellValue: '=FISHER(-1)' }],
+      [{ cellValue: '=FISHER(1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))

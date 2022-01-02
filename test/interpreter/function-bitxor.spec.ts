@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('function BITXOR', () => {
   it('should not work for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITXOR(101)'],
-      ['=BITXOR(1, 2, 3)'],
+      [{ cellValue: '=BITXOR(101)' }],
+      [{ cellValue: '=BITXOR(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('function BITXOR', () => {
 
   it('should not work for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITXOR(1, "foo")'],
-      ['=BITXOR("bar", 4)'],
-      ['=BITXOR("foo", "baz")'],
+      [{ cellValue: '=BITXOR(1, "foo")' }],
+      [{ cellValue: '=BITXOR("bar", 4)' }],
+      [{ cellValue: '=BITXOR("foo", "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,8 +28,8 @@ describe('function BITXOR', () => {
 
   it('should not work for negative numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITXOR(1, -2)'],
-      ['=BITXOR(-1, 2)'],
+      [{ cellValue: '=BITXOR(1, -2)' }],
+      [{ cellValue: '=BITXOR(-1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -38,8 +38,8 @@ describe('function BITXOR', () => {
 
   it('should not work for non-integers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITXOR(1.2, 2)'],
-      ['=BITXOR(3.14, 5)'],
+      [{ cellValue: '=BITXOR(1.2, 2)' }],
+      [{ cellValue: '=BITXOR(3.14, 5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.IntegerExpected))
@@ -48,11 +48,11 @@ describe('function BITXOR', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITXOR(1, 5)'],
-      ['=BITXOR(457, 111)'],
-      ['=BITXOR(BIN2DEC(101), BIN2DEC(1))'],
-      ['=BITXOR(256, 123)'],
-      ['=BITXOR(0, 0)'],
+      [{ cellValue: '=BITXOR(1, 5)' }],
+      [{ cellValue: '=BITXOR(457, 111)' }],
+      [{ cellValue: '=BITXOR(BIN2DEC(101), BIN2DEC(1))' }],
+      [{ cellValue: '=BITXOR(256, 123)' }],
+      [{ cellValue: '=BITXOR(0, 0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(4)
@@ -64,7 +64,7 @@ describe('function BITXOR', () => {
 
   it('should return numeric type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITXOR(1, 5)'],
+      [{ cellValue: '=BITXOR(1, 5)' }],
     ])
 
     expect(engine.getCellValueType(adr('A1'))).toEqual(CellValueType.NUMBER)

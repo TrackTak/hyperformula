@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function ARABIC', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ARABIC()', '=ARABIC(1, 1)'],
+      [{ cellValue: '=ARABIC()' }, { cellValue: '=ARABIC(1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,9 +14,9 @@ describe('Function ARABIC', () => {
 
   it('should properly sanitize input', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ARABIC(" XD ")'],
-      ['=ARABIC("xd")'],
-      ['=ARABIC(" xD ")'],
+      [{ cellValue: '=ARABIC(" XD ")' }],
+      [{ cellValue: '=ARABIC("xd")' }],
+      [{ cellValue: '=ARABIC(" xD ")' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual(490)
     expect(engine.getCellValue(adr('A2'))).toEqual(490)
@@ -25,13 +25,13 @@ describe('Function ARABIC', () => {
 
   it('should detect incorrect numerals', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ARABIC("IMM")'],
-      ['=ARABIC("MMMM")'],
-      ['=ARABIC("IXC")'],
-      ['=ARABIC("--I")'],
-      ['=ARABIC("-")'],
-      ['=ARABIC("Ma")'],
-      ['=ARABIC("M M")'],
+      [{ cellValue: '=ARABIC("IMM")' }],
+      [{ cellValue: '=ARABIC("MMMM")' }],
+      [{ cellValue: '=ARABIC("IXC")' }],
+      [{ cellValue: '=ARABIC("--I")' }],
+      [{ cellValue: '=ARABIC("-")' }],
+      [{ cellValue: '=ARABIC("Ma")' }],
+      [{ cellValue: '=ARABIC("M M")' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
@@ -44,9 +44,9 @@ describe('Function ARABIC', () => {
 
   it('works for border cases', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ARABIC("MMMIMIDCCCICILXXXIXIVIII")'],
-      ['=ARABIC("-I")'],
-      ['=ARABIC(" ")'],
+      [{ cellValue: '=ARABIC("MMMIMIDCCCICILXXXIXIVIII")' }],
+      [{ cellValue: '=ARABIC("-I")' }],
+      [{ cellValue: '=ARABIC(" ")' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual(4992)
     expect(engine.getCellValue(adr('A2'))).toEqual(-1)

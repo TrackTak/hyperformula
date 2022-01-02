@@ -47,10 +47,10 @@ describe('Documentation example spec', () => {
   it('works', () => {
     HyperFormula.getLanguage('enGB').extendFunctions({SQUARE: 'SQUARE'})
     const [engine] = HyperFormula.buildFromArray([
-      ['=SQUARE(2)'],
-      ['=SQUARE()'],
-      ['=SQUARE(TRUE())'],
-      ['=SQUARE(1/0)'],
+      [{ cellValue: '=SQUARE(2)' }],
+      [{ cellValue: '=SQUARE()' }],
+      [{ cellValue: '=SQUARE(TRUE())' }],
+      [{ cellValue: '=SQUARE(1/0)' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual(4)
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA))

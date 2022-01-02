@@ -65,10 +65,10 @@ describe('Function REPLACE', () => {
 
   it('should return value when arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=REPLACE("foobar", "o", 1, "bar")'],
-      ['=REPLACE("foobar", 1, "f", "bar")'],
-      ['=REPLACE(B1:B2, 1, 2, "bar")'],
-      ['=REPLACE("foobar", 1, 2, B1:B2)'],
+      [{ cellValue: '=REPLACE("foobar", "o", 1, "bar")' }],
+      [{ cellValue: '=REPLACE("foobar", 1, "f", "bar")' }],
+      [{ cellValue: '=REPLACE(B1:B2, 1, 2, "bar")' }],
+      [{ cellValue: '=REPLACE("foobar", 1, 2, B1:B2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))

@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function DEVSQ', () => {
   it('single number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEVSQ(1)'],
+      [{ cellValue: '=DEVSQ(1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)
@@ -13,7 +13,7 @@ describe('Function DEVSQ', () => {
 
   it('two numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEVSQ(1, 2)'],
+      [{ cellValue: '=DEVSQ(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0.5)
@@ -21,7 +21,7 @@ describe('Function DEVSQ', () => {
 
   it('more numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEVSQ(3, 1, 2, 4, 5)'],
+      [{ cellValue: '=DEVSQ(3, 1, 2, 4, 5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(10)
@@ -29,8 +29,8 @@ describe('Function DEVSQ', () => {
 
   it('works with ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '9', '0'],
-      ['=DEVSQ(A1:C1)'],
+      [{ cellValue: '0' }, { cellValue: '9' }, { cellValue: '0' }],
+      [{ cellValue: '=DEVSQ(A1:C1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqual(54)
@@ -38,7 +38,7 @@ describe('Function DEVSQ', () => {
 
   it('propagates error from regular argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=3/0', '=DEVSQ(A1)'],
+      [{ cellValue: '=3/0' }, { cellValue: '=DEVSQ(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -46,7 +46,7 @@ describe('Function DEVSQ', () => {
 
   it('propagates first error from range argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=3/0', '=FOO(', '=DEVSQ(A1:B1)'],
+      [{ cellValue: '=3/0' }, { cellValue: '=FOO(' }, { cellValue: '=DEVSQ(A1:B1)' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -55,9 +55,9 @@ describe('Function DEVSQ', () => {
   //inconsistency with product #2
   it('returns 0 for empty ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEVSQ(A2:A3)'],
-      [null],
-      [null],
+      [{ cellValue: '=DEVSQ(A2:A3)' }],
+      [{ cellValue: null }],
+      [{ cellValue: null }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)
@@ -68,7 +68,7 @@ describe('Function DEVSQ', () => {
    */
   it('does coercions of nonnumeric explicit arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEVSQ(TRUE(),FALSE(),)']
+      [{ cellValue: '=DEVSQ(TRUE(),FALSE(),)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.666666666666667, 6)
@@ -76,7 +76,7 @@ describe('Function DEVSQ', () => {
 
   it('ignores nonnumeric values in ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEVSQ(A2:D2)'],
+      [{ cellValue: '=DEVSQ(A2:D2)' }],
       [0, 1, false, null, '\'0']
     ])
 

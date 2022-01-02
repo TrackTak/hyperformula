@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Interpreter - function RAND', () => {
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=RAND()'],
+      [{ cellValue: '=RAND()' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeGreaterThanOrEqual(0.0)
@@ -15,7 +15,7 @@ describe('Interpreter - function RAND', () => {
 
   it('validates number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=RAND(42)'],
+      [{ cellValue: '=RAND(42)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))

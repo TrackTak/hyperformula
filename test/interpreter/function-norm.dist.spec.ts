@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function NORM.DIST', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.DIST(1, 2, 3)'],
-      ['=NORM.DIST(1, 2, 3, 4, 5)'],
+      [{ cellValue: '=NORM.DIST(1, 2, 3)' }],
+      [{ cellValue: '=NORM.DIST(1, 2, 3, 4, 5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,10 +16,10 @@ describe('Function NORM.DIST', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.DIST("foo", 2, 3, TRUE())'],
-      ['=NORM.DIST(1, "baz", 3, TRUE())'],
-      ['=NORM.DIST(1, 2, "baz", TRUE())'],
-      ['=NORM.DIST(1, 2, 3, "abcd")'],
+      [{ cellValue: '=NORM.DIST("foo", 2, 3, TRUE())' }],
+      [{ cellValue: '=NORM.DIST(1, "baz", 3, TRUE())' }],
+      [{ cellValue: '=NORM.DIST(1, 2, "baz", TRUE())' }],
+      [{ cellValue: '=NORM.DIST(1, 2, 3, "abcd")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -30,8 +30,8 @@ describe('Function NORM.DIST', () => {
 
   it('should work as cdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.DIST(-1, 1, 2, TRUE())'],
-      ['=NORM.DIST(0.5, 2, 4, TRUE())'],
+      [{ cellValue: '=NORM.DIST(-1, 1, 2, TRUE())' }],
+      [{ cellValue: '=NORM.DIST(0.5, 2, 4, TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.158655253931457, 6)
@@ -40,8 +40,8 @@ describe('Function NORM.DIST', () => {
 
   it('should work as pdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.DIST(-1, 1, 2, FALSE())'],
-      ['=NORM.DIST(0.5, 2, 4, FALSE())'],
+      [{ cellValue: '=NORM.DIST(-1, 1, 2, FALSE())' }],
+      [{ cellValue: '=NORM.DIST(0.5, 2, 4, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.120985362259572, 6)
@@ -50,8 +50,8 @@ describe('Function NORM.DIST', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.DIST(-1, -1, 0.01, FALSE())'],
-      ['=NORM.DIST(-1, -1, 0, FALSE())'],
+      [{ cellValue: '=NORM.DIST(-1, -1, 0.01, FALSE())' }],
+      [{ cellValue: '=NORM.DIST(-1, -1, 0, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(39.8942280401433, 6)

@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function BINOM.INV', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BINOM.INV(1, 2)'],
-      ['=BINOM.INV(1, 2, 3, 4)'],
+      [{ cellValue: '=BINOM.INV(1, 2)' }],
+      [{ cellValue: '=BINOM.INV(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function BINOM.INV', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BINOM.INV("foo", 0.5, 3)'],
-      ['=BINOM.INV(1, "baz", 3)'],
-      ['=BINOM.INV(1, 0.5, "baz")'],
+      [{ cellValue: '=BINOM.INV("foo", 0.5, 3)' }],
+      [{ cellValue: '=BINOM.INV(1, "baz", 3)' }],
+      [{ cellValue: '=BINOM.INV(1, 0.5, "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -65,7 +65,7 @@ describe('Function BINOM.INV', () => {
         '=BINOM.INV(10, 0.8, 0.999)'],
     ])
 
-    expect(engine.getSheetValues(0)).toEqual([[4, 6, 7, 7, 8, 8, 8, 9, 9, 10, 10]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 4 }, { cellValue: 6 }, { cellValue: 7 }, { cellValue: 7}, {cellValue: 8 }, { cellValue: 8 }, { cellValue: 8 }, { cellValue: 9 }, { cellValue: 9 }, { cellValue: 10 }, { cellValue: 10 }]])
   })
 
   it('should work, small number of trials', () => {
@@ -83,7 +83,7 @@ describe('Function BINOM.INV', () => {
         '=BINOM.INV(0, 0.8, 0.999)'],
     ])
 
-    expect(engine.getSheetValues(0)).toEqual([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0}, {cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }]])
   })
 
   it('should work, another small number of trials', () => {
@@ -102,7 +102,7 @@ describe('Function BINOM.INV', () => {
     ])
 
     //both products #1 and #2 return 1 for '=BINOM.INV(1, 0.8, 0.2)', which is incorrect
-    expect(engine.getSheetValues(0)).toEqual([[0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 1}, {cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }]])
   })
 
   it('should work, large number of trials', () => {
@@ -120,7 +120,7 @@ describe('Function BINOM.INV', () => {
         '=BINOM.INV(1000, 0.8, 0.999)'],
     ])
 
-    expect(engine.getSheetValues(0)).toEqual([[760, 784, 789, 793, 797, 800, 803, 807, 811, 816, 838]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 760 }, { cellValue: 784 }, { cellValue: 789 }, { cellValue: 793}, {cellValue: 797 }, { cellValue: 800 }, { cellValue: 803 }, { cellValue: 807 }, { cellValue: 811 }, { cellValue: 816 }, { cellValue: 838 }]])
   })
 
   it('truncation works', () => {
@@ -138,19 +138,19 @@ describe('Function BINOM.INV', () => {
         '=BINOM.INV(1000.999, 0.8, 0.999)'],
     ])
 
-    expect(engine.getSheetValues(0)).toEqual([[760, 784, 789, 793, 797, 800, 803, 807, 811, 816, 838]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 760 }, { cellValue: 784 }, { cellValue: 789 }, { cellValue: 793}, {cellValue: 797 }, { cellValue: 800 }, { cellValue: 803 }, { cellValue: 807 }, { cellValue: 811 }, { cellValue: 816 }, { cellValue: 838 }]])
   })
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BINOM.INV(0, 0.5, 0.5)'],
-      ['=BINOM.INV(-0.001, 0.5, 0.5)'],
-      ['=BINOM.INV(10, 0, 0.5)'],
-      ['=BINOM.INV(10, 1, 0.5)'],
-      ['=BINOM.INV(10, -0.001, 0.5)'],
-      ['=BINOM.INV(10, 1.001, 0.5)'],
-      ['=BINOM.INV(10, 0.5, 0)'],
-      ['=BINOM.INV(10, 0.5, 1)'],
+      [{ cellValue: '=BINOM.INV(0, 0.5, 0.5)' }],
+      [{ cellValue: '=BINOM.INV(-0.001, 0.5, 0.5)' }],
+      [{ cellValue: '=BINOM.INV(10, 0, 0.5)' }],
+      [{ cellValue: '=BINOM.INV(10, 1, 0.5)' }],
+      [{ cellValue: '=BINOM.INV(10, -0.001, 0.5)' }],
+      [{ cellValue: '=BINOM.INV(10, 1.001, 0.5)' }],
+      [{ cellValue: '=BINOM.INV(10, 0.5, 0)' }],
+      [{ cellValue: '=BINOM.INV(10, 0.5, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)

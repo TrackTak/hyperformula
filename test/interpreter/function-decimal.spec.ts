@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function DECIMAL', () => {
   it('should return error when wrong number of argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DECIMAL(123)'],
-      ['=DECIMAL("foo", 2, 3)'],
+      [{ cellValue: '=DECIMAL(123)' }],
+      [{ cellValue: '=DECIMAL("foo", 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,8 +16,8 @@ describe('Function DECIMAL', () => {
 
   it('should return error when value does not correspond to base', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DECIMAL(12, 2)'],
-      ['=DECIMAL("123XYZ", 33)'],
+      [{ cellValue: '=DECIMAL(12, 2)' }],
+      [{ cellValue: '=DECIMAL("123XYZ", 33)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
@@ -26,13 +26,13 @@ describe('Function DECIMAL', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DECIMAL(10, 2)'],
-      ['=DECIMAL("11111111111111111111111111111111110", 2)'],
-      ['=DECIMAL(123, 4)'],
-      ['=DECIMAL("C0FFEE", 16)'],
-      ['=DECIMAL("C0FFEE", 25)'],
-      ['=DECIMAL("89WPQ", 33)'],
-      ['=DECIMAL("123XYZ", 36)'],
+      [{ cellValue: '=DECIMAL(10, 2)' }],
+      [{ cellValue: '=DECIMAL("11111111111111111111111111111111110", 2)' }],
+      [{ cellValue: '=DECIMAL(123, 4)' }],
+      [{ cellValue: '=DECIMAL("C0FFEE", 16)' }],
+      [{ cellValue: '=DECIMAL("C0FFEE", 25)' }],
+      [{ cellValue: '=DECIMAL("89WPQ", 33)' }],
+      [{ cellValue: '=DECIMAL("123XYZ", 36)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(2)
@@ -58,10 +58,10 @@ describe('Function DECIMAL', () => {
 
   it('should work only for bases from 2 to 36', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DECIMAL("0", 0)'],
-      ['=DECIMAL("10", 2)'],
-      ['=DECIMAL("XYZ", 36)'],
-      ['=DECIMAL("XYZ", 37)'],
+      [{ cellValue: '=DECIMAL("0", 0)' }],
+      [{ cellValue: '=DECIMAL("10", 2)' }],
+      [{ cellValue: '=DECIMAL("XYZ", 36)' }],
+      [{ cellValue: '=DECIMAL("XYZ", 37)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -72,7 +72,7 @@ describe('Function DECIMAL', () => {
 
   it('should return number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DECIMAL("123", 4)'],
+      [{ cellValue: '=DECIMAL("123", 4)' }],
     ])
 
     expect(engine.getCellValueType(adr('A1'))).toEqual(CellValueType.NUMBER)

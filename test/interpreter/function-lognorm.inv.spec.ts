@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function LOGNORM.INV', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOGNORM.INV(1, 2)'],
-      ['=LOGNORM.INV(1, 2, 3, 4)'],
+      [{ cellValue: '=LOGNORM.INV(1, 2)' }],
+      [{ cellValue: '=LOGNORM.INV(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function LOGNORM.INV', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOGNORM.INV("foo", 2, 3)'],
-      ['=LOGNORM.INV(0.5, "baz", 3)'],
-      ['=LOGNORM.INV(0.5, 2, "baz")'],
+      [{ cellValue: '=LOGNORM.INV("foo", 2, 3)' }],
+      [{ cellValue: '=LOGNORM.INV(0.5, "baz", 3)' }],
+      [{ cellValue: '=LOGNORM.INV(0.5, 2, "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,8 +28,8 @@ describe('Function LOGNORM.INV', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOGNORM.INV(0.1, 1, 2)'],
-      ['=LOGNORM.INV(0.5, 2, 4)'],
+      [{ cellValue: '=LOGNORM.INV(0.1, 1, 2)' }],
+      [{ cellValue: '=LOGNORM.INV(0.5, 2, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.209485002124057, 6)
@@ -38,11 +38,11 @@ describe('Function LOGNORM.INV', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOGNORM.INV(0.01, 0, 0.01)'],
-      ['=LOGNORM.INV(0, 0, 0.01)'],
-      ['=LOGNORM.INV(0.01, 0, 0)'],
-      ['=LOGNORM.INV(0.99, 0, 0.01)'],
-      ['=LOGNORM.INV(1, 0, 0.01)'],
+      [{ cellValue: '=LOGNORM.INV(0.01, 0, 0.01)' }],
+      [{ cellValue: '=LOGNORM.INV(0, 0, 0.01)' }],
+      [{ cellValue: '=LOGNORM.INV(0.01, 0, 0)' }],
+      [{ cellValue: '=LOGNORM.INV(0.99, 0, 0.01)' }],
+      [{ cellValue: '=LOGNORM.INV(1, 0, 0.01)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.977005029803317, 6)

@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function TRIM', () => {
   it('should return N/A when number of arguments is incorrect', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TRIM()'],
-      ['=TRIM("foo", "bar")']
+      [{ cellValue: '=TRIM()' }],
+      [{ cellValue: '=TRIM("foo", "bar")' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,10 +15,10 @@ describe('Function TRIM', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TRIM("   foo")'],
-      ['=TRIM("foo   ")'],
-      ['=TRIM(" foo   ")'],
-      ['=TRIM(" f    o  o   ")'],
+      [{ cellValue: '=TRIM("   foo")' }],
+      [{ cellValue: '=TRIM("foo   ")' }],
+      [{ cellValue: '=TRIM(" foo   ")' }],
+      [{ cellValue: '=TRIM(" f    o  o   ")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('foo')
@@ -29,9 +29,9 @@ describe('Function TRIM', () => {
 
   it('should coerce other types to string', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TRIM(1)'],
-      ['=TRIM(5+5)'],
-      ['=TRIM(TRUE())'],
+      [{ cellValue: '=TRIM(1)' }],
+      [{ cellValue: '=TRIM(5+5)' }],
+      [{ cellValue: '=TRIM(TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('1')

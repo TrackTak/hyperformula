@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('function DEC2HEX', () => {
   it('should return error when wrong type of argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEC2HEX("foo")'],
+      [{ cellValue: '=DEC2HEX("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -14,7 +14,7 @@ describe('function DEC2HEX', () => {
 
   it('should return error when wrong number of argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEC2HEX("foo", 2, 3)'],
+      [{ cellValue: '=DEC2HEX("foo", 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -22,10 +22,10 @@ describe('function DEC2HEX', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEC2HEX(1)'],
-      ['=DEC2HEX(50)'],
-      ['=DEC2HEX(122)'],
-      ['=DEC2HEX(-154)'],
+      [{ cellValue: '=DEC2HEX(1)' }],
+      [{ cellValue: '=DEC2HEX(50)' }],
+      [{ cellValue: '=DEC2HEX(122)' }],
+      [{ cellValue: '=DEC2HEX(-154)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('1')
@@ -36,8 +36,8 @@ describe('function DEC2HEX', () => {
 
   it('should work for numeric strings', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEC2HEX("123")'],
-      ['=DEC2HEX("-15")'],
+      [{ cellValue: '=DEC2HEX("123")' }],
+      [{ cellValue: '=DEC2HEX("-15")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('7B')
@@ -46,8 +46,8 @@ describe('function DEC2HEX', () => {
 
   it('should work for reference', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['12'],
-      ['=DEC2HEX(A1)'],
+      [{ cellValue: '12' }],
+      [{ cellValue: '=DEC2HEX(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqual('C')
@@ -55,7 +55,7 @@ describe('function DEC2HEX', () => {
 
   it('should return string value', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEC2HEX(123)'],
+      [{ cellValue: '=DEC2HEX(123)' }],
     ])
 
     expect(engine.getCellValueType(adr('A1'))).toBe(CellValueType.STRING)
@@ -63,10 +63,10 @@ describe('function DEC2HEX', () => {
 
   it('should work for numbers fitting in 10 bits', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEC2HEX(-549755813889)'],
-      ['=DEC2HEX(-549755813888)'],
-      ['=DEC2HEX(549755813887)'],
-      ['=DEC2HEX(549755813888)'],
+      [{ cellValue: '=DEC2HEX(-549755813889)' }],
+      [{ cellValue: '=DEC2HEX(-549755813888)' }],
+      [{ cellValue: '=DEC2HEX(549755813887)' }],
+      [{ cellValue: '=DEC2HEX(549755813888)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseSmall))
@@ -77,8 +77,8 @@ describe('function DEC2HEX', () => {
 
   it('should respect second argument and fill with zeros for positive arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEC2HEX(2, 8)'],
-      ['=DEC2HEX(20, "4")'],
+      [{ cellValue: '=DEC2HEX(2, 8)' }],
+      [{ cellValue: '=DEC2HEX(20, "4")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('00000002')
@@ -87,8 +87,8 @@ describe('function DEC2HEX', () => {
 
   it('should ignore second argument for negative numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEC2HEX(-2, 1)'],
-      ['=DEC2HEX(-2, 10)'],
+      [{ cellValue: '=DEC2HEX(-2, 1)' }],
+      [{ cellValue: '=DEC2HEX(-2, 10)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('FFFFFFFFFE')
@@ -97,8 +97,8 @@ describe('function DEC2HEX', () => {
 
   it('should allow for numbers from 1 to 10 as second argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DEC2HEX(2, 0)'],
-      ['=DEC2HEX(-2, 12)'],
+      [{ cellValue: '=DEC2HEX(2, 0)' }],
+      [{ cellValue: '=DEC2HEX(-2, 12)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))

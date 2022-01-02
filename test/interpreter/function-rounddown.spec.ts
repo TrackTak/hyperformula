@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function ROUNDDOWN', () => {
   it('number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROUNDDOWN()', '=ROUNDDOWN(1, 2, 3)'],
+      [{ cellValue: '=ROUNDDOWN()' }, { cellValue: '=ROUNDDOWN(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function ROUNDDOWN', () => {
 
   it('works for positive numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROUNDDOWN(1.3)', '=ROUNDDOWN(1.7)'],
+      [{ cellValue: '=ROUNDDOWN(1.3)' }, { cellValue: '=ROUNDDOWN(1.7)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(1)
@@ -24,7 +24,7 @@ describe('Function ROUNDDOWN', () => {
 
   it('works for negative numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROUNDDOWN(-1.3)', '=ROUNDDOWN(-1.7)'],
+      [{ cellValue: '=ROUNDDOWN(-1.3)' }, { cellValue: '=ROUNDDOWN(-1.7)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(-1)
@@ -33,7 +33,7 @@ describe('Function ROUNDDOWN', () => {
 
   it('works with positive rounding argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROUNDDOWN(1.43, 1)', '=ROUNDDOWN(1.47, 1)'],
+      [{ cellValue: '=ROUNDDOWN(1.43, 1)' }, { cellValue: '=ROUNDDOWN(1.47, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(1.4)
@@ -42,7 +42,7 @@ describe('Function ROUNDDOWN', () => {
 
   it('works with negative rounding argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROUNDDOWN(43, -1)', '=ROUNDDOWN(47, -1)'],
+      [{ cellValue: '=ROUNDDOWN(43, -1)' }, { cellValue: '=ROUNDDOWN(47, -1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(40)
@@ -51,7 +51,7 @@ describe('Function ROUNDDOWN', () => {
 
   it('use coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROUNDDOWN("42.3")'],
+      [{ cellValue: '=ROUNDDOWN("42.3")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(42)
@@ -59,8 +59,8 @@ describe('Function ROUNDDOWN', () => {
 
   it('propagates error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=4/0'],
-      ['=ROUNDDOWN(A1)', '=ROUNDDOWN(42, A1)', '=ROUNDDOWN(A1, FOO())'],
+      [{ cellValue: '=4/0' }],
+      [{ cellValue: '=ROUNDDOWN(A1)' }, { cellValue: '=ROUNDDOWN(42, A1)' }, { cellValue: '=ROUNDDOWN(A1, FOO())' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

@@ -5,7 +5,7 @@ import {adr, detailedErrorWithOrigin} from './testUtils'
 describe('Address preservation.', () => {
   it('Should work in the basic case.', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NA()', '=A1']
+      [{ cellValue: '=NA()' }, { cellValue: '=A1' }]
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
     expect(engine.getCellValue(adr('B1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
@@ -13,7 +13,7 @@ describe('Address preservation.', () => {
 
   it('Should work with named expressions.', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NAMEDEXPRESSION', '=A1']
+      [{ cellValue: '=NAMEDEXPRESSION' }, { cellValue: '=A1' }]
     ])
     engine.addNamedExpression('NAMEDEXPRESSION', '=NA()')
     expect(engine.getCellValue(adr('A1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'NAMEDEXPRESSION'))
@@ -22,15 +22,15 @@ describe('Address preservation.', () => {
 
   it('Should work with operators.', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NA()', '=NA()', '=A1+B1']
+      [{ cellValue: '=NA()' }, { cellValue: '=NA()' }, { cellValue: '=A1+B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
   })
 
   it('Should work between sheets.', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      sheet1: [['=NA()']],
-      sheet2: [['=sheet1!A1']]
+      sheet1: [[{ cellValue: '=NA()' }]],
+      sheet2: [[{ cellValue: '=sheet1!A1' }]]
     })
     expect(engine.getCellValue(adr('A1', 0))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'sheet1!A1'))
     expect(engine.getCellValue(adr('A1', 1))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'sheet1!A1'))
@@ -38,16 +38,16 @@ describe('Address preservation.', () => {
 
   it('Should work with function calls.', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NA()', '=DATE(1,1,A1)']
+      [{ cellValue: '=NA()' }, { cellValue: '=DATE(1,1,A1)' }]
     ])
     expect(engine.getCellValue(adr('B1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
   })
 
   it('Should work with CYCLE.', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=B1', '=A1'],
-      ['=A1', '=B1'],
-      ['=A1', '=B1']
+      [{ cellValue: '=B1' }, { cellValue: '=A1' }],
+      [{ cellValue: '=A1' }, { cellValue: '=B1' }],
+      [{ cellValue: '=A1' }, { cellValue: '=B1' }]
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
     expect(engine.getCellValue(adr('B1'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1'))
@@ -59,9 +59,9 @@ describe('Address preservation.', () => {
 
   it('Should work with CYCLE #2.', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=B1', '=A1'],
-      ['=A1'],
-      ['=A1']
+      [{ cellValue: '=B1' }, { cellValue: '=A1' }],
+      [{ cellValue: '=A1' }],
+      [{ cellValue: '=A1' }]
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
     expect(engine.getCellValue(adr('B1'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1'))
@@ -71,10 +71,10 @@ describe('Address preservation.', () => {
 
   it('Should work after simple cruds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NA()', '=A1']
+      [{ cellValue: '=NA()' }, { cellValue: '=A1' }]
     ])
 
-    engine.addColumns(0, [0, 1])
+    engine.addColumns(0, [{ cellValue: 0 }, { cellValue: 1 }])
     expect(engine.getCellValue(adr('C1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!B1'))
 
     engine.setCellContents(adr('B1'), '=1/0')

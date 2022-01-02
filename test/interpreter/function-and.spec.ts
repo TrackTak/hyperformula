@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function AND', () => {
   it('usage', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AND(TRUE(), TRUE())', '=AND(TRUE(), FALSE())'],
+      [{ cellValue: '=AND(TRUE(), TRUE())' }, { cellValue: '=AND(TRUE(), FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -14,7 +14,7 @@ describe('Function AND', () => {
 
   it('with numerical arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AND(1)', '=AND(0)', '=AND(1, TRUE())'],
+      [{ cellValue: '=AND(1)' }, { cellValue: '=AND(0)' }, { cellValue: '=AND(1, TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -24,8 +24,8 @@ describe('Function AND', () => {
 
   it('use coercion #1', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AND("TRUE", 1)'],
-      ['=AND("foo", TRUE())'],
+      [{ cellValue: '=AND("TRUE", 1)' }],
+      [{ cellValue: '=AND("foo", TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -34,10 +34,10 @@ describe('Function AND', () => {
 
   it('use coercion #2', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AND(A4:B4)'],
-      ['=AND(C4:D4)'],
-      ['=AND(C4:D4, "foo")'],
-      ['TRUE', 1, 'foo', '=TRUE()'],
+      [{ cellValue: '=AND(A4:B4)' }],
+      [{ cellValue: '=AND(C4:D4)' }],
+      [{ cellValue: '=AND(C4:D4, "foo")' }],
+      [{ cellValue: 'TRUE' }, { cellValue: 1 }, { cellValue: 'foo' }, { cellValue: '=TRUE()'}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -47,9 +47,9 @@ describe('Function AND', () => {
 
   it('if error in range found, returns first one in row-by-row order', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '=4/0'],
-      ['=FOOBAR()', '1'],
-      ['=AND(A1:B2)'],
+      [{ cellValue: '1' }, { cellValue: '=4/0' }],
+      [{ cellValue: '=FOOBAR()' }, { cellValue: '1' }],
+      [{ cellValue: '=AND(A1:B2)' }],
     ])
 
     expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -57,9 +57,9 @@ describe('Function AND', () => {
 
   it('works with ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '1'],
-      ['1', '1'],
-      ['=AND(A1:B2)'],
+      [{ cellValue: '1' }, { cellValue: '1' }],
+      [{ cellValue: '1' }, { cellValue: '1' }],
+      [{ cellValue: '=AND(A1:B2)' }],
     ])
 
     expect(engine.getCellValue(adr('A3'))).toEqual(true)
@@ -67,7 +67,7 @@ describe('Function AND', () => {
 
   it('takes at least one argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=AND()'],
+      [{ cellValue: '=AND()' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -75,9 +75,9 @@ describe('Function AND', () => {
 
   it('is computed eagerly', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '=4/0'],
-      ['1', '1'],
-      ['=AND(A1:B2)'],
+      [{ cellValue: '0' }, { cellValue: '=4/0' }],
+      [{ cellValue: '1' }, { cellValue: '1' }],
+      [{ cellValue: '=AND(A1:B2)' }],
     ])
 
     expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

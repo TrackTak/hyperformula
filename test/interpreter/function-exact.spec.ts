@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function EXACT', () => {
   it('should take two arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EXACT("foo")'],
-      ['=EXACT("foo", "bar", "baz")'],
+      [{ cellValue: '=EXACT("foo")' }],
+      [{ cellValue: '=EXACT("foo", "bar", "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,10 +15,10 @@ describe('Function EXACT', () => {
 
   it('should compare strings', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EXACT(B1, C1)', '', ''],
-      ['=EXACT(B2, C2)', 'foo', 'foo'],
-      ['=EXACT(B3, C3)', 'foo', 'fo'],
-      ['=EXACT(B4, C4)', 'foo', 'bar'],
+      [{ cellValue: '=EXACT(B1, C1)' }, { cellValue: '' }, { cellValue: '' }],
+      [{ cellValue: '=EXACT(B2, C2)' }, { cellValue: 'foo' }, { cellValue: 'foo' }],
+      [{ cellValue: '=EXACT(B3, C3)' }, { cellValue: 'foo' }, { cellValue: 'fo' }],
+      [{ cellValue: '=EXACT(B4, C4)' }, { cellValue: 'foo' }, { cellValue: 'bar' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -29,8 +29,8 @@ describe('Function EXACT', () => {
 
   it('should be case/accent sensitive', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EXACT(B1, C1)', 'foo', 'FOO'],
-      ['=EXACT(B2, C2)', 'foo', 'fóó'],
+      [{ cellValue: '=EXACT(B1, C1)' }, { cellValue: 'foo' }, { cellValue: 'FOO' }],
+      [{ cellValue: '=EXACT(B2, C2)' }, { cellValue: 'foo' }, { cellValue: 'fóó' }],
     ], {caseSensitive: false})
 
     expect(engine.getCellValue(adr('A1'))).toBe(false)
@@ -39,7 +39,7 @@ describe('Function EXACT', () => {
 
   it('should be case sensitive', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EXACT(B1, C1)', 'foo', 'Foo'],
+      [{ cellValue: '=EXACT(B1, C1)' }, { cellValue: 'foo' }, { cellValue: 'Foo' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(false)
@@ -47,10 +47,10 @@ describe('Function EXACT', () => {
 
   it('should coerce', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EXACT(,)'],
-      ['=EXACT(B2, "0")', 0],
-      ['=EXACT(B3, "")', null],
-      ['=EXACT(B4, "TRUE")', '=TRUE()'],
+      [{ cellValue: '=EXACT(,)' }],
+      [{ cellValue: '=EXACT(B2, "0")' }, { cellValue: 0 }],
+      [{ cellValue: '=EXACT(B3, "")' }, { cellValue: null }],
+      [{ cellValue: '=EXACT(B4, "TRUE")' }, { cellValue: '=TRUE()' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -61,8 +61,8 @@ describe('Function EXACT', () => {
 
   it('should return error for range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EXACT("foo",B1:C1)'],
-      ['=EXACT(B1:C1,"foo")'],
+      [{ cellValue: '=EXACT("foo",B1:C1)' }],
+      [{ cellValue: '=EXACT(B1:C1,"foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))

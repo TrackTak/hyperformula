@@ -18,7 +18,7 @@ describe('Text', () => {
 
   it('wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TEXT(42)'],
+      [{ cellValue: '=TEXT(42)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -26,8 +26,8 @@ describe('Text', () => {
 
   it('wrong format argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TEXT(2, 42)'],
-      ['=TEXT(2, 0)'],
+      [{ cellValue: '=TEXT(2, 42)' }],
+      [{ cellValue: '=TEXT(2, 0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('42')
@@ -36,7 +36,7 @@ describe('Text', () => {
 
   it('wrong date argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TEXT(TRUE(), "mm/dd/yyyy")'],
+      [{ cellValue: '=TEXT(TRUE(), "mm/dd/yyyy")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('12/31/1899')
@@ -85,7 +85,7 @@ describe('Text', () => {
         '8/8/2018 00:30',
         '=TEXT(A2, "hh:mm AM/PM")',
       ],
-      ['8/8/2018 00:30', '=TEXT(A3, "hh:mm am/pm")'],
+      [{ cellValue: '8/8/2018 00:30' }, { cellValue: '=TEXT(A3, "hh:mm am/pm")' }],
       [
         '8/8/2018 00:30',
         '=TEXT(A4, "hh:mm a/p")',
@@ -125,7 +125,7 @@ describe('Text', () => {
       [
         '0.0000011574074074074074', '=TEXT(A1, "hh:mm:ss.ss")',
       ],
-      ['0.000001', '=TEXT(A2, "hh:mm:ss.sss")']
+      [{ cellValue: '0.000001' }, { cellValue: '=TEXT(A2, "hh:mm:ss.sss")' }]
     ])
     expect(engine.getCellValue(adr('B1'))).toEqual('00:00:00.1')
     expect(engine.getCellValue(adr('B2'))).toEqual('00:00:00.086')
@@ -159,7 +159,7 @@ describe('Text', () => {
 describe('time duration', () => {
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0.1', '=TEXT(A1, "[hh]:mm:ss")'],
+      [{ cellValue: '0.1' }, { cellValue: '=TEXT(A1, "[hh]:mm:ss")' }],
       ['1.1', '=TEXT(A2, "[hh]:mm:ss")', ],
       ['0.1', '=TEXT(A3, "[mm]:ss")', ],
       ['1.1', '=TEXT(A4, "[mm]:ss")', ],
@@ -206,8 +206,8 @@ describe('Custom date printing', () => {
   })
 
   it('date printing, month and minutes', () => {
-    const [engine] = HyperFormula.buildFromArray([['1.1', '=TEXT(A1, "mm-dd mm:ss.sssss")'],
-      ['1.222', '=TEXT(A2, "mm-dd mm:ss.sssss")']])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1.1' }, { cellValue: '=TEXT(A1, "mm-dd mm:ss.sssss")' }],
+      [{ cellValue: '1.222' }, { cellValue: '=TEXT(A2, "mm-dd mm:ss.sssss")' }]])
     expect(engine.getCellValue(adr('B1'))).toEqual('12-31 24:00')
     expect(engine.getCellValue(adr('B2'))).toEqual('12-31 19:40.8')
   })

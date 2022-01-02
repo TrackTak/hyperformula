@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function HF.UNARY_PERCENT', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UNARY_PERCENT()', '=HF.UNARY_PERCENT(1, 1)'],
+      [{ cellValue: '=HF.UNARY_PERCENT()' }, { cellValue: '=HF.UNARY_PERCENT(1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,7 +14,7 @@ describe('Function HF.UNARY_PERCENT', () => {
 
   it('should calculate the correct value with correct defaults', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UNARY_PERCENT(2)'],
+      [{ cellValue: '=HF.UNARY_PERCENT(2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0.02)
@@ -22,9 +22,9 @@ describe('Function HF.UNARY_PERCENT', () => {
 
   it('should coerce to correct types', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UNARY_PERCENT(TRUE())'],
-      ['=HF.UNARY_PERCENT(B2)'],
-      ['=HF.UNARY_PERCENT("1")'],
+      [{ cellValue: '=HF.UNARY_PERCENT(TRUE())' }],
+      [{ cellValue: '=HF.UNARY_PERCENT(B2)' }],
+      [{ cellValue: '=HF.UNARY_PERCENT("1")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0.01)
@@ -34,9 +34,9 @@ describe('Function HF.UNARY_PERCENT', () => {
 
   it('should throw correct error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UNARY_PERCENT("abcd")'],
-      ['=HF.UNARY_PERCENT(NA())'],
-      ['=HF.UNARY_PERCENT(B3:C3)'],
+      [{ cellValue: '=HF.UNARY_PERCENT("abcd")' }],
+      [{ cellValue: '=HF.UNARY_PERCENT(NA())' }],
+      [{ cellValue: '=HF.UNARY_PERCENT(B3:C3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))

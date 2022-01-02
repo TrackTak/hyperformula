@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function COMPLEX', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COMPLEX(1)'],
-      ['=COMPLEX(1, 2, 3, 4)'],
+      [{ cellValue: '=COMPLEX(1)' }],
+      [{ cellValue: '=COMPLEX(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,8 +15,8 @@ describe('Function COMPLEX', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COMPLEX("foo", 2)'],
-      ['=COMPLEX(1, "bar")'],
+      [{ cellValue: '=COMPLEX("foo", 2)' }],
+      [{ cellValue: '=COMPLEX(1, "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -25,21 +25,21 @@ describe('Function COMPLEX', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COMPLEX(0, 0)'],
-      ['=COMPLEX(0, 1)'],
-      ['=COMPLEX(0, -1)'],
-      ['=COMPLEX(0, 2)'],
-      ['=COMPLEX(0, -2)'],
-      ['=COMPLEX(1, 0)'],
-      ['=COMPLEX(1, 1)'],
-      ['=COMPLEX(1, -1)'],
-      ['=COMPLEX(1, 2)'],
-      ['=COMPLEX(1, -2)'],
-      ['=COMPLEX(-1, 0)'],
-      ['=COMPLEX(-1, 1)'],
-      ['=COMPLEX(-1, -1)'],
-      ['=COMPLEX(-1, 2)'],
-      ['=COMPLEX(-1, -2)'],
+      [{ cellValue: '=COMPLEX(0, 0)' }],
+      [{ cellValue: '=COMPLEX(0, 1)' }],
+      [{ cellValue: '=COMPLEX(0, -1)' }],
+      [{ cellValue: '=COMPLEX(0, 2)' }],
+      [{ cellValue: '=COMPLEX(0, -2)' }],
+      [{ cellValue: '=COMPLEX(1, 0)' }],
+      [{ cellValue: '=COMPLEX(1, 1)' }],
+      [{ cellValue: '=COMPLEX(1, -1)' }],
+      [{ cellValue: '=COMPLEX(1, 2)' }],
+      [{ cellValue: '=COMPLEX(1, -2)' }],
+      [{ cellValue: '=COMPLEX(-1, 0)' }],
+      [{ cellValue: '=COMPLEX(-1, 1)' }],
+      [{ cellValue: '=COMPLEX(-1, -1)' }],
+      [{ cellValue: '=COMPLEX(-1, 2)' }],
+      [{ cellValue: '=COMPLEX(-1, -2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('0')
@@ -61,9 +61,9 @@ describe('Function COMPLEX', () => {
 
   it('should work with third argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COMPLEX(1, 1, "i")'],
-      ['=COMPLEX(1, 1, "j")'],
-      ['=COMPLEX(1, 1, "k")'],
+      [{ cellValue: '=COMPLEX(1, 1, "i")' }],
+      [{ cellValue: '=COMPLEX(1, 1, "j")' }],
+      [{ cellValue: '=COMPLEX(1, 1, "k")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('1+i')

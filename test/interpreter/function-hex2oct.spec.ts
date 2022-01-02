@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('function HEX2OCT', () => {
   it('should return error when wrong number of argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2OCT("foo", 2, 3)'],
+      [{ cellValue: '=HEX2OCT("foo", 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,9 +14,9 @@ describe('function HEX2OCT', () => {
 
   it('should not work for non-hex arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2OCT("foo")'],
-      ['=HEX2OCT("G418")'],
-      ['=HEX2OCT(TRUE())'],
+      [{ cellValue: '=HEX2OCT("foo")' }],
+      [{ cellValue: '=HEX2OCT("G418")' }],
+      [{ cellValue: '=HEX2OCT(TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
@@ -26,17 +26,17 @@ describe('function HEX2OCT', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2OCT("1")'],
-      ['=HEX2OCT("F")'],
-      ['=HEX2OCT("2A")'],
-      ['=HEX2OCT("26235")'],
-      ['=HEX2OCT("1BB95B19")'],
-      ['=HEX2OCT("CE6D570")'],
-      ['=HEX2OCT("FFFB4B62A9")'],
-      ['=HEX2OCT("FFFF439EB2")'],
-      ['=HEX2OCT("FFFFFFFFFF")'],
-      ['=HEX2OCT("1FFFFFFF")'],
-      ['=HEX2OCT("FFE0000000")'],
+      [{ cellValue: '=HEX2OCT("1")' }],
+      [{ cellValue: '=HEX2OCT("F")' }],
+      [{ cellValue: '=HEX2OCT("2A")' }],
+      [{ cellValue: '=HEX2OCT("26235")' }],
+      [{ cellValue: '=HEX2OCT("1BB95B19")' }],
+      [{ cellValue: '=HEX2OCT("CE6D570")' }],
+      [{ cellValue: '=HEX2OCT("FFFB4B62A9")' }],
+      [{ cellValue: '=HEX2OCT("FFFF439EB2")' }],
+      [{ cellValue: '=HEX2OCT("FFFFFFFFFF")' }],
+      [{ cellValue: '=HEX2OCT("1FFFFFFF")' }],
+      [{ cellValue: '=HEX2OCT("FFE0000000")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('1')
@@ -54,7 +54,7 @@ describe('function HEX2OCT', () => {
 
   it('should work for numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2OCT(456)'],
+      [{ cellValue: '=HEX2OCT(456)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('2126')
@@ -62,8 +62,8 @@ describe('function HEX2OCT', () => {
 
   it('should work for reference', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="123"'],
-      ['=HEX2OCT(A1)'],
+      [{ cellValue: '="123"' }],
+      [{ cellValue: '=HEX2OCT(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqual('443')
@@ -71,7 +71,7 @@ describe('function HEX2OCT', () => {
 
   it('should return string value', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2OCT(11)'],
+      [{ cellValue: '=HEX2OCT(11)' }],
     ])
 
     expect(engine.getCellValueType(adr('A1'))).toBe(CellValueType.STRING)
@@ -79,8 +79,8 @@ describe('function HEX2OCT', () => {
 
   it('result cannot be longer than 10 digits', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2OCT("FFDFFFFFFF")'],
-      ['=HEX2OCT("3FFFFFFF")'], ])
+      [{ cellValue: '=HEX2OCT("FFDFFFFFFF")' }],
+      [{ cellValue: '=HEX2OCT("3FFFFFFF")' }], ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseSmall))
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLarge))
@@ -88,7 +88,7 @@ describe('function HEX2OCT', () => {
 
   it('input cannot have more than 10 digits', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2OCT("10000000000")'],
+      [{ cellValue: '=HEX2OCT("10000000000")' }],
 
     ])
 
@@ -97,8 +97,8 @@ describe('function HEX2OCT', () => {
 
   it('should respect second argument and fill with zeros for positive arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2OCT(12, 8)'],
-      ['=HEX2OCT(3, "4")'],
+      [{ cellValue: '=HEX2OCT(12, 8)' }],
+      [{ cellValue: '=HEX2OCT(3, "4")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('00000022')
@@ -107,8 +107,8 @@ describe('function HEX2OCT', () => {
 
   it('should fail if the result is longer than the desired length', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2OCT(32123, 2)'],
-      ['=HEX2OCT(433141, "3")'],
+      [{ cellValue: '=HEX2OCT(32123, 2)' }],
+      [{ cellValue: '=HEX2OCT(433141, "3")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
@@ -117,8 +117,8 @@ describe('function HEX2OCT', () => {
 
   it('second argument should not affect negative results', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2OCT("FFFB4B62A9", 1)'],
-      ['=HEX2OCT("FFFF439EB2", 10)'],
+      [{ cellValue: '=HEX2OCT("FFFB4B62A9", 1)' }],
+      [{ cellValue: '=HEX2OCT("FFFF439EB2", 10)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('7322661251')
@@ -127,8 +127,8 @@ describe('function HEX2OCT', () => {
 
   it('should allow for numbers from 1 to 10 as second argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2OCT(2, 0)'],
-      ['=HEX2OCT(2, 12)'],
+      [{ cellValue: '=HEX2OCT(2, 0)' }],
+      [{ cellValue: '=HEX2OCT(2, 12)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))

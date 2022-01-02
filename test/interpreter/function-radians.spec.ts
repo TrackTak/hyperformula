@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function RADIANS', () => {
   it('happy path', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=RADIANS(0)', '=RADIANS(180.0)'],
+      [{ cellValue: '=RADIANS(0)' }, { cellValue: '=RADIANS(180.0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)
@@ -15,7 +15,7 @@ describe('Function RADIANS', () => {
 
   it('given wrong argument type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=RADIANS("foo")'],
+      [{ cellValue: '=RADIANS("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -23,8 +23,8 @@ describe('Function RADIANS', () => {
 
   it('use number coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="180"', '=RADIANS(A1)'],
-      ['=TRUE()', '=RADIANS(A2)'],
+      [{ cellValue: '="180"' }, { cellValue: '=RADIANS(A1)' }],
+      [{ cellValue: '=TRUE()' }, { cellValue: '=RADIANS(A2)' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toBeCloseTo(3.1415)
@@ -33,8 +33,8 @@ describe('Function RADIANS', () => {
 
   it('given wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=RADIANS()'],
-      ['=RADIANS(1, 2)'],
+      [{ cellValue: '=RADIANS()' }],
+      [{ cellValue: '=RADIANS(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -43,7 +43,7 @@ describe('Function RADIANS', () => {
 
   it('errors propagation', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=RADIANS(4/0)'],
+      [{ cellValue: '=RADIANS(4/0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

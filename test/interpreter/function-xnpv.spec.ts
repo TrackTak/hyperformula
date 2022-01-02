@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function XNPV', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XNPV(1,1)', '=XNPV(1, 1, 1, 1)'],
+      [{ cellValue: '=XNPV(1,1)' }, { cellValue: '=XNPV(1, 1, 1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -17,9 +17,9 @@ describe('Function XNPV', () => {
    */
   it('should accept Rate values that are greater than -1.', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XNPV(-1, A2:D2, A3:D3)', '=XNPV(2, A2:D2, A3:D3)', '=XNPV(-0.9, A2:D2, A3:D3)'],
-      [1, 2, 3, 4],
-      [1, 2, 3, 4],
+      [{ cellValue: '=XNPV(-1, A2:D2, A3:D3)' }, { cellValue: '=XNPV(2, A2:D2, A3:D3)' }, { cellValue: '=XNPV(-0.9, A2:D2, A3:D3)' }],
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}],
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -29,8 +29,8 @@ describe('Function XNPV', () => {
 
   it('should calculate the correct value', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XNPV(2%, 1, 1)'],
-      ['=XNPV(1, B2:C2, D2:E2)', 1, 2, 3, 4],
+      [{ cellValue: '=XNPV(2%, 1, 1)' }],
+      [{ cellValue: '=XNPV(1, B2:C2, D2:E2)' }, { cellValue: 1 }, { cellValue: 2 }, { cellValue: 3}, {cellValue: 4 }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -47,7 +47,7 @@ describe('Function XNPV', () => {
 
   it('only first date needs to be earliest', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XNPV(1, B1:E1, F1:I1)', 1, 2, 3, 4, 1, 4, 3, 2],
+      [{ cellValue: '=XNPV(1, B1:E1, F1:I1)' }, { cellValue: 1 }, { cellValue: 2 }, { cellValue: 3}, {cellValue: 4 }, { cellValue: 1 }, { cellValue: 4 }, { cellValue: 3 }, { cellValue: 2 }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(9.9696766801485, 6)
@@ -55,7 +55,7 @@ describe('Function XNPV', () => {
 
   it('should evaluate to #NUM! if values in range are not numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XNPV(1, B1:C1, D1:E1)', 1, null, 3, null],
+      [{ cellValue: '=XNPV(1, B1:C1, D1:E1)' }, { cellValue: 1 }, { cellValue: null }, { cellValue: 3}, {cellValue: null }],
       ['=XNPV(1, B2:C2, D2:E2)', 1, 2, 3.1, true],
     ])
 
@@ -68,8 +68,8 @@ describe('Function XNPV', () => {
    */
   it('should evaluate to #NUM! if ranges are of different length', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XNPV(1, B1:C1, D1:F1)', 1, 2, 3, 4, 5],
-      ['=XNPV(1, B2:D2, E2:F2)', 1, 2, 3, 4, 5],
+      [{ cellValue: '=XNPV(1, B1:C1, D1:F1)' }, { cellValue: 1 }, { cellValue: 2 }, { cellValue: 3}, {cellValue: 4 }, { cellValue: 5 }],
+      [{ cellValue: '=XNPV(1, B2:D2, E2:F2)' }, { cellValue: 1 }, { cellValue: 2 }, { cellValue: 3}, {cellValue: 4 }, { cellValue: 5 }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.EqualLength))
@@ -78,7 +78,7 @@ describe('Function XNPV', () => {
 
   it('should evaluate to #NUM! if dates are in wrong order', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=XNPV(1, B1:C1, D1:E1)', 1, 2, 4, 3],
+      [{ cellValue: '=XNPV(1, B1:C1, D1:E1)' }, { cellValue: 1 }, { cellValue: 2 }, { cellValue: 4}, {cellValue: 3 }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))

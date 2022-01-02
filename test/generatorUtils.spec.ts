@@ -15,7 +15,7 @@ describe('split', () => {
   })
 
   it('works for one element case', () => {
-    const arr = [42]
+    const arr = [{ cellValue: 42 }]
 
     const result = split(arr[Symbol.iterator]())
 
@@ -24,7 +24,7 @@ describe('split', () => {
   })
 
   it('works for more elements case', () => {
-    const arr = [42, 43]
+    const arr = [{ cellValue: 42 }, { cellValue: 43 }]
 
     const result = split(arr[Symbol.iterator]())
 
@@ -39,13 +39,13 @@ describe('first', () => {
   })
 
   it('works for one element case', () => {
-    const arr = [42]
+    const arr = [{ cellValue: 42 }]
 
     expect(first(arr[Symbol.iterator]())).toEqual(42)
   })
 
   it('works for more elements case', () => {
-    const arr = [42, 43]
+    const arr = [{ cellValue: 42 }, { cellValue: 43 }]
 
     expect(first(arr[Symbol.iterator]())).toEqual(42)
   })

@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function GAUSS', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAUSS()'],
-      ['=GAUSS(1, 2)'],
+      [{ cellValue: '=GAUSS()' }],
+      [{ cellValue: '=GAUSS(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,7 +16,7 @@ describe('Function GAUSS', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAUSS("foo")'],
+      [{ cellValue: '=GAUSS("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -24,9 +24,9 @@ describe('Function GAUSS', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAUSS(-10)'],
-      ['=GAUSS(0)'],
-      ['=GAUSS(1)'],
+      [{ cellValue: '=GAUSS(-10)' }],
+      [{ cellValue: '=GAUSS(0)' }],
+      [{ cellValue: '=GAUSS(1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(-0.5, 6)

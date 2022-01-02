@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function F.DIST.RT', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.DIST.RT(1, 2)'],
-      ['=F.DIST.RT(1, 2, 3, 4)'],
+      [{ cellValue: '=F.DIST.RT(1, 2)' }],
+      [{ cellValue: '=F.DIST.RT(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function F.DIST.RT', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.DIST.RT("foo", 2, 3)'],
-      ['=F.DIST.RT(1, "baz", 3)'],
-      ['=F.DIST.RT(1, 2, "abcd")'],
+      [{ cellValue: '=F.DIST.RT("foo", 2, 3)' }],
+      [{ cellValue: '=F.DIST.RT(1, "baz", 3)' }],
+      [{ cellValue: '=F.DIST.RT(1, 2, "abcd")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,8 +28,8 @@ describe('Function F.DIST.RT', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.DIST.RT(1, 1, 1)'],
-      ['=F.DIST.RT(3, 2, 2)'],
+      [{ cellValue: '=F.DIST.RT(1, 1, 1)' }],
+      [{ cellValue: '=F.DIST.RT(3, 2, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.5, 6)
@@ -38,8 +38,8 @@ describe('Function F.DIST.RT', () => {
 
   it('truncates second and third args', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.DIST.RT(1, 1.9, 1)'],
-      ['=F.DIST.RT(3, 2, 2.9)'],
+      [{ cellValue: '=F.DIST.RT(1, 1.9, 1)' }],
+      [{ cellValue: '=F.DIST.RT(3, 2, 2.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.5, 6)
@@ -48,10 +48,10 @@ describe('Function F.DIST.RT', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.DIST.RT(0, 1, 1)'],
-      ['=F.DIST.RT(-0.001, 1, 1)'],
-      ['=F.DIST.RT(0, 0.999, 1)'],
-      ['=F.DIST.RT(0, 1, 0.999)'],
+      [{ cellValue: '=F.DIST.RT(0, 1, 1)' }],
+      [{ cellValue: '=F.DIST.RT(-0.001, 1, 1)' }],
+      [{ cellValue: '=F.DIST.RT(0, 0.999, 1)' }],
+      [{ cellValue: '=F.DIST.RT(0, 1, 0.999)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)

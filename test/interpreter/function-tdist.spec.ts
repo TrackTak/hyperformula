@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function TDIST', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TDIST(1, 1)'],
-      ['=TDIST(1, 2, 3, 4)'],
+      [{ cellValue: '=TDIST(1, 1)' }],
+      [{ cellValue: '=TDIST(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function TDIST', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TDIST("foo", 2, 3)'],
-      ['=TDIST(1, "baz", 3)'],
-      ['=TDIST(1, 2, "bar")'],
+      [{ cellValue: '=TDIST("foo", 2, 3)' }],
+      [{ cellValue: '=TDIST(1, "baz", 3)' }],
+      [{ cellValue: '=TDIST(1, 2, "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,8 +28,8 @@ describe('Function TDIST', () => {
 
   it('should work as T.DIST.RT', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TDIST(1, 1, 1)'],
-      ['=TDIST(3, 2, 1)'],
+      [{ cellValue: '=TDIST(1, 1, 1)' }],
+      [{ cellValue: '=TDIST(3, 2, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.25, 6)
@@ -38,8 +38,8 @@ describe('Function TDIST', () => {
 
   it('should work as T.DIST.2T', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TDIST(1, 1, 2)'],
-      ['=TDIST(3, 2, 2)'],
+      [{ cellValue: '=TDIST(1, 1, 2)' }],
+      [{ cellValue: '=TDIST(3, 2, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.5, 6)
@@ -48,8 +48,8 @@ describe('Function TDIST', () => {
 
   it('should truncate input', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TDIST(1, 1.9, 2)'],
-      ['=TDIST(3, 2.9, 2)'],
+      [{ cellValue: '=TDIST(1, 1.9, 2)' }],
+      [{ cellValue: '=TDIST(3, 2.9, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.5, 6)
@@ -58,13 +58,13 @@ describe('Function TDIST', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TDIST(0, 1, 1)'],
-      ['=TDIST(0, 1, 2)'],
-      ['=TDIST(-0.01, 1, 1)'],
-      ['=TDIST(-0.01, 1, 2)'],
-      ['=TDIST(1, 0.9, 1)'],
-      ['=TDIST(1, 0.9, 2)'],
-      ['=TDIST(0, 1, 1.5)'],
+      [{ cellValue: '=TDIST(0, 1, 1)' }],
+      [{ cellValue: '=TDIST(0, 1, 2)' }],
+      [{ cellValue: '=TDIST(-0.01, 1, 1)' }],
+      [{ cellValue: '=TDIST(-0.01, 1, 2)' }],
+      [{ cellValue: '=TDIST(1, 0.9, 1)' }],
+      [{ cellValue: '=TDIST(1, 0.9, 2)' }],
+      [{ cellValue: '=TDIST(0, 1, 1.5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.5, 6)

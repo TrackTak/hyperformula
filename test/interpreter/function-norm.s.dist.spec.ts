@@ -7,8 +7,8 @@ describe('Function NORM.S.DIST', () => {
   //in product #1, this function takes 1 argument
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.S.DIST(2)'],
-      ['=NORM.S.DIST(1, 4, 5)'],
+      [{ cellValue: '=NORM.S.DIST(2)' }],
+      [{ cellValue: '=NORM.S.DIST(1, 4, 5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -18,8 +18,8 @@ describe('Function NORM.S.DIST', () => {
   //in product #1, this function takes 1 argument
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.S.DIST("foo", TRUE())'],
-      ['=NORM.S.DIST(1, "abcd")'],
+      [{ cellValue: '=NORM.S.DIST("foo", TRUE())' }],
+      [{ cellValue: '=NORM.S.DIST(1, "abcd")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -29,8 +29,8 @@ describe('Function NORM.S.DIST', () => {
   //in product #1, this function takes 1 argument
   it('should work as cdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.S.DIST(-1, TRUE())'],
-      ['=NORM.S.DIST(0.5, TRUE())'],
+      [{ cellValue: '=NORM.S.DIST(-1, TRUE())' }],
+      [{ cellValue: '=NORM.S.DIST(0.5, TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.158655253931457, 6)
@@ -40,8 +40,8 @@ describe('Function NORM.S.DIST', () => {
   //in product #1, this function takes 1 argument
   it('should work as pdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.S.DIST(-1, FALSE())'],
-      ['=NORM.S.DIST(0.5, FALSE())'],
+      [{ cellValue: '=NORM.S.DIST(-1, FALSE())' }],
+      [{ cellValue: '=NORM.S.DIST(0.5, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.241970724519143, 6)

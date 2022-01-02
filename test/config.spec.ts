@@ -117,7 +117,7 @@ describe('Config', () => {
 
   it('should throw error when currency symbol is empty', () => {
     expect(() => {
-      new Config({currencySymbol: ['']})
+      new Config({currencySymbol: [{ cellValue: '' }]})
     }).toThrowError('Config parameter currencySymbol cannot be empty.')
   })
 
@@ -212,7 +212,7 @@ describe('getConfig', () => {
   })
 
   it('should copy returned values', () => {
-    const arr = ['mm']
+    const arr = [{ cellValue: 'mm' }]
     const [engine] = HyperFormula.buildEmpty({dateFormats: arr})
     const arr2 = engine.getConfig().dateFormats
     expect(arr).toEqual(arr2)

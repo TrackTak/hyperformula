@@ -6,8 +6,8 @@ describe('Function FLOOR', () => {
   /*Inconsistent with ODFF standard.*/
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FLOOR(1)'],
-      ['=FLOOR(1, 2, 3)'],
+      [{ cellValue: '=FLOOR(1)' }],
+      [{ cellValue: '=FLOOR(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,8 +16,8 @@ describe('Function FLOOR', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FLOOR(1, "bar")'],
-      ['=FLOOR("bar", 1)'],
+      [{ cellValue: '=FLOOR(1, "bar")' }],
+      [{ cellValue: '=FLOOR("bar", 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -26,13 +26,13 @@ describe('Function FLOOR', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FLOOR(4.43, 0.3)'],
-      ['=FLOOR(4.43, 0.6)'],
-      ['=FLOOR(4.43, 2)'],
-      ['=FLOOR(-3.14, -1.8)'],
-      ['=FLOOR(-3.14, 0)'],
-      ['=FLOOR(3.14, 0)'],
-      ['=FLOOR(0, 0)'],
+      [{ cellValue: '=FLOOR(4.43, 0.3)' }],
+      [{ cellValue: '=FLOOR(4.43, 0.6)' }],
+      [{ cellValue: '=FLOOR(4.43, 2)' }],
+      [{ cellValue: '=FLOOR(-3.14, -1.8)' }],
+      [{ cellValue: '=FLOOR(-3.14, 0)' }],
+      [{ cellValue: '=FLOOR(3.14, 0)' }],
+      [{ cellValue: '=FLOOR(0, 0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(4.2)
@@ -47,10 +47,10 @@ describe('Function FLOOR', () => {
   /*Inconsistent with ODFF standard.*/
   it('negative values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FLOOR(11, 2)'],
-      ['=FLOOR(-11, 2)'],
-      ['=FLOOR(11, -2)'],
-      ['=FLOOR(-11, -2)'],
+      [{ cellValue: '=FLOOR(11, 2)' }],
+      [{ cellValue: '=FLOOR(-11, 2)' }],
+      [{ cellValue: '=FLOOR(11, -2)' }],
+      [{ cellValue: '=FLOOR(-11, -2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(10)

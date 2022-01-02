@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function UNICODE', () => {
   it('should not work for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=UNICODE()'],
-      ['=UNICODE("foo", "bar")'],
+      [{ cellValue: '=UNICODE()' }],
+      [{ cellValue: '=UNICODE("foo", "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function UNICODE', () => {
 
   it('should not work for empty strings', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=UNICODE("")'],
+      [{ cellValue: '=UNICODE("")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.EmptyString))
@@ -23,15 +23,15 @@ describe('Function UNICODE', () => {
 
   it('should work for single chars', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=UNICODE("")'],
-      ['=UNICODE("!")'],
-      ['=UNICODE("A")'],
-      ['=UNICODE("Z")'],
-      ['=UNICODE("Ñ")'],
-      ['=UNICODE("ÿ")'],
-      ['=UNICODE(TRUE())'],
-      ['=UNICODE("€")'],
-      ['=UNICODE("􏿿")'],
+      [{ cellValue: '=UNICODE("")' }],
+      [{ cellValue: '=UNICODE("!")' }],
+      [{ cellValue: '=UNICODE("A")' }],
+      [{ cellValue: '=UNICODE("Z")' }],
+      [{ cellValue: '=UNICODE("Ñ")' }],
+      [{ cellValue: '=UNICODE("ÿ")' }],
+      [{ cellValue: '=UNICODE(TRUE())' }],
+      [{ cellValue: '=UNICODE("€")' }],
+      [{ cellValue: '=UNICODE("􏿿")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -47,8 +47,8 @@ describe('Function UNICODE', () => {
 
   it('should return code of first character', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=UNICODE("Abar")'],
-      ['=UNICODE("Ñbaz")'],
+      [{ cellValue: '=UNICODE("Abar")' }],
+      [{ cellValue: '=UNICODE("Ñbaz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(65)
@@ -57,7 +57,7 @@ describe('Function UNICODE', () => {
 
   it('should return number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=UNICODE("foo")']
+      [{ cellValue: '=UNICODE("foo")' }]
     ])
 
     expect(engine.getCellValueType(adr('A1'))).toEqual(CellValueType.NUMBER)
@@ -65,11 +65,11 @@ describe('Function UNICODE', () => {
 
   it('should be identity when composed with UNICHAR', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=UNICODE(UNICHAR(1))'],
-      ['=UNICODE(UNICHAR(128))'],
-      ['=UNICODE(UNICHAR(256))'],
-      ['=UNICODE(UNICHAR(8364))'],
-      ['=UNICODE(UNICHAR(1114111))']
+      [{ cellValue: '=UNICODE(UNICHAR(1))' }],
+      [{ cellValue: '=UNICODE(UNICHAR(128))' }],
+      [{ cellValue: '=UNICODE(UNICHAR(256))' }],
+      [{ cellValue: '=UNICODE(UNICHAR(8364))' }],
+      [{ cellValue: '=UNICODE(UNICHAR(1114111))' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)

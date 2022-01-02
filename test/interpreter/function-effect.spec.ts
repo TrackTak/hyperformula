@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function EFFECT', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EFFECT(1)', '=EFFECT(1, 1, 1)'],
+      [{ cellValue: '=EFFECT(1)' }, { cellValue: '=EFFECT(1, 1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function EFFECT', () => {
 
   it('should calculate the correct value with correct arguments and defaults', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=EFFECT(2%, 1)', '=EFFECT(2%, 2)', '=EFFECT(2%, 2.9)', '=EFFECT(2%, 24)'],
+      [{ cellValue: '=EFFECT(2%, 1)' }, { cellValue: '=EFFECT(2%, 2)' }, { cellValue: '=EFFECT(2%, 2.9)' }, { cellValue: '=EFFECT(2%, 24)'}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.02, 9)

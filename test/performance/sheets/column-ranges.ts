@@ -4,7 +4,7 @@ import {columnIndexToLabel, simpleCellAddressToString} from '../../../src/parser
 export function sheet(cols: number = 50) {
   const sheet: Sheet = []
 
-  const firstRow: DataRawCellContent[] = [1]
+  const firstRow: DataRawCellContent[] = [{ cellValue: 1 }]
 
   for (let i = 1; i < cols; ++i) {
     const adr = simpleCellAddressToString(() => '', {sheet: 0, row: 0, col: i - 1}, 0)

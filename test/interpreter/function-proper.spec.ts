@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function PROPER', () => {
   it('should return N/A when number of arguments is incorrect', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=PROPER()'],
-      ['=PROPER("foo", "bar")']
+      [{ cellValue: '=PROPER()' }],
+      [{ cellValue: '=PROPER("foo", "bar")' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,10 +15,10 @@ describe('Function PROPER', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=PROPER("foo")'],
-      ['=PROPER("foo bar")'],
-      ['=PROPER(" foo    bar   ")'],
-      ['=PROPER("fOo BAR")'],
+      [{ cellValue: '=PROPER("foo")' }],
+      [{ cellValue: '=PROPER("foo bar")' }],
+      [{ cellValue: '=PROPER(" foo    bar   ")' }],
+      [{ cellValue: '=PROPER("fOo BAR")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('Foo')
@@ -29,7 +29,7 @@ describe('Function PROPER', () => {
 
   it('should work with punctuation marks and numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=PROPER("123aa123bb.cc.dd")']
+      [{ cellValue: '=PROPER("123aa123bb.cc.dd")' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('123Aa123Bb.Cc.Dd')
@@ -37,8 +37,8 @@ describe('Function PROPER', () => {
 
   it('should work with accents', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=PROPER("MAI ANH ĐỨC")'],
-      ['=PROPER("MAI CHÍ THỌ")'],
+      [{ cellValue: '=PROPER("MAI ANH ĐỨC")' }],
+      [{ cellValue: '=PROPER("MAI CHÍ THỌ")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('Mai Anh Đức')
@@ -47,9 +47,9 @@ describe('Function PROPER', () => {
 
   it('should coerce other types to string', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=PROPER(1)'],
-      ['=PROPER(5+5)'],
-      ['=PROPER(TRUE())'],
+      [{ cellValue: '=PROPER(1)' }],
+      [{ cellValue: '=PROPER(5+5)' }],
+      [{ cellValue: '=PROPER(TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('1')

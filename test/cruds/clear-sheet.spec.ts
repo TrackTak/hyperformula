@@ -26,7 +26,7 @@ describe('Clear sheet content', () => {
 
   it('should clear sheet content', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', 'foo'],
+      [{ cellValue: '1' }, { cellValue: 'foo' }],
     ])
 
     engine.clearSheet(0)
@@ -38,11 +38,11 @@ describe('Clear sheet content', () => {
   it('should recalculate and return changes', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['1'],
+        [{ cellValue: '1' }],
       ],
       Sheet2: [
-        ['=Sheet1!A1'],
-        ['=SUM(1, Sheet1!A1)'],
+        [{ cellValue: '=Sheet1!A1' }],
+        [{ cellValue: '=SUM(1, Sheet1!A1)' }],
       ],
     })
 
@@ -57,12 +57,12 @@ describe('Clear sheet content', () => {
   it('should clear sheet with matrix', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['1', '2'],
-        ['=TRANSPOSE(A1:B1)'],
+        [{ cellValue: '1' }, { cellValue: '2' }],
+        [{ cellValue: '=TRANSPOSE(A1:B1)' }],
       ],
       Sheet2: [
-        ['=Sheet1!A2'],
-        ['=Sheet1!A3'],
+        [{ cellValue: '=Sheet1!A2' }],
+        [{ cellValue: '=Sheet1!A3' }],
       ],
     })
 
@@ -77,10 +77,10 @@ describe('Clear sheet content', () => {
   it('should clear sheet and dont break edge between cells', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['1'],
+        [{ cellValue: '1' }],
       ],
       Sheet2: [
-        ['=Sheet1!A1'],
+        [{ cellValue: '=Sheet1!A1' }],
       ],
     })
 
@@ -93,10 +93,10 @@ describe('Clear sheet content', () => {
   it('should clear sheet and dont break edge between cells, case with range', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['1'],
+        [{ cellValue: '1' }],
       ],
       Sheet2: [
-        ['=SUM(Sheet1!A1:B1)'],
+        [{ cellValue: '=SUM(Sheet1!A1:B1)' }],
       ],
     })
 

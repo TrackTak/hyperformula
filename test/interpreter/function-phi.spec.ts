@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function PHI', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=PHI()'],
-      ['=PHI(1, 2)'],
+      [{ cellValue: '=PHI()' }],
+      [{ cellValue: '=PHI(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,7 +16,7 @@ describe('Function PHI', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=PHI("foo")'],
+      [{ cellValue: '=PHI("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -24,9 +24,9 @@ describe('Function PHI', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=PHI(-0.5)'],
-      ['=PHI(0)'],
-      ['=PHI(1)'],
+      [{ cellValue: '=PHI(-0.5)' }],
+      [{ cellValue: '=PHI(0)' }],
+      [{ cellValue: '=PHI(1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.3520653267643, 6)

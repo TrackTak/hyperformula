@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function T.DIST.RT', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST.RT(1)'],
-      ['=T.DIST.RT(1, 2, 3)'],
+      [{ cellValue: '=T.DIST.RT(1)' }],
+      [{ cellValue: '=T.DIST.RT(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,8 +16,8 @@ describe('Function T.DIST.RT', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST.RT("foo", 2)'],
-      ['=T.DIST.RT(1, "baz")'],
+      [{ cellValue: '=T.DIST.RT("foo", 2)' }],
+      [{ cellValue: '=T.DIST.RT(1, "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -26,8 +26,8 @@ describe('Function T.DIST.RT', () => {
 
   it('should work as cdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST.RT(1, 1)'],
-      ['=T.DIST.RT(3, 2)'],
+      [{ cellValue: '=T.DIST.RT(1, 1)' }],
+      [{ cellValue: '=T.DIST.RT(3, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.25, 6)
@@ -36,8 +36,8 @@ describe('Function T.DIST.RT', () => {
 
   it('should truncate input', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST.RT(1, 1.9)'],
-      ['=T.DIST.RT(3, 2.9)'],
+      [{ cellValue: '=T.DIST.RT(1, 1.9)' }],
+      [{ cellValue: '=T.DIST.RT(3, 2.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.25, 6)
@@ -46,9 +46,9 @@ describe('Function T.DIST.RT', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST.RT(0, 1)'],
-      ['=T.DIST.RT(-0.01, 1)'],
-      ['=T.DIST.RT(1, 0.9)'],
+      [{ cellValue: '=T.DIST.RT(0, 1)' }],
+      [{ cellValue: '=T.DIST.RT(-0.01, 1)' }],
+      [{ cellValue: '=T.DIST.RT(1, 0.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.5, 6)

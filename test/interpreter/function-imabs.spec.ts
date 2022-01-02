@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function IMABS', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMABS()'],
-      ['=IMABS(1, 2)'],
+      [{ cellValue: '=IMABS()' }],
+      [{ cellValue: '=IMABS(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function IMABS', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMABS("foo")'],
+      [{ cellValue: '=IMABS("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -23,9 +23,9 @@ describe('Function IMABS', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMABS(0)'],
-      ['=IMABS("i")'],
-      ['=IMABS("-3+4i")'],
+      [{ cellValue: '=IMABS(0)' }],
+      [{ cellValue: '=IMABS("i")' }],
+      [{ cellValue: '=IMABS("-3+4i")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)

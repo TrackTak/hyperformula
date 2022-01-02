@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function MIRR', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MIRR(1,1)'],
-      ['=MIRR(1,1,1,1)'],
+      [{ cellValue: '=MIRR(1,1)' }],
+      [{ cellValue: '=MIRR(1,1,1,1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -33,7 +33,7 @@ describe('Function MIRR', () => {
   it('should return #DIV/0! if "contains at least one positive and one negative value" condition is not met', () => {
     const [engine] = HyperFormula.buildFromArray([
       ['=MIRR(B1:E1,0.2,0.1)', -1, 0, -1, -1],
-      ['=MIRR(B2:E2,0.2,0.1)', 1, 0, 1, 1],
+      [{ cellValue: '=MIRR(B2:E2,0.2,0.1)' }, { cellValue: 1 }, { cellValue: 0 }, { cellValue: 1}, {cellValue: 1 }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

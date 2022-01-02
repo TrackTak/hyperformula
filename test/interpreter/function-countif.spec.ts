@@ -7,8 +7,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function COUNTIF', () => {
   it('requires 2 arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COUNTIF(B1:B3)'],
-      ['=COUNTIF(B1:B3, ">0", B1)'],
+      [{ cellValue: '=COUNTIF(B1:B3)' }],
+      [{ cellValue: '=COUNTIF(B1:B3, ">0", B1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -17,10 +17,10 @@ describe('Function COUNTIF', () => {
 
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0'],
-      ['1'],
-      ['2'],
-      ['=COUNTIF(A1:A3, ">=1")'],
+      [{ cellValue: '0' }],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '=COUNTIF(A1:A3, ">=1")' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(2)
@@ -28,10 +28,10 @@ describe('Function COUNTIF', () => {
 
   it('works with mixed types', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0'],
-      ['"1"'],
-      ['2'],
-      ['=COUNTIF(A1:A3, "=1")'],
+      [{ cellValue: '0' }],
+      [{ cellValue: '"1"' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '=COUNTIF(A1:A3, "=1")' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(0)
@@ -39,10 +39,10 @@ describe('Function COUNTIF', () => {
 
   it('use partial cache', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0'],
-      ['1'],
-      ['2', '=COUNTIF(A1:A3, ">=1")'],
-      ['3', '=COUNTIF(A1:A4, ">=1")'],
+      [{ cellValue: '0' }],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }, { cellValue: '=COUNTIF(A1:A3, ">=1")' }],
+      [{ cellValue: '3' }, { cellValue: '=COUNTIF(A1:A4, ">=1")' }],
     ])
 
     expect(engine.getCellValue(adr('B3'))).toEqual(2)
@@ -52,9 +52,9 @@ describe('Function COUNTIF', () => {
 
   it('use full cache', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0', '=COUNTIF(A1:A3, ">=1")'],
-      ['1', '=COUNTIF(A1:A3, ">=1")'],
-      ['2'],
+      [{ cellValue: '0' }, { cellValue: '=COUNTIF(A1:A3, ">=1")' }],
+      [{ cellValue: '1' }, { cellValue: '=COUNTIF(A1:A3, ">=1")' }],
+      [{ cellValue: '2' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqual(2)
@@ -64,8 +64,8 @@ describe('Function COUNTIF', () => {
 
   it('works for only one cell', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '=COUNTIF(A1, ">=1")'],
-      ['0', '=COUNTIF(A2, ">=1")'],
+      [{ cellValue: '1' }, { cellValue: '=COUNTIF(A1, ">=1")' }],
+      [{ cellValue: '0' }, { cellValue: '=COUNTIF(A2, ">=1")' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqual(1)
@@ -74,7 +74,7 @@ describe('Function COUNTIF', () => {
 
   it('error when criterion unparsable', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COUNTIF(B1:B2, "><foo")'],
+      [{ cellValue: '=COUNTIF(B1:B2, "><foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.BadCriterion))
@@ -82,8 +82,8 @@ describe('Function COUNTIF', () => {
 
   it('scalars are treated like singular arrays', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COUNTIF(10, ">1")'],
-      ['=COUNTIF(0, ">1")'],
+      [{ cellValue: '=COUNTIF(10, ">1")' }],
+      [{ cellValue: '=COUNTIF(0, ">1")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -92,9 +92,9 @@ describe('Function COUNTIF', () => {
 
   it('error propagation', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COUNTIF(4/0, ">1")'],
-      ['=COUNTIF(0, 4/0)'],
-      ['=COUNTIF(4/0, FOOBAR())'],
+      [{ cellValue: '=COUNTIF(4/0, ">1")' }],
+      [{ cellValue: '=COUNTIF(0, 4/0)' }],
+      [{ cellValue: '=COUNTIF(4/0, FOOBAR())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -104,10 +104,10 @@ describe('Function COUNTIF', () => {
 
   it('works with range values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['3', '5'],
-      ['7', '9'],
-      ['=COUNTIF(A1:B2, ">4")'],
-      ['=COUNTIF(MMULT(A1:B2, A1:B2), ">50")'],
+      [{ cellValue: '3' }, { cellValue: '5' }],
+      [{ cellValue: '7' }, { cellValue: '9' }],
+      [{ cellValue: '=COUNTIF(A1:B2, ">4")' }],
+      [{ cellValue: '=COUNTIF(MMULT(A1:B2, A1:B2), ">50")' }],
     ])
 
     expect(engine.getCellValue(adr('A3'))).toEqual(3)
@@ -116,10 +116,10 @@ describe('Function COUNTIF', () => {
 
   it('works for matrices', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['=TRANSPOSE(A1:B1)'],
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '=TRANSPOSE(A1:B1)' }],
       [],
-      ['=COUNTIF(A2:A3, ">0")'],
+      [{ cellValue: '=COUNTIF(A2:A3, ">0")' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(2)
@@ -127,10 +127,10 @@ describe('Function COUNTIF', () => {
 
   it('ignore errors', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['=4/0'],
-      ['1'],
-      ['=COUNTIF(A1:A3, "=1")'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '=4/0' }],
+      [{ cellValue: '1' }],
+      [{ cellValue: '=COUNTIF(A1:A3, "=1")' }],
     ])
 
     expect(engine.getCellValue(adr('A4'))).toEqual(2)

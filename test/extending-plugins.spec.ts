@@ -21,7 +21,7 @@ describe('Plugins', () => {
   it('Extending with a plugin', () => {
     HyperFormula.getLanguage('enGB').extendFunctions({'FOO': 'FOO'})
     const [engine] = HyperFormula.buildFromArray([
-      ['=foo()'],
+      [{ cellValue: '=foo()' }],
     ], {functionPlugins: [FooPlugin]})
 
     expect(engine.getCellValue(adr('A1'))).toBe(42)
@@ -29,7 +29,7 @@ describe('Plugins', () => {
 
   it('cleanup', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=foo()'],
+      [{ cellValue: '=foo()' }],
     ], {functionPlugins: [FooPlugin]})
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOO')))

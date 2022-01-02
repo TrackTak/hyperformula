@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function HF.UMINUS', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UMINUS()', '=HF.UMINUS(1, 1)'],
+      [{ cellValue: '=HF.UMINUS()' }, { cellValue: '=HF.UMINUS(1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,9 +14,9 @@ describe('Function HF.UMINUS', () => {
 
   it('should calculate the correct value with correct defaults', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UMINUS(2)'],
-      ['=HF.UMINUS(-3)'],
-      ['=HF.UMINUS(0)']
+      [{ cellValue: '=HF.UMINUS(2)' }],
+      [{ cellValue: '=HF.UMINUS(-3)' }],
+      [{ cellValue: '=HF.UMINUS(0)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(-2)
@@ -26,9 +26,9 @@ describe('Function HF.UMINUS', () => {
 
   it('should coerce to correct types', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UMINUS(TRUE())'],
-      ['=HF.UMINUS(B2)'],
-      ['=HF.UMINUS("1")'],
+      [{ cellValue: '=HF.UMINUS(TRUE())' }],
+      [{ cellValue: '=HF.UMINUS(B2)' }],
+      [{ cellValue: '=HF.UMINUS("1")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(-1)
@@ -38,9 +38,9 @@ describe('Function HF.UMINUS', () => {
 
   it('should throw correct error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HF.UMINUS("abcd")'],
-      ['=HF.UMINUS(NA())'],
-      ['=HF.UMINUS(B3:C3)'],
+      [{ cellValue: '=HF.UMINUS("abcd")' }],
+      [{ cellValue: '=HF.UMINUS(NA())' }],
+      [{ cellValue: '=HF.UMINUS(B3:C3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))

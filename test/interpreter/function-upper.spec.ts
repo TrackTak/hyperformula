@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function UPPER', () => {
   it('should take one argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=UPPER()'],
-      ['=UPPER("foo", "bar")'],
+      [{ cellValue: '=UPPER()' }],
+      [{ cellValue: '=UPPER("foo", "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,11 +15,11 @@ describe('Function UPPER', () => {
 
   it('should convert text to uppercase', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=UPPER("")'],
-      ['=UPPER(B1)'],
-      ['=UPPER("FOO")'],
-      ['=UPPER("foo")'],
-      ['=UPPER("bAr")'],
+      [{ cellValue: '=UPPER("")' }],
+      [{ cellValue: '=UPPER(B1)' }],
+      [{ cellValue: '=UPPER("FOO")' }],
+      [{ cellValue: '=UPPER("foo")' }],
+      [{ cellValue: '=UPPER("bAr")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('')
@@ -31,8 +31,8 @@ describe('Function UPPER', () => {
 
   it('should coerce', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=UPPER(TRUE())'],
-      ['=UPPER(0)'],
+      [{ cellValue: '=UPPER(TRUE())' }],
+      [{ cellValue: '=UPPER(0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('TRUE')

@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function COUNTUNIQUE', () => {
   it('error when no arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COUNTUNIQUE()'],
+      [{ cellValue: '=COUNTUNIQUE()' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,7 +14,7 @@ describe('Function COUNTUNIQUE', () => {
 
   it('single number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COUNTUNIQUE(1)'],
+      [{ cellValue: '=COUNTUNIQUE(1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -22,9 +22,9 @@ describe('Function COUNTUNIQUE', () => {
 
   it('three numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COUNTUNIQUE(2, 1, 2)'],
-      ['=COUNTUNIQUE(2, 1, 1)'],
-      ['=COUNTUNIQUE(2, 1, 3)'],
+      [{ cellValue: '=COUNTUNIQUE(2, 1, 2)' }],
+      [{ cellValue: '=COUNTUNIQUE(2, 1, 1)' }],
+      [{ cellValue: '=COUNTUNIQUE(2, 1, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(2)
@@ -34,8 +34,8 @@ describe('Function COUNTUNIQUE', () => {
 
   it('theres no coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '="1"'],
-      ['=COUNTUNIQUE(A1:B1)'],
+      [{ cellValue: '1' }, { cellValue: '="1"' }],
+      [{ cellValue: '=COUNTUNIQUE(A1:B1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqual(2)
@@ -43,7 +43,7 @@ describe('Function COUNTUNIQUE', () => {
 
   it('errors in arguments are not propagated', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=COUNTUNIQUE(5/0)'],
+      [{ cellValue: '=COUNTUNIQUE(5/0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -51,10 +51,10 @@ describe('Function COUNTUNIQUE', () => {
 
   it('different errors are counted by type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=4/0', '=COUNTUNIQUE(A1:A4)'],
-      ['=FOOBAR()'],
-      ['=5/0'],
-      ['=BARFOO()'],
+      [{ cellValue: '=4/0' }, { cellValue: '=COUNTUNIQUE(A1:A4)' }],
+      [{ cellValue: '=FOOBAR()' }],
+      [{ cellValue: '=5/0' }],
+      [{ cellValue: '=BARFOO()' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqual(2)
@@ -62,7 +62,7 @@ describe('Function COUNTUNIQUE', () => {
 
   it('empty string doesnt count', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=""', '=COUNTUNIQUE("", A1)'],
+      [{ cellValue: '=""' }, { cellValue: '=COUNTUNIQUE("", A1)' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqual(0)
@@ -70,10 +70,10 @@ describe('Function COUNTUNIQUE', () => {
 
   it('different strings are recognized are counted by type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['foo', '=COUNTUNIQUE(A1:A4)'],
-      ['bar'],
-      ['foo'],
-      ['bar '],
+      [{ cellValue: 'foo' }, { cellValue: '=COUNTUNIQUE(A1:A4)' }],
+      [{ cellValue: 'bar' }],
+      [{ cellValue: 'foo' }],
+      [{ cellValue: 'bar ' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqual(3)
@@ -81,12 +81,12 @@ describe('Function COUNTUNIQUE', () => {
 
   it('singular values are counted', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['TRUE()', '=COUNTUNIQUE(A1:A6)'],
-      ['FALSE()'],
-      [null],
-      ['TRUE()'],
-      ['FALSE()'],
-      [null],
+      [{ cellValue: 'TRUE()' }, { cellValue: '=COUNTUNIQUE(A1:A6)' }],
+      [{ cellValue: 'FALSE()' }],
+      [{ cellValue: null }],
+      [{ cellValue: 'TRUE()' }],
+      [{ cellValue: 'FALSE()' }],
+      [{ cellValue: null }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqual(3)

@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function CONFIDENCE.T', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CONFIDENCE.T(1, 2)'],
-      ['=CONFIDENCE.T(1, 2, 3, 4)'],
+      [{ cellValue: '=CONFIDENCE.T(1, 2)' }],
+      [{ cellValue: '=CONFIDENCE.T(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function CONFIDENCE.T', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CONFIDENCE.T("foo", 2, 3)'],
-      ['=CONFIDENCE.T(0.5, "baz", 3)'],
-      ['=CONFIDENCE.T(0.5, 2, "abcd")'],
+      [{ cellValue: '=CONFIDENCE.T("foo", 2, 3)' }],
+      [{ cellValue: '=CONFIDENCE.T(0.5, "baz", 3)' }],
+      [{ cellValue: '=CONFIDENCE.T(0.5, 2, "abcd")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,8 +28,8 @@ describe('Function CONFIDENCE.T', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CONFIDENCE.T(0.1, 1, 2)'],
-      ['=CONFIDENCE.T(0.9, 10, 5)'],
+      [{ cellValue: '=CONFIDENCE.T(0.1, 1, 2)' }],
+      [{ cellValue: '=CONFIDENCE.T(0.9, 10, 5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(4.46449651075278, 6)
@@ -38,8 +38,8 @@ describe('Function CONFIDENCE.T', () => {
 
   it('should truncate third argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CONFIDENCE.T(0.1, 1, 2.9)'],
-      ['=CONFIDENCE.T(0.9, 10, 5.9)'],
+      [{ cellValue: '=CONFIDENCE.T(0.1, 1, 2.9)' }],
+      [{ cellValue: '=CONFIDENCE.T(0.9, 10, 5.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(4.46449651075278, 6)
@@ -48,14 +48,14 @@ describe('Function CONFIDENCE.T', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CONFIDENCE.T(0.01, 0.01, 2)'],
-      ['=CONFIDENCE.T(0, 0.01, 2)'],
-      ['=CONFIDENCE.T(0.01, 0, 2)'],
-      ['=CONFIDENCE.T(0.01, 0.1, 1.99)'],
-      ['=CONFIDENCE.T(0.99, 0.01, 2)'],
-      ['=CONFIDENCE.T(1, 0.01, 2)'],
-      ['=CONFIDENCE.T(0.01, 0.1, 0.99)'],
-      ['=CONFIDENCE.T(0.01, 0.1, 1)'],
+      [{ cellValue: '=CONFIDENCE.T(0.01, 0.01, 2)' }],
+      [{ cellValue: '=CONFIDENCE.T(0, 0.01, 2)' }],
+      [{ cellValue: '=CONFIDENCE.T(0.01, 0, 2)' }],
+      [{ cellValue: '=CONFIDENCE.T(0.01, 0.1, 1.99)' }],
+      [{ cellValue: '=CONFIDENCE.T(0.99, 0.01, 2)' }],
+      [{ cellValue: '=CONFIDENCE.T(1, 0.01, 2)' }],
+      [{ cellValue: '=CONFIDENCE.T(0.01, 0.1, 0.99)' }],
+      [{ cellValue: '=CONFIDENCE.T(0.01, 0.1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.450121133444994, 6)

@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function F.INV.RT', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.INV.RT(1, 2)'],
-      ['=F.INV.RT(1, 2, 3, 4)'],
+      [{ cellValue: '=F.INV.RT(1, 2)' }],
+      [{ cellValue: '=F.INV.RT(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function F.INV.RT', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.INV.RT("foo", 2, 3)'],
-      ['=F.INV.RT(1, "baz", 3)'],
-      ['=F.INV.RT(1, 2, "bar")'],
+      [{ cellValue: '=F.INV.RT("foo", 2, 3)' }],
+      [{ cellValue: '=F.INV.RT(1, "baz", 3)' }],
+      [{ cellValue: '=F.INV.RT(1, 2, "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,8 +28,8 @@ describe('Function F.INV.RT', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.INV.RT(0.1, 1, 1)'],
-      ['=F.INV.RT(0.9, 2, 2)'],
+      [{ cellValue: '=F.INV.RT(0.1, 1, 1)' }],
+      [{ cellValue: '=F.INV.RT(0.9, 2, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(39.8634581890474, 6)
@@ -38,8 +38,8 @@ describe('Function F.INV.RT', () => {
 
   it('truncates second and third arg', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.INV.RT(0.1, 1.9, 1)'],
-      ['=F.INV.RT(0.9, 2, 2.9)'],
+      [{ cellValue: '=F.INV.RT(0.1, 1.9, 1)' }],
+      [{ cellValue: '=F.INV.RT(0.9, 2, 2.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(39.8634581890474, 6)
@@ -48,10 +48,10 @@ describe('Function F.INV.RT', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.INV.RT(0.5, 0.999, 1)'],
-      ['=F.INV.RT(0.5, 1, 0.999)'],
-      ['=F.INV.RT(-0.0001, 2, 1)'],
-      ['=F.INV.RT(1.0001, 2, 1)'],
+      [{ cellValue: '=F.INV.RT(0.5, 0.999, 1)' }],
+      [{ cellValue: '=F.INV.RT(0.5, 1, 0.999)' }],
+      [{ cellValue: '=F.INV.RT(-0.0001, 2, 1)' }],
+      [{ cellValue: '=F.INV.RT(1.0001, 2, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))

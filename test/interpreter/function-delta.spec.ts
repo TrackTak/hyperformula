@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function DELTA', () => {
   it('should not work for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DELTA()'],
-      ['=DELTA(1, 2, 3)'],
+      [{ cellValue: '=DELTA()' }],
+      [{ cellValue: '=DELTA(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,8 +16,8 @@ describe('Function DELTA', () => {
 
   it('should not work for wrong type of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DELTA("foo")'],
-      ['=DELTA(1, "bar")'],
+      [{ cellValue: '=DELTA("foo")' }],
+      [{ cellValue: '=DELTA(1, "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -26,9 +26,9 @@ describe('Function DELTA', () => {
 
   it('should compare to 0 if one argument provided', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DELTA(0)'],
-      ['=DELTA("123")'],
-      ['=DELTA(FALSE())'],
+      [{ cellValue: '=DELTA(0)' }],
+      [{ cellValue: '=DELTA("123")' }],
+      [{ cellValue: '=DELTA(FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -38,9 +38,9 @@ describe('Function DELTA', () => {
 
   it('should compare two arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DELTA(1, 0)'],
-      ['=DELTA(2, 2)'],
-      ['=DELTA(123, "123")']
+      [{ cellValue: '=DELTA(1, 0)' }],
+      [{ cellValue: '=DELTA(2, 2)' }],
+      [{ cellValue: '=DELTA(123, "123")' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)
@@ -50,8 +50,8 @@ describe('Function DELTA', () => {
 
   it('should return number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DELTA(3, 3)'],
-      ['=DELTA("123")'],
+      [{ cellValue: '=DELTA(3, 3)' }],
+      [{ cellValue: '=DELTA("123")' }],
     ])
 
     expect(engine.getCellValueType(adr('A1'))).toEqual(CellValueType.NUMBER)

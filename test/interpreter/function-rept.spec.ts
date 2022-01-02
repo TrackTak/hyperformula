@@ -5,9 +5,9 @@ import {adr, detailedError} from '../testUtils'
 describe('Function REPT', () => {
   it('should return N/A when number of arguments is incorrect', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=REPT()'],
-      ['=REPT("foo")'],
-      ['=REPT("foo", 1, 2)']
+      [{ cellValue: '=REPT()' }],
+      [{ cellValue: '=REPT("foo")' }],
+      [{ cellValue: '=REPT("foo", 1, 2)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -17,7 +17,7 @@ describe('Function REPT', () => {
 
   it('should return VALUE when wrong type of second parameter', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=REPT("foo", "bar")'],
+      [{ cellValue: '=REPT("foo", "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -25,7 +25,7 @@ describe('Function REPT', () => {
 
   it('should return VALUE when second parameter is less than 0', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=REPT("foo", -1)'],
+      [{ cellValue: '=REPT("foo", -1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NegativeCount))
@@ -33,11 +33,11 @@ describe('Function REPT', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=REPT("foo", 0)'],
-      ['=REPT("foo", 3)'],
-      ['=REPT(1, 5)'],
-      ['=REPT(, 5)'],
-      ['=REPT("Na", 7)&" Batman!"'],
+      [{ cellValue: '=REPT("foo", 0)' }],
+      [{ cellValue: '=REPT("foo", 3)' }],
+      [{ cellValue: '=REPT(1, 5)' }],
+      [{ cellValue: '=REPT(, 5)' }],
+      [{ cellValue: '=REPT("Na", 7)&" Batman!"' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('')
@@ -49,9 +49,9 @@ describe('Function REPT', () => {
 
   it('should coerce other types to string', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=REPT(1, 1)'],
-      ['=REPT(5+5, 1)'],
-      ['=REPT(TRUE(), 1)'],
+      [{ cellValue: '=REPT(1, 1)' }],
+      [{ cellValue: '=REPT(5+5, 1)' }],
+      [{ cellValue: '=REPT(TRUE(), 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('1')

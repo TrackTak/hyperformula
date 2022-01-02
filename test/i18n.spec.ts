@@ -18,10 +18,10 @@ describe('i18n', () => {
 
   it('using functions in different languages', () => {
     const [enginePL] = HyperFormula.buildFromArray([
-      ['=SUMA(42)'],
+      [{ cellValue: '=SUMA(42)' }],
     ], {language: 'plPL'})
     const [engineEN] = HyperFormula.buildFromArray([
-      ['=SUM(42)'],
+      [{ cellValue: '=SUM(42)' }],
     ], {language: 'enGB'})
 
     expect(enginePL.getCellValue(adr('A1'))).toBe(42)
@@ -30,16 +30,16 @@ describe('i18n', () => {
 
   it('using functions in different languages with not standard characters', () => {
     const [enginePL] = HyperFormula.buildFromArray([
-      ['0'],
-      ['1'],
-      ['2'],
-      ['=LICZ.JEŻELI(A1:A3, ">=1")'],
+      [{ cellValue: '0' }],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '=LICZ.JEŻELI(A1:A3, ">=1")' }],
     ], {language: 'plPL'})
     const [engineEN] = HyperFormula.buildFromArray([
-      ['0'],
-      ['1'],
-      ['2'],
-      ['=COUNTIF(A1:A3, ">=1")'],
+      [{ cellValue: '0' }],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '=COUNTIF(A1:A3, ">=1")' }],
     ], {language: 'enGB'})
 
     expect(enginePL.getCellValue(adr('A4'))).toBe(2)
@@ -48,10 +48,10 @@ describe('i18n', () => {
 
   it('translation works for parser hardcoded offset procedure', () => {
     const [enginePL] = HyperFormula.buildFromArray([
-      ['=PRZESUNIĘCIE(A1, 1, 1)'],
+      [{ cellValue: '=PRZESUNIĘCIE(A1, 1, 1)' }],
     ], {language: 'plPL'})
     const [engineEN] = HyperFormula.buildFromArray([
-      ['=OFFSET(A1, 1, 1)'],
+      [{ cellValue: '=OFFSET(A1, 1, 1)' }],
     ])
 
     expect(extractReference(enginePL, adr('A1'))).toEqual(CellAddress.relative(1, 1))

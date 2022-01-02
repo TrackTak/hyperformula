@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function SQRTPI', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SQRTPI()', '=SQRTPI(1, 1)'],
+      [{ cellValue: '=SQRTPI()' }, { cellValue: '=SQRTPI(1, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,9 +15,9 @@ describe('Function SQRTPI', () => {
 
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SQRTPI(0)'],
-      ['=SQRTPI(1)'],
-      ['=SQRTPI(PI())'],
+      [{ cellValue: '=SQRTPI(0)' }],
+      [{ cellValue: '=SQRTPI(1)' }],
+      [{ cellValue: '=SQRTPI(PI())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(0)
@@ -27,7 +27,7 @@ describe('Function SQRTPI', () => {
 
   it('pass error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SQRTPI(NA())'],
+      [{ cellValue: '=SQRTPI(NA())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))

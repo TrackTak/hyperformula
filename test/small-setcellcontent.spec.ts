@@ -6,8 +6,8 @@ describe('should properly build', () => {
     const [engine] = HyperFormula.buildEmpty()
     engine.addSheet()
     engine.setSheetContent(0, [
-      ['=MAX(B1:B2)', '=MAX(A1:A2)'],
-      ['=MAX(B1:B2)', '=MAX(A1:A2)'],
+      [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
+      [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
     ])
     expect(engine.getSheetValues(0)).toEqual(
       [
@@ -19,8 +19,8 @@ describe('should properly build', () => {
 
   it('and for this', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MAX(B1:B2)', '=MAX(A1:A2)'],
-      ['=MAX(B1:B2)', '=MAX(A1:A2)'],
+      [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
+      [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
     ])
     expect(engine.getSheetValues(0)).toEqual(
       [

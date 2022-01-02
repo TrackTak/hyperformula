@@ -4,20 +4,20 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function CSC', () => {
   it('happy path', () => {
-    const [engine] = HyperFormula.buildFromArray([['=CSC(PI()/2)', '=CSC(1)']])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=CSC(PI()/2)' }, { cellValue: '=CSC(1)' }]])
 
     expect(engine.getCellValue(adr('A1'))).toBe(1)
     expect(engine.getCellValue(adr('B1'))).toBeCloseTo(1.18839510577812)
   })
 
   it('when value not numeric', () => {
-    const [engine] = HyperFormula.buildFromArray([['=CSC("foo")']])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=CSC("foo")' }]])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([['=CSC()', '=CSC(1,-1)']])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=CSC()' }, { cellValue: '=CSC(1,-1)' }]])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -25,7 +25,7 @@ describe('Function CSC', () => {
 
   it('use number coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="-1"', '=CSC(A1)'],
+      [{ cellValue: '="-1"' }, { cellValue: '=CSC(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toBeCloseTo(-1.18839510577812)
@@ -33,7 +33,7 @@ describe('Function CSC', () => {
 
   it('div/zero', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [0, '=CSC(A1)'],
+      [{ cellValue: 0 }, { cellValue: '=CSC(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -41,7 +41,7 @@ describe('Function CSC', () => {
 
   it('errors propagation', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CSC(4/0)'],
+      [{ cellValue: '=CSC(4/0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

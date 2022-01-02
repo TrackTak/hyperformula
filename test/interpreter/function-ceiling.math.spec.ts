@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function CEILING.MATH', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING.MATH()'],
-      ['=CEILING.MATH(1, 2, 3, 4)'],
+      [{ cellValue: '=CEILING.MATH()' }],
+      [{ cellValue: '=CEILING.MATH(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function CEILING.MATH', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING.MATH("foo")'],
-      ['=CEILING.MATH(1, "bar")'],
-      ['=CEILING.MATH(1, 2, "baz")'],
+      [{ cellValue: '=CEILING.MATH("foo")' }],
+      [{ cellValue: '=CEILING.MATH(1, "bar")' }],
+      [{ cellValue: '=CEILING.MATH(1, 2, "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,14 +28,14 @@ describe('Function CEILING.MATH', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING.MATH(4.43, 0.3)'],
-      ['=CEILING.MATH(4.43, 0.6)'],
-      ['=CEILING.MATH(4.43, 2)'],
-      ['=CEILING.MATH(4.43)'],
-      ['=CEILING.MATH(-4.43)'],
-      ['=CEILING.MATH(-3.14, -1.8)'],
-      ['=CEILING.MATH(-3.14, 0)'],
-      ['=CEILING.MATH(3.14, 0)'],
+      [{ cellValue: '=CEILING.MATH(4.43, 0.3)' }],
+      [{ cellValue: '=CEILING.MATH(4.43, 0.6)' }],
+      [{ cellValue: '=CEILING.MATH(4.43, 2)' }],
+      [{ cellValue: '=CEILING.MATH(4.43)' }],
+      [{ cellValue: '=CEILING.MATH(-4.43)' }],
+      [{ cellValue: '=CEILING.MATH(-3.14, -1.8)' }],
+      [{ cellValue: '=CEILING.MATH(-3.14, 0)' }],
+      [{ cellValue: '=CEILING.MATH(3.14, 0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(4.5)
@@ -50,11 +50,11 @@ describe('Function CEILING.MATH', () => {
 
   it('should work with mode for negative numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING.MATH(-11, -2)'],
-      ['=CEILING.MATH(-11, -2, 0)'],
-      ['=CEILING.MATH(-11, -2, 1)'],
-      ['=CEILING.MATH(-11, 0, 1)'],
-      ['=CEILING.MATH(-11, 0, 0)'],
+      [{ cellValue: '=CEILING.MATH(-11, -2)' }],
+      [{ cellValue: '=CEILING.MATH(-11, -2, 0)' }],
+      [{ cellValue: '=CEILING.MATH(-11, -2, 1)' }],
+      [{ cellValue: '=CEILING.MATH(-11, 0, 1)' }],
+      [{ cellValue: '=CEILING.MATH(-11, 0, 0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(-10)
@@ -66,14 +66,14 @@ describe('Function CEILING.MATH', () => {
 
   it('negative values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING.MATH(11, 2, 0)'],
-      ['=CEILING.MATH(-11, 2, 0)'],
-      ['=CEILING.MATH(11, -2, 0)'],
-      ['=CEILING.MATH(-11, -2, 0)'],
-      ['=CEILING.MATH(11, 2, 1)'],
-      ['=CEILING.MATH(-11, 2, 1)'],
-      ['=CEILING.MATH(11, -2, 1)'],
-      ['=CEILING.MATH(-11, -2, 1)'],
+      [{ cellValue: '=CEILING.MATH(11, 2, 0)' }],
+      [{ cellValue: '=CEILING.MATH(-11, 2, 0)' }],
+      [{ cellValue: '=CEILING.MATH(11, -2, 0)' }],
+      [{ cellValue: '=CEILING.MATH(-11, -2, 0)' }],
+      [{ cellValue: '=CEILING.MATH(11, 2, 1)' }],
+      [{ cellValue: '=CEILING.MATH(-11, 2, 1)' }],
+      [{ cellValue: '=CEILING.MATH(11, -2, 1)' }],
+      [{ cellValue: '=CEILING.MATH(-11, -2, 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(12)

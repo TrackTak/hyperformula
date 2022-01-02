@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function LOWER', () => {
   it('should take one argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOWER()'],
-      ['=LOWER("foo", "bar")'],
+      [{ cellValue: '=LOWER()' }],
+      [{ cellValue: '=LOWER("foo", "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,11 +15,11 @@ describe('Function LOWER', () => {
 
   it('should convert text to lowercase', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOWER("")'],
-      ['=LOWER(B1)'],
-      ['=LOWER("foo")'],
-      ['=LOWER("FOO")'],
-      ['=LOWER("BaR")'],
+      [{ cellValue: '=LOWER("")' }],
+      [{ cellValue: '=LOWER(B1)' }],
+      [{ cellValue: '=LOWER("foo")' }],
+      [{ cellValue: '=LOWER("FOO")' }],
+      [{ cellValue: '=LOWER("BaR")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('')
@@ -31,8 +31,8 @@ describe('Function LOWER', () => {
 
   it('should coerce', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOWER(TRUE())'],
-      ['=LOWER(0)'],
+      [{ cellValue: '=LOWER(TRUE())' }],
+      [{ cellValue: '=LOWER(0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('true')

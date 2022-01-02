@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function T.DIST.2T', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST.2T(1)'],
-      ['=T.DIST.2T(1, 2, 3)'],
+      [{ cellValue: '=T.DIST.2T(1)' }],
+      [{ cellValue: '=T.DIST.2T(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,8 +16,8 @@ describe('Function T.DIST.2T', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST.2T("foo", 2)'],
-      ['=T.DIST.2T(1, "baz")'],
+      [{ cellValue: '=T.DIST.2T("foo", 2)' }],
+      [{ cellValue: '=T.DIST.2T(1, "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -26,8 +26,8 @@ describe('Function T.DIST.2T', () => {
 
   it('should work as cdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST.2T(1, 1)'],
-      ['=T.DIST.2T(3, 2)'],
+      [{ cellValue: '=T.DIST.2T(1, 1)' }],
+      [{ cellValue: '=T.DIST.2T(3, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.5, 6)
@@ -36,8 +36,8 @@ describe('Function T.DIST.2T', () => {
 
   it('should truncate input', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST.2T(1, 1.9)'],
-      ['=T.DIST.2T(3, 2.9)'],
+      [{ cellValue: '=T.DIST.2T(1, 1.9)' }],
+      [{ cellValue: '=T.DIST.2T(3, 2.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.5, 6)
@@ -46,9 +46,9 @@ describe('Function T.DIST.2T', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.DIST.2T(0, 1)'],
-      ['=T.DIST.2T(-0.01, 1)'],
-      ['=T.DIST.2T(1, 0.9)'],
+      [{ cellValue: '=T.DIST.2T(0, 1)' }],
+      [{ cellValue: '=T.DIST.2T(-0.01, 1)' }],
+      [{ cellValue: '=T.DIST.2T(1, 0.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(1, 6)

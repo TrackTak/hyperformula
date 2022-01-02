@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function LARGE', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LARGE(1)'],
-      ['=LARGE(1, 2, 3)'],
+      [{ cellValue: '=LARGE(1)' }],
+      [{ cellValue: '=LARGE(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function LARGE', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LARGE(1, "baz")'],
+      [{ cellValue: '=LARGE(1, "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -23,8 +23,8 @@ describe('Function LARGE', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LARGE(A2:D2,0)', '=LARGE(A2:D2,1)', '=LARGE(A2:D2,2)', '=LARGE(A2:D2,3)', '=LARGE(A2:D2,4)', '=LARGE(A2:D2,5)'],
-      [1, 4, 2, 4],
+      [{ cellValue: '=LARGE(A2:D2,0)' }, { cellValue: '=LARGE(A2:D2,1)' }, { cellValue: '=LARGE(A2:D2,2)' }, { cellValue: '=LARGE(A2:D2,3)'}, {cellValue: '=LARGE(A2:D2,4)' }, { cellValue: '=LARGE(A2:D2,5)' }],
+      [{ cellValue: 1 }, { cellValue: 4 }, { cellValue: 2 }, { cellValue: 4}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -37,8 +37,8 @@ describe('Function LARGE', () => {
 
   it('should ignore non-numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LARGE(A2:D2,0)', '=LARGE(A2:D2,1)', '=LARGE(A2:D2,2)', '=LARGE(A2:D2,3)'],
-      [1, 4, true, 'abcd'],
+      [{ cellValue: '=LARGE(A2:D2,0)' }, { cellValue: '=LARGE(A2:D2,1)' }, { cellValue: '=LARGE(A2:D2,2)' }, { cellValue: '=LARGE(A2:D2,3)'}],
+      [{ cellValue: 1 }, { cellValue: 4 }, { cellValue: true }, { cellValue: 'abcd'}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -49,8 +49,8 @@ describe('Function LARGE', () => {
 
   it('should propagate errors', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LARGE(A2:D2,0)', '=LARGE(A2:D2,1)', '=LARGE(A2:D2,2)', '=LARGE(A2:D2,3)'],
-      [1, 4, '=NA()', 'abcd'],
+      [{ cellValue: '=LARGE(A2:D2,0)' }, { cellValue: '=LARGE(A2:D2,1)' }, { cellValue: '=LARGE(A2:D2,2)' }, { cellValue: '=LARGE(A2:D2,3)'}],
+      [{ cellValue: 1 }, { cellValue: 4 }, { cellValue: '=NA()' }, { cellValue: 'abcd'}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -61,8 +61,8 @@ describe('Function LARGE', () => {
 
   it('should truncate second arg', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LARGE(A2:D2,0.9)', '=LARGE(A2:D2,1.9)', '=LARGE(A2:D2,2.9)', '=LARGE(A2:D2,3.9)', '=LARGE(A2:D2,4.9)', '=LARGE(A2:D2,5.9)'],
-      [1, 4, 2, 4],
+      [{ cellValue: '=LARGE(A2:D2,0.9)' }, { cellValue: '=LARGE(A2:D2,1.9)' }, { cellValue: '=LARGE(A2:D2,2.9)' }, { cellValue: '=LARGE(A2:D2,3.9)'}, {cellValue: '=LARGE(A2:D2,4.9)' }, { cellValue: '=LARGE(A2:D2,5.9)' }],
+      [{ cellValue: 1 }, { cellValue: 4 }, { cellValue: 2 }, { cellValue: 4}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -75,7 +75,7 @@ describe('Function LARGE', () => {
 
   it('should work for non-ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LARGE(1,0)', '=LARGE(1,1)', '=LARGE(1,2)', '=LARGE(TRUE(),1)'],
+      [{ cellValue: '=LARGE(1,0)' }, { cellValue: '=LARGE(1,1)' }, { cellValue: '=LARGE(1,2)' }, { cellValue: '=LARGE(TRUE(),1)'}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))

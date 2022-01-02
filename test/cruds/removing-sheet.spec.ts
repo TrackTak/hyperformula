@@ -37,7 +37,7 @@ describe('remove sheet', () => {
   })
 
   it('should remove sheet by id', () => {
-    const [engine] = HyperFormula.buildFromArray([['foo']])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }]])
 
     engine.removeSheet(0)
 
@@ -84,8 +84,8 @@ describe('remove sheet', () => {
   it('should remove sheet with matrix', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['1'],
-        ['{=TRANSPOSE(A1:A1)}'],
+        [{ cellValue: '1' }],
+        [{ cellValue: '{=TRANSPOSE(A1:A1)}' }],
       ],
     })
 
@@ -98,9 +98,9 @@ describe('remove sheet', () => {
   it('should remove sheet with formula matrix', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['1', '2'],
-        ['{=TRANSPOSE(A1:B1)}'],
-        ['{=TRANSPOSE(A1:B1)}'],
+        [{ cellValue: '1' }, { cellValue: '2' }],
+        [{ cellValue: '{=TRANSPOSE(A1:B1)}' }],
+        [{ cellValue: '{=TRANSPOSE(A1:B1)}' }],
       ],
     })
 
@@ -115,10 +115,10 @@ describe('remove sheet - adjust edges', () => {
   it('should not affect dependencies to sheet other than removed', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['1', '=A1'],
+        [{ cellValue: '1' }, { cellValue: '=A1' }],
       ],
       Sheet2: [
-        ['1'],
+        [{ cellValue: '1' }],
       ],
     })
 
@@ -133,10 +133,10 @@ describe('remove sheet - adjust edges', () => {
   it('should remove edge between sheets', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['=Sheet2!A1'],
+        [{ cellValue: '=Sheet2!A1' }],
       ],
       Sheet2: [
-        ['1'],
+        [{ cellValue: '1' }],
       ],
     })
 
@@ -154,10 +154,10 @@ describe('remove sheet - adjust formula dependencies', () => {
   it('should not affect formula with dependency to sheet other than removed', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['1', '=A1'],
+        [{ cellValue: '1' }, { cellValue: '=A1' }],
       ],
       Sheet2: [
-        ['1'],
+        [{ cellValue: '1' }],
       ],
     })
 
@@ -166,19 +166,19 @@ describe('remove sheet - adjust formula dependencies', () => {
     const reference = extractReference(engine, adr('B1'))
 
     expect(reference).toEqual(CellAddress.relative(0, -1))
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([['1', '=A1']])[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([[{ cellValue: '1' }, { cellValue: '=A1' }]])[0])
   })
 
   it('should be #REF after removing sheet', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['=Sheet2!A1'],
-        ['=Sheet2!A1:A2'],
-        ['=Sheet2!A:B'],
-        ['=Sheet2!1:2'],
+        [{ cellValue: '=Sheet2!A1' }],
+        [{ cellValue: '=Sheet2!A1:A2' }],
+        [{ cellValue: '=Sheet2!A:B' }],
+        [{ cellValue: '=Sheet2!1:2' }],
       ],
       Sheet2: [
-        ['1'],
+        [{ cellValue: '1' }],
       ],
     })
 
@@ -193,10 +193,10 @@ describe('remove sheet - adjust formula dependencies', () => {
   it('should return changed values', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['=Sheet2!A1'],
+        [{ cellValue: '=Sheet2!A1' }],
       ],
       Sheet2: [
-        ['1'],
+        [{ cellValue: '1' }],
       ],
     })
 
@@ -221,12 +221,12 @@ describe('remove sheet - adjust range mapping', () => {
   it('should remove ranges from range mapping when removing sheet', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['=SUM(B1:B2)'],
-        ['=SUM(C1:C2)'],
+        [{ cellValue: '=SUM(B1:B2)' }],
+        [{ cellValue: '=SUM(C1:C2)' }],
       ],
       Sheet2: [
-        ['=SUM(B1:B2)'],
-        ['=SUM(C1:C2)'],
+        [{ cellValue: '=SUM(B1:B2)' }],
+        [{ cellValue: '=SUM(C1:C2)' }],
       ],
     })
 
@@ -244,12 +244,12 @@ describe('remove sheet - adjust matrix mapping', () => {
   it('should remove matrices from matrix mapping when removing sheet', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
-        ['1', '2'],
-        ['=TRANSPOSE(A1:B1)'],
+        [{ cellValue: '1' }, { cellValue: '2' }],
+        [{ cellValue: '=TRANSPOSE(A1:B1)' }],
       ],
       Sheet2: [
-        ['1', '2'],
-        ['=TRANSPOSE(A1:B1)'],
+        [{ cellValue: '1' }, { cellValue: '2' }],
+        [{ cellValue: '=TRANSPOSE(A1:B1)' }],
       ],
     })
     expect(engine.arrayMapping.getArray(AbsoluteCellRange.spanFrom(adr('A2'), 1, 2))).toBeInstanceOf(ArrayVertex)
@@ -264,7 +264,7 @@ describe('remove sheet - adjust matrix mapping', () => {
 describe('remove sheet - adjust column index', () => {
   it('should remove sheet from index', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
+      [{ cellValue: '1' }],
     ], {useColumnIndex: true})
     const index = engine.columnSearch as ColumnIndex
     const removeSheetSpy = spyOn(index, 'removeSheet')

@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function MEDIAN', () => {
   it('single number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MEDIAN(1)'],
+      [{ cellValue: '=MEDIAN(1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -13,7 +13,7 @@ describe('Function MEDIAN', () => {
 
   it('two numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MEDIAN(1, 2)'],
+      [{ cellValue: '=MEDIAN(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1.5)
@@ -21,7 +21,7 @@ describe('Function MEDIAN', () => {
 
   it('more numbers (odd)', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MEDIAN(3, 1, 2, 5, 7)'],
+      [{ cellValue: '=MEDIAN(3, 1, 2, 5, 7)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(3)
@@ -29,7 +29,7 @@ describe('Function MEDIAN', () => {
 
   it('more numbers (even)', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MEDIAN(3, 4, 1, 2, 5, 7)'],
+      [{ cellValue: '=MEDIAN(3, 4, 1, 2, 5, 7)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(3.5)
@@ -37,8 +37,8 @@ describe('Function MEDIAN', () => {
 
   it('works with ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['3', '5', '1'],
-      ['=MEDIAN(A1:C1)'],
+      [{ cellValue: '3' }, { cellValue: '5' }, { cellValue: '1' }],
+      [{ cellValue: '=MEDIAN(A1:C1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqual(3)
@@ -46,7 +46,7 @@ describe('Function MEDIAN', () => {
 
   it('propagates error from regular argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=3/0', '=MEDIAN(A1)'],
+      [{ cellValue: '=3/0' }, { cellValue: '=MEDIAN(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -54,7 +54,7 @@ describe('Function MEDIAN', () => {
 
   it('propagates first error from range argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=3/0', '=FOO(', '=MEDIAN(A1:B1)'],
+      [{ cellValue: '=3/0' }, { cellValue: '=FOO(' }, { cellValue: '=MEDIAN(A1:B1)' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -62,7 +62,7 @@ describe('Function MEDIAN', () => {
 
   it('return error when no arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MEDIAN()'],
+      [{ cellValue: '=MEDIAN()' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -70,9 +70,9 @@ describe('Function MEDIAN', () => {
 
   it('coerces only explicit arguments, ignores provided via reference', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="12"', '="11"', '="13"', '=MEDIAN(A1:C1)'],
-      ['=MEDIAN(TRUE())'],
-      ['=MEDIAN(1,2,3,B3:C3)'],
+      [{ cellValue: '="12"' }, { cellValue: '="11"' }, { cellValue: '="13"' }, { cellValue: '=MEDIAN(A1:C1)'}],
+      [{ cellValue: '=MEDIAN(TRUE())' }],
+      [{ cellValue: '=MEDIAN(1,2,3,B3:C3)' }],
     ])
 
     expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.OneValue))
@@ -82,7 +82,7 @@ describe('Function MEDIAN', () => {
 
   it('ignores nonnumeric values as long as theres at least one numeric value', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MEDIAN(TRUE(), "foobar", 42)'],
+      [{ cellValue: '=MEDIAN(TRUE(), "foobar", 42)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -90,7 +90,7 @@ describe('Function MEDIAN', () => {
 
   it('coerces given string arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MEDIAN("12", "11", "13")'],
+      [{ cellValue: '=MEDIAN("12", "11", "13")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(12)
@@ -98,8 +98,8 @@ describe('Function MEDIAN', () => {
 
   it('empty args as 0', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MEDIAN(1,2,3,,)'],
-      ['=MEDIAN(,)']
+      [{ cellValue: '=MEDIAN(1,2,3,,)' }],
+      [{ cellValue: '=MEDIAN(,)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)

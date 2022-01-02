@@ -202,7 +202,7 @@ describe('Snap to zero', () => {
 describe('Value-fixed', () => {
   it('should correctly calculate 0.2 + 0.1 as 0.3', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=0.2+0.1'],
+      [{ cellValue: '=0.2+0.1' }],
     ], {smartRounding: true})
 
     expect(engine.getCellValue(adr('A1'))).toBe(0.3)
@@ -212,7 +212,7 @@ describe('Value-fixed', () => {
 describe('tests', () => {
   it('addition of small numbers with smartRounding #1', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0.000123456789', '1', '=A1+B1'],
+      [{ cellValue: '0.000123456789' }, { cellValue: '1' }, { cellValue: '=A1+B1' }],
     ], {smartRounding: true})
 
     expect(engine.getCellValue(adr('C1'))).toEqual(1.000123456789)
@@ -220,7 +220,7 @@ describe('tests', () => {
 
   it('addition of small numbers with smartRounding #2', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0.000123456789', '1', '=A1+B1'],
+      [{ cellValue: '0.000123456789' }, { cellValue: '1' }, { cellValue: '=A1+B1' }],
     ], {smartRounding: true, precisionRounding: 9})
 
     expect(engine.getCellValue(adr('C1'))).toEqual(1.000123457) //as GS and E
@@ -243,26 +243,26 @@ describe('internal rounding', () => {
 describe('number of leading digits', () => {
   it('rounding extensive test', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '0.33333333333333300000', '=A1/3'],
-      ['10', '3.33333333333333000000', '=A2/3'],
-      ['100', '33.33333333333330000000', '=A3/3'],
-      ['1000', '333.33333333333300000000', '=A4/3'],
-      ['10000', '3333.33333333333000000000', '=A5/3'],
-      ['100000', '33333.33333333330000000000', '=A6/3'],
-      ['1000000', '333333.33333333300000000000', '=A7/3'],
-      ['10000000', '3333333.33333333000000000000', '=A8/3'],
-      ['100000000', '33333333.33333330000000000000', '=A9/3'],
-      ['1000000000', '333333333.33333300000000000000', '=A10/3'],
-      ['10000000000', '3333333333.33333000000000000000', '=A11/3'],
-      ['100000000000', '33333333333.33330000000000000000', '=A12/3'],
-      ['1000000000000', '333333333333.33300000000000000000', '=A13/3'],
-      ['10000000000000', '3333333333333.33000000000000000000', '=A14/3'],
-      ['100000000000000', '33333333333333.30000000000000000000', '=A15/3'],
-      ['1000000000000000', '333333333333333.00000000000000000000', '=A16/3'],
-      ['10000000000000000', '3333333333333330.00000000000000000000', '=A17/3'],
-      ['100000000000000000', '33333333333333300.00000000000000000000', '=A18/3'],
-      ['1000000000000000000', '333333333333333000.00000000000000000000', '=A19/3'],
-      ['10000000000000000000', '3333333333333330000.00000000000000000000', '=A20/3'],
+      [{ cellValue: '1' }, { cellValue: '0.33333333333333300000' }, { cellValue: '=A1/3' }],
+      [{ cellValue: '10' }, { cellValue: '3.33333333333333000000' }, { cellValue: '=A2/3' }],
+      [{ cellValue: '100' }, { cellValue: '33.33333333333330000000' }, { cellValue: '=A3/3' }],
+      [{ cellValue: '1000' }, { cellValue: '333.33333333333300000000' }, { cellValue: '=A4/3' }],
+      [{ cellValue: '10000' }, { cellValue: '3333.33333333333000000000' }, { cellValue: '=A5/3' }],
+      [{ cellValue: '100000' }, { cellValue: '33333.33333333330000000000' }, { cellValue: '=A6/3' }],
+      [{ cellValue: '1000000' }, { cellValue: '333333.33333333300000000000' }, { cellValue: '=A7/3' }],
+      [{ cellValue: '10000000' }, { cellValue: '3333333.33333333000000000000' }, { cellValue: '=A8/3' }],
+      [{ cellValue: '100000000' }, { cellValue: '33333333.33333330000000000000' }, { cellValue: '=A9/3' }],
+      [{ cellValue: '1000000000' }, { cellValue: '333333333.33333300000000000000' }, { cellValue: '=A10/3' }],
+      [{ cellValue: '10000000000' }, { cellValue: '3333333333.33333000000000000000' }, { cellValue: '=A11/3' }],
+      [{ cellValue: '100000000000' }, { cellValue: '33333333333.33330000000000000000' }, { cellValue: '=A12/3' }],
+      [{ cellValue: '1000000000000' }, { cellValue: '333333333333.33300000000000000000' }, { cellValue: '=A13/3' }],
+      [{ cellValue: '10000000000000' }, { cellValue: '3333333333333.33000000000000000000' }, { cellValue: '=A14/3' }],
+      [{ cellValue: '100000000000000' }, { cellValue: '33333333333333.30000000000000000000' }, { cellValue: '=A15/3' }],
+      [{ cellValue: '1000000000000000' }, { cellValue: '333333333333333.00000000000000000000' }, { cellValue: '=A16/3' }],
+      [{ cellValue: '10000000000000000' }, { cellValue: '3333333333333330.00000000000000000000' }, { cellValue: '=A17/3' }],
+      [{ cellValue: '100000000000000000' }, { cellValue: '33333333333333300.00000000000000000000' }, { cellValue: '=A18/3' }],
+      [{ cellValue: '1000000000000000000' }, { cellValue: '333333333333333000.00000000000000000000' }, { cellValue: '=A19/3' }],
+      [{ cellValue: '10000000000000000000' }, { cellValue: '3333333333333330000.00000000000000000000' }, { cellValue: '=A20/3' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toEqual(engine.getCellValue(adr('B1')))

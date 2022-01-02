@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function DAYS360', () => {
   it('should not work for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DAYS360(1, 2, 3, 4)'],
-      ['=DAYS360(1)'],
+      [{ cellValue: '=DAYS360(1, 2, 3, 4)' }],
+      [{ cellValue: '=DAYS360(1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,8 +16,8 @@ describe('Function DAYS360', () => {
 
   it('should not work for wrong type of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DAYS360("foo", 1, TRUE())'],
-      ['=DAYS360(2, "bar")'],
+      [{ cellValue: '=DAYS360("foo", 1, TRUE())' }],
+      [{ cellValue: '=DAYS360(2, "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -26,14 +26,14 @@ describe('Function DAYS360', () => {
 
   it('US mode', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DAYS360("30/03/2020", "31/03/2020")'],
-      ['=DAYS360("28/02/2020", "29/02/2020")'],
-      ['=DAYS360("29/02/2020", "01/03/2020")'],
-      ['=DAYS360("28/02/2021", "01/03/2021")'],
-      ['=DAYS360("31/03/2020", "30/03/2020")'],
-      ['=DAYS360("29/02/2020", "28/02/2020")'],
-      ['=DAYS360("01/03/2020", "29/02/2020")'],
-      ['=DAYS360("01/03/2021", "28/02/2021")'],
+      [{ cellValue: '=DAYS360("30/03/2020", "31/03/2020")' }],
+      [{ cellValue: '=DAYS360("28/02/2020", "29/02/2020")' }],
+      [{ cellValue: '=DAYS360("29/02/2020", "01/03/2020")' }],
+      [{ cellValue: '=DAYS360("28/02/2021", "01/03/2021")' }],
+      [{ cellValue: '=DAYS360("31/03/2020", "30/03/2020")' }],
+      [{ cellValue: '=DAYS360("29/02/2020", "28/02/2020")' }],
+      [{ cellValue: '=DAYS360("01/03/2020", "29/02/2020")' }],
+      [{ cellValue: '=DAYS360("01/03/2021", "28/02/2021")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)
@@ -48,14 +48,14 @@ describe('Function DAYS360', () => {
 
   it('EU mode', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DAYS360("30/03/2020", "31/03/2020", TRUE())'],
-      ['=DAYS360("28/02/2020", "29/02/2020", TRUE())'],
-      ['=DAYS360("29/02/2020", "01/03/2020", TRUE())'],
-      ['=DAYS360("28/02/2021", "01/03/2021", TRUE())'],
-      ['=DAYS360("31/03/2020", "30/03/2020", TRUE())'],
-      ['=DAYS360("29/02/2020", "28/02/2020", TRUE())'],
-      ['=DAYS360("01/03/2020", "29/02/2020", TRUE())'],
-      ['=DAYS360("01/03/2021", "28/02/2021", TRUE())'],
+      [{ cellValue: '=DAYS360("30/03/2020", "31/03/2020", TRUE())' }],
+      [{ cellValue: '=DAYS360("28/02/2020", "29/02/2020", TRUE())' }],
+      [{ cellValue: '=DAYS360("29/02/2020", "01/03/2020", TRUE())' }],
+      [{ cellValue: '=DAYS360("28/02/2021", "01/03/2021", TRUE())' }],
+      [{ cellValue: '=DAYS360("31/03/2020", "30/03/2020", TRUE())' }],
+      [{ cellValue: '=DAYS360("29/02/2020", "28/02/2020", TRUE())' }],
+      [{ cellValue: '=DAYS360("01/03/2020", "29/02/2020", TRUE())' }],
+      [{ cellValue: '=DAYS360("01/03/2021", "28/02/2021", TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)

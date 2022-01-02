@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Interpreter - concatenate operator', () => {
   it('Ampersand with string arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="foo"&"bar"'],
+      [{ cellValue: '="foo"&"bar"' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe('foobar')
@@ -13,7 +13,7 @@ describe('Interpreter - concatenate operator', () => {
 
   it('Ampersand with cell address', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['foo', '=A1&"bar"'],
+      [{ cellValue: 'foo' }, { cellValue: '=A1&"bar"' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toBe('foobar')
@@ -21,7 +21,7 @@ describe('Interpreter - concatenate operator', () => {
 
   it('Ampersand with number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=1&2'],
+      [{ cellValue: '=1&2' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe('12')
@@ -29,7 +29,7 @@ describe('Interpreter - concatenate operator', () => {
 
   it('Ampersand with bool', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="foo"&TRUE()'],
+      [{ cellValue: '="foo"&TRUE()' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe('fooTRUE')
@@ -37,7 +37,7 @@ describe('Interpreter - concatenate operator', () => {
 
   it('Ampersand with null', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="foo"&B1'],
+      [{ cellValue: '="foo"&B1' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe('foo')
@@ -45,7 +45,7 @@ describe('Interpreter - concatenate operator', () => {
 
   it('Ampersand with error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=1/0', '=A1&TRUE()'],
+      [{ cellValue: '=1/0' }, { cellValue: '=A1&TRUE()' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

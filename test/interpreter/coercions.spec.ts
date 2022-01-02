@@ -150,7 +150,7 @@ describe('#coerceScalarToString', () => {
 describe('check if type coercions are applied', () => {
   it('boolean to int, true vs null', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [true, null, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1', '=+A1', '=-A1', '=A1%']
+      [{ cellValue: true }, { cellValue: null }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }, { cellValue: '=+A1' }, { cellValue: '=-A1' }, { cellValue: '=A1%' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(1) //ADD
     expect(engine.getCellValue(adr('D1'))).toEqual(1) //SUB
@@ -164,7 +164,7 @@ describe('check if type coercions are applied', () => {
 
   it('boolean to int, null vs true', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, true, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1', '=+A1', '=-A1', '=A1%']
+      [{ cellValue: null }, { cellValue: true }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }, { cellValue: '=+A1' }, { cellValue: '=-A1' }, { cellValue: '=A1%' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(1) //ADD
     expect(engine.getCellValue(adr('D1'))).toEqual(-1) //SUB
@@ -178,7 +178,7 @@ describe('check if type coercions are applied', () => {
 
   it('boolean to int, true vs true', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [true, true, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1']
+      [{ cellValue: true }, { cellValue: true }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(2) //ADD
     expect(engine.getCellValue(adr('D1'))).toEqual(0) //SUB
@@ -189,7 +189,7 @@ describe('check if type coercions are applied', () => {
 
   it('boolean to int, true vs false', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [true, false, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1']
+      [{ cellValue: true }, { cellValue: false }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(1) //ADD
     expect(engine.getCellValue(adr('D1'))).toEqual(1) //SUB
@@ -200,7 +200,7 @@ describe('check if type coercions are applied', () => {
 
   it('boolean to int, false vs true', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [false, true, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1']
+      [{ cellValue: false }, { cellValue: true }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(1) //ADD
     expect(engine.getCellValue(adr('D1'))).toEqual(-1) //SUB
@@ -211,7 +211,7 @@ describe('check if type coercions are applied', () => {
 
   it('boolean to int, false vs false', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [false, false, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1', '=+A1', '=-A1', '=A1%']
+      [{ cellValue: false }, { cellValue: false }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }, { cellValue: '=+A1' }, { cellValue: '=-A1' }, { cellValue: '=A1%' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(0) //ADD
     expect(engine.getCellValue(adr('D1'))).toEqual(0) //SUB
@@ -225,7 +225,7 @@ describe('check if type coercions are applied', () => {
 
   it('boolean to int, null vs false', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, false, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1']
+      [{ cellValue: null }, { cellValue: false }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(0) //ADD
     expect(engine.getCellValue(adr('D1'))).toEqual(0) //SUB
@@ -235,7 +235,7 @@ describe('check if type coercions are applied', () => {
   })
   it('order operations, \'\' vs null', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['', null, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
+      [{ cellValue: '' }, { cellValue: null }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(false)
     expect(engine.getCellValue(adr('D1'))).toEqual(false)
@@ -244,7 +244,7 @@ describe('check if type coercions are applied', () => {
   })
   it('order operations, string vs boolean', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['string', false, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
+      [{ cellValue: 'string' }, { cellValue: false }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(false)
     expect(engine.getCellValue(adr('D1'))).toEqual(true)
@@ -253,7 +253,7 @@ describe('check if type coercions are applied', () => {
   })
   it('order operations, null vs false', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, false, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
+      [{ cellValue: null }, { cellValue: false }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(false)
     expect(engine.getCellValue(adr('D1'))).toEqual(false)
@@ -262,7 +262,7 @@ describe('check if type coercions are applied', () => {
   })
   it('order operations, null vs 1', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, 1, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
+      [{ cellValue: null }, { cellValue: 1 }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(false)
     expect(engine.getCellValue(adr('D1'))).toEqual(true)
@@ -282,7 +282,7 @@ describe('check if type coercions are applied', () => {
 
   it('order operations, 0 vs null', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [0, null, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
+      [{ cellValue: 0 }, { cellValue: null }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(false)
     expect(engine.getCellValue(adr('D1'))).toEqual(false)
@@ -292,7 +292,7 @@ describe('check if type coercions are applied', () => {
 
   it('order operations, 0 vs false', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [0, false, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1', '=A1=B1']
+      [{ cellValue: 0 }, { cellValue: false }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }, { cellValue: '=A1=B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(false)
     expect(engine.getCellValue(adr('D1'))).toEqual(true)
@@ -303,7 +303,7 @@ describe('check if type coercions are applied', () => {
 
   it('order operations, 1 vs true', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [1, true, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1', '=A1=B1']
+      [{ cellValue: 1 }, { cellValue: true }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }, { cellValue: '=A1=B1' }]
     ])
     expect(engine.getCellValue(adr('C1'))).toEqual(false)
     expect(engine.getCellValue(adr('D1'))).toEqual(true)

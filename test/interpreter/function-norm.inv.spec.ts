@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function NORM.INV', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.INV(1, 2)'],
-      ['=NORM.INV(1, 2, 3, 4)'],
+      [{ cellValue: '=NORM.INV(1, 2)' }],
+      [{ cellValue: '=NORM.INV(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function NORM.INV', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.INV("foo", 2, 3)'],
-      ['=NORM.INV(0.5, "baz", 3)'],
-      ['=NORM.INV(0.5, 2, "baz")'],
+      [{ cellValue: '=NORM.INV("foo", 2, 3)' }],
+      [{ cellValue: '=NORM.INV(0.5, "baz", 3)' }],
+      [{ cellValue: '=NORM.INV(0.5, 2, "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,8 +28,8 @@ describe('Function NORM.INV', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.INV(0.9, 1, 2)'],
-      ['=NORM.INV(0.5, 2, 4)'],
+      [{ cellValue: '=NORM.INV(0.9, 1, 2)' }],
+      [{ cellValue: '=NORM.INV(0.5, 2, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(3.5631031310892, 6)
@@ -38,12 +38,12 @@ describe('Function NORM.INV', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=NORM.INV(0.5, -1, 0.01)'],
-      ['=NORM.INV(0.5, -1, 0)'],
-      ['=NORM.INV(0.01, -1, 0.01)'],
-      ['=NORM.INV(0, -1, 0.01)'],
-      ['=NORM.INV(0.99, -1, 0.01)'],
-      ['=NORM.INV(1, -1, 0.01)'],
+      [{ cellValue: '=NORM.INV(0.5, -1, 0.01)' }],
+      [{ cellValue: '=NORM.INV(0.5, -1, 0)' }],
+      [{ cellValue: '=NORM.INV(0.01, -1, 0.01)' }],
+      [{ cellValue: '=NORM.INV(0, -1, 0.01)' }],
+      [{ cellValue: '=NORM.INV(0.99, -1, 0.01)' }],
+      [{ cellValue: '=NORM.INV(1, -1, 0.01)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(-1)

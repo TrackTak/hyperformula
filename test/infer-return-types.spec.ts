@@ -41,7 +41,7 @@ class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlu
 
   public arrayinferfoo(ast: ProcedureAst, state: InterpreterState): InterpreterValue {
     return this.runFunction(ast.args, state, this.metadata('ARRAYINFERFOO'), () => {
-      return SimpleRangeValue.onlyValues([['$2', '2%'], [2, '"2%"']])
+      return SimpleRangeValue.onlyValues([[{ cellValue: '$2' }, { cellValue: '2%' }], [{ cellValue: '$2' }, { cellValue: '2%' }]])
     })
   }
 
@@ -60,7 +60,7 @@ describe('infer return types', () => {
   })
 
   it('numbers', () => {
-    const [engine] = HyperFormula.buildFromArray([['=INFERFOO()', '=INFERFOO(0)']])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=INFERFOO()' }, { cellValue: '=INFERFOO(0)' }]])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(2)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
@@ -70,7 +70,7 @@ describe('infer return types', () => {
   })
 
   it('arrays', () => {
-    const [engine] = HyperFormula.buildFromArray([['=ARRAYINFERFOO()']])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=ARRAYINFERFOO()' }]])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(2)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)

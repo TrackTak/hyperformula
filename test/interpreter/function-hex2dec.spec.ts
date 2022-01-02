@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('function HEX2DEC', () => {
   it('should return error when wrong number of argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2DEC("foo", 2, 3)'],
+      [{ cellValue: '=HEX2DEC("foo", 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,9 +14,9 @@ describe('function HEX2DEC', () => {
 
   it('should not work for non-hex arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2DEC("foo")'],
-      ['=HEX2DEC("23G")'],
-      ['=HEX2DEC(TRUE())'],
+      [{ cellValue: '=HEX2DEC("foo")' }],
+      [{ cellValue: '=HEX2DEC("23G")' }],
+      [{ cellValue: '=HEX2DEC(TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
@@ -26,17 +26,17 @@ describe('function HEX2DEC', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2DEC("1")'],
-      ['=HEX2DEC("10")'],
-      ['=HEX2DEC("AD")'],
-      ['=HEX2DEC("ABBA")'],
-      ['=HEX2DEC("BA0AB")'],
-      ['=HEX2DEC("B09D65")'],
-      ['=HEX2DEC("F1808E4")'],
-      ['=HEX2DEC("B07D007")'],
-      ['=HEX2DEC("7FFFFFFFFF")'],
-      ['=HEX2DEC("F352DEB731")'],
-      ['=HEX2DEC("FFFFFFFFFF")'],
+      [{ cellValue: '=HEX2DEC("1")' }],
+      [{ cellValue: '=HEX2DEC("10")' }],
+      [{ cellValue: '=HEX2DEC("AD")' }],
+      [{ cellValue: '=HEX2DEC("ABBA")' }],
+      [{ cellValue: '=HEX2DEC("BA0AB")' }],
+      [{ cellValue: '=HEX2DEC("B09D65")' }],
+      [{ cellValue: '=HEX2DEC("F1808E4")' }],
+      [{ cellValue: '=HEX2DEC("B07D007")' }],
+      [{ cellValue: '=HEX2DEC("7FFFFFFFFF")' }],
+      [{ cellValue: '=HEX2DEC("F352DEB731")' }],
+      [{ cellValue: '=HEX2DEC("FFFFFFFFFF")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -54,7 +54,7 @@ describe('function HEX2DEC', () => {
 
   it('should work for numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2DEC(456)'],
+      [{ cellValue: '=HEX2DEC(456)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1110)
@@ -62,8 +62,8 @@ describe('function HEX2DEC', () => {
 
   it('should work for reference', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="1A3"'],
-      ['=HEX2DEC(A1)'],
+      [{ cellValue: '="1A3"' }],
+      [{ cellValue: '=HEX2DEC(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqual(419)
@@ -71,7 +71,7 @@ describe('function HEX2DEC', () => {
 
   it('should return a number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2DEC("11")'],
+      [{ cellValue: '=HEX2DEC("11")' }],
     ])
 
     expect(engine.getCellValueType(adr('A1'))).toBe(CellValueType.NUMBER)
@@ -79,8 +79,8 @@ describe('function HEX2DEC', () => {
 
   it('should work only for 10 digits', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HEX2DEC("1010B040205")'],
-      ['=HEX2DEC("7777EE70D2")'],
+      [{ cellValue: '=HEX2DEC("1010B040205")' }],
+      [{ cellValue: '=HEX2DEC("7777EE70D2")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))

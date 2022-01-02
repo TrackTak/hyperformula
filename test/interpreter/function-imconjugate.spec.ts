@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function IMCONJUGATE', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMCONJUGATE()'],
-      ['=IMCONJUGATE(1, 2)'],
+      [{ cellValue: '=IMCONJUGATE()' }],
+      [{ cellValue: '=IMCONJUGATE(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function IMCONJUGATE', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMCONJUGATE("foo")'],
+      [{ cellValue: '=IMCONJUGATE("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -23,9 +23,9 @@ describe('Function IMCONJUGATE', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMCONJUGATE(0)'],
-      ['=IMCONJUGATE("i")'],
-      ['=IMCONJUGATE("-3+4i")'],
+      [{ cellValue: '=IMCONJUGATE(0)' }],
+      [{ cellValue: '=IMCONJUGATE("i")' }],
+      [{ cellValue: '=IMCONJUGATE("-3+4i")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('0')

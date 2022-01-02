@@ -7,8 +7,8 @@ describe('Function GAMMA.DIST', () => {
 
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAMMA.DIST(1, 2, 3)'],
-      ['=GAMMA.DIST(1, 2, 3, 4, 5)'],
+      [{ cellValue: '=GAMMA.DIST(1, 2, 3)' }],
+      [{ cellValue: '=GAMMA.DIST(1, 2, 3, 4, 5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -17,10 +17,10 @@ describe('Function GAMMA.DIST', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAMMA.DIST("foo", 2, 3, TRUE())'],
-      ['=GAMMA.DIST(1, "baz", 3, TRUE())'],
-      ['=GAMMA.DIST(1, 2, "baz", TRUE())'],
-      ['=GAMMA.DIST(1, 2, 3, "abcd")'],
+      [{ cellValue: '=GAMMA.DIST("foo", 2, 3, TRUE())' }],
+      [{ cellValue: '=GAMMA.DIST(1, "baz", 3, TRUE())' }],
+      [{ cellValue: '=GAMMA.DIST(1, 2, "baz", TRUE())' }],
+      [{ cellValue: '=GAMMA.DIST(1, 2, 3, "abcd")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -31,8 +31,8 @@ describe('Function GAMMA.DIST', () => {
 
   it('should work as cdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAMMA.DIST(1, 1, 2, TRUE())'],
-      ['=GAMMA.DIST(3, 2, 4, TRUE())'],
+      [{ cellValue: '=GAMMA.DIST(1, 1, 2, TRUE())' }],
+      [{ cellValue: '=GAMMA.DIST(3, 2, 4, TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.393469340287367, 6)
@@ -41,8 +41,8 @@ describe('Function GAMMA.DIST', () => {
 
   it('should work as pdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAMMA.DIST(1, 1, 2, FALSE())'],
-      ['=GAMMA.DIST(3, 2, 4, FALSE())'],
+      [{ cellValue: '=GAMMA.DIST(1, 1, 2, FALSE())' }],
+      [{ cellValue: '=GAMMA.DIST(3, 2, 4, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.303265329856317, 6)
@@ -51,10 +51,10 @@ describe('Function GAMMA.DIST', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GAMMA.DIST(0, 1, 1, FALSE())'],
-      ['=GAMMA.DIST(-0.00001, 1, 1, FALSE())'],
-      ['=GAMMA.DIST(1, 0, 1, FALSE())'],
-      ['=GAMMA.DIST(1, 1, 0, FALSE())'],
+      [{ cellValue: '=GAMMA.DIST(0, 1, 1, FALSE())' }],
+      [{ cellValue: '=GAMMA.DIST(-0.00001, 1, 1, FALSE())' }],
+      [{ cellValue: '=GAMMA.DIST(1, 0, 1, FALSE())' }],
+      [{ cellValue: '=GAMMA.DIST(1, 1, 0, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)

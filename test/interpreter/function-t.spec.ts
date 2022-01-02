@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function T', () => {
   it('should take one argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T()'],
-      ['=T("foo", "bar")'],
+      [{ cellValue: '=T()' }],
+      [{ cellValue: '=T("foo", "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,8 +15,8 @@ describe('Function T', () => {
 
   it('should return given text', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T("foo")'],
-      ['=T(B2)', 'bar'],
+      [{ cellValue: '=T("foo")' }],
+      [{ cellValue: '=T(B2)' }, { cellValue: 'bar' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('foo')
@@ -25,9 +25,9 @@ describe('Function T', () => {
 
   it('should return empty string if given value is not a text', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T(B1)', '=TRUE()'],
-      ['=T(B2)', 42],
-      ['=T(B3)', null],
+      [{ cellValue: '=T(B1)' }, { cellValue: '=TRUE()' }],
+      [{ cellValue: '=T(B2)' }, { cellValue: 42 }],
+      [{ cellValue: '=T(B3)' }, { cellValue: null }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('')
@@ -37,8 +37,8 @@ describe('Function T', () => {
 
   it('should propagate errors', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T(B1)', '=1/0'],
-      ['=T(B2)', '=FOO()'],
+      [{ cellValue: '=T(B1)' }, { cellValue: '=1/0' }],
+      [{ cellValue: '=T(B2)' }, { cellValue: '=FOO()' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function STANDARDIZE', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=STANDARDIZE(1, 2)'],
-      ['=STANDARDIZE(1, 2, 3, 4)'],
+      [{ cellValue: '=STANDARDIZE(1, 2)' }],
+      [{ cellValue: '=STANDARDIZE(1, 2, 3, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function STANDARDIZE', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=STANDARDIZE("foo", 1, 2)'],
-      ['=STANDARDIZE(1, "foo", 2)'],
-      ['=STANDARDIZE(1, 2, "foo")'],
+      [{ cellValue: '=STANDARDIZE("foo", 1, 2)' }],
+      [{ cellValue: '=STANDARDIZE(1, "foo", 2)' }],
+      [{ cellValue: '=STANDARDIZE(1, 2, "foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,7 +28,7 @@ describe('Function STANDARDIZE', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=STANDARDIZE(1, 2, 4)'],
+      [{ cellValue: '=STANDARDIZE(1, 2, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(-0.25)
@@ -36,9 +36,9 @@ describe('Function STANDARDIZE', () => {
 
   it('should check bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=STANDARDIZE(1, 2, 0.001)'],
-      ['=STANDARDIZE(1, 2, 0)'],
-      ['=STANDARDIZE(1, 2, -0.001)'],
+      [{ cellValue: '=STANDARDIZE(1, 2, 0.001)' }],
+      [{ cellValue: '=STANDARDIZE(1, 2, 0)' }],
+      [{ cellValue: '=STANDARDIZE(1, 2, -0.001)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(-1000)

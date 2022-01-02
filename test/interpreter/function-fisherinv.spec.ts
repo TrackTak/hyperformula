@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function FISHERINV', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FISHERINV()'],
-      ['=FISHERINV(1, 2)'],
+      [{ cellValue: '=FISHERINV()' }],
+      [{ cellValue: '=FISHERINV(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,7 +16,7 @@ describe('Function FISHERINV', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FISHERINV("foo")'],
+      [{ cellValue: '=FISHERINV("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -24,9 +24,9 @@ describe('Function FISHERINV', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FISHERINV(0)'],
-      ['=FISHERINV(0.5)'],
-      ['=FISHERINV(-5)'],
+      [{ cellValue: '=FISHERINV(0)' }],
+      [{ cellValue: '=FISHERINV(0.5)' }],
+      [{ cellValue: '=FISHERINV(-5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(0)

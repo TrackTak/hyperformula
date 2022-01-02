@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function ISODD', () => {
   it('number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISODD()', '=ISODD(1, 2)'],
+      [{ cellValue: '=ISODD()' }, { cellValue: '=ISODD(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function ISODD', () => {
 
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISODD(1)', '=ISODD(2)'],
+      [{ cellValue: '=ISODD(1)' }, { cellValue: '=ISODD(2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -24,7 +24,7 @@ describe('Function ISODD', () => {
 
   it('use coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISODD("42")'],
+      [{ cellValue: '=ISODD("42")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(false)
@@ -32,8 +32,8 @@ describe('Function ISODD', () => {
 
   it('propagates error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=4/0'],
-      ['=ISODD(A1)'],
+      [{ cellValue: '=4/0' }],
+      [{ cellValue: '=ISODD(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

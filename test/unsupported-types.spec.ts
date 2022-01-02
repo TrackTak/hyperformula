@@ -108,11 +108,11 @@ describe('unsupported types should result in error', () => {
     ).toThrowError('Invalid arguments, expected an array of arrays.')
     // eslint-disable-next-line
     // @ts-ignore
-    expect(() => engine.setSheetContent(0, [1])
+    expect(() => engine.setSheetContent(0, [{ cellValue: 1 }])
     ).toThrowError('Invalid arguments, expected an array of arrays.')
     // eslint-disable-next-line
     // @ts-ignore
-    expect(() => engine.setCellContents(adr('A1'), [1]))
+    expect(() => engine.setCellContents(adr('A1'), [{ cellValue: 1 }]))
       .toThrowError('Invalid arguments, expected an array of arrays or a raw cell value.')
   })
 })

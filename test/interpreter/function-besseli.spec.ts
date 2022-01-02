@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function BESSELI', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BESSELI(1)'],
-      ['=BESSELI(1, 2, 3)'],
+      [{ cellValue: '=BESSELI(1)' }],
+      [{ cellValue: '=BESSELI(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,8 +15,8 @@ describe('Function BESSELI', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BESSELI("foo", 1)'],
-      ['=BESSELI(2, "foo")'],
+      [{ cellValue: '=BESSELI("foo", 1)' }],
+      [{ cellValue: '=BESSELI(2, "foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -25,15 +25,15 @@ describe('Function BESSELI', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BESSELI(-1,0)'],
-      ['=BESSELI(0,0)'],
-      ['=BESSELI(5,0)'],
-      ['=BESSELI(-1,1)'],
-      ['=BESSELI(0,1)'],
-      ['=BESSELI(5,1)'],
-      ['=BESSELI(-1,3)'],
-      ['=BESSELI(0,3)'],
-      ['=BESSELI(5,3)'],
+      [{ cellValue: '=BESSELI(-1,0)' }],
+      [{ cellValue: '=BESSELI(0,0)' }],
+      [{ cellValue: '=BESSELI(5,0)' }],
+      [{ cellValue: '=BESSELI(-1,1)' }],
+      [{ cellValue: '=BESSELI(0,1)' }],
+      [{ cellValue: '=BESSELI(5,1)' }],
+      [{ cellValue: '=BESSELI(-1,3)' }],
+      [{ cellValue: '=BESSELI(0,3)' }],
+      [{ cellValue: '=BESSELI(5,3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(1.26606584803426, 6)
@@ -49,7 +49,7 @@ describe('Function BESSELI', () => {
 
   it('should check bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BESSELI(1, -0.001)'],
+      [{ cellValue: '=BESSELI(1, -0.001)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -58,9 +58,9 @@ describe('Function BESSELI', () => {
 
   it('should truncate second argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BESSELI(-1,0.9)'],
-      ['=BESSELI(0,0.9)'],
-      ['=BESSELI(5,0.9)'],
+      [{ cellValue: '=BESSELI(-1,0.9)' }],
+      [{ cellValue: '=BESSELI(0,0.9)' }],
+      [{ cellValue: '=BESSELI(5,0.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(1.26606584803426, 6)

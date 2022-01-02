@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function MOD', () => {
   it('should not work for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MOD(101)'],
-      ['=MOD(1, 2, 3)'],
+      [{ cellValue: '=MOD(101)' }],
+      [{ cellValue: '=MOD(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('Function MOD', () => {
 
   it('should not work for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MOD(1, "foo")'],
-      ['=MOD("bar", 4)'],
-      ['=MOD("foo", "baz")'],
+      [{ cellValue: '=MOD(1, "foo")' }],
+      [{ cellValue: '=MOD("bar", 4)' }],
+      [{ cellValue: '=MOD("foo", "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,7 +28,7 @@ describe('Function MOD', () => {
 
   it('should return error when dividing by 0', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MOD(42, 0)'],
+      [{ cellValue: '=MOD(42, 0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -36,9 +36,9 @@ describe('Function MOD', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=MOD(5, 2)'],
-      ['=MOD(36, 6)'],
-      ['=MOD(10.5, 3)'],
+      [{ cellValue: '=MOD(5, 2)' }],
+      [{ cellValue: '=MOD(36, 6)' }],
+      [{ cellValue: '=MOD(10.5, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)

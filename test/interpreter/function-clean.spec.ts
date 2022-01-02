@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function CLEAN', () => {
   it('should return N/A when number of arguments is incorrect', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CLEAN()'],
-      ['=CLEAN("foo", "bar")']
+      [{ cellValue: '=CLEAN()' }],
+      [{ cellValue: '=CLEAN("foo", "bar")' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,8 +15,8 @@ describe('Function CLEAN', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CLEAN("foo\u0000")'],
-      ['=CLEAN("foo\u0020")'],
+      [{ cellValue: '=CLEAN("foo\u0000")' }],
+      [{ cellValue: '=CLEAN("foo\u0020")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('foo')
@@ -36,9 +36,9 @@ describe('Function CLEAN', () => {
 
   it('should coerce other types to string', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CLEAN(1)'],
-      ['=CLEAN(5+5)'],
-      ['=CLEAN(TRUE())'],
+      [{ cellValue: '=CLEAN(1)' }],
+      [{ cellValue: '=CLEAN(5+5)' }],
+      [{ cellValue: '=CLEAN(TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('1')

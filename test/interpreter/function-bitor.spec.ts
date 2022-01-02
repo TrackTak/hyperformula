@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('function BITOR', () => {
   it('should not work for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITOR(101)'],
-      ['=BITOR(1, 2, 3)'],
+      [{ cellValue: '=BITOR(101)' }],
+      [{ cellValue: '=BITOR(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,9 +16,9 @@ describe('function BITOR', () => {
 
   it('should not work for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITOR(1, "foo")'],
-      ['=BITOR("bar", 4)'],
-      ['=BITOR("foo", "baz")'],
+      [{ cellValue: '=BITOR(1, "foo")' }],
+      [{ cellValue: '=BITOR("bar", 4)' }],
+      [{ cellValue: '=BITOR("foo", "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -28,8 +28,8 @@ describe('function BITOR', () => {
 
   it('should not work for negative numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITOR(1, -2)'],
-      ['=BITOR(-1, 2)'],
+      [{ cellValue: '=BITOR(1, -2)' }],
+      [{ cellValue: '=BITOR(-1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -38,8 +38,8 @@ describe('function BITOR', () => {
 
   it('should not work for non-integers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITOR(1.2, 2)'],
-      ['=BITOR(3.14, 5)'],
+      [{ cellValue: '=BITOR(1.2, 2)' }],
+      [{ cellValue: '=BITOR(3.14, 5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.IntegerExpected))
@@ -48,11 +48,11 @@ describe('function BITOR', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITOR(1, 5)'],
-      ['=BITOR(457, 111)'],
-      ['=BITOR(BIN2DEC(101), BIN2DEC(1))'],
-      ['=BITOR(256, 123)'],
-      ['=BITOR(0, 0)'],
+      [{ cellValue: '=BITOR(1, 5)' }],
+      [{ cellValue: '=BITOR(457, 111)' }],
+      [{ cellValue: '=BITOR(BIN2DEC(101), BIN2DEC(1))' }],
+      [{ cellValue: '=BITOR(256, 123)' }],
+      [{ cellValue: '=BITOR(0, 0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(5)
@@ -64,7 +64,7 @@ describe('function BITOR', () => {
 
   it('should return numeric type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=BITOR(1, 5)'],
+      [{ cellValue: '=BITOR(1, 5)' }],
     ])
 
     expect(engine.getCellValueType(adr('A1'))).toEqual(CellValueType.NUMBER)

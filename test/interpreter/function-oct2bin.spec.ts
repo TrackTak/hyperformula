@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('function OCT2BIN', () => {
   it('should return error when wrong number of argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=OCT2BIN("foo", 2, 3)'],
+      [{ cellValue: '=OCT2BIN("foo", 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,9 +14,9 @@ describe('function OCT2BIN', () => {
 
   it('should not work for non-oct arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=OCT2BIN("foo")'],
-      ['=OCT2BIN(418)'],
-      ['=OCT2BIN(TRUE())'],
+      [{ cellValue: '=OCT2BIN("foo")' }],
+      [{ cellValue: '=OCT2BIN(418)' }],
+      [{ cellValue: '=OCT2BIN(TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotOctal))
@@ -26,13 +26,13 @@ describe('function OCT2BIN', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=OCT2BIN(1)'],
-      ['=OCT2BIN(10)'],
-      ['=OCT2BIN(71)'],
-      ['=OCT2BIN(777)'],
-      ['=OCT2BIN(7777777000)'],
-      ['=OCT2BIN(7777777042)'],
-      ['=OCT2BIN(7777777777)'],
+      [{ cellValue: '=OCT2BIN(1)' }],
+      [{ cellValue: '=OCT2BIN(10)' }],
+      [{ cellValue: '=OCT2BIN(71)' }],
+      [{ cellValue: '=OCT2BIN(777)' }],
+      [{ cellValue: '=OCT2BIN(7777777000)' }],
+      [{ cellValue: '=OCT2BIN(7777777042)' }],
+      [{ cellValue: '=OCT2BIN(7777777777)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('1')
@@ -46,7 +46,7 @@ describe('function OCT2BIN', () => {
 
   it('should work for strings', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=OCT2BIN("456")'],
+      [{ cellValue: '=OCT2BIN("456")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('100101110')
@@ -54,8 +54,8 @@ describe('function OCT2BIN', () => {
 
   it('should work for reference', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['="123"'],
-      ['=OCT2BIN(A1)'],
+      [{ cellValue: '="123"' }],
+      [{ cellValue: '=OCT2BIN(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqual('1010011')
@@ -63,7 +63,7 @@ describe('function OCT2BIN', () => {
 
   it('should return string value', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=OCT2BIN(11)'],
+      [{ cellValue: '=OCT2BIN(11)' }],
     ])
 
     expect(engine.getCellValueType(adr('A1'))).toBe(CellValueType.STRING)
@@ -71,8 +71,8 @@ describe('function OCT2BIN', () => {
 
   it('should work only for 10 digits', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=OCT2BIN(10101010101010)'],
-      ['=OCT2BIN(7777777042)'],
+      [{ cellValue: '=OCT2BIN(10101010101010)' }],
+      [{ cellValue: '=OCT2BIN(7777777042)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotOctal))
@@ -81,8 +81,8 @@ describe('function OCT2BIN', () => {
 
   it('result cannot be longer than 10 digits', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=OCT2BIN(1000)'],
-      ['=OCT2BIN(7777776777)'],
+      [{ cellValue: '=OCT2BIN(1000)' }],
+      [{ cellValue: '=OCT2BIN(7777776777)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLarge))
@@ -91,8 +91,8 @@ describe('function OCT2BIN', () => {
 
   it('should respect second argument and fill with zeros for positive arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=OCT2BIN(12, 8)'],
-      ['=OCT2BIN(3, "4")'],
+      [{ cellValue: '=OCT2BIN(12, 8)' }],
+      [{ cellValue: '=OCT2BIN(3, "4")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('00001010')
@@ -101,8 +101,8 @@ describe('function OCT2BIN', () => {
 
   it('second argument should not affect negative results', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=OCT2BIN(7777777042, 1)'],
-      ['=OCT2BIN(7777777042, 10)'],
+      [{ cellValue: '=OCT2BIN(7777777042, 1)' }],
+      [{ cellValue: '=OCT2BIN(7777777042, 10)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('1000100010')
@@ -111,8 +111,8 @@ describe('function OCT2BIN', () => {
 
   it('should fail if the result is longer than the desired length', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=OCT2BIN(12123, 2)'],
-      ['=OCT2BIN(34141, "3")'],
+      [{ cellValue: '=OCT2BIN(12123, 2)' }],
+      [{ cellValue: '=OCT2BIN(34141, "3")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLarge))
@@ -121,8 +121,8 @@ describe('function OCT2BIN', () => {
 
   it('should allow for numbers from 1 to 10 as second argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=OCT2BIN(2, 0)'],
-      ['=OCT2BIN(2, 12)'],
+      [{ cellValue: '=OCT2BIN(2, 0)' }],
+      [{ cellValue: '=OCT2BIN(2, 12)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))

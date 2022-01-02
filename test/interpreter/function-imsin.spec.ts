@@ -5,8 +5,8 @@ import {adr, detailedError, expectToBeCloseForComplex} from '../testUtils'
 describe('Function IMSIN', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMSIN()'],
-      ['=IMSIN(1, 2)'],
+      [{ cellValue: '=IMSIN()' }],
+      [{ cellValue: '=IMSIN(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function IMSIN', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMSIN("foo")'],
+      [{ cellValue: '=IMSIN("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -23,9 +23,9 @@ describe('Function IMSIN', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMSIN(0)'],
-      ['=IMSIN("i")'],
-      ['=IMSIN("-3+4i")'],
+      [{ cellValue: '=IMSIN(0)' }],
+      [{ cellValue: '=IMSIN("i")' }],
+      [{ cellValue: '=IMSIN("-3+4i")' }],
     ])
 
     expectToBeCloseForComplex(engine, 'A1', '0')

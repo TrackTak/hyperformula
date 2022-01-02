@@ -20,8 +20,8 @@ describe('Events', () => {
 
   it('sheetRemoved works', function() {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [['=Sheet2!A1']],
-      Sheet2: [['42']],
+      Sheet1: [[{ cellValue: '=Sheet2!A1' }]],
+      Sheet2: [[{ cellValue: '42' }]],
     })
     const handler = jasmine.createSpy()
 
@@ -34,8 +34,8 @@ describe('Events', () => {
 
   it('sheetRemoved name contains actual display name', function() {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [['=Sheet2!A1']],
-      Sheet2: [['42']],
+      Sheet1: [[{ cellValue: '=Sheet2!A1' }]],
+      Sheet2: [[{ cellValue: '42' }]],
     })
     const handler = jasmine.createSpy()
 
@@ -114,12 +114,12 @@ describe('Events', () => {
 
   it('valuesUpdated works', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['42']
+      [{ cellValue: '42' }]
     ])
     const handler = jasmine.createSpy()
 
     engine.on(Events.ValuesUpdated, handler)
-    engine.setCellContents(adr('A1'), [['43']])
+    engine.setCellContents(adr('A1'), [[{ cellValue: '43' }]])
 
     expect(handler).toHaveBeenCalledTimes(1)
     expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 43)])
@@ -129,13 +129,13 @@ describe('Events', () => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
     const [engine] = HyperFormula.buildFromArray([
-      ['=ASYNC_FOO()']
+      [{ cellValue: '=ASYNC_FOO()' }]
     ])
     const handler = jasmine.createSpy()
 
     engine.on(Events.AsyncValuesUpdated, handler)
 
-    await engine.setCellContents(adr('B1'), [['=ASYNC_FOO()']])[1]
+    await engine.setCellContents(adr('B1'), [[{ cellValue: '=ASYNC_FOO()' }]])[1]
 
     expect(handler).toHaveBeenCalledTimes(2)
     expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), 1)])
@@ -144,12 +144,12 @@ describe('Events', () => {
 
   it('valuesUpdated may sometimes be triggered even if nothing changed', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['42']
+      [{ cellValue: '42' }]
     ])
     const handler = jasmine.createSpy()
 
     engine.on(Events.ValuesUpdated, handler)
-    engine.setCellContents(adr('A1'), [['42']])
+    engine.setCellContents(adr('A1'), [[{ cellValue: '42' }]])
 
     expect(handler).toHaveBeenCalledTimes(1)
     expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 42)])
@@ -159,7 +159,7 @@ describe('Events', () => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
     const [engine, promise] = HyperFormula.buildFromArray([
-      ['42', '=ASYNC_FOO()']
+      [{ cellValue: '42' }, { cellValue: '=ASYNC_FOO()' }]
     ])
     const handlerUpdated = jasmine.createSpy()
     const handlerSuspended = jasmine.createSpy()
@@ -179,7 +179,7 @@ describe('Events', () => {
     expect(handlerResumed).toHaveBeenCalledTimes(0)
     expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(1)
 
-    await engine.setCellContents(adr('A1'), [['13']])[1]
+    await engine.setCellContents(adr('A1'), [[{ cellValue: '13' }]])[1]
 
     expect(handlerUpdated).toHaveBeenCalledTimes(0)
     expect(handlerSuspended).toHaveBeenCalledTimes(1)
@@ -200,7 +200,7 @@ describe('Events', () => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
     const [engine, promise] = HyperFormula.buildFromArray([
-      ['42']
+      [{ cellValue: '42' }]
     ])
 
     await promise
@@ -215,7 +215,7 @@ describe('Events', () => {
     engine.on(Events.EvaluationResumed, handlerResumed)
     engine.on(Events.AsyncValuesUpdated, handlerAsyncValuesUpdated)
 
-    await engine.batch(() => engine.setCellContents(adr('A1'), [['13', '=ASYNC_FOO()']]))[1]
+    await engine.batch(() => engine.setCellContents(adr('A1'), [[{ cellValue: '13' }, { cellValue: '=ASYNC_FOO()' }]]))[1]
 
     expect(handlerUpdated).toHaveBeenCalledTimes(1)
     expect(handlerSuspended).toHaveBeenCalledTimes(1)

@@ -6,8 +6,8 @@ describe('Function CEILING', () => {
   /*Inconsistent with ODFF standard.*/
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING(1)'],
-      ['=CEILING(1, 2, 3)'],
+      [{ cellValue: '=CEILING(1)' }],
+      [{ cellValue: '=CEILING(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,8 +16,8 @@ describe('Function CEILING', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING(1, "bar")'],
-      ['=CEILING("bar", 1)'],
+      [{ cellValue: '=CEILING(1, "bar")' }],
+      [{ cellValue: '=CEILING("bar", 1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -26,13 +26,13 @@ describe('Function CEILING', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING(4.43, 0.3)'],
-      ['=CEILING(4.43, 0.6)'],
-      ['=CEILING(4.43, 2)'],
-      ['=CEILING(-3.14, -1.8)'],
-      ['=CEILING(-3.14, 0)'],
-      ['=CEILING(3.14, 0)'],
-      ['=CEILING(0, 0)'],
+      [{ cellValue: '=CEILING(4.43, 0.3)' }],
+      [{ cellValue: '=CEILING(4.43, 0.6)' }],
+      [{ cellValue: '=CEILING(4.43, 2)' }],
+      [{ cellValue: '=CEILING(-3.14, -1.8)' }],
+      [{ cellValue: '=CEILING(-3.14, 0)' }],
+      [{ cellValue: '=CEILING(3.14, 0)' }],
+      [{ cellValue: '=CEILING(0, 0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(4.5)
@@ -47,10 +47,10 @@ describe('Function CEILING', () => {
   /*Inconsistent with ODFF standard.*/
   it('negative values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=CEILING(11, 2)'],
-      ['=CEILING(-11, 2)'],
-      ['=CEILING(11, -2)'],
-      ['=CEILING(-11, -2)'],
+      [{ cellValue: '=CEILING(11, 2)' }],
+      [{ cellValue: '=CEILING(-11, 2)' }],
+      [{ cellValue: '=CEILING(11, -2)' }],
+      [{ cellValue: '=CEILING(-11, -2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(12)

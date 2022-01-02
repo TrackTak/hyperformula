@@ -16,8 +16,8 @@ import {
 describe('Ensure it is possible to move rows', () => {
   it('should return false when target makes no sense', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2']
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }]
     ])
 
     expect(engine.isItPossibleToMoveRows(0, 0, 1, -1)).toEqual(false)
@@ -30,8 +30,8 @@ describe('Ensure it is possible to move rows', () => {
 
   it('should not be possible to move rows when sheet does not exists', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
     ])
 
     expect(engine.isItPossibleToMoveRows(1, 0, 1, 2)).toEqual(false)
@@ -39,7 +39,7 @@ describe('Ensure it is possible to move rows', () => {
 
   it('should not be possible to move rows when number of rows is non-positive', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1']
+      [{ cellValue: '1' }]
     ])
 
     expect(engine.isItPossibleToMoveRows(0, 0, 0, 1)).toEqual(false)
@@ -48,9 +48,9 @@ describe('Ensure it is possible to move rows', () => {
 
   it('should be possible to move rows', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['0'],
-      ['1'],
-      ['2'],
+      [{ cellValue: '0' }],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
     ])
 
     expect(engine.isItPossibleToMoveRows(0, 1, 1, 0)).toEqual(true)
@@ -63,8 +63,8 @@ describe('Ensure it is possible to move rows', () => {
 
   it('should not be possible to move row with formula matrix', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['=TRANSPOSE(A1:B1)'],
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '=TRANSPOSE(A1:B1)' }],
     ])
 
     expect(engine.isItPossibleToMoveRows(0, 1, 1, 5)).toBe(false)
@@ -73,9 +73,9 @@ describe('Ensure it is possible to move rows', () => {
 
   it('should not be possible to move row inside formula matrix', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      [''],
-      ['=TRANSPOSE(A1:B1)'],
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '' }],
+      [{ cellValue: '=TRANSPOSE(A1:B1)' }],
     ])
 
     expect(engine.isItPossibleToMoveRows(0, 0, 1, 2)).toBe(true)
@@ -87,8 +87,8 @@ describe('Ensure it is possible to move rows', () => {
 describe('Move rows', () => {
   it('should throw error when target makes no sense', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2']
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }]
     ])
 
     expect(() => engine.moveRows(0, 0, 1, -1)).toThrow(new InvalidArgumentsError('row number to be nonnegative and number of rows to add to be positive.'))
@@ -101,10 +101,10 @@ describe('Move rows', () => {
 
   it('should move one row', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2'],
-      ['3'],
-      ['4'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '3' }],
+      [{ cellValue: '4' }],
     ])
 
     engine.moveRows(0, 1, 1, 3)
@@ -117,10 +117,10 @@ describe('Move rows', () => {
 
   it('should move row when moving upward', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2'],
-      ['3'],
-      ['4'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '3' }],
+      [{ cellValue: '4' }],
     ])
 
     engine.moveRows(0, 2, 1, 1)
@@ -133,10 +133,10 @@ describe('Move rows', () => {
 
   it('should move multiple rows', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2'],
-      ['3'],
-      ['4'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '3' }],
+      [{ cellValue: '4' }],
     ])
 
     engine.moveRows(0, 0, 3, 4)
@@ -149,9 +149,9 @@ describe('Move rows', () => {
 
   it('should work when moving multiple rows far away', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2'],
-      ['3'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '3' }],
     ])
 
     engine.moveRows(0, 1, 2, 5)
@@ -165,8 +165,8 @@ describe('Move rows', () => {
 
   it('should adjust reference when swapping formula with dependency ', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['=A1'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '=A1' }],
     ])
 
     engine.moveRows(0, 1, 1, 0)
@@ -178,7 +178,7 @@ describe('Move rows', () => {
 
   it('should adjust absolute references', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=$A$2', '=B2']
+      [{ cellValue: '=$A$2' }, { cellValue: '=B2' }]
     ])
 
     engine.moveRows(0, 0, 1, 2)
@@ -189,8 +189,8 @@ describe('Move rows', () => {
 
   it('should adjust range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2', '=COUNTBLANK(A1:A2)'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }, { cellValue: '=COUNTBLANK(A1:A2)' }],
     ])
 
     engine.moveRows(0, 1, 1, 3)
@@ -201,8 +201,8 @@ describe('Move rows', () => {
 
   it('should return changes', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      [null, '=COUNTBLANK(A1:A2)'],
+      [{ cellValue: '1' }],
+      [{ cellValue: null }, { cellValue: '=COUNTBLANK(A1:A2)' }],
     ])
 
     const [changes] = engine.moveRows(0, 1, 1, 3)
@@ -213,11 +213,11 @@ describe('Move rows', () => {
 
   it('should return #CYCLE when moving formula onto referred range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2'],
-      ['3'],
-      ['=SUM(A1:A3)'],
-      ['=AVERAGE(A1:A3)'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '3' }],
+      [{ cellValue: '=SUM(A1:A3)' }],
+      [{ cellValue: '=AVERAGE(A1:A3)' }],
     ])
 
     engine.moveRows(0, 3, 1, 1)
@@ -227,7 +227,7 @@ describe('Move rows', () => {
   })
 
   it('should produce only one history entry', () => {
-    const [engine] = HyperFormula.buildFromArray([[0], [1], [2], [3]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }]])
 
     const version = engine.lazilyTransformingAstService.version()
 
@@ -240,9 +240,9 @@ describe('Move rows', () => {
 describe('Move rows - row ranges', () => {
   it('should adjust relative references of dependent formulas', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUM(2:3)'],
-      ['1'],
-      ['2']
+      [{ cellValue: '=SUM(2:3)' }],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }]
     ])
 
     engine.moveRows(0, 1, 2, 4)
@@ -255,9 +255,9 @@ describe('Move rows - row ranges', () => {
 
   it('should adjust relative dependencies of moved formulas', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUM(2:3)'],
-      ['1'],
-      ['2']
+      [{ cellValue: '=SUM(2:3)' }],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }]
     ])
 
     engine.moveRows(0, 0, 1, 3)
@@ -270,9 +270,9 @@ describe('Move rows - row ranges', () => {
 
   it('should return #CYCLE when moving formula onto referred range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUM(2:3)'],
-      ['1'],
-      ['2']
+      [{ cellValue: '=SUM(2:3)' }],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }]
     ])
 
     engine.moveRows(0, 0, 1, 2)
@@ -285,7 +285,7 @@ describe('Move rows - row ranges', () => {
 describe('Move rows - column ranges', () => {
   it('should not affect moved column range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUM(B:C)', '1', '2'],
+      [{ cellValue: '=SUM(B:C)' }, { cellValue: '1' }, { cellValue: '2' }],
     ])
 
     engine.moveRows(0, 0, 1, 2)
@@ -298,8 +298,8 @@ describe('Move rows - column ranges', () => {
 
   it('should not affect dependent column range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUM(B:C)', '1', '2'],
-      [null, '3', '4'],
+      [{ cellValue: '=SUM(B:C)' }, { cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: null }, { cellValue: '3' }, { cellValue: '4' }],
     ])
 
     engine.moveRows(0, 1, 1, 3)

@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function T.INV', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.INV(1)'],
-      ['=T.INV(1, 2, 3)'],
+      [{ cellValue: '=T.INV(1)' }],
+      [{ cellValue: '=T.INV(1, 2, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,8 +16,8 @@ describe('Function T.INV', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.INV("foo", 2)'],
-      ['=T.INV(0.5, "baz")'],
+      [{ cellValue: '=T.INV("foo", 2)' }],
+      [{ cellValue: '=T.INV(0.5, "baz")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -26,8 +26,8 @@ describe('Function T.INV', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.INV(0.1, 1)'],
-      ['=T.INV(0.9, 2)'],
+      [{ cellValue: '=T.INV(0.1, 1)' }],
+      [{ cellValue: '=T.INV(0.9, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(-3.07768353592299, 6)
@@ -36,8 +36,8 @@ describe('Function T.INV', () => {
 
   it('should truncate input', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.INV(0.1, 1.9)'],
-      ['=T.INV(0.9, 2.9)'],
+      [{ cellValue: '=T.INV(0.1, 1.9)' }],
+      [{ cellValue: '=T.INV(0.9, 2.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(-3.07768353592299, 6)
@@ -46,11 +46,11 @@ describe('Function T.INV', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=T.INV(0.01, 1)'],
-      ['=T.INV(0, 1)'],
-      ['=T.INV(0.99, 1)'],
-      ['=T.INV(1, 1)'],
-      ['=T.INV(0.5, 0.9)'],
+      [{ cellValue: '=T.INV(0.01, 1)' }],
+      [{ cellValue: '=T.INV(0, 1)' }],
+      [{ cellValue: '=T.INV(0.99, 1)' }],
+      [{ cellValue: '=T.INV(1, 1)' }],
+      [{ cellValue: '=T.INV(0.5, 0.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(-31.820515953771, 6)

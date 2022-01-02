@@ -5,8 +5,8 @@ import {adr, detailedError, expectToBeCloseForComplex} from '../testUtils'
 describe('Function IMTAN', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMTAN()'],
-      ['=IMTAN(1, 2)'],
+      [{ cellValue: '=IMTAN()' }],
+      [{ cellValue: '=IMTAN(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function IMTAN', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMTAN("foo")'],
+      [{ cellValue: '=IMTAN("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -23,9 +23,9 @@ describe('Function IMTAN', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMTAN(0)'],
-      ['=IMTAN("i")'],
-      ['=IMTAN("-3+4i")'],
+      [{ cellValue: '=IMTAN(0)' }],
+      [{ cellValue: '=IMTAN("i")' }],
+      [{ cellValue: '=IMTAN("-3+4i")' }],
     ])
 
     expectToBeCloseForComplex(engine, 'A1', '0')

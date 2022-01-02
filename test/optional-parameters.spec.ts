@@ -27,13 +27,13 @@ describe('Nonexistent metadata', () => {
   it('should work for function', () => {
     HyperFormula.getLanguage('enGB').extendFunctions({FOO: 'FOO'})
     const [engine] = HyperFormula.buildFromArray([
-      ['=foo(1,2)'],
-      ['=foo(,2)'],
-      ['=foo( ,2)'],
-      ['=foo(1,)'],
-      ['=foo( , )'],
-      ['=foo(1)'],
-      ['=foo()'],
+      [{ cellValue: '=foo(1,2)' }],
+      [{ cellValue: '=foo(,2)' }],
+      [{ cellValue: '=foo( ,2)' }],
+      [{ cellValue: '=foo(1,)' }],
+      [{ cellValue: '=foo( , )' }],
+      [{ cellValue: '=foo(1)' }],
+      [{ cellValue: '=foo()' }],
     ], {functionPlugins: [FooPlugin]})
 
     expect(engine.getCellValue(adr('A1'))).toBe('1+2')
@@ -47,7 +47,7 @@ describe('Nonexistent metadata', () => {
 
   it('log fails with coerce to 0', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LOG(10,)'],
+      [{ cellValue: '=LOG(10,)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -55,9 +55,9 @@ describe('Nonexistent metadata', () => {
 
   it('other function coerce EmptyValue', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=DATE(,1,1900)'],
-      ['=SUM(,1)'],
-      ['=CONCATENATE(,"abcd")']
+      [{ cellValue: '=DATE(,1,1900)' }],
+      [{ cellValue: '=SUM(,1)' }],
+      [{ cellValue: '=CONCATENATE(,"abcd")' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1901)

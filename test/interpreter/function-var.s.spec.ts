@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function VAR.S', () => {
   it('should take at least two arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=VAR.S()'],
-      ['=VAR.S(1)']
+      [{ cellValue: '=VAR.S()' }],
+      [{ cellValue: '=VAR.S(1)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,14 +15,14 @@ describe('Function VAR.S', () => {
 
   it('should calculate variance (sample)', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=VAR.S(2, 3)'],
+      [{ cellValue: '=VAR.S(2, 3)' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual(0.5)
   })
 
   it('should coerce explicit argument to numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=VAR.S(2, 3, 4, TRUE(), FALSE(), "1",)'],
+      [{ cellValue: '=VAR.S(2, 3, 4, TRUE(), FALSE(), "1",)' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(2.28571428571429, 6) //inconsistency with product #1
   })

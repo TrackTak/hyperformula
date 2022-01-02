@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function ISEVEN', () => {
   it('number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISEVEN()', '=ISEVEN(1, 2)'],
+      [{ cellValue: '=ISEVEN()' }, { cellValue: '=ISEVEN(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function ISEVEN', () => {
 
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISEVEN(1)', '=ISEVEN(2)'],
+      [{ cellValue: '=ISEVEN(1)' }, { cellValue: '=ISEVEN(2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(false)
@@ -24,7 +24,7 @@ describe('Function ISEVEN', () => {
 
   it('use coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ISEVEN("42")'],
+      [{ cellValue: '=ISEVEN("42")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(true)
@@ -32,8 +32,8 @@ describe('Function ISEVEN', () => {
 
   it('propagates error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=4/0'],
-      ['=ISEVEN(A1)'],
+      [{ cellValue: '=4/0' }],
+      [{ cellValue: '=ISEVEN(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

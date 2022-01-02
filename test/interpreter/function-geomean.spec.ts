@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function GEOMEAN', () => {
   it('single number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GEOMEAN(1)'],
+      [{ cellValue: '=GEOMEAN(1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -13,7 +13,7 @@ describe('Function GEOMEAN', () => {
 
   it('two numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GEOMEAN(1, 4)'],
+      [{ cellValue: '=GEOMEAN(1, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(2)
@@ -21,7 +21,7 @@ describe('Function GEOMEAN', () => {
 
   it('more numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GEOMEAN(8, 1, 2, 4, 16)'],
+      [{ cellValue: '=GEOMEAN(8, 1, 2, 4, 16)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(4)
@@ -29,8 +29,8 @@ describe('Function GEOMEAN', () => {
 
   it('validates input', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GEOMEAN(8, 0, 2, 4, 16)'],
-      ['=GEOMEAN(8, -1, -2, 4, 16)'],
+      [{ cellValue: '=GEOMEAN(8, 0, 2, 4, 16)' }],
+      [{ cellValue: '=GEOMEAN(8, -1, -2, 4, 16)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -39,8 +39,8 @@ describe('Function GEOMEAN', () => {
 
   it('works with ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '9', '3'],
-      ['=GEOMEAN(A1:C1)'],
+      [{ cellValue: '1' }, { cellValue: '9' }, { cellValue: '3' }],
+      [{ cellValue: '=GEOMEAN(A1:C1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqual(3)
@@ -48,7 +48,7 @@ describe('Function GEOMEAN', () => {
 
   it('propagates error from regular argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=3/0', '=GEOMEAN(A1)'],
+      [{ cellValue: '=3/0' }, { cellValue: '=GEOMEAN(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -56,7 +56,7 @@ describe('Function GEOMEAN', () => {
 
   it('propagates first error from range argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=3/0', '=FOO(', '=GEOMEAN(A1:B1)'],
+      [{ cellValue: '=3/0' }, { cellValue: '=FOO(' }, { cellValue: '=GEOMEAN(A1:B1)' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -64,9 +64,9 @@ describe('Function GEOMEAN', () => {
 
   it('returns error for empty ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GEOMEAN(A2:A3)'],
-      [null],
-      [null],
+      [{ cellValue: '=GEOMEAN(A2:A3)' }],
+      [{ cellValue: null }],
+      [{ cellValue: null }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.OneValue))
@@ -77,7 +77,7 @@ describe('Function GEOMEAN', () => {
    */
   it('does coercions of nonnumeric explicit arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GEOMEAN(TRUE(),"4")']
+      [{ cellValue: '=GEOMEAN(TRUE(),"4")' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(2)
@@ -85,7 +85,7 @@ describe('Function GEOMEAN', () => {
 
   it('ignores nonnumeric values in ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=GEOMEAN(A2:D2)'],
+      [{ cellValue: '=GEOMEAN(A2:D2)' }],
       [1, 1, false, null, '\'0']
     ])
 

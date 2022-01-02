@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function WEEKDAY', () => {
   it('should not work for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=WEEKDAY(1, 2, 3)'],
-      ['=WEEKDAY()'],
+      [{ cellValue: '=WEEKDAY(1, 2, 3)' }],
+      [{ cellValue: '=WEEKDAY()' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,8 +16,8 @@ describe('Function WEEKDAY', () => {
 
   it('should not work for wrong type of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=WEEKDAY("foo", 1)'],
-      ['=WEEKDAY(2, "bar")'],
+      [{ cellValue: '=WEEKDAY("foo", 1)' }],
+      [{ cellValue: '=WEEKDAY(2, "bar")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -26,8 +26,8 @@ describe('Function WEEKDAY', () => {
 
   it('should not work for wrong value of args', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=WEEKDAY(-1, 1)'],
-      ['=WEEKDAY(2, 9)'],
+      [{ cellValue: '=WEEKDAY(-1, 1)' }],
+      [{ cellValue: '=WEEKDAY(2, 9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -36,10 +36,10 @@ describe('Function WEEKDAY', () => {
 
   it('should work for strings', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=WEEKDAY("31/07/2020")'],
-      ['=WEEKDAY("31/07/2020", "1")'],
-      ['=WEEKDAY("31/07/2020", "2")'],
-      ['=WEEKDAY("31/07/2020", "3")'],
+      [{ cellValue: '=WEEKDAY("31/07/2020")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "1")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "2")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "3")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(6)
@@ -50,10 +50,10 @@ describe('Function WEEKDAY', () => {
 
   it('should work for numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=WEEKDAY(0)'],
-      ['=WEEKDAY(0, 1)'],
-      ['=WEEKDAY(0, 2)'],
-      ['=WEEKDAY(0, 3)'],
+      [{ cellValue: '=WEEKDAY(0)' }],
+      [{ cellValue: '=WEEKDAY(0, 1)' }],
+      [{ cellValue: '=WEEKDAY(0, 2)' }],
+      [{ cellValue: '=WEEKDAY(0, 3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(7)
@@ -64,10 +64,10 @@ describe('Function WEEKDAY', () => {
 
   it('should work for strings with different nullDate', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=WEEKDAY("31/07/2020")'],
-      ['=WEEKDAY("31/07/2020", "1")'],
-      ['=WEEKDAY("31/07/2020", "2")'],
-      ['=WEEKDAY("31/07/2020", "3")'],
+      [{ cellValue: '=WEEKDAY("31/07/2020")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "1")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "2")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "3")' }],
     ], {nullDate: {day: 20, month: 10, year: 1920}})
 
     expect(engine.getCellValue(adr('A1'))).toEqual(6)
@@ -78,10 +78,10 @@ describe('Function WEEKDAY', () => {
 
   it('should work for strings with compatibility mode', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=WEEKDAY("31/07/2020")'],
-      ['=WEEKDAY("31/07/2020", "1")'],
-      ['=WEEKDAY("31/07/2020", "2")'],
-      ['=WEEKDAY("31/07/2020", "3")'],
+      [{ cellValue: '=WEEKDAY("31/07/2020")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "1")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "2")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "3")' }],
     ], {leapYear1900: true})
 
     expect(engine.getCellValue(adr('A1'))).toEqual(6)
@@ -92,10 +92,10 @@ describe('Function WEEKDAY', () => {
 
   it('should work for strings with compatibility mode and different nullDate', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=WEEKDAY("31/07/2020")'],
-      ['=WEEKDAY("31/07/2020", "1")'],
-      ['=WEEKDAY("31/07/2020", "2")'],
-      ['=WEEKDAY("31/07/2020", "3")'],
+      [{ cellValue: '=WEEKDAY("31/07/2020")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "1")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "2")' }],
+      [{ cellValue: '=WEEKDAY("31/07/2020", "3")' }],
     ], {leapYear1900: true, nullDate: {day: 20, month: 10, year: 1920}})
 
     expect(engine.getCellValue(adr('A1'))).toEqual(6)
@@ -105,8 +105,8 @@ describe('Function WEEKDAY', () => {
   })
 
   it('big test', () => {
-    const args = [1, 2, 3, 11, 12, 13, 14, 15, 16, 17]
-    const dates = ['13/08/2020', '14/08/2020', '15/08/2020', '16/08/2020', '17/08/2020', '18/08/2020', '19/08/2020']
+    const args = [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 11}, {cellValue: 12 }, { cellValue: 13 }, { cellValue: 14 }, { cellValue: 15 }, { cellValue: 16 }, { cellValue: 17 }]
+    const dates = [{ cellValue: '13/08/2020' }, { cellValue: '14/08/2020' }, { cellValue: '15/08/2020' }, { cellValue: '16/08/2020'}, {cellValue: '17/08/2020' }, { cellValue: '18/08/2020' }, { cellValue: '19/08/2020' }]
     const arrs = []
     for (const arg of args) {
       const arr = []
@@ -117,15 +117,15 @@ describe('Function WEEKDAY', () => {
     }
     const [engine] = HyperFormula.buildFromArray(arrs)
     expect(engine.getSheetValues(0)).toEqual(
-      [[5, 6, 7, 1, 2, 3, 4],
-        [4, 5, 6, 7, 1, 2, 3],
-        [3, 4, 5, 6, 0, 1, 2],
-        [4, 5, 6, 7, 1, 2, 3],
-        [3, 4, 5, 6, 7, 1, 2],
-        [2, 3, 4, 5, 6, 7, 1],
-        [1, 2, 3, 4, 5, 6, 7],
-        [7, 1, 2, 3, 4, 5, 6],
-        [6, 7, 1, 2, 3, 4, 5],
-        [5, 6, 7, 1, 2, 3, 4]])
+      [[{ cellValue: 5 }, { cellValue: 6 }, { cellValue: 7 }, { cellValue: 1}, {cellValue: 2 }, { cellValue: 3 }, { cellValue: 4 }],
+        [{ cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }, { cellValue: 7}, {cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }],
+        [{ cellValue: 3 }, { cellValue: 4 }, { cellValue: 5 }, { cellValue: 6}, {cellValue: 0 }, { cellValue: 1 }, { cellValue: 2 }],
+        [{ cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }, { cellValue: 7}, {cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }],
+        [{ cellValue: 3 }, { cellValue: 4 }, { cellValue: 5 }, { cellValue: 6}, {cellValue: 7 }, { cellValue: 1 }, { cellValue: 2 }],
+        [{ cellValue: 2 }, { cellValue: 3 }, { cellValue: 4 }, { cellValue: 5}, {cellValue: 6 }, { cellValue: 7 }, { cellValue: 1 }],
+        [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}, {cellValue: 5 }, { cellValue: 6 }, { cellValue: 7 }],
+        [{ cellValue: 7 }, { cellValue: 1 }, { cellValue: 2 }, { cellValue: 3}, {cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }],
+        [{ cellValue: 6 }, { cellValue: 7 }, { cellValue: 1 }, { cellValue: 2}, {cellValue: 3 }, { cellValue: 4 }, { cellValue: 5 }],
+        [{ cellValue: 5 }, { cellValue: 6 }, { cellValue: 7 }, { cellValue: 1}, {cellValue: 2 }, { cellValue: 3 }, { cellValue: 4 }]])
   })
 })

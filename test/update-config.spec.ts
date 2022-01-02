@@ -7,8 +7,8 @@ import {adr, detailedError} from './testUtils'
 describe('update config', () => {
   it('simple reload preserves all values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '=A1', '=SUM(A1:B1)'],
-      ['#DIV/0!', '=B2', '=F(']
+      [{ cellValue: '1' }, { cellValue: '=A1' }, { cellValue: '=SUM(A1:B1)' }],
+      [{ cellValue: '#DIV/0!' }, { cellValue: '=B2' }, { cellValue: '=F(' }]
     ])
     engine.updateConfig({})
 
@@ -21,8 +21,8 @@ describe('update config', () => {
   })
   it('simple reload preserves formulas', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '=A1', '=SUM(A1:B1)'],
-      ['#DIV/0!', '=B2', '=F(']
+      [{ cellValue: '1' }, { cellValue: '=A1' }, { cellValue: '=SUM(A1:B1)' }],
+      [{ cellValue: '#DIV/0!' }, { cellValue: '=B2' }, { cellValue: '=F(' }]
     ])
     engine.updateConfig({})
 
@@ -34,7 +34,7 @@ describe('update config', () => {
 
   it('simple reload preserves values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1.00000000000001', '1', '=A1-B1'],
+      [{ cellValue: '1.00000000000001' }, { cellValue: '1' }, { cellValue: '=A1-B1' }],
     ], {smartRounding: false})
     expect(engine.getCellValue(adr('C1'))).toBeCloseTo(0.00000000000001)
 
@@ -45,7 +45,7 @@ describe('update config', () => {
   it('language reload', () => {
     HyperFormula.registerLanguage('plPL', plPL)
     const [engine] = HyperFormula.buildFromArray([
-      ['=FOO()', '=SUM()', '=SUMA()', 'SUM()', '=SUM('],
+      [{ cellValue: '=FOO()' }, { cellValue: '=SUM()' }, { cellValue: '=SUMA()' }, { cellValue: 'SUM()'}, {cellValue: '=SUM(' }],
     ])
     engine.updateConfig({language: 'plPL'})
 
@@ -58,7 +58,7 @@ describe('update config', () => {
 
   it('simple reload preserves namedexpressions', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=TRUE', '=FALSE'],
+      [{ cellValue: '=TRUE' }, { cellValue: '=FALSE' }],
     ])
     engine.addNamedExpression('TRUE', true)
     engine.addNamedExpression('FALSE', false)

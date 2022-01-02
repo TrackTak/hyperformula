@@ -6,8 +6,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function F.DIST', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.DIST(1, 2, 3)'],
-      ['=F.DIST(1, 2, 3, 4, 5)'],
+      [{ cellValue: '=F.DIST(1, 2, 3)' }],
+      [{ cellValue: '=F.DIST(1, 2, 3, 4, 5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,10 +16,10 @@ describe('Function F.DIST', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.DIST("foo", 2, 3, TRUE())'],
-      ['=F.DIST(1, "baz", 3, TRUE())'],
-      ['=F.DIST(1, 2, "abcd", TRUE())'],
-      ['=F.DIST(1, 2, 3, "abcd")'],
+      [{ cellValue: '=F.DIST("foo", 2, 3, TRUE())' }],
+      [{ cellValue: '=F.DIST(1, "baz", 3, TRUE())' }],
+      [{ cellValue: '=F.DIST(1, 2, "abcd", TRUE())' }],
+      [{ cellValue: '=F.DIST(1, 2, 3, "abcd")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -30,8 +30,8 @@ describe('Function F.DIST', () => {
 
   it('should work as cdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.DIST(1, 1, 1, TRUE())'],
-      ['=F.DIST(3, 2, 2, TRUE())'],
+      [{ cellValue: '=F.DIST(1, 1, 1, TRUE())' }],
+      [{ cellValue: '=F.DIST(3, 2, 2, TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.5, 6)
@@ -40,8 +40,8 @@ describe('Function F.DIST', () => {
 
   it('should work as pdf', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.DIST(1, 1, 1, FALSE())'],
-      ['=F.DIST(3, 2, 2, FALSE())'],
+      [{ cellValue: '=F.DIST(1, 1, 1, FALSE())' }],
+      [{ cellValue: '=F.DIST(3, 2, 2, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.159154942198517, 6)
@@ -50,8 +50,8 @@ describe('Function F.DIST', () => {
 
   it('truncates second and third arg', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.DIST(1, 1.9, 1, FALSE())'],
-      ['=F.DIST(3, 2, 2.9, FALSE())'],
+      [{ cellValue: '=F.DIST(1, 1.9, 1, FALSE())' }],
+      [{ cellValue: '=F.DIST(3, 2, 2.9, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.159154942198517, 6)
@@ -60,10 +60,10 @@ describe('Function F.DIST', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=F.DIST(0, 1, 1, FALSE())'],
-      ['=F.DIST(-0.001, 1, 1, FALSE())'],
-      ['=F.DIST(0, 0.999, 1, FALSE())'],
-      ['=F.DIST(0, 1, 0.999, FALSE())'],
+      [{ cellValue: '=F.DIST(0, 1, 1, FALSE())' }],
+      [{ cellValue: '=F.DIST(-0.001, 1, 1, FALSE())' }],
+      [{ cellValue: '=F.DIST(0, 0.999, 1, FALSE())' }],
+      [{ cellValue: '=F.DIST(0, 1, 0.999, FALSE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NaN))

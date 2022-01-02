@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function HARMEAN', () => {
   it('single number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HARMEAN(1)'],
+      [{ cellValue: '=HARMEAN(1)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -13,7 +13,7 @@ describe('Function HARMEAN', () => {
 
   it('two numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HARMEAN(1, 4)'],
+      [{ cellValue: '=HARMEAN(1, 4)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1.6)
@@ -21,7 +21,7 @@ describe('Function HARMEAN', () => {
 
   it('more numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HARMEAN(8, 1, 2, 4, 16)'],
+      [{ cellValue: '=HARMEAN(8, 1, 2, 4, 16)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBeCloseTo(2.58064516129032, 6)
@@ -29,8 +29,8 @@ describe('Function HARMEAN', () => {
 
   it('validates input', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HARMEAN(8, 0, 2, 4, 16)'],
-      ['=HARMEAN(8, -1, -2, 4, 16)'],
+      [{ cellValue: '=HARMEAN(8, 0, 2, 4, 16)' }],
+      [{ cellValue: '=HARMEAN(8, -1, -2, 4, 16)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -39,8 +39,8 @@ describe('Function HARMEAN', () => {
 
   it('works with ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '9', '3'],
-      ['=HARMEAN(A1:C1)'],
+      [{ cellValue: '1' }, { cellValue: '9' }, { cellValue: '3' }],
+      [{ cellValue: '=HARMEAN(A1:C1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toBeCloseTo(2.07692307692308, 6)
@@ -48,7 +48,7 @@ describe('Function HARMEAN', () => {
 
   it('propagates error from regular argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=3/0', '=HARMEAN(A1)'],
+      [{ cellValue: '=3/0' }, { cellValue: '=HARMEAN(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -56,7 +56,7 @@ describe('Function HARMEAN', () => {
 
   it('propagates first error from range argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=3/0', '=FOO(', '=HARMEAN(A1:B1)'],
+      [{ cellValue: '=3/0' }, { cellValue: '=FOO(' }, { cellValue: '=HARMEAN(A1:B1)' }],
     ])
 
     expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -64,9 +64,9 @@ describe('Function HARMEAN', () => {
 
   it('returns error for empty ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HARMEAN(A2:A3)'],
-      [null],
-      [null],
+      [{ cellValue: '=HARMEAN(A2:A3)' }],
+      [{ cellValue: null }],
+      [{ cellValue: null }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.OneValue))
@@ -77,7 +77,7 @@ describe('Function HARMEAN', () => {
    */
   it('does coercions of nonnumeric explicit arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HARMEAN(TRUE(),"4")']
+      [{ cellValue: '=HARMEAN(TRUE(),"4")' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1.6)
@@ -85,7 +85,7 @@ describe('Function HARMEAN', () => {
 
   it('ignores nonnumeric values in ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=HARMEAN(A2:D2)'],
+      [{ cellValue: '=HARMEAN(A2:D2)' }],
       [1, 1, false, null, '\'0']
     ])
 

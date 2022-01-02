@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function FACT', () => {
   it('checks number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FACT()', '=FACT(1, 2)'],
+      [{ cellValue: '=FACT()' }, { cellValue: '=FACT(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -14,10 +14,10 @@ describe('Function FACT', () => {
 
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FACT(0)'],
-      ['=FACT(1)'],
-      ['=FACT(10)'],
-      ['=FACT(170)'],
+      [{ cellValue: '=FACT(0)' }],
+      [{ cellValue: '=FACT(1)' }],
+      [{ cellValue: '=FACT(10)' }],
+      [{ cellValue: '=FACT(170)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(1)
@@ -28,10 +28,10 @@ describe('Function FACT', () => {
 
   it('rounds argument', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FACT(0.9)'],
-      ['=FACT(1.1)'],
-      ['=FACT(10.42)'],
-      ['=FACT(169.9)'],
+      [{ cellValue: '=FACT(0.9)' }],
+      [{ cellValue: '=FACT(1.1)' }],
+      [{ cellValue: '=FACT(10.42)' }],
+      [{ cellValue: '=FACT(169.9)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(1)
@@ -42,8 +42,8 @@ describe('Function FACT', () => {
 
   it('checks bounds', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FACT(-1)'],
-      ['=FACT(171)'],
+      [{ cellValue: '=FACT(-1)' }],
+      [{ cellValue: '=FACT(171)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -52,7 +52,7 @@ describe('Function FACT', () => {
 
   it('uses coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FACT("0")'],
+      [{ cellValue: '=FACT("0")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(1)
@@ -60,7 +60,7 @@ describe('Function FACT', () => {
 
   it('propagates error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=FACT(NA())'],
+      [{ cellValue: '=FACT(NA())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))

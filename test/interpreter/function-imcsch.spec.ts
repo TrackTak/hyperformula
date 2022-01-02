@@ -5,8 +5,8 @@ import {adr, detailedError, expectToBeCloseForComplex} from '../testUtils'
 describe('Function IMCSCH', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMCSCH()'],
-      ['=IMCSCH(1, 2)'],
+      [{ cellValue: '=IMCSCH()' }],
+      [{ cellValue: '=IMCSCH(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function IMCSCH', () => {
 
   it('should return error for arguments of wrong type', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMCSCH("foo")'],
+      [{ cellValue: '=IMCSCH("foo")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -23,9 +23,9 @@ describe('Function IMCSCH', () => {
 
   it('should work', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMCSCH(0)'],
-      ['=IMCSCH("i")'],
-      ['=IMCSCH("-3+4i")'],
+      [{ cellValue: '=IMCSCH(0)' }],
+      [{ cellValue: '=IMCSCH("i")' }],
+      [{ cellValue: '=IMCSCH("-3+4i")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NaN))

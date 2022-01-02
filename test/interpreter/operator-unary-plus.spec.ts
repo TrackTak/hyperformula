@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Unary operator PLUS', () => {
   it('works for obvious case', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=+3'],
+      [{ cellValue: '=+3' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(3)
@@ -14,8 +14,8 @@ describe('Unary operator PLUS', () => {
 
   it('use number coerce', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=+"3"'],
-      ['=+"foobar"'],
+      [{ cellValue: '=+"3"' }],
+      [{ cellValue: '=+"foobar"' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe('3')
@@ -24,8 +24,8 @@ describe('Unary operator PLUS', () => {
 
   it('pass error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=+B1', '=FOOBAR()'],
-      ['=+B2', '=1/0'],
+      [{ cellValue: '=+B1' }, { cellValue: '=FOOBAR()' }],
+      [{ cellValue: '=+B2' }, { cellValue: '=1/0' }],
 
     ])
 
@@ -35,10 +35,10 @@ describe('Unary operator PLUS', () => {
 
   it('range value results in VALUE error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['9'],
-      ['3'],
-      ['=+A1:A3'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '9' }],
+      [{ cellValue: '3' }],
+      [{ cellValue: '=+A1:A3' }],
     ], {useArrayArithmetic: false})
 
     expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
@@ -46,15 +46,15 @@ describe('Unary operator PLUS', () => {
 
   it('string given by reference should return string with UNARY+', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['Liz'],
-      ['=+A1']
+      [{ cellValue: 'Liz' }],
+      [{ cellValue: '=+A1' }]
     ])
     expect(engine.getCellValue(adr('A2'))).toEqual('Liz') // UNARY PLUS value
   })
 
   it('double unary plus', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=++2'],
+      [{ cellValue: '=++2' }],
     ])
     expect(engine.getCellValue(adr('A1'))).toEqual(2)
   })

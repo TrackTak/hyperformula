@@ -6,7 +6,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function ODD', () => {
   it('number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ODD()', '=ODD(1, 2)'],
+      [{ cellValue: '=ODD()' }, { cellValue: '=ODD(1, 2)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,7 +15,7 @@ describe('Function ODD', () => {
 
   it('works for positive numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ODD(1.3)', '=ODD(2.7)'],
+      [{ cellValue: '=ODD(1.3)' }, { cellValue: '=ODD(2.7)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(3)
@@ -24,7 +24,7 @@ describe('Function ODD', () => {
 
   it('works for negative numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ODD(-1.3)', '=ODD(-2.7)'],
+      [{ cellValue: '=ODD(-1.3)' }, { cellValue: '=ODD(-2.7)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(-3)
@@ -33,7 +33,7 @@ describe('Function ODD', () => {
 
   it('use coercion', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ODD("42.3")'],
+      [{ cellValue: '=ODD("42.3")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toBe(43)
@@ -41,8 +41,8 @@ describe('Function ODD', () => {
 
   it('propagates error', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=4/0'],
-      ['=ODD(A1)'],
+      [{ cellValue: '=4/0' }],
+      [{ cellValue: '=ODD(A1)' }],
     ])
 
     expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))

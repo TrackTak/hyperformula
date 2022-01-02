@@ -54,8 +54,8 @@ describe('Copy - paste integration', () => {
 
   it('copy should return values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['foo', '=A1'],
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: 'foo' }, { cellValue: '=A1' }],
     ])
 
     const values = engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 2))
@@ -66,7 +66,7 @@ describe('Copy - paste integration', () => {
 
   it('copy should round return values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1.0000000001', '1.000000000000001'],
+      [{ cellValue: '1.0000000001' }, { cellValue: '1.000000000000001' }],
     ])
 
     const values = engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 1))
@@ -76,7 +76,7 @@ describe('Copy - paste integration', () => {
 
   it('should copy empty cell vertex', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, '=A1']
+      [{ cellValue: null }, { cellValue: '=A1' }]
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
@@ -87,7 +87,7 @@ describe('Copy - paste integration', () => {
 
   it('should work for single number', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1']
+      [{ cellValue: '1' }]
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
@@ -98,7 +98,7 @@ describe('Copy - paste integration', () => {
 
   it('should work for parsing error', () => {
     const sheet = [
-      ['=SUM('],
+      [{ cellValue: '=SUM(' }],
     ]
     const [engine] = HyperFormula.buildFromArray(sheet)
 
@@ -110,8 +110,8 @@ describe('Copy - paste integration', () => {
 
   it('should work for area', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['foo', 'bar'],
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: 'foo' }, { cellValue: 'bar' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 2))
@@ -125,7 +125,7 @@ describe('Copy - paste integration', () => {
 
   it('should not round here', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1.0000000001', '1.000000000000001'],
+      [{ cellValue: '1.0000000001' }, { cellValue: '1.000000000000001' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 1))
@@ -137,7 +137,7 @@ describe('Copy - paste integration', () => {
 
   it('should work for cell reference inside copied area', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '=A1'],
+      [{ cellValue: '1' }, { cellValue: '=A1' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 1))
@@ -154,7 +154,7 @@ describe('Copy - paste integration', () => {
 
   it('should work for absolute cell reference', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '=$A$1'],
+      [{ cellValue: '1' }, { cellValue: '=$A$1' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('B1'), 1, 1))
@@ -171,8 +171,8 @@ describe('Copy - paste integration', () => {
 
   it('should work for cell reference pointing outside copied area', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '=A1'],
-      ['2', ''],
+      [{ cellValue: '1' }, { cellValue: '=A1' }],
+      [{ cellValue: '2' }, { cellValue: '' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('B1'), 1, 1))
@@ -183,8 +183,8 @@ describe('Copy - paste integration', () => {
 
   it('should return ref when pasted reference is out of scope', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, null],
-      [null, '=A1'],
+      [{ cellValue: null }, { cellValue: null }],
+      [{ cellValue: null }, { cellValue: '=A1' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('B2'), 1, 1))
@@ -196,8 +196,8 @@ describe('Copy - paste integration', () => {
 
   it('should return ref when pasted range is out of scope', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, null],
-      [null, '=A1:B2'],
+      [{ cellValue: null }, { cellValue: null }],
+      [{ cellValue: null }, { cellValue: '=A1:B2' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('B2'), 1, 1))
@@ -209,9 +209,9 @@ describe('Copy - paste integration', () => {
 
   it('should return ref when pasted range is out of scope 2', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, null, null],
-      [null, null, null],
-      [null, null, '=SUM(A1:B2)'],
+      [{ cellValue: null }, { cellValue: null }, { cellValue: null }],
+      [{ cellValue: null }, { cellValue: null }, { cellValue: null }],
+      [{ cellValue: null }, { cellValue: null }, { cellValue: '=SUM(A1:B2)' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('C3'), 1, 1))
@@ -223,8 +223,8 @@ describe('Copy - paste integration', () => {
 
   it('should return ref when pasted column range is out of scope', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, null],
-      [null, '=A:B'],
+      [{ cellValue: null }, { cellValue: null }],
+      [{ cellValue: null }, { cellValue: '=A:B' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('B2'), 1, 1))
@@ -236,8 +236,8 @@ describe('Copy - paste integration', () => {
 
   it('should return ref when pasted row range is out of scope', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, null],
-      [null, '=1:2'],
+      [{ cellValue: null }, { cellValue: null }],
+      [{ cellValue: null }, { cellValue: '=1:2' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('B2'), 1, 1))
@@ -249,9 +249,9 @@ describe('Copy - paste integration', () => {
 
   it('should create new range vertex - cell range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '3'],
-      ['2', '4'],
-      ['=SUM(A1:A2)']
+      [{ cellValue: '1' }, { cellValue: '3' }],
+      [{ cellValue: '2' }, { cellValue: '4' }],
+      [{ cellValue: '=SUM(A1:A2)' }]
     ])
     expect(Array.from(engine.dependencyGraph.rangeMapping.rangesInSheet(0)).length).toBe(1)
 
@@ -265,8 +265,8 @@ describe('Copy - paste integration', () => {
 
   it('should create new range vertex - column range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '3', '5', '=SUM(A:B)'],
-      ['2', '4', '6', null],
+      [{ cellValue: '1' }, { cellValue: '3' }, { cellValue: '5' }, { cellValue: '=SUM(A:B)'}],
+      [{ cellValue: '2' }, { cellValue: '4' }, { cellValue: '6' }, { cellValue: null}],
     ])
     expect(Array.from(engine.dependencyGraph.rangeMapping.rangesInSheet(0)).length).toBe(1)
 
@@ -280,10 +280,10 @@ describe('Copy - paste integration', () => {
 
   it('should create new range vertex - row range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['3', '4'],
-      ['5', '6'],
-      ['=SUM(1:2)']
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '3' }, { cellValue: '4' }],
+      [{ cellValue: '5' }, { cellValue: '6' }],
+      [{ cellValue: '=SUM(1:2)' }]
     ])
     expect(Array.from(engine.dependencyGraph.rangeMapping.rangesInSheet(0)).length).toBe(1)
 
@@ -297,7 +297,7 @@ describe('Copy - paste integration', () => {
 
   it('should update edges between infinite range and pasted values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=SUM(2:3)', '1', '=SUM(1,2)']
+      [{ cellValue: '=SUM(2:3)' }, { cellValue: '1' }, { cellValue: '=SUM(1,2)' }]
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('B1'), 1, 1))
@@ -315,7 +315,7 @@ describe('Copy - paste integration', () => {
 
   it('paste should return newly pasted values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '=A1'],
+      [{ cellValue: '1' }, { cellValue: '=A1' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 1))
@@ -329,9 +329,9 @@ describe('Copy - paste integration', () => {
 
   it('should copy values from formula matrix', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['3', '4'],
-      ['=TRANSPOSE(A1:B2)'],
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '3' }, { cellValue: '4' }],
+      [{ cellValue: '=TRANSPOSE(A1:B2)' }],
     ])
     expect(engine.arrayMapping.arrayMapping.size).toEqual(1)
 
@@ -348,9 +348,9 @@ describe('Copy - paste integration', () => {
 
   it('should not be possible to paste onto formula matrix', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['3', '4'],
-      ['=TRANSPOSE(A1:B2)'],
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '3' }, { cellValue: '4' }],
+      [{ cellValue: '=TRANSPOSE(A1:B2)' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 2))
@@ -362,7 +362,7 @@ describe('Copy - paste integration', () => {
 
   it('should not be possible to paste to not existing sheet', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      'Sheet1': [['=Sheet1!A2', '=Sheet2!A2']],
+      'Sheet1': [[{ cellValue: '=Sheet1!A2' }, { cellValue: '=Sheet2!A2' }]],
     })
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 1))
@@ -374,7 +374,7 @@ describe('Copy - paste integration', () => {
 
   it('should copy references with absolute sheet id', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      'Sheet1': [['=Sheet1!A2', '=Sheet2!A2']],
+      'Sheet1': [[{ cellValue: '=Sheet1!A2' }, { cellValue: '=Sheet2!A2' }]],
       'Sheet2': []
     })
 
@@ -387,7 +387,7 @@ describe('Copy - paste integration', () => {
 
   it('sheet reference should stay "relative" to other sheet', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      'Sheet1': [['=A2']],
+      'Sheet1': [[{ cellValue: '=A2' }]],
       'Sheet2': []
     })
 
@@ -399,8 +399,8 @@ describe('Copy - paste integration', () => {
 
   it('should throw error when trying to paste beyond sheet size limit', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['3', '4'],
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '3' }, { cellValue: '4' }],
     ])
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 2))
@@ -413,7 +413,7 @@ describe('Copy - paste integration', () => {
 describe('isClipboardEmpty', () => {
   it('when just engine initialized', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
+      [{ cellValue: '1' }],
     ])
 
     expect(engine.isClipboardEmpty()).toBe(true)
@@ -421,7 +421,7 @@ describe('isClipboardEmpty', () => {
 
   it('after copy', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
+      [{ cellValue: '1' }],
     ])
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
 
@@ -430,7 +430,7 @@ describe('isClipboardEmpty', () => {
 
   it('after copy-paste', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
+      [{ cellValue: '1' }],
     ])
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('A2'))
@@ -440,7 +440,7 @@ describe('isClipboardEmpty', () => {
 
   it('after cut', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
+      [{ cellValue: '1' }],
     ])
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
 
@@ -449,7 +449,7 @@ describe('isClipboardEmpty', () => {
 
   it('after cut-paste', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
+      [{ cellValue: '1' }],
     ])
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('A2'))
@@ -459,7 +459,7 @@ describe('isClipboardEmpty', () => {
 
   it('after clearClipboard', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '=A1'],
+      [{ cellValue: '1' }, { cellValue: '=A1' }],
     ])
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 1))
     engine.clearClipboard()

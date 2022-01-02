@@ -9,7 +9,7 @@ import {adr, colEnd, colStart} from './testUtils'
 describe('GraphBuilder', () => {
   it('build sheet with simple number cell', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['42'],
+      [{ cellValue: '42' }],
     ])
 
     const vertex = engine.addressMapping.fetchCell(adr('A1'))
@@ -19,7 +19,7 @@ describe('GraphBuilder', () => {
 
   it('build sheet with simple string cell', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['foo'],
+      [{ cellValue: 'foo' }],
     ])
 
     const vertex = engine.addressMapping.fetchCell(adr('A1'))
@@ -29,7 +29,7 @@ describe('GraphBuilder', () => {
 
   it('building for cell with null should give empty vertex', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, '=A1'],
+      [{ cellValue: null }, { cellValue: '=A1' }],
     ])
 
     const vertex = engine.addressMapping.fetchCell(adr('A1'))
@@ -38,8 +38,8 @@ describe('GraphBuilder', () => {
 
   it('#buildGraph works with ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['=A1:B1'],
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '=A1:B1' }],
     ])
 
     const a1 = engine.addressMapping.fetchCell(adr('A1'))
@@ -53,7 +53,7 @@ describe('GraphBuilder', () => {
 
   it('#buildGraph works with column ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '=A:B'],
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A:B' }],
     ])
 
     const a1 = engine.addressMapping.fetchCell(adr('A1'))
@@ -69,8 +69,8 @@ describe('GraphBuilder', () => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
     const [engine] = HyperFormula.buildFromArray([
-      ['=ASYNC_FOO()', '=ASYNC_FOO(A1)', '=A1 + B1', '=ASYNC_FOO(C1)+B1+A2'],
-      ['=ASYNC_FOO()', '=ASYNC_FOO(A2)'],
+      [{ cellValue: '=ASYNC_FOO()' }, { cellValue: '=ASYNC_FOO(A1)' }, { cellValue: '=A1 + B1' }, { cellValue: '=ASYNC_FOO(C1)+B1+A2'}],
+      [{ cellValue: '=ASYNC_FOO()' }, { cellValue: '=ASYNC_FOO(A2)' }],
     ])
 
     const a1 = engine.addressMapping.fetchCell(adr('A1')) as FormulaVertex
@@ -91,9 +91,9 @@ describe('GraphBuilder', () => {
 
   it('#loadSheet - it should build graph with only one RangeVertex', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['=A1:B1'],
-      ['=A1:B1'],
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '=A1:B1' }],
+      [{ cellValue: '=A1:B1' }],
     ])
 
     const a1 = engine.addressMapping.fetchCell(adr('A1'))
@@ -114,9 +114,9 @@ describe('GraphBuilder', () => {
 
   it('build with range one row smaller', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '0'],
-      ['3', '=A1:A2'],
-      ['5', '=A1:A3'],
+      [{ cellValue: '1' }, { cellValue: '0' }],
+      [{ cellValue: '3' }, { cellValue: '=A1:A2' }],
+      [{ cellValue: '5' }, { cellValue: '=A1:A3' }],
     ])
 
     const a3 = engine.addressMapping.fetchCell(adr('A3'))
@@ -134,7 +134,7 @@ describe('GraphBuilder', () => {
 
   it('#buildGraph should work even if range dependencies are empty', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '0', '=SUM(A1:B2)'],
+      [{ cellValue: '1' }, { cellValue: '0' }, { cellValue: '=SUM(A1:B2)' }],
     ])
 
     expect(engine.graph.nodesCount()).toBe(
@@ -151,9 +151,9 @@ describe('GraphBuilder', () => {
 
   it("optimization doesn't work if smaller range is after bigger", () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', '0'],
-      ['3', '=A1:A3'],
-      ['5', '=A1:A2'],
+      [{ cellValue: '1' }, { cellValue: '0' }],
+      [{ cellValue: '3' }, { cellValue: '=A1:A3' }],
+      [{ cellValue: '5' }, { cellValue: '=A1:A2' }],
     ])
 
     const a1a2 = engine.rangeMapping.fetchRange(adr('A1'), adr('A2'))

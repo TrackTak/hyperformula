@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 describe('Function IMSUM', () => {
   it('should return error for wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMSUM()'],
+      [{ cellValue: '=IMSUM()' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -13,10 +13,10 @@ describe('Function IMSUM', () => {
 
   it('should coerce explicit arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMSUM(0)'],
-      ['=IMSUM("i", "-1.5")'],
-      ['=IMSUM("-3+4i", "1+i", 1, 2, "3")'],
-      ['=IMSUM("i",)'],
+      [{ cellValue: '=IMSUM(0)' }],
+      [{ cellValue: '=IMSUM("i", "-1.5")' }],
+      [{ cellValue: '=IMSUM("-3+4i", "1+i", 1, 2, "3")' }],
+      [{ cellValue: '=IMSUM("i",)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('0')
@@ -27,8 +27,8 @@ describe('Function IMSUM', () => {
 
   it('should fail for non-coercible explicit arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMSUM(1, TRUE())'],
-      ['=IMSUM(2, "abcd")'],
+      [{ cellValue: '=IMSUM(1, TRUE())' }],
+      [{ cellValue: '=IMSUM(2, "abcd")' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
@@ -37,10 +37,10 @@ describe('Function IMSUM', () => {
 
   it('should not coerce range arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=IMSUM(B1:C1)', 1, '2+i'],
-      ['=IMSUM(B2:D2)', 1, null, null],
-      ['=IMSUM(B3:D3)', 'i', 'abcd', true],
-      ['=IMSUM(B4:D4,)', 'i', '=NA()', 1],
+      [{ cellValue: '=IMSUM(B1:C1)' }, { cellValue: 1 }, { cellValue: '2+i' }],
+      [{ cellValue: '=IMSUM(B2:D2)' }, { cellValue: 1 }, { cellValue: null }, { cellValue: null}],
+      [{ cellValue: '=IMSUM(B3:D3)' }, { cellValue: 'i' }, { cellValue: 'abcd' }, { cellValue: true}],
+      [{ cellValue: '=IMSUM(B4:D4,)' }, { cellValue: 'i' }, { cellValue: '=NA()' }, { cellValue: 1}],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual('3+i')

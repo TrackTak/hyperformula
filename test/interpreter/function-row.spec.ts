@@ -5,8 +5,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Function ROW', () => {
   it('should take one or zero arguments', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROW(B1, B2)'],
-      ['=ROW(B1, B2, B3)'],
+      [{ cellValue: '=ROW(B1, B2)' }],
+      [{ cellValue: '=ROW(B1, B2, B3)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -15,9 +15,9 @@ describe('Function ROW', () => {
 
   it('should take only reference', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROW(42)'],
-      ['=ROW("foo")'],
-      ['=ROW(TRUE())'],
+      [{ cellValue: '=ROW(42)' }],
+      [{ cellValue: '=ROW("foo")' }],
+      [{ cellValue: '=ROW(TRUE())' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.CellRefExpected))
@@ -27,7 +27,7 @@ describe('Function ROW', () => {
 
   it('should propagate errors', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROW(1/0)'],
+      [{ cellValue: '=ROW(1/0)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -35,9 +35,9 @@ describe('Function ROW', () => {
 
   it('should return row of a reference', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROW(B1)'],
-      ['=ROW(B7)'],
-      ['=ROW(F$5)'],
+      [{ cellValue: '=ROW(B1)' }],
+      [{ cellValue: '=ROW(B7)' }],
+      [{ cellValue: '=ROW(F$5)' }],
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -47,7 +47,7 @@ describe('Function ROW', () => {
 
   it('should work for itself', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROW(A1)']
+      [{ cellValue: '=ROW(A1)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(1)
@@ -55,8 +55,8 @@ describe('Function ROW', () => {
 
   it('should return row of a cell in which formula is', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [null, '=ROW()'],
-      ['=ROW()'],
+      [{ cellValue: null }, { cellValue: '=ROW()' }],
+      [{ cellValue: '=ROW()' }],
     ])
 
     expect(engine.getCellValue(adr('B1'))).toEqual(1)
@@ -65,8 +65,8 @@ describe('Function ROW', () => {
 
   it('should return row of range start', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=ROW(A3:A4)'],
-      ['=ROW(B1:B2)']
+      [{ cellValue: '=ROW(A3:A4)' }],
+      [{ cellValue: '=ROW(B1:B2)' }]
     ])
 
     expect(engine.getCellValue(adr('A1'))).toEqual(3)
@@ -75,12 +75,12 @@ describe('Function ROW', () => {
 
   it('should be dependent on sheet structure changes', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['=ROW(A1)']
+      [{ cellValue: '1' }],
+      [{ cellValue: '=ROW(A1)' }]
     ])
     expect(engine.getCellValue(adr('A2'))).toEqual(1)
 
-    engine.addRows(0, [0, 1])
+    engine.addRows(0, [{ cellValue: 0 }, { cellValue: 1 }])
 
     expect(engine.getCellValue(adr('A3'))).toEqual(2)
   })
