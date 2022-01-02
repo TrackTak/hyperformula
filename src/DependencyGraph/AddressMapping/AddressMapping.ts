@@ -89,7 +89,7 @@ export class AddressMapping {
     } else if (vertex instanceof ArrayVertex) {
       return vertex.getArrayCellRawValue(address)
     } else {
-      return null
+      return new CellData(null)
     }
   }
 

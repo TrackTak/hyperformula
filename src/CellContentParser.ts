@@ -10,7 +10,6 @@
  import {UnableToParseError} from './errors'
  import {fixNegativeZero, isNumberOverflow} from './interpreter/ArithmeticHelper'
  import {
-   CellData,
    CellMetadata,
    cloneNumber,
    CurrencyNumber,
@@ -26,8 +25,8 @@
  
  export type RawCellContent = Date | string | number | boolean | null | undefined
 
- export type DataRawCellContent = RawCellContent | {
-  cellValue: RawCellContent,
+ export type DataRawCellContent = {
+  cellValue?: RawCellContent,
   metadata?: CellMetadata,
  }
 
@@ -70,11 +69,6 @@
      constructor(public readonly formula: string) {
      }
    }
-
-   export class CellData<PrimitiveType> {
-    constructor(public cellValue: PrimitiveType, public metadata?: CellMetadata) {
-    }
-   }
  
    export class Error {
      public readonly value: CellError
@@ -112,20 +106,6 @@
    const errorRegex = /#[A-Za-z0-9\/]+[?!]?/
    return errorRegex.test(upperCased) && Object.prototype.hasOwnProperty.call(errorMapping, upperCased)
  }
-
- export function isCellData<T extends Object>(obj: T | DataRawCellContent): obj is {
-  cellValue: RawCellContent,
-  metadata?: CellMetadata,
- } {
-  const isObject = obj != null && typeof obj === 'object' && !Array.isArray(obj)
-  const keys = Object.keys(obj ?? {})
-
-  if (!isObject || !keys.length) return false
-
-  const isCellData = keys.every(key => key === 'cellValue' || key === 'metadata')
-
-  return isCellData
- }
  
  export class CellContentParser {
    constructor(
@@ -134,14 +114,8 @@
      private readonly numberLiteralsHelper: NumberLiteralHelper) {
    }
  
-   public parse(content: DataRawCellContent): CellData<CellContent.Type> {
-     if (isCellData(content)) {
-       const { cellValue, metadata } = content
-
-       return new CellData(this.parseRawCellContent(cellValue, metadata), metadata)
-     }
-
-     return new CellData(this.parseRawCellContent(content))
+   public parse(content: RawCellContent): CellContent.Type {
+     return this.parseRawCellContent(content)
    }
 
    public isCurrency(text: string): boolean {

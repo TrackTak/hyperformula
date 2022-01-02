@@ -8,7 +8,7 @@ import {ArraySize} from '../ArraySize'
 import {CellError, ErrorType, simpleCellAddress, SimpleCellAddress} from '../Cell'
 import {DependencyGraph} from '../DependencyGraph'
 import {ErrorMessage} from '../error-message'
-import {getCellDataValue, InternalScalarValue, isExtendedNumber} from './InterpreterValue'
+import {InternalScalarValue, isExtendedNumber} from './InterpreterValue'
 
 export type AsyncSimpleRangeValue = Promise<SimpleRangeValue>
 

@@ -7,7 +7,7 @@ import {ArrayVertex, FormulaCellVertex, RangeVertex} from '../src/DependencyGrap
 import {ErrorMessage} from '../src/error-message'
 import {defaultStringifyDateTime} from '../src/format/format'
 import {complex} from '../src/interpreter/ArithmeticHelper'
-import { CellData, getCellDataValue } from '../src/interpreter/InterpreterValue'
+import { CellData } from '../src/interpreter/InterpreterValue'
 import {ColumnIndex} from '../src/Lookup/ColumnIndex'
 import {
   AstNodeType,
@@ -99,8 +99,8 @@ export const expectArrayWithSameContent = (expected: any[], actual: any[]) => {
 export const expectToBeCloseForComplex = (engine: HyperFormula, cell: string, expected: string, precision?: number) => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
-  const coerce = (arg: CellValue | CellData<CellValue>): complex => engine.evaluator.interpreter.arithmeticHelper.coerceScalarToComplex(getCellDataValue(arg))
-  const actualVal: complex = coerce(engine.getCellValue(adr(cell)))
+  const coerce = (arg: CellValue): complex => engine.evaluator.interpreter.arithmeticHelper.coerceScalarToComplex(arg)
+  const actualVal: complex = coerce(engine.getCellValue(adr(cell)).cellValue)
   const expectedVal: complex = coerce(expected)
   expect(expectedVal[0]).toBeCloseTo(actualVal[0], precision)
   expect(expectedVal[1]).toBeCloseTo(actualVal[1], precision)
@@ -170,8 +170,8 @@ export const expectEngineToBeTheSameAs = (actual: HyperFormula, expected: HyperF
   comparator.compare()
 }
 
-export function dateNumberToString(dateNumber: CellValue | CellData<CellValue>, config: Config): string | DetailedCellError {
-  const value = getCellDataValue(dateNumber)
+export function dateNumberToString(dateNumber: CellData<CellValue>, config: Config): string | DetailedCellError {
+  const value = dateNumber.cellValue
 
   if (value instanceof DetailedCellError) {
     return value
@@ -181,8 +181,8 @@ export function dateNumberToString(dateNumber: CellValue | CellData<CellValue>, 
   return dateString ?? ''
 }
 
-export function timeNumberToString(timeNumber: CellValue | CellData<CellValue>, config: Config): string | DetailedCellError {
-  const value = getCellDataValue(timeNumber)
+export function timeNumberToString(timeNumber: CellData<CellValue>, config: Config): string | DetailedCellError {
+  const value = timeNumber.cellValue
 
   if (value instanceof DetailedCellError) {
     return value

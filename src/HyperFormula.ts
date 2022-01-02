@@ -11,8 +11,6 @@ import {
   CellType,
   CellValueDetailedType,
   CellValueType,
-  CellDataDetailedType,
-  CellDataType,
   getCellType,
   getCellValueDetailedType,
   getCellValueFormat,
@@ -50,7 +48,7 @@ import {LicenseKeyValidityState} from './helpers/licenseKeyValidator'
 import {buildTranslationPackage, RawTranslationPackage, TranslationPackage} from './i18n'
 import {FunctionPluginDefinition} from './interpreter'
 import {FunctionRegistry, FunctionTranslationsPackage} from './interpreter/FunctionRegistry'
-import {CellData, FormatInfo, getCellDataValue} from './interpreter/InterpreterValue'
+import {CellData, FormatInfo} from './interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import {NamedExpression, NamedExpressionOptions, NamedExpressions} from './NamedExpressions'
@@ -648,7 +646,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public getCellValue(cellAddress: SimpleCellAddress): CellValue | CellData<CellValue> {
+  public getCellValue(cellAddress: SimpleCellAddress): CellData<CellValue> {
     if (!isSimpleCellAddress(cellAddress)) {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
@@ -679,7 +677,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public getCellFormula(cellAddress: SimpleCellAddress): (string | undefined) | CellData<string | undefined> {
+  public getCellFormula(cellAddress: SimpleCellAddress): CellData<string | undefined> {
     if (!isSimpleCellAddress(cellAddress)) {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
@@ -742,7 +740,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetValues(sheetId: number): (CellValue | CellData<CellValue>)[][] {
+  public getSheetValues(sheetId: number): CellData<CellValue>[][] {
     validateArgToType(sheetId, 'number', 'sheetId')
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getSheetValues(sheetId)
@@ -775,7 +773,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetFormulas(sheetId: number): (string | undefined | CellData<string | undefined>)[][] {
+  public getSheetFormulas(sheetId: number): CellData<string | undefined>[][] {
     validateArgToType(sheetId, 'number', 'sheetId')
     return this._serialization.getSheetFormulas(sheetId)
   }
@@ -888,7 +886,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getAllSheetsValues(): Record<string, ((CellValue | CellData<CellValue>))[][]> {
+  public getAllSheetsValues(): Record<string, CellData<CellValue>[][]> {
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getAllSheetsValues()
   }
@@ -907,7 +905,7 @@ export class HyperFormula implements TypedEmitter {
    * ```
    * @category Sheets
    */
-  public getAllSheetsFormulas(): Record<string, (string | undefined | CellData<string | undefined>)[][]> {
+  public getAllSheetsFormulas(): Record<string, CellData<string | undefined>[][]> {
     return this._serialization.getAllSheetsFormulas()
   }
 
@@ -2131,7 +2129,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Clipboard
    */
-  public copy(source: SimpleCellRange): (CellValue | CellData<CellValue>)[][] {
+  public copy(source: SimpleCellRange): CellData<CellValue>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2164,7 +2162,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Clipboard
    */
-  public cut(source: SimpleCellRange): (CellValue | CellData<CellValue>)[][] {
+  public cut(source: SimpleCellRange): CellData<CellValue>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2330,7 +2328,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Ranges
    */
-  public getRangeValues(source: SimpleCellRange): (CellValue | CellData<CellValue>)[][] {
+  public getRangeValues(source: SimpleCellRange): CellData<CellValue>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2366,7 +2364,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Ranges
    */
-  public getRangeFormulas(source: SimpleCellRange): (string | undefined | CellData<string | undefined>)[][] {
+  public getRangeFormulas(source: SimpleCellRange): CellData<string | undefined>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -3204,12 +3202,13 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public getCellValueType(cellAddress: SimpleCellAddress): CellValueType | CellDataType {
+  public getCellValueType(cellAddress: SimpleCellAddress): CellValueType {
     if (!isSimpleCellAddress(cellAddress)) {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
     this.ensureEvaluationIsNotSuspended()
-    const value = this.dependencyGraph.getCellValue(cellAddress)
+    const value = this.dependencyGraph.getCellValue(cellAddress).cellValue
+    
     return getCellValueType(value)
   }
 
@@ -3238,12 +3237,13 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public getCellValueDetailedType(cellAddress: SimpleCellAddress): CellValueDetailedType | CellDataDetailedType {
+  public getCellValueDetailedType(cellAddress: SimpleCellAddress): CellValueDetailedType {
     if (!isSimpleCellAddress(cellAddress)) {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
     this.ensureEvaluationIsNotSuspended()
-    const value = this.dependencyGraph.getCellValue(cellAddress)
+    const value = this.dependencyGraph.getCellValue(cellAddress).cellValue
+
     return getCellValueDetailedType(value)
   }
 
@@ -3277,7 +3277,8 @@ export class HyperFormula implements TypedEmitter {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
     this.ensureEvaluationIsNotSuspended()
-    const value = this.dependencyGraph.getCellValue(cellAddress)
+    const value = this.dependencyGraph.getCellValue(cellAddress).cellValue
+
     return getCellValueFormat(value)
   }
 
@@ -3644,7 +3645,7 @@ export class HyperFormula implements TypedEmitter {
     this._crudOperations.ensureScopeIdIsValid(scope)
     const namedExpression = this._namedExpressions.namedExpressionForScope(expressionName, scope)
     if (namedExpression) {
-      return getCellDataValue(this._serialization.getCellValue(namedExpression.address))
+      return this._serialization.getCellValue(namedExpression.address).cellValue
     } else {
       return undefined
     }
@@ -3685,7 +3686,7 @@ export class HyperFormula implements TypedEmitter {
     if (namedExpression === undefined) {
       return undefined
     } else {
-      return getCellDataValue(this._serialization.getCellFormula(namedExpression.address))
+      return this._serialization.getCellFormula(namedExpression.address).cellValue
     }
   }
 
@@ -3729,7 +3730,7 @@ export class HyperFormula implements TypedEmitter {
       return undefined
     }
 
-    const expression = getCellDataValue(this._serialization.getCellFormula(namedExpression.address))
+    const expression = this._serialization.getCellFormula(namedExpression.address).cellValue
 
     return {
       name: expressionName,
@@ -4057,11 +4058,11 @@ export class HyperFormula implements TypedEmitter {
     
     const newPromise = new Promise<CellValue | CellValue[][]>((resolve, reject) => {
       promise?.then((value) => {
-        resolve(this._exporter.exportScalarOrRange(value) as CellValue | CellValue[][])
+        resolve(this._exporter.exportScalarOrRange(new CellData(value)).cellValue)
       }).catch(reject)
     })
 
-    return [this._exporter.exportScalarOrRange(interpreterValue) as CellValue | CellValue[][], newPromise]
+    return [this._exporter.exportScalarOrRange(new CellData(interpreterValue)).cellValue, newPromise]
   }
 
   /**
@@ -4357,7 +4358,7 @@ export class HyperFormula implements TypedEmitter {
   }
 
   private extractTemporaryFormula(formulaString: string, sheetId: number = 1, stripWhitespaces = true): { ast?: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[] } {
-    const parsedCellContent = this._cellContentParser.parse(formulaString).cellValue
+    const parsedCellContent = this._cellContentParser.parse(formulaString)
     
     const address = {sheet: sheetId, col: 0, row: 0}
     if (!(parsedCellContent instanceof CellContent.Formula)) {

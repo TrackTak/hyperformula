@@ -10,7 +10,7 @@ import {CellValue} from './CellValue'
 import {Config} from './Config'
 import {ArrayVertex, CellVertex, DependencyGraph, EmptyCellVertex, FormulaCellVertex, ParsingErrorVertex} from './DependencyGraph'
 import {Exporter} from './Exporter'
-import {CellData, DataInterpreterValue, getCellDataValue, InterpreterValue} from './interpreter/InterpreterValue'
+import {CellData} from './interpreter/InterpreterValue'
 import {Maybe} from './Maybe'
 import {NamedExpressionOptions, NamedExpressions} from './NamedExpressions'
 import {buildLexerConfig, Unparser} from './parser'
@@ -51,55 +51,37 @@ export class Serialization {
     return undefined
   }
 
-  public getCellFormula(address: SimpleCellAddress, targetAddress?: SimpleCellAddress): Maybe<string | CellData<string | undefined>> {
+  public getCellFormula(address: SimpleCellAddress, targetAddress?: SimpleCellAddress): CellData<string | undefined> {
     const cell = this.dependencyGraph.getCell(address)
 
-    if (!cell || cell instanceof EmptyCellVertex) return undefined
+    if (!cell || cell instanceof EmptyCellVertex) return new CellData(undefined)
 
-    if (cell.metadata) {
-      return new CellData(this.parseCellFormula(cell, address, targetAddress), cell.metadata)
-    }
- 
-    return this.parseCellFormula(cell, address, targetAddress)
+    return new CellData(this.parseCellFormula(cell, address, targetAddress), cell.metadata)
   }
 
   public getCellSerialized(address: SimpleCellAddress, targetAddress?: SimpleCellAddress): DataRawCellContent {
     const cellFormula = this.getCellFormula(address, targetAddress)
-    const cellFormulaValue = getCellDataValue(cellFormula)
 
-    return cellFormulaValue !== undefined ? cellFormula : this.getRawValue(address)
+    return cellFormula.cellValue !== undefined ? cellFormula : this.getRawValue(address)
   }
 
-  public getCellValue(address: SimpleCellAddress): CellValue | CellData<CellValue> {
+  public getCellValue(address: SimpleCellAddress): CellData<CellValue> {
     const cell = this.dependencyGraph.getScalarValue(address)
-    let value: InterpreterValue | DataInterpreterValue = cell
 
-    if (cell instanceof CellData) {
-      value = cell.metadata ? cell : cell.cellValue
-    }
-
-    return this.exporter.exportValue(value)
+    return this.exporter.exportValue(cell)
   }
 
   public getRawValue(address: SimpleCellAddress): DataRawCellContent {
     const cell = this.dependencyGraph.getRawValue(address)
 
-    if (cell instanceof CellData) {
-      if (cell.metadata) {
-        return cell
-      }
-
-      return cell.cellValue
-    }
-
     return cell
   }
 
-  public getSheetValues(sheet: number): (CellValue | CellData<CellValue>)[][] {
+  public getSheetValues(sheet: number): CellData<CellValue>[][] {
     return this.genericSheetGetter(sheet, (arg) => this.getCellValue(arg))
   }
 
-  public getSheetFormulas(sheet: number): Maybe<string | CellData<string | undefined>>[][] {
+  public getSheetFormulas(sheet: number): CellData<string | undefined>[][] {
     return this.genericSheetGetter(sheet, (arg) => this.getCellFormula(arg))
   }
 
@@ -147,11 +129,11 @@ export class Serialization {
     return this.genericSheetGetter(sheet, (arg) => this.getCellSerialized(arg))
   }
 
-  public getAllSheetsValues(): Record<string, (CellValue | CellData<CellValue>)[][]> {
+  public getAllSheetsValues(): Record<string, CellData<CellValue>[][]> {
     return this.genericAllSheetsGetter((arg) => this.getSheetValues(arg))
   }
 
-  public getAllSheetsFormulas(): Record<string, Maybe<string | CellData<string | undefined>>[][]> {
+  public getAllSheetsFormulas(): Record<string, CellData<string | undefined>[][]> {
     return this.genericAllSheetsGetter((arg) => this.getSheetFormulas(arg))
   }
 
@@ -170,7 +152,7 @@ export class Serialization {
     return this.dependencyGraph.namedExpressions.getAllNamedExpressions().map((entry) => {
       return {
         name: entry.expression.displayName,
-        expression: getCellDataValue(this.getCellSerialized(entry.expression.address)),
+        expression: this.getCellSerialized(entry.expression.address).cellValue,
         scope: entry.scope !== undefined ? idMap[entry.scope] : undefined,
         options: entry.expression.options
       }

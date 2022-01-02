@@ -4,13 +4,13 @@
  */
 
 import {addressKey, SimpleCellAddress} from './Cell'
-import {DataInterpreterValue, InterpreterValue} from './interpreter/InterpreterValue'
+import {DataInterpreterValue} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 
 export interface CellValueChange {
   address: SimpleCellAddress,
-  value: InterpreterValue | DataInterpreterValue,
-  oldValue?: InterpreterValue | DataInterpreterValue,
+  value: DataInterpreterValue,
+  oldValue?: DataInterpreterValue,
 }
 
 export interface ChangeExporter<T> {
@@ -71,8 +71,8 @@ export class ContentChanges {
   private addInterpreterValue(value: DataInterpreterValue, address: SimpleCellAddress, oldValue?: DataInterpreterValue) {
     this.add(address, {
       address,
-      value: value.metadata ? value : value.cellValue,
-      oldValue: oldValue?.metadata ? oldValue : oldValue?.cellValue
+      value,
+      oldValue
     })
   }
 }

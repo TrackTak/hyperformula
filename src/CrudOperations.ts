@@ -3,6 +3,7 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
+import { CellData } from '.'
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {invalidSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
 import {CellContent, CellContentParser, DataRawCellContent, RawCellContent} from './CellContentParser'
@@ -634,7 +635,7 @@ export class CrudOperations {
   }
 
   private ensureNamedExpressionIsValid(expression: RawCellContent): void {
-    const parsedExpression = this.cellContentParser.parse(expression).cellValue
+    const parsedExpression = this.cellContentParser.parse(expression)
     if (parsedExpression instanceof CellContent.Formula) {
       const parsingResult = this.parser.parse(parsedExpression.formula, simpleCellAddress(-1, 0, 0))
       if (doesContainRelativeReferences(parsingResult.ast)) {

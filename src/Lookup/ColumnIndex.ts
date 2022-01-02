@@ -13,7 +13,6 @@ import {FormulaTransformer} from '../dependencyTransformers/Transformer'
 import {forceNormalizeString} from '../interpreter/ArithmeticHelper'
 import {
   EmptyValue,
-  getCellDataValue,
   getRawValue,
   RawInterpreterValue,
   RawNoErrorScalarValue,
@@ -87,7 +86,7 @@ export class ColumnIndex implements ColumnSearchStrategy {
   public applyChanges(contentChanges: CellValueChange[]) {
     for (const change of contentChanges) {
       if (change.oldValue !== undefined) {
-        this.change(getRawValue(getCellDataValue(change.oldValue)), getRawValue(getCellDataValue(change.value)), change.address)
+        this.change(getRawValue(change.oldValue.cellValue), getRawValue(change.value.cellValue), change.address)
       }
     }
   }

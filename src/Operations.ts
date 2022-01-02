@@ -42,7 +42,7 @@ import {
   SourceLocationHasArrayError,
   TargetLocationHasArrayError
 } from './errors'
-import {CellData, CellMetadata, EmptyValue, getCellDataValue, getRawValue} from './interpreter/InterpreterValue'
+import {CellData, CellMetadata, EmptyValue, getRawValue} from './interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import { Maybe } from './Maybe'
@@ -522,7 +522,7 @@ export class Operations {
         return {type: ClipboardCellType.EMPTY}
       }
 
-      return {type: ClipboardCellType.VALUE, parsedValue: val.cellValue, rawValue: getCellDataValue(vertex.getArrayCellRawValue(address)), metadata}
+      return {type: ClipboardCellType.VALUE, parsedValue: val.cellValue, rawValue: vertex.getArrayCellRawValue(address).cellValue, metadata}
     } else if (vertex instanceof FormulaCellVertex) {
       return {
         type: ClipboardCellType.FORMULA,
@@ -561,9 +561,9 @@ export class Operations {
   }
 
   public setCellContent(address: SimpleCellAddress, newCellContent: DataRawCellContent): [SimpleCellAddress, ClipboardCell] {
-    const parsedCellContent = this.cellContentParser.parse(newCellContent)
+    const parsedCellContent = this.cellContentParser.parse(newCellContent.cellValue)
     
-    return this.setParsedCellContent(newCellContent, parsedCellContent, address)
+    return this.setParsedCellContent(newCellContent, parsedCellContent, address, newCellContent.metadata)
   }
 
   public setSheetContent(sheetId: number, newSheetContent: DataRawCellContent[][]) {
@@ -581,7 +581,7 @@ export class Operations {
     const vertex = new ParsingErrorVertex(errors, rawInput, metadata)
     const arrayChanges = this.dependencyGraph.setParsingErrorToCell(address, vertex)
     
-    this.columnSearch.remove(getRawValue(getCellDataValue(oldValue)), address)
+    this.columnSearch.remove(getRawValue(oldValue.cellValue), address)
     this.columnSearch.applyChanges(arrayChanges.getChanges())
     this.changes.addAll(arrayChanges)
     this.changes.addChange(vertex.getCellValue(), address)
@@ -675,26 +675,25 @@ export class Operations {
     this.dependencyGraph.forceApplyPostponedTransformations()
   }
 
-  private setParsedCellContent(rawCellContent: DataRawCellContent, parsedCellContent: CellData<CellContent.Type>, address: SimpleCellAddress): [SimpleCellAddress, ClipboardCell] {
+  private setParsedCellContent(rawCellContent: DataRawCellContent, parsedCellContent: CellContent.Type, address: SimpleCellAddress, metadata?: CellMetadata): [SimpleCellAddress, ClipboardCell] {
     const oldContent = this.getOldContent(address)
-    const { cellValue, metadata } = parsedCellContent
 
-    if (cellValue instanceof CellContent.Formula) {
-      const parserResult = this.parser.parse(cellValue.formula, address)
+    if (parsedCellContent instanceof CellContent.Formula) {
+      const parserResult = this.parser.parse(parsedCellContent.formula, address)
       const {ast, errors} = parserResult
 
       if (errors.length > 0) {
-        this.setParsingErrorToCell(cellValue.formula, errors, address, metadata)
+        this.setParsingErrorToCell(parsedCellContent.formula, errors, address, metadata)
       } else {
         const size = this.arraySizePredictor.checkArraySize(ast, address)
         const asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(ast, address)
 
         this.setFormulaToCell(address, size, asyncPromises, metadata, parserResult, true)
       }
-    } else if (cellValue instanceof CellContent.Empty) {
+    } else if (parsedCellContent instanceof CellContent.Empty) {
       this.setCellEmpty(address)
     } else {
-      this.setValueToCell({parsedValue: cellValue.value, rawValue: getCellDataValue(rawCellContent), metadata}, address)
+      this.setValueToCell({parsedValue: parsedCellContent.value, rawValue: rawCellContent.cellValue, metadata}, address)
     }
 
     return oldContent
@@ -870,7 +869,7 @@ export class Operations {
   }
 
   private storeNamedExpressionInCell(address: SimpleCellAddress, expression: RawCellContent) {
-    const cellValue = this.cellContentParser.parse(expression).cellValue
+    const cellValue = this.cellContentParser.parse(expression)
 
     if (cellValue instanceof CellContent.Formula) {
       const parsingResult = this.parser.parse(cellValue.formula, simpleCellAddress(-1, 0, 0))

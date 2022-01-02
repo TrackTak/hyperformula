@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import { DataRawCellContent, getCellDataValue } from '.'
+import { CellMetadata, DataRawCellContent } from '.'
 import {absolutizeDependencies} from './absolutizeDependencies'
 import {ArraySize, ArraySizePredictor} from './ArraySize'
 import {AsyncPromiseFetcher} from './AsyncPromise'
@@ -18,7 +18,7 @@ import {
   ValueCellVertex,
   Vertex
 } from './DependencyGraph'
-import {CellData, getRawValue} from './interpreter/InterpreterValue'
+import {getRawValue} from './interpreter/InterpreterValue'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import {ParserWithCaching} from './parser'
 import {Sheets} from './Sheet'
@@ -91,7 +91,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
         for (let j = 0; j < row.length; ++j) {
           const cellContent = row[j]
           const address = simpleCellAddress(sheetId, j, i)
-          const parsedCellContent = this.cellContentParser.parse(cellContent)
+          const parsedCellContent = this.cellContentParser.parse(cellContent.cellValue)
           const dependency = this.setDependency(address, cellContent, parsedCellContent)
 
           if (dependency) {
@@ -106,14 +106,12 @@ export class SimpleStrategy implements GraphBuilderStrategy {
     return dependencies
   }
 
-  private setDependency(address: SimpleCellAddress, rawCellContent: DataRawCellContent, parsedCellContent: CellData<CellContent.Type>): null | [Vertex, CellDependency[]] {
-    const { cellValue, metadata } = parsedCellContent
-    
-    if (cellValue instanceof CellContent.Formula) {
-      const parseResult = this.stats.measure(StatType.PARSER, () => this.parser.parse(cellValue.formula, address))
+  private setDependency(address: SimpleCellAddress, rawCellContent: DataRawCellContent, parsedCellContent: CellContent.Type, metadata?: CellMetadata): null | [Vertex, CellDependency[]] {    
+    if (parsedCellContent instanceof CellContent.Formula) {
+      const parseResult = this.stats.measure(StatType.PARSER, () => this.parser.parse(parsedCellContent.formula, address))
       if (parseResult.errors.length > 0) {
         this.shrinkArrayIfNeeded(address)
-        const vertex = new ParsingErrorVertex(parseResult.errors, cellValue.formula, metadata)
+        const vertex = new ParsingErrorVertex(parseResult.errors, parsedCellContent.formula, metadata)
 
         this.dependencyGraph.addVertex(address, vertex)
       } else {
@@ -150,13 +148,13 @@ export class SimpleStrategy implements GraphBuilderStrategy {
           return [vertex, absolutizeDependencies(parseResult.dependencies, address)]
         }
       }
-    } else if (cellValue instanceof CellContent.Empty) {
+    } else if (parsedCellContent instanceof CellContent.Empty) {
       return null
     } else {
       this.shrinkArrayIfNeeded(address)
-      const vertex = new ValueCellVertex(cellValue.value, getCellDataValue(rawCellContent), metadata)
+      const vertex = new ValueCellVertex(parsedCellContent.value, rawCellContent.cellValue, metadata)
 
-      this.columnIndex.add(getRawValue(cellValue.value), address)
+      this.columnIndex.add(getRawValue(parsedCellContent.value), address)
       this.dependencyGraph.addVertex(address, vertex)
     }
     return null

@@ -627,7 +627,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     if (typeof val === 'string' || 
       typeof val === 'boolean' || 
       typeof val === 'number') {
-      const cellValue = this.cellContentParser.parse(val).cellValue
+      const cellValue = this.cellContentParser.parse(val)
     
       if (cellValue instanceof CellContent.Formula) {
         return cellValue.formula
