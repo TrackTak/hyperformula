@@ -118,8 +118,8 @@ describe('Function WEEKNUM', () => {
   })
 
   it('big test', () => {
-    const args = [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 11 }, { cellValue: 12}, {cellValue: 13 }, { cellValue: 14 }, { cellValue: 15 }, { cellValue: 16 }, { cellValue: 17 }, { cellValue: 21 }]
-    const dates = [{ cellValue: '13/08/2020' }, { cellValue: '14/08/2020' }, { cellValue: '15/08/2020' }, { cellValue: '16/08/2020'}, {cellValue: '17/08/2020' }, { cellValue: '18/08/2020' }, { cellValue: '19/08/2020' }]
+    const args = [1, 2, 11, 12, 13, 14, 15, 16, 17, 21]
+    const dates = ['13/08/2020', '14/08/2020', '15/08/2020', '16/08/2020', '17/08/2020', '18/08/2020', '19/08/2020']
     const arrs = []
     for (const arg of args) {
       const arr = []

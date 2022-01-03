@@ -82,7 +82,7 @@ describe('ContentChanges', () => {
 
   it('should handle array change', () => {
     const contentChanges = ContentChanges.empty()
-    contentChanges.addChange(new CellData(SimpleRangeValue.onlyValues([[1, 2], [1, 2]])), adr('A1'))
+    contentChanges.addChange(new CellData(SimpleRangeValue.onlyValues([[1, 2], ['foo', 'bar']])), adr('A1'), undefined)
 
     const exportedChanges = contentChanges.exportChanges(new SpreadRangeExporter())
 

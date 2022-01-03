@@ -15,12 +15,12 @@ describe('MAX', () => {
   })
 
   it('MAX with range', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '3' }], [{ cellValue: '2' }], [{ cellValue: '=MAX(A1:A3)' }]])
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
   })
 
   it('MAX with mixed arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '3' }], [{ cellValue: '2' }], [{ cellValue: '=MAX(4,A1:A3)' }]])
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(4)
   })
 
@@ -38,7 +38,7 @@ describe('MAX', () => {
   })
 
   it('MAX of strings and -1', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: 'bar' }], [{ cellValue: '-1' }], [{ cellValue: '=MAX(A1:A3)' }]])
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(-1)
   })
 

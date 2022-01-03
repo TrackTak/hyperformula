@@ -17,13 +17,13 @@ describe('COUNTA', () => {
   })
 
   it('COUNTA with range', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '3' }], [{ cellValue: '2' }], [{ cellValue: '=COUNTA(A1:A3)' }]])
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
   })
 
   it('COUNTA doesnt count only empty values', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: '=""' }], [{ cellValue: null }], [{ cellValue: '=TRUE()' }], [{ cellValue: '=COUNTA(A1:A4)' }]])
 
     expect(engine.getCellValue(adr('A5')).cellValue).toEqual(3)
   })

@@ -425,7 +425,7 @@ describe('build from array', () => {
     expect(engine.getSheetValues(0))
   })
 
-  it.only('should REF last array', () => {
+  it('should REF last array', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=TRANSPOSE(D1:E2)' }, { cellValue: '=TRANSPOSE(D1:E2)' }, { cellValue: null }, { cellValue: 1}, {cellValue: 2 }],
       [{ cellValue: '=TRANSPOSE(D1:E2)' }, { cellValue: null }, { cellValue: null }, { cellValue: 1}, {cellValue: 2 }],

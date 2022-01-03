@@ -17,7 +17,7 @@ describe('MAXA', () => {
   })
 
   it('MAXA with range', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '3' }], [{ cellValue: '2' }], [{ cellValue: '=MAXA(A1:A3)' }]])
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
   })
@@ -37,7 +37,7 @@ describe('MAXA', () => {
   })
 
   it('MAXA of strings and -1', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: 'bar' }], [{ cellValue: '-1' }], [{ cellValue: '=MAXA(A1:A3)' }]])
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(0)
   })
 

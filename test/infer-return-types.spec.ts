@@ -79,7 +79,7 @@ describe('infer return types', () => {
     expect(engine.getCellValueDetailedType(adr('B1'))).toBe(CellValueDetailedType.NUMBER_PERCENT)
   
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
-    expect(engine.getCellValueDetailedType(adr('A2'))).toBe(CellValueDetailedType.NUMBER_RAW)
+    expect(engine.getCellValueDetailedType(adr('A2'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
     
     expect(engine.getCellValue(adr('B2')).cellValue).toEqual('\"2%\"')
     expect(engine.getCellValueDetailedType(adr('B2'))).toBe(CellValueDetailedType.STRING)

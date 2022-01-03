@@ -106,6 +106,17 @@
    const errorRegex = /#[A-Za-z0-9\/]+[?!]?/
    return errorRegex.test(upperCased) && Object.prototype.hasOwnProperty.call(errorMapping, upperCased)
  }
+
+ export function isCellData<T extends Object>(obj: T | DataRawCellContent) {
+  const isObject = obj != null && typeof obj === 'object' && !Array.isArray(obj)
+  const keys = Object.keys(obj ?? {})
+
+  if (!isObject || !keys.length) return false
+
+  const isCellData = keys.every(key => key === 'cellValue' || key === 'metadata')
+
+  return isCellData
+ }
  
  export class CellContentParser {
    constructor(
@@ -114,8 +125,12 @@
      private readonly numberLiteralsHelper: NumberLiteralHelper) {
    }
  
-   public parse(content: RawCellContent): CellContent.Type {
-     return this.parseRawCellContent(content)
+   public parse(content: DataRawCellContent): CellContent.Type {
+    if (!isCellData(content)) {
+      throw new UnableToParseError(content)
+    }
+
+     return this.parseRawCellContent(content as RawCellContent)
    }
 
    public isCurrency(text: string): boolean {

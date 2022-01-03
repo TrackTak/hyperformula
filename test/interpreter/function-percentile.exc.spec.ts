@@ -17,7 +17,7 @@ describe('Function PERCENTILE.EXC', () => {
   it('throws error for non-numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: 3 }],
-      ['\'1'],
+      [{ cellValue: '\'1' }],
       [{ cellValue: 2 }],
       [{ cellValue: '=PERCENTILE.EXC(A1:A3, 0.3)' }],
     ])

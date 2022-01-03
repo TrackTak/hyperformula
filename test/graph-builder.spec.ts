@@ -173,7 +173,7 @@ describe('GraphBuilder', () => {
 describe('Sheet size limits', () => {
   it('should throw error when trying to build engine with too many columns', () => {
     const maxColumns = Config.defaultConfig.maxColumns
-    const sheet = [new Array(maxColumns + 1).fill('')]
+    const sheet = [new Array(maxColumns + 1).fill({ cellValue: '' })]
 
     expect(() => {
       HyperFormula.buildFromArray(sheet)
@@ -182,7 +182,7 @@ describe('Sheet size limits', () => {
 
   it('should throw error when trying to build engine with too many rows', () => {
     const maxRows = Config.defaultConfig.maxRows
-    const sheet = new Array(maxRows + 1).fill([''])
+    const sheet = new Array(maxRows + 1).fill([{ cellValue: '' }])
 
     expect(() => {
       HyperFormula.buildFromArray(sheet)

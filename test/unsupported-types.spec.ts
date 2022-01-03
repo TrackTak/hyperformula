@@ -10,8 +10,8 @@ const BigIntSupported = (function(): boolean {
   }
 })()
 
-describe('unsupported types should result in error', () => {
-  it('should give parsing error #1', () => {
+describe.only('unsupported types should result in error', () => {
+  it.only('should give parsing error #1', () => {
     // eslint-disable-next-line
     // @ts-ignore
     expect(() => HyperFormula.buildFromArray([[[]]])

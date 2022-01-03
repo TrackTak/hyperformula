@@ -11,7 +11,7 @@ import {adr} from './testUtils'
 
 describe('simpleCellAddressFromString', () => {
   const sheetMappingFunction = (name: string): Maybe<number> => {
-    const index = [{ cellValue: 'Sheet1' }, { cellValue: 'Sheet2' }, { cellValue: 'Sheet3' }].findIndex(x => x.cellValue === name)
+    const index = ['Sheet1', 'Sheet2', 'Sheet3'].indexOf(name)
     return index > 0 ? index : undefined
   }
 
@@ -39,7 +39,7 @@ describe('simpleCellAddressFromString', () => {
 
 describe('simpleCellRangeFromString', () => {
   const sheetMappingFunction = (name: string): Maybe<number> => {
-    const index = [{ cellValue: 'Sheet1' }, { cellValue: 'Sheet2' }, { cellValue: 'Sheet3' }].findIndex(x => x.cellValue === name)
+    const index = ['Sheet1', 'Sheet2', 'Sheet3'].indexOf(name)
     return index > 0 ? index : undefined
   }
 
@@ -104,7 +104,7 @@ describe('simpleCellAddressToString', () => {
 
 describe('simpleCellRangeToString', () => {
   const sheetIndexMappingFunction = (index: number): Maybe<string> => {
-    return [{ cellValue: 'Sheet1' }, { cellValue: 'Sheet2' }, { cellValue: 'Sheet3' }][index].cellValue
+    return ['Sheet1', 'Sheet2', 'Sheet3'][index]
   }
 
   it('should return string representation', () => {

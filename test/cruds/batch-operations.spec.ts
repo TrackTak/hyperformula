@@ -66,33 +66,33 @@ describe('normalize added indexes', () => {
   })
 
   it('should return shifted further indexes when expanding', () => {
-    const normalized = normalizeAddedIndexes([[3, 3], [3, 3]])
-    expectArrayWithSameContent(normalized, [[3, 3], [3, 3]])
+    const normalized = normalizeAddedIndexes([[3, 3], [7, 3]])
+    expectArrayWithSameContent(normalized, [[3, 3], [10, 3]])
   })
 
   it('should merge indexes with same start', () => {
-    const normalized = normalizeAddedIndexes([[3, 3], [3, 3]])
+    const normalized = normalizeAddedIndexes([[3, 3], [3, 7]])
     expectArrayWithSameContent(normalized, [[3, 7]])
   })
 
   it('should return shift further indexes - more arguments', () => {
-    const normalized = normalizeAddedIndexes([[3, 3], [3, 3], [3, 3]])
-    expectArrayWithSameContent(normalized, [[3, 3], [3, 3], [3, 3]])
+    const normalized = normalizeAddedIndexes([[3, 3], [7, 3], [11, 2]])
+    expectArrayWithSameContent(normalized, [[3, 3], [10, 3], [17, 2]])
   })
 
   it('should return shift further indexes even when they overlap', () => {
-    const normalized = normalizeAddedIndexes([[3, 5], [3, 5]])
-    expectArrayWithSameContent(normalized, [[3, 5], [3, 5]])
+    const normalized = normalizeAddedIndexes([[3, 5], [8, 5]])
+    expectArrayWithSameContent(normalized, [[3, 5], [13, 5]])
   })
 
   it('should normalize unsorted indexes', () => {
-    const normalized = normalizeAddedIndexes([[5, 9], [5, 9]])
-    expectArrayWithSameContent(normalized, [[3, 5], [3, 5]])
+    const normalized = normalizeAddedIndexes([[5, 9], [3, 5]])
+    expectArrayWithSameContent(normalized, [[3, 5], [10, 9]])
   })
 
   it('mixed case', () => {
-    const normalized = normalizeAddedIndexes([[3, 7], [3, 7], [3, 7], [3, 7]])
-    expectArrayWithSameContent(normalized, [[2, 1], [2, 1], [2, 1]])
+    const normalized = normalizeAddedIndexes([[3, 7], [3, 2], [2, 1], [15, 15]])
+    expectArrayWithSameContent(normalized, [[2, 1], [4, 7], [23, 15]])
   })
 })
 
@@ -108,32 +108,32 @@ describe('normalize removed indexes', () => {
   })
 
   it('should return shifted further indexes', () => {
-    const normalized = normalizeRemovedIndexes([[3, 3], [3, 3]])
-    expectArrayWithSameContent(normalized, [[3, 3], [3, 3]])
+    const normalized = normalizeRemovedIndexes([[3, 3], [7, 3]])
+    expectArrayWithSameContent(normalized, [[3, 3], [4, 3]])
   })
 
   it('should return shift further indexes - more arguments', () => {
-    const normalized = normalizeRemovedIndexes([[3, 3], [3, 3], [3, 3]])
-    expectArrayWithSameContent(normalized, [[3, 3], [3, 3], [3, 3]])
+    const normalized = normalizeRemovedIndexes([[3, 3], [7, 3], [11, 2]])
+    expectArrayWithSameContent(normalized, [[3, 3], [4, 3], [5, 2]])
   })
 
   it('should normalize adjacent indexes', () => {
-    const normalized = normalizeRemovedIndexes([[3, 5], [3, 5]])
-    expectArrayWithSameContent(normalized, [[3, 1]])
+    const normalized = normalizeRemovedIndexes([[3, 5], [8, 5]])
+    expectArrayWithSameContent(normalized, [[3, 10]])
   })
 
   it('should normalize overlapping indexes', () => {
-    const normalized = normalizeRemovedIndexes([[3, 5], [3, 5]])
-    expectArrayWithSameContent(normalized, [[3, 1]])
+    const normalized = normalizeRemovedIndexes([[3, 5], [5, 9]])
+    expectArrayWithSameContent(normalized, [[3, 11]])
   })
 
   it('should normalize unsorted indexes', () => {
-    const normalized = normalizeRemovedIndexes([[5, 9], [5, 9]])
-    expectArrayWithSameContent(normalized, [[3, 1]])
+    const normalized = normalizeRemovedIndexes([[5, 9], [3, 5]])
+    expectArrayWithSameContent(normalized, [[3, 11]])
   })
 
   it('mixed case', () => {
-    const normalized = normalizeRemovedIndexes([[3, 7], [3, 7], [3, 7], [3, 7]])
-    expectArrayWithSameContent(normalized, [[1, 1], [1, 1], [1, 1]])
+    const normalized = normalizeRemovedIndexes([[3, 7], [4, 8], [1, 1], [15, 5]])
+    expectArrayWithSameContent(normalized, [[1, 1], [2, 9], [5, 5]])
   })
 })

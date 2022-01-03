@@ -9,8 +9,8 @@ import {adr, detailedError} from '../testUtils'
 describe('Text', () => {
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([[
-      '2',
-      '=TEXT(A1, "mm/dd/yyyy")',
+      { cellValue: '2' },
+      { cellValue: '=TEXT(A1, "mm/dd/yyyy")' },
     ]])
 
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('01/01/1900')
@@ -44,9 +44,9 @@ describe('Text', () => {
 
   it('day formats', () => {
     const [engine] = HyperFormula.buildFromArray([[
-      '=DATE(2018, 8, 8)',
-      '=TEXT(A1, "d d")',
-      '=TEXT(A1, "dd DD")',
+      { cellValue: '=DATE(2018, 8, 8)'},
+      { cellValue: '=TEXT(A1, "d d")' },
+      { cellValue: '=TEXT(A1, "dd DD")'},
     ]])
 
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('8 8')
@@ -55,9 +55,9 @@ describe('Text', () => {
 
   it('month formats', () => {
     const [engine] = HyperFormula.buildFromArray([[
-      '=DATE(2018, 8, 8)',
-      '=TEXT(A1, "m M")',
-      '=TEXT(A1, "mm MM")',
+      { cellValue: '=DATE(2018, 8, 8)' },
+      { cellValue: '=TEXT(A1, "m M")' },
+      { cellValue: '=TEXT(A1, "mm MM")' },
     ]])
 
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('8 0') //heuristic - repeated month is minutes
@@ -66,9 +66,9 @@ describe('Text', () => {
 
   it('year formats', () => {
     const [engine] = HyperFormula.buildFromArray([[
-      '=DATE(2018, 8, 8)',
-      '=TEXT(A1, "yy YY")',
-      '=TEXT(A1, "yyyy YYYY")',
+      { cellValue: '=DATE(2018, 8, 8)'},
+      { cellValue: '=TEXT(A1, "yy YY")'},
+      { cellValue: '=TEXT(A1, "yyyy YYYY")'},
     ]])
 
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('18 18')
@@ -78,17 +78,17 @@ describe('Text', () => {
   it('12 hours', () => {
     const [engine] = HyperFormula.buildFromArray([
       [
-        '8/8/2018 14:00',
-        '=TEXT(A1, "hh:mm A/P")',
+        { cellValue: '8/8/2018 14:00'},
+        { cellValue: '=TEXT(A1, "hh:mm A/P")'},
       ],
       [
-        '8/8/2018 00:30',
-        '=TEXT(A2, "hh:mm AM/PM")',
+        { cellValue: '8/8/2018 00:30'},
+        { cellValue: '=TEXT(A2, "hh:mm AM/PM")'},
       ],
       [{ cellValue: '8/8/2018 00:30' }, { cellValue: '=TEXT(A3, "hh:mm am/pm")' }],
       [
-        '8/8/2018 00:30',
-        '=TEXT(A4, "hh:mm a/p")',
+        { cellValue: '8/8/2018 00:30'},
+        { cellValue: '=TEXT(A4, "hh:mm a/p")'},
       ]
     ])
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('02:00 P')
@@ -100,8 +100,8 @@ describe('Text', () => {
   it('24 hours', () => {
     const [engine] = HyperFormula.buildFromArray([
       [
-        '8/8/2018 13:59',
-        '=TEXT(A1, "HH:mm")',
+        { cellValue: '8/8/2018 13:59'},
+        { cellValue: '=TEXT(A1, "HH:mm")'},
       ]
     ])
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('13:59')
@@ -110,10 +110,10 @@ describe('Text', () => {
   it('padding', () => {
     const [engine] = HyperFormula.buildFromArray([
       [
-        '8/8/2018 01:01:01', '=TEXT(A1, "H:m:s")',
+        { cellValue: '8/8/2018 01:01:01'}, { cellValue:'=TEXT(A1, "H:m:s")'},
       ],
       [
-        '8/8/2018 01:11:11', '=TEXT(A2, "H:m:s")',
+        { cellValue: '8/8/2018 01:11:11'}, { cellValue:'=TEXT(A2, "H:m:s")'},
       ]
     ])
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('1:1:1')
@@ -123,7 +123,7 @@ describe('Text', () => {
   it('fractions of seconds', () => {
     const [engine] = HyperFormula.buildFromArray([
       [
-        '0.0000011574074074074074', '=TEXT(A1, "hh:mm:ss.ss")',
+        { cellValue: '0.0000011574074074074074'}, { cellValue:'=TEXT(A1, "hh:mm:ss.ss")'},
       ],
       [{ cellValue: '0.000001' }, { cellValue: '=TEXT(A2, "hh:mm:ss.sss")' }]
     ])
@@ -133,10 +133,10 @@ describe('Text', () => {
 
   it('distinguishes between months and minutes - not supported', () => {
     const [engine] = HyperFormula.buildFromArray([[
-      '=DATE(2018, 8, 8)',
-      '=TEXT(A1, "mm")',
-      '=TEXT(A1, "HH:mm")',
-      '=TEXT(A1, "H:m")',
+      { cellValue: '=DATE(2018, 8, 8)'},
+      { cellValue: '=TEXT(A1, "mm")'},
+      { cellValue: '=TEXT(A1, "HH:mm")'},
+      { cellValue: '=TEXT(A1, "H:m")'},
     ]])
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('08')
     expect(engine.getCellValue(adr('C1')).cellValue).toEqual('00:00')
@@ -145,9 +145,9 @@ describe('Text', () => {
 
   it('works for number format', () => {
     const [engine] = HyperFormula.buildFromArray([[
-      '12.45',
-      '=TEXT(A1, "###.###")',
-      '=TEXT(A1, "000.000")',
+      { cellValue: '12.45'},
+      { cellValue: '=TEXT(A1, "###.###")'},
+      { cellValue: '=TEXT(A1, "000.000")'},
     ]])
 
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('12.45')
@@ -187,8 +187,8 @@ describe('Custom date printing', () => {
 
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([[
-      '2',
-      '=TEXT(A1, "mm/dd/yyyy")',
+      { cellValue: '2'},
+      { cellValue: '=TEXT(A1, "mm/dd/yyyy")'},
     ]], {stringifyDateTime: customPrintDate})
 
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('fancy 01/01/1900 fancy')
@@ -196,9 +196,9 @@ describe('Custom date printing', () => {
 
   it('no effect for number format', () => {
     const [engine] = HyperFormula.buildFromArray([[
-      '12.45',
-      '=TEXT(A1, "###.###")',
-      '=TEXT(A1, "000.000")',
+      { cellValue: '12.45'},
+      { cellValue: '=TEXT(A1, "###.###")'},
+      { cellValue: '=TEXT(A1, "000.000")'},
     ]], {stringifyDateTime: customPrintDate})
 
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('12.45')

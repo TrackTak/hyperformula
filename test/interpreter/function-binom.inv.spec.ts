@@ -52,7 +52,11 @@ describe('Function BINOM.INV', () => {
 
     const [engine] = HyperFormula.buildFromArray(formulas)
 
-    expect(engine.getSheetValues(0)).toEqual([[1, 1, 2, 2, 3, 4, 4, 5, 5, 5, 6, 6, 7, 8, 8, 9, 9]])
+    const out = [[1, 1, 2, 2, 3, 4, 4, 5, 5, 5, 6, 6, 7, 8, 8, 9, 9]].map(x => x.map(z => ({
+      cellValue: z
+    })))
+    
+    expect(engine.getSheetValues(0)).toEqual(out)
   })
 
   it('should work, different p-value', () => {

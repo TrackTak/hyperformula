@@ -51,7 +51,7 @@ describe('Function SKEW.P', () => {
   it('ignores nonnumeric values in ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=SKEW.P(A2:F2)' }],
-      [{ cellValue: 1 }, { cellValue: 1 }, { cellValue: false }, { cellValue: null }, { cellValue: '\'0' }]
+      [{ cellValue: 1 }, { cellValue: 0 }, { cellValue: 0 }, {cellValue: false }, { cellValue: null }, { cellValue: '\'0' }]
     ])
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.707106781186548, 6)

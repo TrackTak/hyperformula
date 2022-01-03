@@ -62,31 +62,31 @@ describe('serialization', () => {
     // reload data and "restore" the previous state
     const [engine2] =HyperFormula.buildFromSheets(serialized)
 
-    expect(engine2.getCellSerialized(adr('A1'))).toEqual(1)
+    expect(engine2.getCellSerialized(adr('A1')).cellValue).toEqual(1)
     expect(engine2.getCellValueFormat(adr('A1'))).toEqual(undefined)
     expect(engine2.getCellValueDetailedType(adr('A1'))).toEqual(CellValueDetailedType.NUMBER_RAW)
 
-    expect(engine2.getCellSerialized(adr('B1'))).toEqual('2')
+    expect(engine2.getCellSerialized(adr('B1')).cellValue).toEqual('2')
     expect(engine2.getCellValueFormat(adr('B1'))).toEqual(undefined)
     expect(engine2.getCellValueDetailedType(adr('B1'))).toEqual(CellValueDetailedType.NUMBER_RAW)
 
-    expect(engine2.getCellSerialized(adr('C1'))).toEqual('foo')
+    expect(engine2.getCellSerialized(adr('C1')).cellValue).toEqual('foo')
     expect(engine2.getCellValueFormat(adr('C1'))).toEqual(undefined)
     expect(engine2.getCellValueDetailedType(adr('C1'))).toEqual(CellValueDetailedType.STRING)
 
-    expect(engine2.getCellSerialized(adr('D1'))).toEqual(true)
+    expect(engine2.getCellSerialized(adr('D1')).cellValue).toEqual(true)
     expect(engine2.getCellValueFormat(adr('D1'))).toEqual(undefined)
     expect(engine2.getCellValueDetailedType(adr('D1'))).toEqual(CellValueDetailedType.BOOLEAN)
 
-    expect(engine2.getCellSerialized(adr('E1'))).toEqual('\'1')
+    expect(engine2.getCellSerialized(adr('E1')).cellValue).toEqual('\'1')
     expect(engine2.getCellValueFormat(adr('E1'))).toEqual(undefined)
     expect(engine2.getCellValueDetailedType(adr('E1'))).toEqual(CellValueDetailedType.STRING)
 
-    expect(engine2.getCellSerialized(adr('F1'))).toEqual('33$')
+    expect(engine2.getCellSerialized(adr('F1')).cellValue).toEqual('33$')
     expect(engine2.getCellValueFormat(adr('F1'))).toEqual('$')
     expect(engine2.getCellValueDetailedType(adr('F1'))).toEqual(CellValueDetailedType.NUMBER_CURRENCY)
 
-    expect(engine2.getCellSerialized(adr('G1'))).toEqual('12/01/15')
+    expect(engine2.getCellSerialized(adr('G1')).cellValue).toEqual('12/01/15')
     expect(engine2.getCellValueFormat(adr('G1'))).toEqual('DD/MM/YY')
     expect(engine2.getCellValueDetailedType(adr('G1'))).toEqual(CellValueDetailedType.NUMBER_DATE)
 

@@ -19,7 +19,7 @@ describe('split', () => {
 
     const result = split(arr[Symbol.iterator]())
 
-    expect(result.value).toBe(42)
+    expect(result.value?.cellValue).toBe(42)
     expect(Array.from(result.rest)).toEqual([])
   })
 
@@ -28,7 +28,7 @@ describe('split', () => {
 
     const result = split(arr[Symbol.iterator]())
 
-    expect(result.value).toBe(42)
+    expect(result.value?.cellValue).toBe(42)
     expect(Array.from(result.rest)).toEqual([43])
   })
 })
@@ -41,12 +41,12 @@ describe('first', () => {
   it('works for one element case', () => {
     const arr = [{ cellValue: 42 }]
 
-    expect(first(arr[Symbol.iterator]())).toEqual(42)
+    expect(first(arr[Symbol.iterator]())?.cellValue).toEqual(42)
   })
 
   it('works for more elements case', () => {
     const arr = [{ cellValue: 42 }, { cellValue: 43 }]
 
-    expect(first(arr[Symbol.iterator]())).toEqual(42)
+    expect(first(arr[Symbol.iterator]())?.cellValue).toEqual(42)
   })
 })

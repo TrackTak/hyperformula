@@ -50,7 +50,7 @@ describe('Interpreter', () => {
   })
 
   it('ranges - VALUE error when evaluating without context', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '2' }], [{ cellValue: '=A1:A2' }]])
     expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
   })
 
