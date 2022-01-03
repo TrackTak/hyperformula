@@ -8,7 +8,7 @@ describe('Function DEVSQ', () => {
       [{ cellValue: '=DEVSQ(1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
   })
 
   it('two numbers', () => {
@@ -16,7 +16,7 @@ describe('Function DEVSQ', () => {
       [{ cellValue: '=DEVSQ(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0.5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0.5)
   })
 
   it('more numbers', () => {
@@ -24,7 +24,7 @@ describe('Function DEVSQ', () => {
       [{ cellValue: '=DEVSQ(3, 1, 2, 4, 5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(10)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(10)
   })
 
   it('works with ranges', () => {
@@ -33,7 +33,7 @@ describe('Function DEVSQ', () => {
       [{ cellValue: '=DEVSQ(A1:C1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual(54)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(54)
   })
 
   it('propagates error from regular argument', () => {
@@ -41,7 +41,7 @@ describe('Function DEVSQ', () => {
       [{ cellValue: '=3/0' }, { cellValue: '=DEVSQ(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('propagates first error from range argument', () => {
@@ -49,7 +49,7 @@ describe('Function DEVSQ', () => {
       [{ cellValue: '=3/0' }, { cellValue: '=FOO(' }, { cellValue: '=DEVSQ(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   //inconsistency with product #2
@@ -60,7 +60,7 @@ describe('Function DEVSQ', () => {
       [{ cellValue: null }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
   })
 
   /**
@@ -71,15 +71,15 @@ describe('Function DEVSQ', () => {
       [{ cellValue: '=DEVSQ(TRUE(),FALSE(),)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.666666666666667, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.666666666666667, 6)
   })
 
   it('ignores nonnumeric values in ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=DEVSQ(A2:D2)' }],
-      [0, 1, false, null, '\'0']
+      [{ cellValue: 0 }, { cellValue: 1 }, { cellValue: false }, { cellValue: null }, { cellValue: '\'0' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0.5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0.5)
   })
 })

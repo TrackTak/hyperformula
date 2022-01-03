@@ -12,12 +12,12 @@ describe('update config', () => {
     ])
     engine.updateConfig({})
 
-    expect(engine.getCellValue(adr('A1'))).toBe(1)
-    expect(engine.getCellValue(adr('B1'))).toBe(1)
-    expect(engine.getCellValue(adr('C1'))).toBe(2)
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('B2'))).toEqualError(detailedError(ErrorType.CYCLE))
-    expect(engine.getCellValue(adr('C2'))).toEqualError(detailedError(ErrorType.ERROR, ErrorMessage.ParseError))
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(1)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(2)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
+    expect(engine.getCellValue(adr('C2')).cellValue).toEqualError(detailedError(ErrorType.ERROR, ErrorMessage.ParseError))
   })
   it('simple reload preserves formulas', () => {
     const [engine] = HyperFormula.buildFromArray([
@@ -36,11 +36,11 @@ describe('update config', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '1.00000000000001' }, { cellValue: '1' }, { cellValue: '=A1-B1' }],
     ], {smartRounding: false})
-    expect(engine.getCellValue(adr('C1'))).toBeCloseTo(0.00000000000001)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBeCloseTo(0.00000000000001)
 
     engine.updateConfig({smartRounding: true})
 
-    expect(engine.getCellValue(adr('C1'))).toEqual(0)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(0)
   })
   it('language reload', () => {
     HyperFormula.registerLanguage('plPL', plPL)
@@ -64,7 +64,7 @@ describe('update config', () => {
     engine.addNamedExpression('FALSE', false)
     engine.updateConfig({})
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
   })
 })

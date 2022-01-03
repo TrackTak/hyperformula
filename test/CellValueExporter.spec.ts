@@ -1,4 +1,4 @@
-import {DetailedCellError, ErrorType, HyperFormula} from '../src'
+import {CellData, DetailedCellError, ErrorType, HyperFormula} from '../src'
 import {CellError} from '../src/Cell'
 import {Config} from '../src/Config'
 import {ErrorMessage} from '../src/error-message'
@@ -19,31 +19,31 @@ describe('rounding', () => {
   it('no rounding', () => {
     const config = new Config({smartRounding: false})
     const cellValueExporter = new Exporter(config, namedExpressionsMock, sheetIndexMock, lazilyTransforminService)
-    expect(cellValueExporter.exportValue(1.000000000000001)).toBe(1.000000000000001)
-    expect(cellValueExporter.exportValue(-1.000000000000001)).toBe(-1.000000000000001)
-    expect(cellValueExporter.exportValue(0.000000000000001)).toBe(0.000000000000001)
-    expect(cellValueExporter.exportValue(-0.000000000000001)).toBe(-0.000000000000001)
-    expect(cellValueExporter.exportValue(true)).toBe(true)
-    expect(cellValueExporter.exportValue(false)).toBe(false)
-    expect(cellValueExporter.exportValue(1)).toBe(1)
-    expect(cellValueExporter.exportValue(EmptyValue)).toBe(null)
-    expect(cellValueExporter.exportValue('abcd')).toBe('abcd')
+    expect(cellValueExporter.exportValue(new CellData(1.000000000000001)).cellValue).toBe(1.000000000000001)
+    expect(cellValueExporter.exportValue(new CellData(-1.000000000000001)).cellValue).toBe(-1.000000000000001)
+    expect(cellValueExporter.exportValue(new CellData(0.000000000000001)).cellValue).toBe(0.000000000000001)
+    expect(cellValueExporter.exportValue(new CellData(-0.000000000000001)).cellValue).toBe(-0.000000000000001)
+    expect(cellValueExporter.exportValue(new CellData(true)).cellValue).toBe(true)
+    expect(cellValueExporter.exportValue(new CellData(false)).cellValue).toBe(false)
+    expect(cellValueExporter.exportValue(new CellData(1)).cellValue).toBe(1)
+    expect(cellValueExporter.exportValue(new CellData(EmptyValue)).cellValue).toBe(null)
+    expect(cellValueExporter.exportValue(new CellData('abcd')).cellValue).toBe('abcd')
   })
 
   it('with rounding', () => {
     const config = new Config()
     const cellValueExporter = new Exporter(config, namedExpressionsMock, sheetIndexMock, lazilyTransforminService)
-    expect(cellValueExporter.exportValue(1.0000000000001)).toBe(1.0000000000001)
-    expect(cellValueExporter.exportValue(-1.0000000000001)).toBe(-1.0000000000001)
-    expect(cellValueExporter.exportValue(1.000000000000001)).toBe(1)
-    expect(cellValueExporter.exportValue(-1.000000000000001)).toBe(-1)
-    expect(cellValueExporter.exportValue(0.0000000000001)).toBe(0.0000000000001)
-    expect(cellValueExporter.exportValue(-0.0000000000001)).toBe(-0.0000000000001)
-    expect(cellValueExporter.exportValue(true)).toBe(true)
-    expect(cellValueExporter.exportValue(false)).toBe(false)
-    expect(cellValueExporter.exportValue(1)).toBe(1)
-    expect(cellValueExporter.exportValue(EmptyValue)).toBe(null)
-    expect(cellValueExporter.exportValue('abcd')).toBe('abcd')
+    expect(cellValueExporter.exportValue(new CellData(1.0000000000001)).cellValue).toBe(1.0000000000001)
+    expect(cellValueExporter.exportValue(new CellData(-1.0000000000001)).cellValue).toBe(-1.0000000000001)
+    expect(cellValueExporter.exportValue(new CellData(1.000000000000001)).cellValue).toBe(1)
+    expect(cellValueExporter.exportValue(new CellData(-1.000000000000001)).cellValue).toBe(-1)
+    expect(cellValueExporter.exportValue(new CellData(0.0000000000001)).cellValue).toBe(0.0000000000001)
+    expect(cellValueExporter.exportValue(new CellData(-0.0000000000001)).cellValue).toBe(-0.0000000000001)
+    expect(cellValueExporter.exportValue(new CellData(true)).cellValue).toBe(true)
+    expect(cellValueExporter.exportValue(new CellData(false)).cellValue).toBe(false)
+    expect(cellValueExporter.exportValue(new CellData(1)).cellValue).toBe(1)
+    expect(cellValueExporter.exportValue(new CellData(EmptyValue)).cellValue).toBe(null)
+    expect(cellValueExporter.exportValue(new CellData('abcd')).cellValue).toBe('abcd')
   })
 })
 
@@ -52,7 +52,8 @@ describe('detailed error', () => {
     const config = new Config({language: 'enGB'})
     const cellValueExporter = new Exporter(config, namedExpressionsMock, sheetIndexMock, lazilyTransforminService)
 
-    const error = cellValueExporter.exportValue(new CellError(ErrorType.VALUE)) as DetailedCellError
+    const error = cellValueExporter.exportValue(new CellData(new CellError(ErrorType.VALUE))).cellValue as DetailedCellError
+
     expect(error).toEqualError(detailedError(ErrorType.VALUE))
     expect(error.value).toEqual('#VALUE!')
   })
@@ -62,7 +63,8 @@ describe('detailed error', () => {
     const config = new Config({language: 'plPL'})
     const cellValueExporter = new Exporter(config, namedExpressionsMock, sheetIndexMock, lazilyTransforminService)
 
-    const error = cellValueExporter.exportValue(new CellError(ErrorType.VALUE)) as DetailedCellError
+    const error = cellValueExporter.exportValue(new CellData(new CellError(ErrorType.VALUE))).cellValue as DetailedCellError
+    
     expect(error).toEqualError(detailedError(ErrorType.VALUE, undefined, config))
     expect(error.value).toEqual('#ARG!')
   })

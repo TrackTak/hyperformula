@@ -1,4 +1,4 @@
-import {ExportedCellChange, ExportedNamedExpressionChange, HyperFormula} from '../src'
+import {CellData, ExportedCellChange, ExportedNamedExpressionChange, HyperFormula} from '../src'
 import {ErrorType} from '../src/Cell'
 import {Events} from '../src/Emitter'
 import {NamedExpressionDoesNotExistError} from '../src/errors'
@@ -29,7 +29,7 @@ describe('Events', () => {
     engine.removeSheet(1)
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(handler).toHaveBeenCalledWith('Sheet2', [new ExportedCellChange(adr('A1'), detailedErrorWithOrigin(ErrorType.REF, 'Sheet1!A1'))])
+    expect(handler).toHaveBeenCalledWith('Sheet2', [new ExportedCellChange(adr('A1'), new CellData(detailedErrorWithOrigin(ErrorType.REF, 'Sheet1!A1')))])
   })
 
   it('sheetRemoved name contains actual display name', function() {
@@ -43,7 +43,7 @@ describe('Events', () => {
     engine.removeSheet(1)
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(handler).toHaveBeenCalledWith('Sheet2', [new ExportedCellChange(adr('A1'), detailedErrorWithOrigin(ErrorType.REF, 'Sheet1!A1'))])
+    expect(handler).toHaveBeenCalledWith('Sheet2', [new ExportedCellChange(adr('A1'), new CellData(detailedErrorWithOrigin(ErrorType.REF, 'Sheet1!A1')))])
   })
 
   it('sheetRenamed works', () => {
@@ -122,7 +122,7 @@ describe('Events', () => {
     engine.setCellContents(adr('A1'), [[{ cellValue: '43' }]])
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 43)])
+    expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), new CellData(43))])
   })
 
   it('asyncValuesUpdated works', async() => {
@@ -138,7 +138,7 @@ describe('Events', () => {
     await engine.setCellContents(adr('B1'), [[{ cellValue: '=ASYNC_FOO()' }]])[1]
 
     expect(handler).toHaveBeenCalledTimes(2)
-    expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), 1)])
+    expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), new CellData(1))])
   })
 
 
@@ -152,7 +152,7 @@ describe('Events', () => {
     engine.setCellContents(adr('A1'), [[{ cellValue: '42' }]])
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 42)])
+    expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), new CellData(42))])
   })
 
   it('suspension and resuming of evaluation', async() => {
@@ -191,9 +191,9 @@ describe('Events', () => {
     expect(handlerUpdated).toHaveBeenCalledTimes(1)
     expect(handlerSuspended).toHaveBeenCalledTimes(1)
     expect(handlerResumed).toHaveBeenCalledTimes(2)
-    expect(handlerResumed).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 13)])
+    expect(handlerResumed).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), new CellData(13))])
     expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(1)
-    expect(handlerAsyncValuesUpdated).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), 1)])
+    expect(handlerAsyncValuesUpdated).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), new CellData(1))])
   })
 
   it('batching', async() => {
@@ -220,9 +220,9 @@ describe('Events', () => {
     expect(handlerUpdated).toHaveBeenCalledTimes(1)
     expect(handlerSuspended).toHaveBeenCalledTimes(1)
     expect(handlerResumed).toHaveBeenCalledTimes(2)
-    expect(handlerResumed).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 13), new ExportedCellChange(adr('B1'), getLoadingError('Sheet1!B1'))])
+    expect(handlerResumed).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), new CellData(13)), new ExportedCellChange(adr('B1'), new CellData(getLoadingError('Sheet1!B1')))])
     expect(handlerAsyncValuesUpdated).toHaveBeenCalledTimes(1)
-    expect(handlerAsyncValuesUpdated).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), 1)])
+    expect(handlerAsyncValuesUpdated).toHaveBeenCalledWith([new ExportedCellChange(adr('B1'), new CellData(1))])
   })
 })
 

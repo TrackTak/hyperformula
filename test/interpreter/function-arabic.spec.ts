@@ -8,8 +8,8 @@ describe('Function ARABIC', () => {
       [{ cellValue: '=ARABIC()' }, { cellValue: '=ARABIC(1, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should properly sanitize input', () => {
@@ -18,9 +18,9 @@ describe('Function ARABIC', () => {
       [{ cellValue: '=ARABIC("xd")' }],
       [{ cellValue: '=ARABIC(" xD ")' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(490)
-    expect(engine.getCellValue(adr('A2'))).toEqual(490)
-    expect(engine.getCellValue(adr('A3'))).toEqual(490)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(490)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(490)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(490)
   })
 
   it('should detect incorrect numerals', () => {
@@ -33,13 +33,13 @@ describe('Function ARABIC', () => {
       [{ cellValue: '=ARABIC("Ma")' }],
       [{ cellValue: '=ARABIC("M M")' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A5'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A6'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A7'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
   })
 
   it('works for border cases', () => {
@@ -48,9 +48,9 @@ describe('Function ARABIC', () => {
       [{ cellValue: '=ARABIC("-I")' }],
       [{ cellValue: '=ARABIC(" ")' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(4992)
-    expect(engine.getCellValue(adr('A2'))).toEqual(-1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(4992)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(-1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(0)
   })
 
   it('should output correct value for roman numerals from mode 0', () => {
@@ -89,8 +89,8 @@ function inputOutput(mode: number) {
   const input = []
   const output = []
   for (let i = 0; i < arr.length; i++) {
-    input.push(`=ARABIC("${arr[i]}")`)
-    output.push(i + 1)
+    input.push({ cellValue: `=ARABIC("${arr[i]}")` })
+    output.push({ cellValue: i + 1 })
   }
   return [input, output]
 }

@@ -10,8 +10,8 @@ describe('Function SIGN', () => {
       [{ cellValue: '=SIGN(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for arguments of wrong type', () => {
@@ -19,7 +19,7 @@ describe('Function SIGN', () => {
       [{ cellValue: '=SIGN("foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work', () => {
@@ -29,8 +29,8 @@ describe('Function SIGN', () => {
       [{ cellValue: '=SIGN(-12.1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
-    expect(engine.getCellValue(adr('A3'))).toEqual(-1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(-1)
   })
 })

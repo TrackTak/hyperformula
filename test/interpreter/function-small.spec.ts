@@ -9,8 +9,8 @@ describe('Function SMALL', () => {
       [{ cellValue: '=SMALL(1, 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -18,7 +18,7 @@ describe('Function SMALL', () => {
       [{ cellValue: '=SMALL(1, "baz")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work', () => {
@@ -27,12 +27,12 @@ describe('Function SMALL', () => {
       [{ cellValue: 1 }, { cellValue: 4 }, { cellValue: 2 }, { cellValue: 4}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('B1'))).toEqual(1)
-    expect(engine.getCellValue(adr('C1'))).toEqual(2)
-    expect(engine.getCellValue(adr('D1'))).toEqual(4)
-    expect(engine.getCellValue(adr('E1'))).toEqual(4)
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 
   it('should ignore non-numbers', () => {
@@ -41,10 +41,10 @@ describe('Function SMALL', () => {
       [{ cellValue: 1 }, { cellValue: 4 }, { cellValue: true }, { cellValue: 'abcd'}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('B1'))).toEqual(1)
-    expect(engine.getCellValue(adr('C1'))).toEqual(4)
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 
   it('should propagate errors', () => {
@@ -53,10 +53,10 @@ describe('Function SMALL', () => {
       [{ cellValue: 1 }, { cellValue: 4 }, { cellValue: '=NA()' }, { cellValue: 'abcd'}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA))
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.NA))
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 
   it('should truncate second arg', () => {
@@ -65,12 +65,12 @@ describe('Function SMALL', () => {
       [{ cellValue: 1 }, { cellValue: 4 }, { cellValue: 2 }, { cellValue: 4}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('B1'))).toEqual(1)
-    expect(engine.getCellValue(adr('C1'))).toEqual(2)
-    expect(engine.getCellValue(adr('D1'))).toEqual(4)
-    expect(engine.getCellValue(adr('E1'))).toEqual(4)
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 
   it('should work for non-ranges', () => {
@@ -78,9 +78,9 @@ describe('Function SMALL', () => {
       [{ cellValue: '=SMALL(1,0)' }, { cellValue: '=SMALL(1,1)' }, { cellValue: '=SMALL(1,2)' }, { cellValue: '=SMALL(TRUE(),1)'}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('B1'))).toEqual(1)
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 })

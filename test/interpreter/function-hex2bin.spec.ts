@@ -9,7 +9,7 @@ describe('function HEX2BIN', () => {
       [{ cellValue: '=HEX2BIN("foo", 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for non-hex arguments', () => {
@@ -19,9 +19,9 @@ describe('function HEX2BIN', () => {
       [{ cellValue: '=HEX2BIN(TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
   })
 
   it('should work', () => {
@@ -35,13 +35,13 @@ describe('function HEX2BIN', () => {
       [{ cellValue: '=HEX2BIN("FFFFFFFE00")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('1')
-    expect(engine.getCellValue(adr('A2'))).toEqual('1111')
-    expect(engine.getCellValue(adr('A3'))).toEqual('101010')
-    expect(engine.getCellValue(adr('A4'))).toEqual('111111111')
-    expect(engine.getCellValue(adr('A5'))).toEqual('1111110110')
-    expect(engine.getCellValue(adr('A6'))).toEqual('1110011100')
-    expect(engine.getCellValue(adr('A7'))).toEqual('1000000000')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('1111')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('101010')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('111111111')
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual('1111110110')
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual('1110011100')
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual('1000000000')
   })
 
   it('should work for numbers', () => {
@@ -49,7 +49,7 @@ describe('function HEX2BIN', () => {
       [{ cellValue: '=HEX2BIN(156)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('101010110')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('101010110')
   })
 
   it('should work for reference', () => {
@@ -58,7 +58,7 @@ describe('function HEX2BIN', () => {
       [{ cellValue: '=HEX2BIN(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual('100101010')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('100101010')
   })
 
   it('should return string value', () => {
@@ -75,8 +75,8 @@ describe('function HEX2BIN', () => {
       [{ cellValue: '=HEX2BIN("FFFFFFFDFF")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLarge))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLarge))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseSmall))
   })
 
   it('should respect second argument and fill with zeros for positive arguments', () => {
@@ -85,8 +85,8 @@ describe('function HEX2BIN', () => {
       [{ cellValue: '=HEX2BIN(3, "4")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('00010010')
-    expect(engine.getCellValue(adr('A2'))).toEqual('0011')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('00010010')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('0011')
   })
 
   it('second argument should not affect negative results', () => {
@@ -95,8 +95,8 @@ describe('function HEX2BIN', () => {
       [{ cellValue: '=HEX2BIN("FFFFFFFFF6", 10)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('1110011100')
-    expect(engine.getCellValue(adr('A2'))).toEqual('1111110110')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1110011100')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('1111110110')
   })
 
   it('should fail if the result is longer than the desired length', () => {
@@ -105,8 +105,8 @@ describe('function HEX2BIN', () => {
       [{ cellValue: '=HEX2BIN("FF", "3")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
   })
 
   it('should allow for numbers from 1 to 10 as second argument', () => {
@@ -115,7 +115,7 @@ describe('function HEX2BIN', () => {
       [{ cellValue: '=HEX2BIN(2, 12)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 })

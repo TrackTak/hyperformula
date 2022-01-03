@@ -9,8 +9,8 @@ describe('Function BESSELI', () => {
       [{ cellValue: '=BESSELI(1, 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -19,8 +19,8 @@ describe('Function BESSELI', () => {
       [{ cellValue: '=BESSELI(2, "foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work', () => {
@@ -36,15 +36,15 @@ describe('Function BESSELI', () => {
       [{ cellValue: '=BESSELI(5,3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(1.26606584803426, 6)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(27.2398718943949, 6)
-    expect(engine.getCellValue(adr('A4'))).toBeCloseTo(-0.565159097581944, 6)
-    expect(engine.getCellValue(adr('A5'))).toEqual(0)
-    expect(engine.getCellValue(adr('A6'))).toBeCloseTo(24.3356418457055, 6)
-    expect(engine.getCellValue(adr('A7'))).toBeCloseTo(-0.0221684244039833, 6)
-    expect(engine.getCellValue(adr('A8'))).toEqual(0)
-    expect(engine.getCellValue(adr('A9'))).toBeCloseTo(10.3311501959992, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(1.26606584803426, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(27.2398718943949, 6)
+    expect(engine.getCellValue(adr('A4')).cellValue).toBeCloseTo(-0.565159097581944, 6)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A6')).cellValue).toBeCloseTo(24.3356418457055, 6)
+    expect(engine.getCellValue(adr('A7')).cellValue).toBeCloseTo(-0.0221684244039833, 6)
+    expect(engine.getCellValue(adr('A8')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A9')).cellValue).toBeCloseTo(10.3311501959992, 6)
   })
 
   it('should check bounds', () => {
@@ -52,7 +52,7 @@ describe('Function BESSELI', () => {
       [{ cellValue: '=BESSELI(1, -0.001)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
 
   })
 
@@ -63,8 +63,8 @@ describe('Function BESSELI', () => {
       [{ cellValue: '=BESSELI(5,0.9)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(1.26606584803426, 6)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(27.2398718943949, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(1.26606584803426, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(27.2398718943949, 6)
   })
 })

@@ -7,12 +7,12 @@ describe('Function FALSE', () => {
   it('works', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=FALSE()' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(false)
   })
 
   it('is 0-arity', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=FALSE(1)' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 })

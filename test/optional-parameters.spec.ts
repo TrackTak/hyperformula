@@ -36,13 +36,13 @@ describe('Nonexistent metadata', () => {
       [{ cellValue: '=foo()' }],
     ], {functionPlugins: [FooPlugin]})
 
-    expect(engine.getCellValue(adr('A1'))).toBe('1+2')
-    expect(engine.getCellValue(adr('A2'))).toBe('+2')
-    expect(engine.getCellValue(adr('A3'))).toBe('+2')
-    expect(engine.getCellValue(adr('A4'))).toBe('1+')
-    expect(engine.getCellValue(adr('A5'))).toBe('+')
-    expect(engine.getCellValue(adr('A6'))).toBe('1+default2')
-    expect(engine.getCellValue(adr('A7'))).toBe('default1+default2')
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe('1+2')
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe('+2')
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe('+2')
+    expect(engine.getCellValue(adr('A4')).cellValue).toBe('1+')
+    expect(engine.getCellValue(adr('A5')).cellValue).toBe('+')
+    expect(engine.getCellValue(adr('A6')).cellValue).toBe('1+default2')
+    expect(engine.getCellValue(adr('A7')).cellValue).toBe('default1+default2')
   })
 
   it('log fails with coerce to 0', () => {
@@ -50,7 +50,7 @@ describe('Nonexistent metadata', () => {
       [{ cellValue: '=LOG(10,)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 
   it('other function coerce EmptyValue', () => {
@@ -60,9 +60,9 @@ describe('Nonexistent metadata', () => {
       [{ cellValue: '=CONCATENATE(,"abcd")' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1901)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual('abcd')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1901)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('abcd')
   })
 
 })

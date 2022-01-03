@@ -1,4 +1,4 @@
-import {ExportedCellChange, HyperFormula} from '../../src'
+import {CellData, ExportedCellChange, HyperFormula} from '../../src'
 import {AbsoluteCellRange} from '../../src/AbsoluteCellRange'
 import {Config} from '../../src/Config'
 import {ArrayVertex, FormulaCellVertex} from '../../src/DependencyGraph'
@@ -37,7 +37,7 @@ describe('Adding column - checking if its possible', () => {
   it('no if number of columns is not positive', () => {
     const [engine] = HyperFormula.buildFromArray([[]])
 
-    expect(engine.isItPossibleToAddColumns(0, [{ cellValue: 0 }, { cellValue: 0 }])).toEqual(false)
+    expect(engine.isItPossibleToAddColumns(0, [0, 0]))
   })
 
   it('no if number of columns is not an integer', () => {
@@ -57,12 +57,12 @@ describe('Adding column - checking if its possible', () => {
   it('no if sheet does not exist', () => {
     const [engine] = HyperFormula.buildFromArray([[]])
 
-    expect(engine.isItPossibleToAddColumns(1, [{ cellValue: 0 }, { cellValue: 1 }])).toEqual(false)
-    expect(engine.isItPossibleToAddColumns(1.5, [{ cellValue: 0 }, { cellValue: 1 }])).toEqual(false)
-    expect(engine.isItPossibleToAddColumns(-1, [{ cellValue: 0 }, { cellValue: 1 }])).toEqual(false)
-    expect(engine.isItPossibleToAddColumns(NaN, [{ cellValue: 0 }, { cellValue: 1 }])).toEqual(false)
-    expect(engine.isItPossibleToAddColumns(Infinity, [{ cellValue: 0 }, { cellValue: 1 }])).toEqual(false)
-    expect(engine.isItPossibleToAddColumns(-Infinity, [{ cellValue: 0 }, { cellValue: 1 }])).toEqual(false)
+    expect(engine.isItPossibleToAddColumns(1, [0, 1])).toEqual(false)
+    expect(engine.isItPossibleToAddColumns(1.5, [0, 1])).toEqual(false)
+    expect(engine.isItPossibleToAddColumns(-1, [0, 1])).toEqual(false)
+    expect(engine.isItPossibleToAddColumns(NaN, [0, 1])).toEqual(false)
+    expect(engine.isItPossibleToAddColumns(Infinity, [0, 1])).toEqual(false)
+    expect(engine.isItPossibleToAddColumns(-Infinity, [0, 1])).toEqual(false)
   })
 
   it('no if adding column would exceed sheet size limit', () => {
@@ -70,14 +70,14 @@ describe('Adding column - checking if its possible', () => {
       Array(Config.defaultConfig.maxColumns - 1).fill('')
     ])
 
-    expect(engine.isItPossibleToAddColumns(0, [{ cellValue: 0 }, { cellValue: 2 }])).toEqual(false)
-    expect(engine.isItPossibleToAddColumns(0, [{ cellValue: 0 }, { cellValue: 1 }], [{ cellValue: 0 }, { cellValue: 1 }])).toEqual(false)
+    expect(engine.isItPossibleToAddColumns(0, [0, 2])).toBe(false)
+    expect(engine.isItPossibleToAddColumns(0, [0, 1], [5, 1])).toEqual(false)
   })
 
   it('yes otherwise', () => {
     const [engine] = HyperFormula.buildFromArray([[]])
 
-    expect(engine.isItPossibleToAddColumns(0, [{ cellValue: 0 }, { cellValue: 1 }])).toEqual(true)
+    expect(engine.isItPossibleToAddColumns(0, [0, 1])).toEqual(true)
   })
 })
 
@@ -89,7 +89,7 @@ describe('Adding column - matrix check', () => {
       [{ cellValue: '5' }, { cellValue: '6' }],
     ], {chooseAddressMappingPolicy: new AlwaysDense()})
 
-    engine.addColumns(0, [{ cellValue: 3 }, { cellValue: 1 }])
+    engine.addColumns(0, [3, 1])
 
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: 'foo' }, { cellValue: null}, {cellValue: 'bar' }],
@@ -105,7 +105,7 @@ describe('Adding column - matrix check', () => {
       [{ cellValue: '5' }, { cellValue: '6' }],
     ], {chooseAddressMappingPolicy: new AlwaysDense()})
 
-    engine.addColumns(0, [{ cellValue: 3 }, { cellValue: 3 }])
+    engine.addColumns(0, [3, 3])
 
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: 'foo' }, { cellValue: null}, {cellValue: null }, { cellValue: null }, { cellValue: 'bar' }],
@@ -120,12 +120,12 @@ describe('Adding column - matrix check', () => {
       [{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '3' }, { cellValue: '4'}],
     ])
 
-    engine.addColumns(0, [{ cellValue: 0 }, { cellValue: 1 }])
+    engine.addColumns(0, [0, 1])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(null)
-    expect(engine.getCellValue(adr('B1'))).toEqual(1)
-    expect(engine.getCellValue(adr('C1'))).toEqual(3)
-    expect(engine.getCellValue(adr('D1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(1)
   })
 
   it('should be possible to add row right after matrix', () => {
@@ -134,29 +134,29 @@ describe('Adding column - matrix check', () => {
       [{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '3' }, { cellValue: '4'}],
     ])
 
-    engine.addColumns(0, [{ cellValue: 2 }, { cellValue: 1 }])
+    engine.addColumns(0, [2, 1])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('B1'))).toEqual(3)
-    expect(engine.getCellValue(adr('C1'))).toBe(null)
-    expect(engine.getCellValue(adr('D1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(1)
   })
 })
 
 describe('Adding column - reevaluation', () => {
   it('reevaluates cells', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', /* new col */ '2', '=COUNTBLANK(A1:B1)'],
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=COUNTBLANK(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqual(0)
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
-    expect(engine.getCellValue(adr('D1'))).toEqual(1)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(0)
+    engine.addColumns(0, [1, 1])
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(1)
   })
 
   it('dont reevaluate everything', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', /* new col */ '2', '=COUNTBLANK(A1:B1)'],
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=COUNTBLANK(A1:B1)' }],
       [{ cellValue: '=SUM(A1:A1)' }],
     ])
     const c1 = engine.addressMapping.getCell(adr('C1'))
@@ -166,7 +166,7 @@ describe('Adding column - reevaluation', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const a2setCellValueSpy = spyOn(a2 as any, 'setCellValue')
 
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addColumns(0, [1, 1])
 
     expect(a2setCellValueSpy).not.toHaveBeenCalled()
     expect(c1setCellValueSpy).toHaveBeenCalled()
@@ -174,13 +174,13 @@ describe('Adding column - reevaluation', () => {
 
   it('reevaluates cells which are dependent on structure changes', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', /* */ '2', '=COLUMNS(A1:B1)'],
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=COLUMNS(A1:B1)' }],
     ])
     const c1 = engine.addressMapping.getCell(adr('C1'))
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const c1setCellValueSpy = spyOn(c1 as any, 'setCellValue')
 
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addColumns(0, [1, 1])
 
     expect(c1setCellValueSpy).toHaveBeenCalled()
     expect(extractRange(engine, adr('D1'))).toEqual(new AbsoluteCellRange(adr('A1'), adr('C1')))
@@ -188,24 +188,24 @@ describe('Adding column - reevaluation', () => {
 
   it('returns changed values', () => {
     const [engine] = HyperFormula.buildFromArray([
-      /* */
+      
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=COLUMNS(A1:B1)' }],
     ])
 
-    const [changes] = engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    const [changes] = engine.addColumns(0, [1, 1])
 
     expect(changes.length).toBe(1)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('D1'), 3))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('D1'), new CellData(3)))
   })
 })
 
 describe('Adding column - FormulaCellVertex#address update', () => {
   it('updates addresses in formulas', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', /* new col */ '=A1'],
+      [{ cellValue: '1' }, { cellValue: '=A1' }],
     ])
 
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addColumns(0, [1, 1])
 
     const c1 = engine.addressMapping.getCell(adr('C1')) as FormulaCellVertex
     expect(c1).toBeInstanceOf(FormulaCellVertex)
@@ -216,10 +216,10 @@ describe('Adding column - FormulaCellVertex#address update', () => {
 describe('Adding column - address mapping', () => {
   it('verify sheet dimensions', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', /* new col */ '=A1'],
+      [{ cellValue: '1' }, { cellValue: '=A1' }],
     ])
 
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addColumns(0, [1, 1])
 
     expect(engine.getSheetDimensions(0)).toEqual({
       width: 3,
@@ -239,7 +239,7 @@ describe('different sheet', () => {
       ],
     })
 
-    engine.addColumns(0, [{ cellValue: 0 }, { cellValue: 1 }])
+    engine.addColumns(0, [0, 1])
 
     const formulaVertex = engine.addressMapping.fetchCell(adr('A1', 1)) as FormulaCellVertex
 
@@ -257,8 +257,8 @@ describe('Adding column - sheet dimensions', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recalcSpy = spyOn(engine.evaluator as any, 'partialRun')
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
-    engine.addColumns(0, [{ cellValue: 10 }, { cellValue: 15 }])
+    engine.addColumns(0, [1, 1])
+    engine.addColumns(0, [10, 15])
 
     expect(recalcSpy).not.toHaveBeenCalled()
     expect(engine.getSheetDimensions(0)).toEqual({
@@ -273,11 +273,11 @@ describe('Adding column - sheet dimensions', () => {
     ])
 
     expect(() => {
-      engine.addColumns(0, [{ cellValue: 0 }, { cellValue: 2 }])
+      engine.addColumns(0, [0, 2])
     }).toThrow(new SheetSizeLimitExceededError())
 
     expect(() => {
-      engine.addColumns(0, [{ cellValue: 0 }, { cellValue: 1 }], [{ cellValue: 0 }, { cellValue: 1 }])
+      engine.addColumns(0, [0, 1], [5, 1])
     }).toThrow(new SheetSizeLimitExceededError())
   })
 })
@@ -291,7 +291,7 @@ describe('Adding column - column index', () => {
 
     expectArrayWithSameContent([0], index.getValueIndex(0, 0, 1).index)
 
-    engine.addColumns(0, [{ cellValue: 0 }, { cellValue: 1 }])
+    engine.addColumns(0, [0, 1])
 
     expectArrayWithSameContent([], index.getValueIndex(0, 0, 1).index)
     expectArrayWithSameContent([0], index.getValueIndex(0, 1, 1).index)
@@ -304,7 +304,7 @@ describe('Adding column - arrays', () => {
       [{ cellValue: '=-A3:C4' }, { cellValue: null }, { cellValue: null }, { cellValue: 'foo'}],
     ], {useArrayArithmetic: true})
 
-    engine.addColumns(0, [{ cellValue: 0 }, { cellValue: 1 }])
+    engine.addColumns(0, [0, 1])
 
     const expected = HyperFormula.buildFromArray([
       [{ cellValue: null }, { cellValue: '=-B3:D4' }, { cellValue: null }, { cellValue: null}, {cellValue: 'foo' }],
@@ -318,7 +318,7 @@ describe('Adding column - arrays', () => {
       [{ cellValue: null }, { cellValue: null }, { cellValue: null }, { cellValue: '=-A1:C1'}, {cellValue: null }, { cellValue: null }, { cellValue: 'foo' }]
     ], {useArrayArithmetic: true})
 
-    engine.addColumns(0, [{ cellValue: 4 }, { cellValue: 1 }])
+    engine.addColumns(0, [4, 1])
 
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([
       [{ cellValue: null }, { cellValue: null }, { cellValue: null }, { cellValue: '=-A1:C1'}, {cellValue: null }, { cellValue: null }, { cellValue: null }, { cellValue: 'foo' }]
@@ -331,7 +331,7 @@ describe('Adding column - arrays', () => {
       [{ cellValue: 3 }, { cellValue: 4 }],
     ], {useArrayArithmetic: true})
 
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addColumns(0, [1, 1])
 
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([
       [{ cellValue: 1 }, { cellValue: null }, { cellValue: 2 }, { cellValue: '=TRANSPOSE(A1:C2)'}],
@@ -345,7 +345,7 @@ describe('Adding column - arrays', () => {
       [{ cellValue: 3 }, { cellValue: 4 }],
     ], {useArrayArithmetic: true})
 
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addColumns(0, [1, 1])
     engine.undo()
 
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([
@@ -360,7 +360,7 @@ describe('Adding column - arrays', () => {
       [{ cellValue: 3 }, { cellValue: 4 }],
     ])
 
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addColumns(0, [1, 1])
 
     expect(extractMatrixRange(engine, adr('D1'))).toEqual(new AbsoluteCellRange(adr('A1'), adr('C2')))
   })
@@ -376,7 +376,7 @@ describe('Adding column - arrays', () => {
       ],
     })
 
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addColumns(0, [1, 1])
 
     expect(extractMatrixRange(engine, adr('A1', 1))).toEqual(new AbsoluteCellRange(adr('A1'), adr('C2')))
   })
@@ -387,7 +387,7 @@ describe('Adding column - arrays', () => {
       [{ cellValue: 3 }, { cellValue: 4 }],
     ])
 
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addColumns(0, [1, 1])
 
     const matrixVertex = engine.addressMapping.fetchCell(adr('D1')) as ArrayVertex
     expect(matrixVertex.getAddress(engine.lazilyTransformingAstService)).toEqual(adr('D1'))

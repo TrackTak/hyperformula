@@ -9,8 +9,8 @@ describe('Function PROPER', () => {
       [{ cellValue: '=PROPER("foo", "bar")' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should work', () => {
@@ -21,10 +21,10 @@ describe('Function PROPER', () => {
       [{ cellValue: '=PROPER("fOo BAR")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('Foo')
-    expect(engine.getCellValue(adr('A2'))).toEqual('Foo Bar')
-    expect(engine.getCellValue(adr('A3'))).toEqual(' Foo    Bar   ')
-    expect(engine.getCellValue(adr('A4'))).toEqual('Foo Bar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('Foo')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('Foo Bar')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(' Foo    Bar   ')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('Foo Bar')
   })
 
   it('should work with punctuation marks and numbers', () => {
@@ -32,7 +32,7 @@ describe('Function PROPER', () => {
       [{ cellValue: '=PROPER("123aa123bb.cc.dd")' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('123Aa123Bb.Cc.Dd')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('123Aa123Bb.Cc.Dd')
   })
 
   it('should work with accents', () => {
@@ -41,8 +41,8 @@ describe('Function PROPER', () => {
       [{ cellValue: '=PROPER("MAI CHÍ THỌ")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('Mai Anh Đức')
-    expect(engine.getCellValue(adr('A2'))).toEqual('Mai Chí Thọ')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('Mai Anh Đức')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('Mai Chí Thọ')
   })
 
   it('should coerce other types to string', () => {
@@ -52,8 +52,8 @@ describe('Function PROPER', () => {
       [{ cellValue: '=PROPER(TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('1')
-    expect(engine.getCellValue(adr('A2'))).toEqual('10')
-    expect(engine.getCellValue(adr('A3'))).toEqual('True')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('10')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('True')
   })
 })

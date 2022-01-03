@@ -9,7 +9,7 @@ describe('Function SKEW.P', () => {
       [{ cellValue: '=SKEW.P(1, 2, 4, 8)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.6568077345, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.6568077345, 6)
   })
 
   it('works with ranges', () => {
@@ -18,7 +18,7 @@ describe('Function SKEW.P', () => {
       [{ cellValue: '=SKEW.P(A1:D1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.0164833284967738, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.0164833284967738, 6)
   })
 
   it('propagates error from regular argument', () => {
@@ -26,7 +26,7 @@ describe('Function SKEW.P', () => {
       [{ cellValue: '=NA()' }, { cellValue: '=SKEW.P(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 
   it('propagates first error from range argument', () => {
@@ -34,7 +34,7 @@ describe('Function SKEW.P', () => {
       [{ cellValue: '=NA()' }, { cellValue: '=FOO(' }, { cellValue: '=SKEW.P(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 
   /**
@@ -45,16 +45,16 @@ describe('Function SKEW.P', () => {
       [{ cellValue: '=SKEW.P(TRUE(),FALSE(),)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.707106781186548, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.707106781186548, 6)
   })
 
   it('ignores nonnumeric values in ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=SKEW.P(A2:F2)' }],
-      [1, 0, 0, false, null, '\'0']
+      [{ cellValue: 1 }, { cellValue: 1 }, { cellValue: false }, { cellValue: null }, { cellValue: '\'0' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.707106781186548, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.707106781186548, 6)
   })
 
   it('validates range size', () => {
@@ -62,6 +62,6 @@ describe('Function SKEW.P', () => {
       [{ cellValue: '=SKEW.P(0,0)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.ThreeValues))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.ThreeValues))
   })
 })

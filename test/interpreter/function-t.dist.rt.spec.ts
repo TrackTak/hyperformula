@@ -10,8 +10,8 @@ describe('Function T.DIST.RT', () => {
       [{ cellValue: '=T.DIST.RT(1, 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -20,8 +20,8 @@ describe('Function T.DIST.RT', () => {
       [{ cellValue: '=T.DIST.RT(1, "baz")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work as cdf', () => {
@@ -30,8 +30,8 @@ describe('Function T.DIST.RT', () => {
       [{ cellValue: '=T.DIST.RT(3, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.25, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.0477329831333546, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.25, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.0477329831333546, 6)
   })
 
   it('should truncate input', () => {
@@ -40,8 +40,8 @@ describe('Function T.DIST.RT', () => {
       [{ cellValue: '=T.DIST.RT(3, 2.9)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.25, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.0477329831333546, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.25, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.0477329831333546, 6)
   })
 
   it('checks bounds', () => {
@@ -51,8 +51,8 @@ describe('Function T.DIST.RT', () => {
       [{ cellValue: '=T.DIST.RT(1, 0.9)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.5, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.50318300828035, 6)
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.5, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.50318300828035, 6)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 })

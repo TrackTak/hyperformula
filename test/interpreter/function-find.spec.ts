@@ -10,9 +10,9 @@ describe('Function FIND', () => {
       [{ cellValue: '=FIND("foo", 1, 2, 3)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return VALUE when wrong type of third parameter', () => {
@@ -20,7 +20,7 @@ describe('Function FIND', () => {
       [{ cellValue: '=FIND("foo", "bar", "baz")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should return VALUE if third parameter is not between 1 and text length', () => {
@@ -30,9 +30,9 @@ describe('Function FIND', () => {
       [{ cellValue: '=FIND("foo", "bar", 4)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.IndexBounds))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.IndexBounds))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.IndexBounds))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.IndexBounds))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.IndexBounds))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.IndexBounds))
   })
 
   it('should work', () => {
@@ -45,12 +45,12 @@ describe('Function FIND', () => {
       [{ cellValue: '=FIND("?o", "oo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(2)
-    expect(engine.getCellValue(adr('A3'))).toEqual(3)
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.PatternNotFound))
-    expect(engine.getCellValue(adr('A5'))).toEqual(1)
-    expect(engine.getCellValue(adr('A6'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.PatternNotFound))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.PatternNotFound))
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.PatternNotFound))
   })
 
   it('should be case sensitive', () => {
@@ -61,10 +61,10 @@ describe('Function FIND', () => {
       [{ cellValue: '=FIND("R", "baR")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.PatternNotFound))
-    expect(engine.getCellValue(adr('A2'))).toEqual(3)
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.PatternNotFound))
-    expect(engine.getCellValue(adr('A4'))).toEqual(3)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.PatternNotFound))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.PatternNotFound))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
   })
 
   it('should coerce other types to string', () => {
@@ -74,8 +74,8 @@ describe('Function FIND', () => {
       [{ cellValue: '=FIND("U", TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(2)
-    expect(engine.getCellValue(adr('A3'))).toEqual(3)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(3)
   })
 })

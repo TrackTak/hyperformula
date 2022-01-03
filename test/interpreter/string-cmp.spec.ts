@@ -10,10 +10,10 @@ describe('string comparison', () => {
       [{ cellValue: 'Aa' }, { cellValue: 'aa' }, { cellValue: '=A4>B4' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
-    expect(engine.getCellValue(adr('C2'))).toBe(false)
-    expect(engine.getCellValue(adr('C3'))).toBe(false)
-    expect(engine.getCellValue(adr('C4'))).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C2')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C3')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C4')).cellValue).toBe(false)
   })
 
   it('accents default', () => {
@@ -24,10 +24,10 @@ describe('string comparison', () => {
       [{ cellValue: 'ää' }, { cellValue: 'ZZ' }, { cellValue: '=A4>B4' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
-    expect(engine.getCellValue(adr('C2'))).toBe(false)
-    expect(engine.getCellValue(adr('C3'))).toBe(false)
-    expect(engine.getCellValue(adr('C4'))).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C2')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C3')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C4')).cellValue).toBe(false)
   })
 
   it('accents sensitive', () => {
@@ -38,10 +38,10 @@ describe('string comparison', () => {
       [{ cellValue: 'ää' }, { cellValue: 'ŹŹ' }, { cellValue: '=A4>B4' }],
     ], {accentSensitive: true})
 
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
-    expect(engine.getCellValue(adr('C2'))).toBe(true)
-    expect(engine.getCellValue(adr('C3'))).toBe(false)
-    expect(engine.getCellValue(adr('C4'))).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C2')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C3')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C4')).cellValue).toBe(false)
   })
 
   it('accents+case sensitive', () => {
@@ -52,10 +52,10 @@ describe('string comparison', () => {
       [{ cellValue: 'ää' }, { cellValue: 'ŹŹ' }, { cellValue: '=A4>B4' }],
     ], {accentSensitive: true, caseSensitive: true})
 
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
-    expect(engine.getCellValue(adr('C2'))).toBe(false)
-    expect(engine.getCellValue(adr('C3'))).toBe(false)
-    expect(engine.getCellValue(adr('C4'))).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C2')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C3')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C4')).cellValue).toBe(false)
   })
 
   it('accents+case sensitive, reverse order', () => {
@@ -66,10 +66,10 @@ describe('string comparison', () => {
       [{ cellValue: 'ää' }, { cellValue: 'ŹŹ' }, { cellValue: '=A4>B4' }],
     ], {accentSensitive: true, caseSensitive: true, caseFirst: 'upper'})
 
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
-    expect(engine.getCellValue(adr('C2'))).toBe(false)
-    expect(engine.getCellValue(adr('C3'))).toBe(false)
-    expect(engine.getCellValue(adr('C4'))).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C2')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C3')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C4')).cellValue).toBe(false)
   })
 
   it('accents lang', () => {
@@ -80,10 +80,10 @@ describe('string comparison', () => {
       [{ cellValue: 'ää' }, { cellValue: 'ZZ' }, { cellValue: '=A4>B4' }],
     ], {localeLang: 'sv', accentSensitive: true})
 
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
-    expect(engine.getCellValue(adr('C2'))).toBe(false)
-    expect(engine.getCellValue(adr('C3'))).toBe(true)
-    expect(engine.getCellValue(adr('C4'))).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C2')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C3')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C4')).cellValue).toBe(true)
   })
 
   it('comparison case sensitive', () => {
@@ -94,10 +94,10 @@ describe('string comparison', () => {
       [{ cellValue: 'Aa' }, { cellValue: 'aa' }, { cellValue: '=A4>B4' }],
     ], {caseSensitive: true})
 
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
-    expect(engine.getCellValue(adr('C2'))).toBe(false)
-    expect(engine.getCellValue(adr('C3'))).toBe(true)
-    expect(engine.getCellValue(adr('C4'))).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C2')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C3')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C4')).cellValue).toBe(true)
   })
 
   it('comparison case sensitive, reverse order', () => {
@@ -108,10 +108,10 @@ describe('string comparison', () => {
       [{ cellValue: 'Aa' }, { cellValue: 'aa' }, { cellValue: '=A4>B4' }],
     ], {caseSensitive: true, caseFirst: 'upper'})
 
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
-    expect(engine.getCellValue(adr('C2'))).toBe(true)
-    expect(engine.getCellValue(adr('C3'))).toBe(false)
-    expect(engine.getCellValue(adr('C4'))).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C2')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C3')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C4')).cellValue).toBe(false)
   })
 
   it('comparison ignore punctuation', () => {
@@ -122,9 +122,9 @@ describe('string comparison', () => {
       [{ cellValue: 'Aa' }, { cellValue: '????aa' }, { cellValue: '=A4>B4' }],
     ], {ignorePunctuation: true})
 
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
-    expect(engine.getCellValue(adr('C2'))).toBe(false)
-    expect(engine.getCellValue(adr('C3'))).toBe(false)
-    expect(engine.getCellValue(adr('C4'))).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C2')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C3')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C4')).cellValue).toBe(false)
   })
 })

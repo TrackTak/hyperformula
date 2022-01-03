@@ -8,7 +8,7 @@ describe('Function LCM', () => {
       [{ cellValue: '=LCM()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('computes correct answer for two args', () => {
@@ -16,8 +16,8 @@ describe('Function LCM', () => {
       [{ cellValue: '=LCM(2*3*5,3*5*7)' }, { cellValue: '=LCM(0,1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(2 * 3 * 5 * 7)
-    expect(engine.getCellValue(adr('B1'))).toBe(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(2 * 3 * 5 * 7)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(0)
   })
 
   it('computes correct answer for more than two args', () => {
@@ -25,8 +25,8 @@ describe('Function LCM', () => {
       [{ cellValue: '=LCM(2*3*5,3*5*7, 2*5*7)' }, { cellValue: '=LCM(100,101,102,103, 104)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(2 * 3 * 5 * 7)
-    expect(engine.getCellValue(adr('B1'))).toBe(1379437800)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(2 * 3 * 5 * 7)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(1379437800)
   })
 
   it('works with zeroes', () => {
@@ -34,8 +34,8 @@ describe('Function LCM', () => {
       [{ cellValue: '=LCM(2*3*5,3*5*7, 2*5*7, 0, 0, 0)' }, { cellValue: '=LCM(0, 0, 100,101,102,103,104, 0)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(0)
-    expect(engine.getCellValue(adr('B1'))).toBe(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(0)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(0)
   })
 
   it('accepts single arg', () => {
@@ -43,8 +43,8 @@ describe('Function LCM', () => {
       [{ cellValue: '=LCM(1)' }, { cellValue: '=LCM(0)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(1)
-    expect(engine.getCellValue(adr('B1'))).toBe(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(0)
   })
 
   it('handles overflow', () => {
@@ -53,7 +53,7 @@ describe('Function LCM', () => {
     ])
 
     //inconsistency with product #1
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 
   it('coerces to number', () => {
@@ -65,11 +65,11 @@ describe('Function LCM', () => {
       [{ cellValue: '=LCM(,4)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(4)
-    expect(engine.getCellValue(adr('A2'))).toBe(4)
-    expect(engine.getCellValue(adr('A3'))).toBe(0)
-    expect(engine.getCellValue(adr('A4'))).toBe(0)
-    expect(engine.getCellValue(adr('A5'))).toBe(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(4)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(4)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(0)
+    expect(engine.getCellValue(adr('A4')).cellValue).toBe(0)
+    expect(engine.getCellValue(adr('A5')).cellValue).toBe(0)
   })
 
   it('ignores non-coercible values', () => {
@@ -78,8 +78,8 @@ describe('Function LCM', () => {
       [{ cellValue: '=LCM(B2:C2)' }, { cellValue: null }, { cellValue: 4 }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(4)
-    expect(engine.getCellValue(adr('A2'))).toBe(4)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(4)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(4)
   })
 
   it('throws error for non-coercible values', () => {
@@ -87,7 +87,7 @@ describe('Function LCM', () => {
       [{ cellValue: '=LCM("abcd",4)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('checks bounds', () => {
@@ -95,7 +95,7 @@ describe('Function LCM', () => {
       [{ cellValue: '=LCM(-1,5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 
   it('truncates numbers', () => {
@@ -103,7 +103,7 @@ describe('Function LCM', () => {
       ['=LCM(B1:C1)', 5.5, 10],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(10)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(10)
   })
 
   it('propagates errors', () => {
@@ -111,7 +111,7 @@ describe('Function LCM', () => {
       [{ cellValue: '=LCM(NA(),4)' }],
       [{ cellValue: '=LCM(B2:C2)' }, { cellValue: '=NA()' }, { cellValue: 4 }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 })

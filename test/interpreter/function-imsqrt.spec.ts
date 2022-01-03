@@ -9,8 +9,8 @@ describe('Function IMSQRT', () => {
       [{ cellValue: '=IMSQRT(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -18,7 +18,7 @@ describe('Function IMSQRT', () => {
       [{ cellValue: '=IMSQRT("foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
   })
 
   it('should work', () => {
@@ -28,7 +28,7 @@ describe('Function IMSQRT', () => {
       [{ cellValue: '=IMSQRT("-3+4i")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('0')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('0')
     expectToBeCloseForComplex(engine, 'A2', '2i')
     expectToBeCloseForComplex(engine, 'A3', '1+2i')
   })

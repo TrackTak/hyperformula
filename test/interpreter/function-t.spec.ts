@@ -9,8 +9,8 @@ describe('Function T', () => {
       [{ cellValue: '=T("foo", "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return given text', () => {
@@ -19,8 +19,8 @@ describe('Function T', () => {
       [{ cellValue: '=T(B2)' }, { cellValue: 'bar' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
-    expect(engine.getCellValue(adr('A2'))).toEqual('bar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('bar')
   })
 
   it('should return empty string if given value is not a text', () => {
@@ -30,9 +30,9 @@ describe('Function T', () => {
       [{ cellValue: '=T(B3)' }, { cellValue: null }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('')
-    expect(engine.getCellValue(adr('A2'))).toEqual('')
-    expect(engine.getCellValue(adr('A3'))).toEqual('')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('')
   })
 
   it('should propagate errors', () => {
@@ -41,7 +41,7 @@ describe('Function T', () => {
       [{ cellValue: '=T(B2)' }, { cellValue: '=FOO()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOO')))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOO')))
   })
 })

@@ -8,7 +8,7 @@ describe('dependencies with parenthesis', () => {
       [{ cellValue: '=(A1)+((A3))' }],
       [{ cellValue: '=SUM(1)' }],
     ])
-    expect(engine.getCellValue(adr('A2'))).toEqual(2)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
   })
 
   it('should not build ref for special function', () => {
@@ -16,6 +16,6 @@ describe('dependencies with parenthesis', () => {
       [{ cellValue: '=COLUMN((((A1))))' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
   })
 })

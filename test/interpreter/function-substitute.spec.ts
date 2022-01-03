@@ -9,8 +9,8 @@ describe('Function SUBSTITUTE', () => {
       [{ cellValue: '=SUBSTITUTE("foobar", "o", "uu", 4, 5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should substitute new text for all occurrences of old text in a string', () => {
@@ -20,9 +20,9 @@ describe('Function SUBSTITUTE', () => {
       [{ cellValue: '=SUBSTITUTE("fooobar", "oo", "x")' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('bboo')
-    expect(engine.getCellValue(adr('A2'))).toEqual('fuuuubar')
-    expect(engine.getCellValue(adr('A3'))).toEqual('fxobar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('bboo')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('fuuuubar')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('fxobar')
   })
 
   it('should substitute new text for nth occurrence of a string', () => {
@@ -33,10 +33,10 @@ describe('Function SUBSTITUTE', () => {
       [{ cellValue: '=SUBSTITUTE("fofofofofo", "o", "u", 4)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('ffobar')
-    expect(engine.getCellValue(adr('A2'))).toEqual('foOObar')
-    expect(engine.getCellValue(adr('A3'))).toEqual('foobar')
-    expect(engine.getCellValue(adr('A4'))).toEqual('fofofofufo')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('ffobar')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('foOObar')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('foobar')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('fofofofufo')
   })
 
   it('should coerce', () => {
@@ -45,8 +45,8 @@ describe('Function SUBSTITUTE', () => {
       [{ cellValue: '=SUBSTITUTE("fooTRUE", TRUE(), 5, 1)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('fTRUEobar')
-    expect(engine.getCellValue(adr('A2'))).toEqual('foo5')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('fTRUEobar')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('foo5')
   })
 
   it('should return value when last argument is less than one', () => {
@@ -55,8 +55,8 @@ describe('Function SUBSTITUTE', () => {
       [{ cellValue: '=SUBSTITUTE("foobar", "o", "OO", -1)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.LessThanOne))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.LessThanOne))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.LessThanOne))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.LessThanOne))
   })
 
   it('should return value when arguments of wrong type', () => {
@@ -67,9 +67,9 @@ describe('Function SUBSTITUTE', () => {
       [{ cellValue: '=SUBSTITUTE("foobar", "o", B1:C1, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 })

@@ -11,8 +11,8 @@ describe('should properly build', () => {
     ])
     expect(engine.getSheetValues(0)).toEqual(
       [
-        [detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'), detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1')],
-        [detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A2'), detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B2')],
+        [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1') }],
+        [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A2')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B2') }],
       ]
     )
   })
@@ -24,8 +24,8 @@ describe('should properly build', () => {
     ])
     expect(engine.getSheetValues(0)).toEqual(
       [
-        [detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'), detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1')],
-        [detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A2'), detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B2')],
+        [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1') }],
+        [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A2')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B2') }],
       ]
     )
   })

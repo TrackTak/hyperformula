@@ -10,8 +10,8 @@ describe('Function QUOTIENT', () => {
       [{ cellValue: '=QUOTIENT(1, 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for arguments of wrong type', () => {
@@ -21,9 +21,9 @@ describe('Function QUOTIENT', () => {
       [{ cellValue: '=QUOTIENT("foo", "baz")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should return error when dividing by 0', () => {
@@ -31,7 +31,7 @@ describe('Function QUOTIENT', () => {
       [{ cellValue: '=QUOTIENT(42, 0)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('should work', () => {
@@ -41,9 +41,9 @@ describe('Function QUOTIENT', () => {
       [{ cellValue: '=QUOTIENT(10.5, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2)
-    expect(engine.getCellValue(adr('A2'))).toEqual(5)
-    expect(engine.getCellValue(adr('A3'))).toEqual(3)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(5)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(3)
   })
 
   it('should work for negative numbers', () => {
@@ -53,8 +53,8 @@ describe('Function QUOTIENT', () => {
       [{ cellValue: '=QUOTIENT(-5, -2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(-2)
-    expect(engine.getCellValue(adr('A2'))).toEqual(-2)
-    expect(engine.getCellValue(adr('A3'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(-2)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(-2)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(2)
   })
 })

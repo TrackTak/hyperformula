@@ -9,7 +9,7 @@ describe('function BIN2DEC', () => {
       [{ cellValue: '=BIN2DEC(101)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(5)
   })
 
   it('should not work for non-binary arguments', () => {
@@ -19,9 +19,9 @@ describe('function BIN2DEC', () => {
       [{ cellValue: '=BIN2DEC(TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotBinary))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotBinary))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotBinary))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotBinary))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotBinary))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotBinary))
   })
 
   it('should work only for 10 bits', () => {
@@ -30,8 +30,8 @@ describe('function BIN2DEC', () => {
       [{ cellValue: '=BIN2DEC(1010101010)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotBinary))
-    expect(engine.getCellValue(adr('A2'))).toEqual(-342)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotBinary))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(-342)
   })
 
   it('should work', () => {
@@ -43,11 +43,11 @@ describe('function BIN2DEC', () => {
       [{ cellValue: '=BIN2DEC(000101)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(-1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(-512)
-    expect(engine.getCellValue(adr('A3'))).toEqual(511)
-    expect(engine.getCellValue(adr('A4'))).toEqual(5)
-    expect(engine.getCellValue(adr('A5'))).toEqual(5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(-1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(-512)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(511)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(5)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(5)
 
   })
 
@@ -57,7 +57,7 @@ describe('function BIN2DEC', () => {
       [{ cellValue: '=BIN2DEC(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual(13)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(13)
   })
 
   it('should return numeric type', () => {

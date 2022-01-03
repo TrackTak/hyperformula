@@ -10,8 +10,8 @@ describe('Function WEEKNUM', () => {
       [{ cellValue: '=WEEKNUM()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for wrong type of arguments', () => {
@@ -20,8 +20,8 @@ describe('Function WEEKNUM', () => {
       [{ cellValue: '=WEEKNUM(2, "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should not work for wrong value of args', () => {
@@ -30,8 +30,8 @@ describe('Function WEEKNUM', () => {
       [{ cellValue: '=WEEKNUM(2, 9)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.BadMode))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.BadMode))
   })
 
   it('should work for strings', () => {
@@ -44,12 +44,12 @@ describe('Function WEEKNUM', () => {
       [{ cellValue: '=WEEKNUM("02/08/2017", "21")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(32)
-    expect(engine.getCellValue(adr('A2'))).toEqual(32)
-    expect(engine.getCellValue(adr('A3'))).toEqual(31)
-    expect(engine.getCellValue(adr('A4'))).toEqual(31)
-    expect(engine.getCellValue(adr('A5'))).toEqual(32)
-    expect(engine.getCellValue(adr('A6'))).toEqual(31)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(31)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(31)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(31)
   })
 
   it('should work for numbers', () => {
@@ -59,9 +59,9 @@ describe('Function WEEKNUM', () => {
       [{ cellValue: '=WEEKNUM(0, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(52)
-    expect(engine.getCellValue(adr('A2'))).toEqual(52)
-    expect(engine.getCellValue(adr('A3'))).toEqual(53)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(52)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(52)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(53)
   })
 
   it('should work for strings with different nullDate', () => {
@@ -74,12 +74,12 @@ describe('Function WEEKNUM', () => {
       [{ cellValue: '=WEEKNUM("02/08/2017", "21")' }],
     ], {nullDate: {day: 20, month: 10, year: 1920}})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(32)
-    expect(engine.getCellValue(adr('A2'))).toEqual(32)
-    expect(engine.getCellValue(adr('A3'))).toEqual(31)
-    expect(engine.getCellValue(adr('A4'))).toEqual(31)
-    expect(engine.getCellValue(adr('A5'))).toEqual(32)
-    expect(engine.getCellValue(adr('A6'))).toEqual(31)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(31)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(31)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(31)
   })
 
   it('should work for strings with compatibility mode', () => {
@@ -92,12 +92,12 @@ describe('Function WEEKNUM', () => {
       [{ cellValue: '=WEEKNUM("02/08/2017", "21")' }],
     ], {leapYear1900: true})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(32)
-    expect(engine.getCellValue(adr('A2'))).toEqual(32)
-    expect(engine.getCellValue(adr('A3'))).toEqual(31)
-    expect(engine.getCellValue(adr('A4'))).toEqual(31)
-    expect(engine.getCellValue(adr('A5'))).toEqual(32)
-    expect(engine.getCellValue(adr('A6'))).toEqual(31)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(31)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(31)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(31)
   })
   it('should work for strings with compatibility mode and different nullDate', () => {
     const [engine] = HyperFormula.buildFromArray([
@@ -109,12 +109,12 @@ describe('Function WEEKNUM', () => {
       [{ cellValue: '=WEEKNUM("02/08/2017", "21")' }],
     ], {leapYear1900: true, nullDate: {day: 20, month: 10, year: 1920}})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(32)
-    expect(engine.getCellValue(adr('A2'))).toEqual(32)
-    expect(engine.getCellValue(adr('A3'))).toEqual(31)
-    expect(engine.getCellValue(adr('A4'))).toEqual(31)
-    expect(engine.getCellValue(adr('A5'))).toEqual(32)
-    expect(engine.getCellValue(adr('A6'))).toEqual(31)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(31)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(31)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(31)
   })
 
   it('big test', () => {
@@ -124,7 +124,7 @@ describe('Function WEEKNUM', () => {
     for (const arg of args) {
       const arr = []
       for (const date of dates) {
-        arr.push(`=WEEKNUM("${date}", ${arg})`)
+        arr.push({ cellValue: `=WEEKNUM("${date}", ${arg})` })
       }
       arrs.push(arr)
     }

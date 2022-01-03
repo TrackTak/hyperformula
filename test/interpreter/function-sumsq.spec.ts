@@ -7,7 +7,7 @@ describe('SUMSQ', () => {
   it('SUMSQ without args', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=SUMSQ()' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('SUMSQ with args', () => {
@@ -15,7 +15,7 @@ describe('SUMSQ', () => {
       [{ cellValue: '=SUMSQ(1, B1)' }, { cellValue: '2' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(5)
   })
 
   it('SUMSQ with range args', () => {
@@ -23,7 +23,7 @@ describe('SUMSQ', () => {
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '5' }],
       [{ cellValue: '3' }, { cellValue: '4' }, { cellValue: '=SUMSQ(A1:B2)' }],
     ])
-    expect(engine.getCellValue(adr('C2'))).toEqual(30)
+    expect(engine.getCellValue(adr('C2')).cellValue).toEqual(30)
   })
 
   it('SUMSQ with using previously cached value', () => {
@@ -31,7 +31,7 @@ describe('SUMSQ', () => {
       [{ cellValue: '3' }, { cellValue: '=SUMSQ(A1:A1)' }],
       [{ cellValue: '4' }, { cellValue: '=SUMSQ(A1:A2)' }],
     ])
-    expect(engine.getCellValue(adr('B2'))).toEqual(25)
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual(25)
   })
 
   it('doesnt do coercions', () => {
@@ -44,7 +44,7 @@ describe('SUMSQ', () => {
       [{ cellValue: '=SUMSQ(A1:A5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A6'))).toEqual(5)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(5)
   })
 
   it('range only with empty value', () => {
@@ -52,7 +52,7 @@ describe('SUMSQ', () => {
       [{ cellValue: '' }, { cellValue: '=SUMSQ(A1:A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqual(0)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(0)
   })
 
   it('range only with some empty values', () => {
@@ -60,7 +60,7 @@ describe('SUMSQ', () => {
       [{ cellValue: '42' }, { cellValue: '' }, { cellValue: '13' }, { cellValue: '=SUMSQ(A1:C1)'}],
     ])
 
-    expect(engine.getCellValue(adr('D1'))).toEqual(1933)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(1933)
   })
 
   it('over a range value', () => {
@@ -70,7 +70,7 @@ describe('SUMSQ', () => {
       [{ cellValue: '=SUMSQ(MMULT(A1:B2, A1:B2))' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(858)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(858)
   })
 
   it('propagates errors', () => {
@@ -80,6 +80,6 @@ describe('SUMSQ', () => {
       [{ cellValue: '=SUMSQ(A1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

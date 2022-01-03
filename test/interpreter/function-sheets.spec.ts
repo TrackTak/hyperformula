@@ -9,35 +9,35 @@ describe('Function SHEETS', () => {
       'Sheet2': [],
     })
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
   })
 
   it('should return 1 for a valid reference', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=SHEETS(B1)' }, { cellValue: '=SHEETS(A1:A2)' }, { cellValue: '=SHEETS(A:B)' }, { cellValue: '=SHEETS(1:2)'}]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('B1'))).toEqual(1)
-    expect(engine.getCellValue(adr('C1'))).toEqual(1)
-    expect(engine.getCellValue(adr('D1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(1)
   })
 
   it('should return VALUE for non-reference parameter', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=SHEETS(1)' }, { cellValue: '=SHEETS("foo")' }, { cellValue: '=SHEETS(TRUE())' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CellRefExpected))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CellRefExpected))
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CellRefExpected))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CellRefExpected))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CellRefExpected))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CellRefExpected))
   })
 
   it('should propagate errors', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=SHEETS(1/0)' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('should work for itself', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=SHEETS(A1)' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
   })
 })

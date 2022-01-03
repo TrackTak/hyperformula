@@ -9,8 +9,8 @@ describe('Function CLEAN', () => {
       [{ cellValue: '=CLEAN("foo", "bar")' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should work', () => {
@@ -19,19 +19,19 @@ describe('Function CLEAN', () => {
       [{ cellValue: '=CLEAN("foo\u0020")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
-    expect(engine.getCellValue(adr('A2'))).toEqual('foo\u0020')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('foo\u0020')
   })
 
   it('should clean all non-printable ASCII characters', () => {
     const str = Array.from(Array(32).keys()).map(code => String.fromCharCode(code)).join('')
 
     const [engine] = HyperFormula.buildFromArray([
-      [str, '=LEN(A1)', '=CLEAN(A1)'],
+      [{ cellValue: str }, { cellValue: '=LEN(A1)' }, { cellValue: '=CLEAN(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqual(32)
-    expect(engine.getCellValue(adr('C1'))).toEqual('')
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(32)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual('')
   })
 
   it('should coerce other types to string', () => {
@@ -41,8 +41,8 @@ describe('Function CLEAN', () => {
       [{ cellValue: '=CLEAN(TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('1')
-    expect(engine.getCellValue(adr('A2'))).toEqual('10')
-    expect(engine.getCellValue(adr('A3'))).toEqual('TRUE')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('10')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('TRUE')
   })
 })

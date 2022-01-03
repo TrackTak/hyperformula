@@ -9,7 +9,7 @@ describe('function DEC2OCT', () => {
       [{ cellValue: '=DEC2OCT("foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should return error when wrong number of argument', () => {
@@ -17,7 +17,7 @@ describe('function DEC2OCT', () => {
       [{ cellValue: '=DEC2OCT("foo", 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should work', () => {
@@ -28,10 +28,10 @@ describe('function DEC2OCT', () => {
       [{ cellValue: '=DEC2OCT(-12)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('1')
-    expect(engine.getCellValue(adr('A2'))).toEqual('12')
-    expect(engine.getCellValue(adr('A3'))).toEqual('142')
-    expect(engine.getCellValue(adr('A4'))).toEqual('7777777764')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('12')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('142')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('7777777764')
   })
 
   it('should work for numeric strings', () => {
@@ -40,8 +40,8 @@ describe('function DEC2OCT', () => {
       [{ cellValue: '=DEC2OCT("-15")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('173')
-    expect(engine.getCellValue(adr('A2'))).toEqual('7777777761')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('173')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('7777777761')
   })
 
   it('should work for reference', () => {
@@ -50,7 +50,7 @@ describe('function DEC2OCT', () => {
       [{ cellValue: '=DEC2OCT(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual('14')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('14')
   })
 
   it('should return string value', () => {
@@ -69,10 +69,10 @@ describe('function DEC2OCT', () => {
       [{ cellValue: '=DEC2OCT(536870912)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqual('4000000000')
-    expect(engine.getCellValue(adr('A3'))).toEqual('3777777777')
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('4000000000')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('3777777777')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLarge))
   })
 
   it('should respect second argument and fill with zeros for positive arguments', () => {
@@ -81,8 +81,8 @@ describe('function DEC2OCT', () => {
       [{ cellValue: '=DEC2OCT(5, "4")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('00000002')
-    expect(engine.getCellValue(adr('A2'))).toEqual('0005')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('00000002')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('0005')
   })
 
   it('should ignore second argument for negative numbers', () => {
@@ -91,8 +91,8 @@ describe('function DEC2OCT', () => {
       [{ cellValue: '=DEC2OCT(-2, 10)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('7777777776')
-    expect(engine.getCellValue(adr('A2'))).toEqual('7777777776')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('7777777776')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('7777777776')
   })
 
   it('should allow for numbers from 1 to 10 as second argument', () => {
@@ -101,7 +101,7 @@ describe('function DEC2OCT', () => {
       [{ cellValue: '=DEC2OCT(-2, 12)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 })

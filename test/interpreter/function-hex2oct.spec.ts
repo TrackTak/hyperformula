@@ -9,7 +9,7 @@ describe('function HEX2OCT', () => {
       [{ cellValue: '=HEX2OCT("foo", 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for non-hex arguments', () => {
@@ -19,9 +19,9 @@ describe('function HEX2OCT', () => {
       [{ cellValue: '=HEX2OCT(TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
   })
 
   it('should work', () => {
@@ -39,17 +39,17 @@ describe('function HEX2OCT', () => {
       [{ cellValue: '=HEX2OCT("FFE0000000")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('1')
-    expect(engine.getCellValue(adr('A2'))).toEqual('17')
-    expect(engine.getCellValue(adr('A3'))).toEqual('52')
-    expect(engine.getCellValue(adr('A4'))).toEqual('461065')
-    expect(engine.getCellValue(adr('A5'))).toEqual('3356255431')
-    expect(engine.getCellValue(adr('A6'))).toEqual('1471552560')
-    expect(engine.getCellValue(adr('A7'))).toEqual('7322661251')
-    expect(engine.getCellValue(adr('A8'))).toEqual('7720717262')
-    expect(engine.getCellValue(adr('A9'))).toEqual('7777777777')
-    expect(engine.getCellValue(adr('A10'))).toEqual('3777777777')
-    expect(engine.getCellValue(adr('A11'))).toEqual('4000000000')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('17')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('52')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('461065')
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual('3356255431')
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual('1471552560')
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual('7322661251')
+    expect(engine.getCellValue(adr('A8')).cellValue).toEqual('7720717262')
+    expect(engine.getCellValue(adr('A9')).cellValue).toEqual('7777777777')
+    expect(engine.getCellValue(adr('A10')).cellValue).toEqual('3777777777')
+    expect(engine.getCellValue(adr('A11')).cellValue).toEqual('4000000000')
   })
 
   it('should work for numbers', () => {
@@ -57,7 +57,7 @@ describe('function HEX2OCT', () => {
       [{ cellValue: '=HEX2OCT(456)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('2126')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('2126')
   })
 
   it('should work for reference', () => {
@@ -66,7 +66,7 @@ describe('function HEX2OCT', () => {
       [{ cellValue: '=HEX2OCT(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual('443')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('443')
   })
 
   it('should return string value', () => {
@@ -82,8 +82,8 @@ describe('function HEX2OCT', () => {
       [{ cellValue: '=HEX2OCT("FFDFFFFFFF")' }],
       [{ cellValue: '=HEX2OCT("3FFFFFFF")' }], ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLarge))
   })
 
   it('input cannot have more than 10 digits', () => {
@@ -92,7 +92,7 @@ describe('function HEX2OCT', () => {
 
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
   })
 
   it('should respect second argument and fill with zeros for positive arguments', () => {
@@ -101,8 +101,8 @@ describe('function HEX2OCT', () => {
       [{ cellValue: '=HEX2OCT(3, "4")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('00000022')
-    expect(engine.getCellValue(adr('A2'))).toEqual('0003')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('00000022')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('0003')
   })
 
   it('should fail if the result is longer than the desired length', () => {
@@ -111,8 +111,8 @@ describe('function HEX2OCT', () => {
       [{ cellValue: '=HEX2OCT(433141, "3")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
   })
 
   it('second argument should not affect negative results', () => {
@@ -121,8 +121,8 @@ describe('function HEX2OCT', () => {
       [{ cellValue: '=HEX2OCT("FFFF439EB2", 10)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('7322661251')
-    expect(engine.getCellValue(adr('A2'))).toEqual('7720717262')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('7322661251')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('7720717262')
   })
 
   it('should allow for numbers from 1 to 10 as second argument', () => {
@@ -131,7 +131,7 @@ describe('function HEX2OCT', () => {
       [{ cellValue: '=HEX2OCT(2, 12)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueBaseLong))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 })

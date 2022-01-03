@@ -10,8 +10,8 @@ describe('Function POISSON.DIST', () => {
       [{ cellValue: '=POISSON.DIST(1, 2, 3, 4)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -21,9 +21,9 @@ describe('Function POISSON.DIST', () => {
       [{ cellValue: '=POISSON.DIST(1, 2, "BCD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 
   it('should work as cdf', () => {
@@ -32,8 +32,8 @@ describe('Function POISSON.DIST', () => {
       [{ cellValue: '=POISSON.DIST(5, 2, TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.999999989952234, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.983436391519386, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.999999989952234, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.983436391519386, 6)
   })
 
   it('should work as pdf', () => {
@@ -42,8 +42,8 @@ describe('Function POISSON.DIST', () => {
       [{ cellValue: '=POISSON.DIST(5, 2, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1')) as number / 1.0137771196303e-7).toBeCloseTo(1, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.0360894088630967, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue as number / 1.0137771196303e-7).toBeCloseTo(1, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.0360894088630967, 6)
   })
 
   it('should truncate first arg', () => {
@@ -52,8 +52,8 @@ describe('Function POISSON.DIST', () => {
       [{ cellValue: '=POISSON.DIST(5.9, 2, TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.999999989952234, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.983436391519386, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.999999989952234, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.983436391519386, 6)
   })
 
   it('checks bounds', () => {
@@ -63,10 +63,10 @@ describe('Function POISSON.DIST', () => {
       [{ cellValue: '=POISSON.DIST(0, -0.01, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     //product #1 returns value
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
     //product #2 returns value
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 })

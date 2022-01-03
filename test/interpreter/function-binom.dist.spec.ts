@@ -10,8 +10,8 @@ describe('Function BINOM.DIST', () => {
       [{ cellValue: '=BINOM.DIST(1, 2, 3, 4, 5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -22,10 +22,10 @@ describe('Function BINOM.DIST', () => {
       [{ cellValue: '=BINOM.DIST(1, 1, 1, "abcd")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 
   it('should work as cdf', () => {
@@ -34,9 +34,9 @@ describe('Function BINOM.DIST', () => {
       [{ cellValue: '=BINOM.DIST(10, 20, 0.7, TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
 
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.0479618973, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.0479618973, 6)
   })
 
   it('should work as pdf', () => {
@@ -45,8 +45,8 @@ describe('Function BINOM.DIST', () => {
       [{ cellValue: '=BINOM.DIST(10, 20, 0.7, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0.1)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.0308170809000851, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0.1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.0308170809000851, 6)
   })
 
   it('truncation works', () => {
@@ -55,8 +55,8 @@ describe('Function BINOM.DIST', () => {
       [{ cellValue: '=BINOM.DIST(10.5, 20.2, 0.7, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0.1)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.0308170809000851, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0.1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.0308170809000851, 6)
   })
 
   it('checks bounds', () => {
@@ -68,11 +68,11 @@ describe('Function BINOM.DIST', () => {
       [{ cellValue: '=BINOM.DIST(1, 1, 1.01, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
     //product #2 returns 1 for following test
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.WrongOrder))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A5'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.WrongOrder))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 })

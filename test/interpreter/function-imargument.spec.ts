@@ -9,8 +9,8 @@ describe('Function IMARGUMENT', () => {
       [{ cellValue: '=IMARGUMENT(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -18,7 +18,7 @@ describe('Function IMARGUMENT', () => {
       [{ cellValue: '=IMARGUMENT("foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
   })
 
   it('should work', () => {
@@ -28,8 +28,8 @@ describe('Function IMARGUMENT', () => {
       [{ cellValue: '=IMARGUMENT("-3+4i")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(1.5707963267949, 6)
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(2.21429743558818)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(1.5707963267949, 6)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(2.21429743558818)
   })
 })

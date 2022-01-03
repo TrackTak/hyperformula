@@ -7,8 +7,8 @@ describe('Address preservation.', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=NA()' }, { cellValue: '=A1' }]
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
-    expect(engine.getCellValue(adr('B1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
   })
 
   it('Should work with named expressions.', () => {
@@ -16,15 +16,15 @@ describe('Address preservation.', () => {
       [{ cellValue: '=NAMEDEXPRESSION' }, { cellValue: '=A1' }]
     ])
     engine.addNamedExpression('NAMEDEXPRESSION', '=NA()')
-    expect(engine.getCellValue(adr('A1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'NAMEDEXPRESSION'))
-    expect(engine.getCellValue(adr('B1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'NAMEDEXPRESSION'))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'NAMEDEXPRESSION'))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'NAMEDEXPRESSION'))
   })
 
   it('Should work with operators.', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=NA()' }, { cellValue: '=NA()' }, { cellValue: '=A1+B1' }]
     ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
   })
 
   it('Should work between sheets.', () => {
@@ -32,15 +32,15 @@ describe('Address preservation.', () => {
       sheet1: [[{ cellValue: '=NA()' }]],
       sheet2: [[{ cellValue: '=sheet1!A1' }]]
     })
-    expect(engine.getCellValue(adr('A1', 0))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'sheet1!A1'))
-    expect(engine.getCellValue(adr('A1', 1))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'sheet1!A1'))
+    expect(engine.getCellValue(adr('A1', 0)).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'sheet1!A1'))
+    expect(engine.getCellValue(adr('A1', 1)).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'sheet1!A1'))
   })
 
   it('Should work with function calls.', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=NA()' }, { cellValue: '=DATE(1,1,A1)' }]
     ])
-    expect(engine.getCellValue(adr('B1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
   })
 
   it('Should work with CYCLE.', () => {
@@ -49,12 +49,12 @@ describe('Address preservation.', () => {
       [{ cellValue: '=A1' }, { cellValue: '=B1' }],
       [{ cellValue: '=A1' }, { cellValue: '=B1' }]
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
-    expect(engine.getCellValue(adr('B1'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1'))
-    expect(engine.getCellValue(adr('A2'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
-    expect(engine.getCellValue(adr('B2'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1'))
-    expect(engine.getCellValue(adr('A3'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
-    expect(engine.getCellValue(adr('B3'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1'))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1'))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1'))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
+    expect(engine.getCellValue(adr('B3')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1'))
   })
 
   it('Should work with CYCLE #2.', () => {
@@ -63,10 +63,10 @@ describe('Address preservation.', () => {
       [{ cellValue: '=A1' }],
       [{ cellValue: '=A1' }]
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
-    expect(engine.getCellValue(adr('B1'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1'))
-    expect(engine.getCellValue(adr('A2'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
-    expect(engine.getCellValue(adr('A3'))).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1'))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'))
   })
 
   it('Should work after simple cruds', () => {
@@ -74,13 +74,13 @@ describe('Address preservation.', () => {
       [{ cellValue: '=NA()' }, { cellValue: '=A1' }]
     ])
 
-    engine.addColumns(0, [{ cellValue: 0 }, { cellValue: 1 }])
-    expect(engine.getCellValue(adr('C1'))).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!B1'))
+    engine.addColumns(0, [0, 1])
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!B1'))
 
-    engine.setCellContents(adr('B1'), '=1/0')
-    expect(engine.getCellValue(adr('C1'))).toEqual(detailedErrorWithOrigin(ErrorType.DIV_BY_ZERO, 'Sheet1!B1'))
+    engine.setCellContents(adr('B1'), { cellValue: '=1/0' })
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.DIV_BY_ZERO, 'Sheet1!B1'))
 
     engine.moveCells(simpleCellRange(adr('B1'), adr('B1')), adr('C5'))
-    expect(engine.getCellValue(adr('C1'))).toEqual(detailedErrorWithOrigin(ErrorType.DIV_BY_ZERO, 'Sheet1!C5'))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.DIV_BY_ZERO, 'Sheet1!C5'))
   })
 })

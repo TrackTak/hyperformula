@@ -9,7 +9,7 @@ describe('Row ranges', () => {
       [{ cellValue: '=SUM(1:2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(3)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(3)
   })
 
   it('should create correct edges for infinite range when building graph', () => {
@@ -37,7 +37,7 @@ describe('Row ranges', () => {
       [{ cellValue: '=SUM(4:7)' }],
     ])
 
-    engine.setCellContents(adr('B1'), '=SUM(Z4:Z8)')
+    engine.setCellContents(adr('B1'), { cellValue: '=SUM(Z4:Z8)' })
 
     const rowRange35 = engine.rangeMapping.getRange(rowStart(3), rowEnd(5))!
     const rowRange47 = engine.rangeMapping.getRange(rowStart(4), rowEnd(7))!

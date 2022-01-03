@@ -7,7 +7,6 @@ import {ArrayVertex, FormulaCellVertex, RangeVertex} from '../src/DependencyGrap
 import {ErrorMessage} from '../src/error-message'
 import {defaultStringifyDateTime} from '../src/format/format'
 import {complex} from '../src/interpreter/ArithmeticHelper'
-import { CellData } from '../src/interpreter/InterpreterValue'
 import {ColumnIndex} from '../src/Lookup/ColumnIndex'
 import {
   AstNodeType,
@@ -170,8 +169,8 @@ export const expectEngineToBeTheSameAs = (actual: HyperFormula, expected: HyperF
   comparator.compare()
 }
 
-export function dateNumberToString(dateNumber: CellData<CellValue>, config: Config): string | DetailedCellError {
-  const value = dateNumber.cellValue
+export function dateNumberToString(dateNumber: CellValue, config: Config): string | DetailedCellError {
+  const value = dateNumber
 
   if (value instanceof DetailedCellError) {
     return value
@@ -181,8 +180,8 @@ export function dateNumberToString(dateNumber: CellData<CellValue>, config: Conf
   return dateString ?? ''
 }
 
-export function timeNumberToString(timeNumber: CellData<CellValue>, config: Config): string | DetailedCellError {
-  const value = timeNumber.cellValue
+export function timeNumberToString(timeNumber: CellValue, config: Config): string | DetailedCellError {
+  const value = timeNumber
 
   if (value instanceof DetailedCellError) {
     return value

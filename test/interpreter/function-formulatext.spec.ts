@@ -9,8 +9,8 @@ describe('Function FORMULATEXT', () => {
       [{ cellValue: '=FORMULATEXT(B2, B3)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return N/A for wrong types of arguments', () => {
@@ -20,9 +20,9 @@ describe('Function FORMULATEXT', () => {
       [{ cellValue: '=FORMULATEXT(SUM(1))' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.CellRefExpected))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.CellRefExpected))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.CellRefExpected))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.CellRefExpected))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.CellRefExpected))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.CellRefExpected))
   })
 
   it('should propagate expression error', () => {
@@ -30,7 +30,7 @@ describe('Function FORMULATEXT', () => {
       [{ cellValue: '=FORMULATEXT(1/0)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('should return text of a formula evaluating to error', () => {
@@ -38,7 +38,7 @@ describe('Function FORMULATEXT', () => {
       [{ cellValue: '=1/0' }, { cellValue: '=FORMULATEXT(A1)' }]
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqual('=1/0')
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual('=1/0')
   })
 
   it('should work', () => {
@@ -46,7 +46,7 @@ describe('Function FORMULATEXT', () => {
       [{ cellValue: '=SUM(1, 2)' }, { cellValue: '=FORMULATEXT(A1)' }]
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqual('=SUM(1, 2)')
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual('=SUM(1, 2)')
   })
 
   it('should return formula of a left corner cell', () => {
@@ -54,7 +54,7 @@ describe('Function FORMULATEXT', () => {
       [{ cellValue: '=SUM(1, 2)' }, { cellValue: '=FORMULATEXT(A1:A2)' }]
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqual('=SUM(1, 2)')
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual('=SUM(1, 2)')
   })
 
   it('should return REF when ', () => {
@@ -62,9 +62,9 @@ describe('Function FORMULATEXT', () => {
       [{ cellValue: '=SUM(1, 2)' }]
     ])
     engine.addSheet('Sheet2')
-    engine.setCellContents(adr('B1'), '=FORMULATEXT(Sheet1!A1:Sheet2!A2)')
+    engine.setCellContents(adr('B1'), { cellValue: '=FORMULATEXT(Sheet1!A1:Sheet2!A2)' })
 
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.REF, ErrorMessage.CellRefExpected))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.REF, ErrorMessage.CellRefExpected))
   })
 
   it('should work for unparsed formula', () => {
@@ -72,7 +72,7 @@ describe('Function FORMULATEXT', () => {
       [{ cellValue: '=SUM(1,' }, { cellValue: '=FORMULATEXT(A1)' }]
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqual('=SUM(1,')
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual('=SUM(1,')
   })
 
   it('should return itself', () => {
@@ -80,7 +80,7 @@ describe('Function FORMULATEXT', () => {
       [{ cellValue: '=FORMULATEXT(A1)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('=FORMULATEXT(A1)')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('=FORMULATEXT(A1)')
   })
 
   it('should be dependent on sheet structure changes', () => {
@@ -89,9 +89,9 @@ describe('Function FORMULATEXT', () => {
       [{ cellValue: 1 }]
     ])
 
-    engine.addRows(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addRows(0, [1, 1])
 
     expect(engine.getCellFormula(adr('A1'))).toEqual('=SUM(A3)')
-    expect(engine.getCellValue(adr('B1'))).toEqual('=SUM(A3)')
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual('=SUM(A3)')
   })
 })

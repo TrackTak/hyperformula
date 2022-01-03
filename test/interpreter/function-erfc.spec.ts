@@ -10,8 +10,8 @@ describe('Function ERFC', () => {
       [{ cellValue: '=ERFC(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -19,7 +19,7 @@ describe('Function ERFC', () => {
       [{ cellValue: '=ERFC("foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work', () => {
@@ -29,9 +29,9 @@ describe('Function ERFC', () => {
       [{ cellValue: '=ERFC(0.5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.004677734981047288, 6)
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(0.4795001221869535, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.004677734981047288, 6)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(0.4795001221869535, 6)
   })
 
   it('should work for negative numbers', () => {
@@ -40,7 +40,7 @@ describe('Function ERFC', () => {
       [{ cellValue: '=ERFC(-14.8)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(2)
-    expect(engine.getCellValue(adr('A2'))).toBe(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(2)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(2)
   })
 })

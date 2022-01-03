@@ -9,8 +9,8 @@ describe('Function ABS', () => {
       [{ cellValue: '=ABS(-1)' }, { cellValue: '=ABS(1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('B1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
   })
 
   it('given wrong argument type', () => {
@@ -18,7 +18,7 @@ describe('Function ABS', () => {
       [{ cellValue: '=ABS("foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('use number coercion', () => {
@@ -27,8 +27,8 @@ describe('Function ABS', () => {
       [{ cellValue: '=TRUE()' }, { cellValue: '=ABS(A2)' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqual(2)
-    expect(engine.getCellValue(adr('B2'))).toEqual(1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual(1)
   })
 
   it('given wrong number of arguments', () => {
@@ -37,8 +37,8 @@ describe('Function ABS', () => {
       [{ cellValue: '=ABS(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('errors propagation', () => {
@@ -46,6 +46,6 @@ describe('Function ABS', () => {
       [{ cellValue: '=ABS(4/0)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

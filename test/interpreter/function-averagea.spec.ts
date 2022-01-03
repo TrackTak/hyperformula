@@ -7,7 +7,7 @@ describe('AVERAGEA', () => {
   it('AVERAGEA with empty args', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=AVERAGEA()' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('AVERAGEA with args', () => {
@@ -15,7 +15,7 @@ describe('AVERAGEA', () => {
       [{ cellValue: '=AVERAGEA(1, B1)' }, { cellValue: '4' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2.5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2.5)
   })
 
   it('AVERAGEA with range', () => {
@@ -26,7 +26,7 @@ describe('AVERAGEA', () => {
       [{ cellValue: '=AVERAGEA(A1:A3)' }]
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toBeCloseTo(2.333333333)
+    expect(engine.getCellValue(adr('A4')).cellValue).toBeCloseTo(2.333333333)
   })
 
   it('AVERAGEA converts non-blank values to numbers', () => {
@@ -36,9 +36,9 @@ describe('AVERAGEA', () => {
       [{ cellValue: '39' }, { cellValue: null }, { cellValue: '=AVERAGEA(A3:B3)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqual(19.5)
-    expect(engine.getCellValue(adr('C2'))).toEqual(20)
-    expect(engine.getCellValue(adr('C3'))).toEqual(39)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(19.5)
+    expect(engine.getCellValue(adr('C2')).cellValue).toEqual(20)
+    expect(engine.getCellValue(adr('C3')).cellValue).toEqual(39)
   })
 
   it('error when no meaningful arguments', () => {
@@ -48,8 +48,8 @@ describe('AVERAGEA', () => {
       [{ cellValue: '=AVERAGEA(A1:A2)' }, { cellValue: '=AVERAGEA(B1:B2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('B3'))).toEqual(0)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('B3')).cellValue).toEqual(0)
   })
 
   it('over a range value', () => {
@@ -59,7 +59,7 @@ describe('AVERAGEA', () => {
       [{ cellValue: '=AVERAGEA(MMULT(A1:B2, A1:B2))' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(13.5)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(13.5)
   })
 
   it('does propagate errors', () => {
@@ -69,6 +69,6 @@ describe('AVERAGEA', () => {
       [{ cellValue: '=AVERAGEA(A1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

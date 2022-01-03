@@ -11,8 +11,8 @@ describe('Function GAMMA.DIST', () => {
       [{ cellValue: '=GAMMA.DIST(1, 2, 3, 4, 5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -23,10 +23,10 @@ describe('Function GAMMA.DIST', () => {
       [{ cellValue: '=GAMMA.DIST(1, 2, 3, "abcd")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 
   it('should work as cdf', () => {
@@ -35,8 +35,8 @@ describe('Function GAMMA.DIST', () => {
       [{ cellValue: '=GAMMA.DIST(3, 2, 4, TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.393469340287367, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.173358532703224, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.393469340287367, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.173358532703224, 6)
   })
 
   it('should work as pdf', () => {
@@ -45,8 +45,8 @@ describe('Function GAMMA.DIST', () => {
       [{ cellValue: '=GAMMA.DIST(3, 2, 4, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.303265329856317, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.0885687286389403, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.303265329856317, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.0885687286389403, 6)
   })
 
   it('checks bounds', () => {
@@ -57,9 +57,9 @@ describe('Function GAMMA.DIST', () => {
       [{ cellValue: '=GAMMA.DIST(1, 1, 0, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 })

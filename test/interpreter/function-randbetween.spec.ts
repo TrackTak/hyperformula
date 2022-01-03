@@ -10,7 +10,7 @@ describe('Interpreter - function RANDBETWEEN', () => {
       const [engine] = HyperFormula.buildFromArray([
         [{ cellValue: '=RANDBETWEEN(0,9)' }],
       ])
-      const val = engine.getCellValue(adr('A1')) as number
+      const val = engine.getCellValue(adr('A1')).cellValue as number
       expect(val).toBeGreaterThanOrEqual(0)
       expect(val).toBeLessThanOrEqual(9)
       expect(val).toEqual(Math.trunc(val))
@@ -27,7 +27,7 @@ describe('Interpreter - function RANDBETWEEN', () => {
       const [engine] = HyperFormula.buildFromArray([
         [{ cellValue: '=RANDBETWEEN(-0.1,9.9)' }],
       ])
-      const val = engine.getCellValue(adr('A1')) as number
+      const val = engine.getCellValue(adr('A1')).cellValue as number
       expect(val).toBeGreaterThanOrEqual(0)
       expect(val).toBeLessThanOrEqual(9)
       expect(val).toEqual(Math.trunc(val))
@@ -43,7 +43,7 @@ describe('Interpreter - function RANDBETWEEN', () => {
       const [engine] = HyperFormula.buildFromArray([
         [{ cellValue: '=RANDBETWEEN(0,0.5)' }],
       ])
-      const val = engine.getCellValue(adr('A1')) as number
+      const val = engine.getCellValue(adr('A1')).cellValue as number
       expect(val).toEqual(0)
     }
   })
@@ -53,7 +53,7 @@ describe('Interpreter - function RANDBETWEEN', () => {
       const [engine] = HyperFormula.buildFromArray([
         [{ cellValue: '=RANDBETWEEN(0.5,1)' }],
       ])
-      const val = engine.getCellValue(adr('A1')) as number
+      const val = engine.getCellValue(adr('A1')).cellValue as number
       expect(val).toEqual(1)
     }
   })
@@ -63,7 +63,7 @@ describe('Interpreter - function RANDBETWEEN', () => {
       const [engine] = HyperFormula.buildFromArray([
         [{ cellValue: '=RANDBETWEEN(0.5,0.6)' }],
       ])
-      const val = engine.getCellValue(adr('A1')) as number
+      const val = engine.getCellValue(adr('A1')).cellValue as number
       expect(val).toEqual(1)
     }
   })
@@ -73,7 +73,7 @@ describe('Interpreter - function RANDBETWEEN', () => {
       [{ cellValue: '=RANDBETWEEN(0.7,0.5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.WrongOrder))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.WrongOrder))
   })
 
   it('validates number of arguments', () => {
@@ -82,7 +82,7 @@ describe('Interpreter - function RANDBETWEEN', () => {
       [{ cellValue: '=RANDBETWEEN(1,2,3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 })

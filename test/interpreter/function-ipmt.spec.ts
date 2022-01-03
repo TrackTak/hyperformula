@@ -9,8 +9,8 @@ describe('Function IPMT', () => {
       [{ cellValue: '=IPMT(1,1)' }, { cellValue: '=IPMT(1, 1, 1, 1, 1, 1, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value with correct arguments and defaults', () => {
@@ -18,9 +18,9 @@ describe('Function IPMT', () => {
       [{ cellValue: '=IPMT(1%, 12, 360, 100000)' }, { cellValue: '=IPMT(1%, 12, 360, 100000, 30000)' }, { cellValue: '=IPMT(1%, 12, 360, 100000, 30000, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(-996.690428219826)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(-996.690428219826)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
-    expect(engine.getCellValue(adr('B1'))).toBeCloseTo(-995.697556685774)
-    expect(engine.getCellValue(adr('C1'))).toBeCloseTo(-985.839165035419)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBeCloseTo(-995.697556685774)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBeCloseTo(-985.839165035419)
   })
 })

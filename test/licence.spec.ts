@@ -5,10 +5,10 @@ import {adr, detailedError} from './testUtils'
 describe('Wrong licence', () => {
   it('eval', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=TRUE()' }, { cellValue: null }, { cellValue: 1 }, { cellValue: '=A('}]], {licenseKey: ''})
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.LIC, ErrorMessage.LicenseKey('missing')))
-    expect(engine.getCellValue(adr('B1'))).toEqual(null)
-    expect(engine.getCellValue(adr('C1'))).toEqual(1)
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.ERROR, ErrorMessage.ParseError))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.LIC, ErrorMessage.LicenseKey('missing')))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(null)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.ERROR, ErrorMessage.ParseError))
   })
 
   it('serialization', () => {

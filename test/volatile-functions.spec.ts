@@ -7,22 +7,22 @@ describe('Interpreter - function RAND', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=RAND()' }, { cellValue: '42' }],
     ])
-    const valueBeforeRecomputation = engine.getCellValue(adr('A1'))
+    const valueBeforeRecomputation = engine.getCellValue(adr('A1')).cellValue
 
-    engine.setCellContents(adr('B1'), '35')
+    engine.setCellContents(adr('B1'), { cellValue: '35' })
 
-    expect(engine.getCellValue(adr('A1'))).not.toEqual(valueBeforeRecomputation)
+    expect(engine.getCellValue(adr('A1')).cellValue).not.toEqual(valueBeforeRecomputation)
   })
 
   it('cell which is dependent on volatile formula is also recomputed', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=RAND()' }, { cellValue: '42' }, { cellValue: '=A1' }],
     ])
-    const valueBeforeRecomputation = engine.getCellValue(adr('C1'))
+    const valueBeforeRecomputation = engine.getCellValue(adr('C1')).cellValue
 
-    engine.setCellContents(adr('B1'), '35')
+    engine.setCellContents(adr('B1'), { cellValue: '35' })
 
-    expect(engine.getCellValue(adr('C1'))).not.toEqual(valueBeforeRecomputation)
+    expect(engine.getCellValue(adr('C1')).cellValue).not.toEqual(valueBeforeRecomputation)
   })
 
   it('formula can be recognized as volatile even if entered later', () => {
@@ -30,7 +30,7 @@ describe('Interpreter - function RAND', () => {
       [{ cellValue: '=A2+A3' }, { cellValue: '42' }],
     ])
 
-    engine.setCellContents(adr('A1'), '=RAND()')
+    engine.setCellContents(adr('A1'), { cellValue: '=RAND()' })
 
     const a1 = engine.addressMapping.getCell(adr('A1'))
     expect(engine.dependencyGraph.volatileVertices()).toEqual(new Set([a1]))
@@ -41,7 +41,7 @@ describe('Interpreter - function RAND', () => {
       [{ cellValue: '=RAND()' }, { cellValue: '42' }],
     ])
 
-    engine.setCellContents(adr('A1'), '35')
+    engine.setCellContents(adr('A1'), { cellValue: '35' })
 
     expect(engine.dependencyGraph.verticesToRecompute()).toEqual(new Set())
   })

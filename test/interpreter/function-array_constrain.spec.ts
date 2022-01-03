@@ -21,7 +21,7 @@ describe('Interpreter - function ARRAY_CONSTRAIN', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=ARRAY_CONSTRAIN(1, 0, 1)' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 
   it('works #3', () => {
@@ -58,7 +58,7 @@ describe('Interpreter - function ARRAY_CONSTRAIN', () => {
       [{ cellValue: '=ARRAY_CONSTRAIN(1, 2, 3, 4)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 })

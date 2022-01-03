@@ -10,8 +10,8 @@ describe('Function PERCENTILE.EXC', () => {
       [{ cellValue: '=PERCENTILE.EXC(3, 0.5, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('throws error for non-numbers', () => {
@@ -22,7 +22,7 @@ describe('Function PERCENTILE.EXC', () => {
       [{ cellValue: '=PERCENTILE.EXC(A1:A3, 0.3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberExpected))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberExpected))
   })
 
   it('should work', () => {
@@ -34,6 +34,6 @@ describe('Function PERCENTILE.EXC', () => {
       [{ cellValue: '=PERCENTILE.EXC(A1:A4, 0.3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A5'))).toEqual(1.5)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(1.5)
   })
 })

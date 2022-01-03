@@ -8,7 +8,7 @@ describe('Function IMPRODUCT', () => {
       [{ cellValue: '=IMPRODUCT()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should coerce explicit arguments', () => {
@@ -19,10 +19,10 @@ describe('Function IMPRODUCT', () => {
       [{ cellValue: '=IMPRODUCT("i",)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('0')
-    expect(engine.getCellValue(adr('A2'))).toEqual('-1.5i')
-    expect(engine.getCellValue(adr('A3'))).toEqual('-42+6i')
-    expect(engine.getCellValue(adr('A4'))).toEqual('i')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('0')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('-1.5i')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('-42+6i')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('i')
   })
 
   it('should fail for non-coercible explicit arguments', () => {
@@ -31,8 +31,8 @@ describe('Function IMPRODUCT', () => {
       [{ cellValue: '=IMPRODUCT(2, "abcd")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
   })
 
   it('should not coerce range arguments', () => {
@@ -43,9 +43,9 @@ describe('Function IMPRODUCT', () => {
       [{ cellValue: '=IMPRODUCT(B4:D4,)' }, { cellValue: 'i' }, { cellValue: '=NA()' }, { cellValue: 1}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('2+i')
-    expect(engine.getCellValue(adr('A2'))).toEqual('1')
-    expect(engine.getCellValue(adr('A3'))).toEqual('i')
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('2+i')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('1')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('i')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 })

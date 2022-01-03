@@ -9,7 +9,7 @@ describe('Unary operator PLUS', () => {
       [{ cellValue: '=+3' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(3)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(3)
   })
 
   it('use number coerce', () => {
@@ -18,8 +18,8 @@ describe('Unary operator PLUS', () => {
       [{ cellValue: '=+"foobar"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe('3')
-    expect(engine.getCellValue(adr('A2'))).toEqual('foobar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe('3')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('foobar')
   })
 
   it('pass error', () => {
@@ -29,8 +29,8 @@ describe('Unary operator PLUS', () => {
 
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOOBAR')))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOOBAR')))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('range value results in VALUE error', () => {
@@ -41,7 +41,7 @@ describe('Unary operator PLUS', () => {
       [{ cellValue: '=+A1:A3' }],
     ], {useArrayArithmetic: false})
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
   })
 
   it('string given by reference should return string with UNARY+', () => {
@@ -49,13 +49,13 @@ describe('Unary operator PLUS', () => {
       [{ cellValue: 'Liz' }],
       [{ cellValue: '=+A1' }]
     ])
-    expect(engine.getCellValue(adr('A2'))).toEqual('Liz') // UNARY PLUS value
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('Liz') // UNARY PLUS value
   })
 
   it('double unary plus', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=++2' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
   })
 })

@@ -10,9 +10,9 @@ describe('Function REPT', () => {
       [{ cellValue: '=REPT("foo", 1, 2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return VALUE when wrong type of second parameter', () => {
@@ -20,7 +20,7 @@ describe('Function REPT', () => {
       [{ cellValue: '=REPT("foo", "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should return VALUE when second parameter is less than 0', () => {
@@ -28,7 +28,7 @@ describe('Function REPT', () => {
       [{ cellValue: '=REPT("foo", -1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NegativeCount))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NegativeCount))
   })
 
   it('should work', () => {
@@ -40,11 +40,11 @@ describe('Function REPT', () => {
       [{ cellValue: '=REPT("Na", 7)&" Batman!"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('')
-    expect(engine.getCellValue(adr('A2'))).toEqual('foofoofoo')
-    expect(engine.getCellValue(adr('A3'))).toEqual('11111')
-    expect(engine.getCellValue(adr('A4'))).toEqual('')
-    expect(engine.getCellValue(adr('A5'))).toEqual('NaNaNaNaNaNaNa Batman!')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('foofoofoo')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('11111')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual('NaNaNaNaNaNaNa Batman!')
   })
 
   it('should coerce other types to string', () => {
@@ -54,8 +54,8 @@ describe('Function REPT', () => {
       [{ cellValue: '=REPT(TRUE(), 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('1')
-    expect(engine.getCellValue(adr('A2'))).toEqual('10')
-    expect(engine.getCellValue(adr('A3'))).toEqual('TRUE')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('10')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('TRUE')
   })
 })

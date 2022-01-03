@@ -9,8 +9,8 @@ describe('Function SQRTPI', () => {
       [{ cellValue: '=SQRTPI()' }, { cellValue: '=SQRTPI(1, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('works', () => {
@@ -20,9 +20,9 @@ describe('Function SQRTPI', () => {
       [{ cellValue: '=SQRTPI(PI())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(0)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(1.77245385090552, 6)
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(3.14159265358979, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(1.77245385090552, 6)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(3.14159265358979, 6)
   })
 
   it('pass error', () => {
@@ -30,6 +30,6 @@ describe('Function SQRTPI', () => {
       [{ cellValue: '=SQRTPI(NA())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 })

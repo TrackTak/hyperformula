@@ -9,8 +9,8 @@ describe('Function ODD', () => {
       [{ cellValue: '=ODD()' }, { cellValue: '=ODD(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('works for positive numbers', () => {
@@ -18,8 +18,8 @@ describe('Function ODD', () => {
       [{ cellValue: '=ODD(1.3)' }, { cellValue: '=ODD(2.7)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(3)
-    expect(engine.getCellValue(adr('B1'))).toBe(3)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(3)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(3)
   })
 
   it('works for negative numbers', () => {
@@ -27,8 +27,8 @@ describe('Function ODD', () => {
       [{ cellValue: '=ODD(-1.3)' }, { cellValue: '=ODD(-2.7)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(-3)
-    expect(engine.getCellValue(adr('B1'))).toBe(-3)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(-3)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(-3)
   })
 
   it('use coercion', () => {
@@ -36,7 +36,7 @@ describe('Function ODD', () => {
       [{ cellValue: '=ODD("42.3")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(43)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(43)
   })
 
   it('propagates error', () => {
@@ -45,6 +45,6 @@ describe('Function ODD', () => {
       [{ cellValue: '=ODD(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

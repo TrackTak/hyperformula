@@ -12,9 +12,9 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '=COUNTIFS(B1:B3, ">0", B1, ">1", 42)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('works', () => {
@@ -25,7 +25,7 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '=COUNTIFS(A1:A3, ">=1")' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(2)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(2)
   })
 
   it('works for more criteria pairs', () => {
@@ -36,7 +36,7 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '=COUNTIFS(A1:A3, ">=2", B1:B3, "<=20")' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(1)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(1)
   })
 
   it('use partial cache', () => {
@@ -47,8 +47,8 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '3' }, { cellValue: '=COUNTIFS(A1:A4, ">=1")' }],
     ])
 
-    expect(engine.getCellValue(adr('B3'))).toEqual(2)
-    expect(engine.getCellValue(adr('B4'))).toEqual(3)
+    expect(engine.getCellValue(adr('B3')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('B4')).cellValue).toEqual(3)
     expect(engine.getStats().get(StatType.CRITERION_FUNCTION_PARTIAL_CACHE_USED)).toEqual(1)
   })
 
@@ -59,8 +59,8 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '2' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqual(2)
-    expect(engine.getCellValue(adr('B2'))).toEqual(2)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual(2)
     expect(engine.getStats().get(StatType.CRITERION_FUNCTION_FULL_CACHE_USED)).toEqual(1)
   })
 
@@ -70,8 +70,8 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '0' }, { cellValue: '=COUNTIFS(A2, ">=1")' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqual(1)
-    expect(engine.getCellValue(adr('B2'))).toEqual(0)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual(0)
   })
 
   it('error when criterion unparsable', () => {
@@ -79,7 +79,7 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '=COUNTIFS(B1:B2, "><foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.BadCriterion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.BadCriterion))
   })
 
   it('scalars are treated like singular arrays', () => {
@@ -88,8 +88,8 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '=COUNTIFS(0, ">1")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
   })
 
   it('error propagation', () => {
@@ -99,9 +99,9 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '=COUNTIFS(4/0, FOOBAR())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('works with range values', () => {
@@ -112,8 +112,8 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '=COUNTIFS(MMULT(A1:B2, A1:B2), ">50")' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(3)
-    expect(engine.getCellValue(adr('A4'))).toEqual(3)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
   })
 
   it('works for matrices', () => {
@@ -124,7 +124,7 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '=COUNTIFS(A2:A3, ">0")' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(2)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(2)
   })
 
   it('ignore errors', () => {
@@ -135,6 +135,6 @@ describe('Function COUNTIFS', () => {
       [{ cellValue: '=COUNTIFS(A1:A3, "=1")' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(2)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(2)
   })
 })

@@ -24,7 +24,7 @@ describe('Plugins', () => {
       [{ cellValue: '=foo()' }],
     ], {functionPlugins: [FooPlugin]})
 
-    expect(engine.getCellValue(adr('A1'))).toBe(42)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(42)
   })
 
   it('cleanup', () => {
@@ -32,6 +32,6 @@ describe('Plugins', () => {
       [{ cellValue: '=foo()' }],
     ], {functionPlugins: [FooPlugin]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOO')))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOO')))
   })
 })

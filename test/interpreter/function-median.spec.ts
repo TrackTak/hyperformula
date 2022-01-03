@@ -8,7 +8,7 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=MEDIAN(1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
   })
 
   it('two numbers', () => {
@@ -16,7 +16,7 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=MEDIAN(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1.5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1.5)
   })
 
   it('more numbers (odd)', () => {
@@ -24,7 +24,7 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=MEDIAN(3, 1, 2, 5, 7)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(3)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(3)
   })
 
   it('more numbers (even)', () => {
@@ -32,7 +32,7 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=MEDIAN(3, 4, 1, 2, 5, 7)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(3.5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(3.5)
   })
 
   it('works with ranges', () => {
@@ -41,7 +41,7 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=MEDIAN(A1:C1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual(3)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(3)
   })
 
   it('propagates error from regular argument', () => {
@@ -49,7 +49,7 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=3/0' }, { cellValue: '=MEDIAN(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('propagates first error from range argument', () => {
@@ -57,7 +57,7 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=3/0' }, { cellValue: '=FOO(' }, { cellValue: '=MEDIAN(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('return error when no arguments', () => {
@@ -65,7 +65,7 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=MEDIAN()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('coerces only explicit arguments, ignores provided via reference', () => {
@@ -75,9 +75,9 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=MEDIAN(1,2,3,B3:C3)' }],
     ])
 
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.OneValue))
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(2)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.OneValue))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(2)
   })
 
   it('ignores nonnumeric values as long as theres at least one numeric value', () => {
@@ -85,7 +85,7 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=MEDIAN(TRUE(), "foobar", 42)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('coerces given string arguments', () => {
@@ -93,7 +93,7 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=MEDIAN("12", "11", "13")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(12)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(12)
   })
 
   it('empty args as 0', () => {
@@ -102,7 +102,7 @@ describe('Function MEDIAN', () => {
       [{ cellValue: '=MEDIAN(,)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
   })
 })

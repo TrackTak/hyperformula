@@ -9,8 +9,8 @@ describe('CHISQ.TEST', () => {
       [{ cellValue: '=CHISQ.TEST(1, 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('works', () => {
@@ -20,7 +20,7 @@ describe('CHISQ.TEST', () => {
       [{ cellValue: '=CHISQ.TEST(A1:A2, B1:B2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(0.001652787719, 6)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(0.001652787719, 6)
   })
 
   it('works for larger ranges', () => {
@@ -30,7 +30,7 @@ describe('CHISQ.TEST', () => {
       [{ cellValue: '=CHISQ.TEST(A1:C2, D1:F2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(0.00000054330486, 9)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(0.00000054330486, 9)
   })
 
   /**
@@ -43,7 +43,7 @@ describe('CHISQ.TEST', () => {
       [{ cellValue: '=CHISQ.TEST(A1:C2, A1:F1)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
   })
 
   it('validates values #1', () => {
@@ -53,27 +53,27 @@ describe('CHISQ.TEST', () => {
       [{ cellValue: '=CHISQ.TEST(A1:C2, D1:F2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('accepts negative values', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: 1 }, { cellValue: 10 }, { cellValue: 1 }, { cellValue: 1}, {cellValue: 3 }, { cellValue: 7 }],
-      [2, 5, 1, 1, 4, -1],
+      [{ cellValue: 2 }, { cellValue: 5 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 4 }, { cellValue: -1}],
       [{ cellValue: '=CHISQ.TEST(A1:C2, D1:F2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(0.0000858340104264999, 9)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(0.0000858340104264999, 9)
   })
 
   it('but checks intermediate values for negatives', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: 1 }, { cellValue: 10 }, { cellValue: 1 }, { cellValue: 1}, {cellValue: 3 }, { cellValue: 7 }],
-      [2, 5, 1, 1, 4, -0.001],
+      [{ cellValue: 2 }, { cellValue: 5 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 4 }, { cellValue: -0.001 }],
       [{ cellValue: '=CHISQ.TEST(A1:C2, D1:F2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NaN))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NaN))
   })
 
   it('doesnt do coercions, nonnumeric values are skipped', () => {
@@ -83,7 +83,7 @@ describe('CHISQ.TEST', () => {
       [{ cellValue: '=CHISQ.TEST(A1:C2, D1:F2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(0.00001161637011, 9)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(0.00001161637011, 9)
   })
 
   it('propagates errors', () => {
@@ -94,7 +94,7 @@ describe('CHISQ.TEST', () => {
       [{ cellValue: '=CHISQ.TEST(A1:A3, B1:B3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 
   it('error when not enough data', () => {
@@ -102,6 +102,6 @@ describe('CHISQ.TEST', () => {
       [{ cellValue: '=CHISQ.TEST(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
   })
 })

@@ -10,8 +10,8 @@ describe('Function CHISQ.INV', () => {
       [{ cellValue: '=CHISQ.INV(1, 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -20,8 +20,8 @@ describe('Function CHISQ.INV', () => {
       [{ cellValue: '=CHISQ.INV(1, "baz")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work', () => {
@@ -30,8 +30,8 @@ describe('Function CHISQ.INV', () => {
       [{ cellValue: '=CHISQ.INV(0.9, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.0157907740934326, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(4.60517018598809, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.0157907740934326, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(4.60517018598809, 6)
   })
 
   it('truncates second arg', () => {
@@ -40,8 +40,8 @@ describe('Function CHISQ.INV', () => {
       [{ cellValue: '=CHISQ.INV(0.9, 2.9)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.0157907740934326, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(4.60517018598809, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.0157907740934326, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(4.60517018598809, 6)
   })
 
   it('checks bounds', () => {
@@ -51,8 +51,8 @@ describe('Function CHISQ.INV', () => {
       [{ cellValue: '=CHISQ.INV(1.0001, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 })

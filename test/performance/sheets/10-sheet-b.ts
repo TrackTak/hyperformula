@@ -2,17 +2,17 @@ import {ExpectedValue} from '../benchmark'
 
 export function sheet(rows: number = 5000) {
   const sheet = []
-  sheet.push(['1', '2', '3', '0', '0'])
+  sheet.push([{ cellValue: '1' }, { cellValue: '2'}, { cellValue: '3'}, { cellValue: '0'}, { cellValue: '0' }])
 
   let prev = 1
 
   while (prev < rows) {
     const rowToPush = [
-      `${prev + 1}`,
-      '2',
-      '=3*5',
-      `=A${prev}+D${prev}`,
-      `=SUM($A$1:A${prev})`,
+      { cellValue: `${prev + 1}`},
+      { cellValue: '2'},
+      { cellValue:'=3*5'},
+      { cellValue:`=A${prev}+D${prev}`},
+      { cellValue:`=SUM($A$1:A${prev})`},
     ]
 
     sheet.push(rowToPush)
@@ -21,7 +21,7 @@ export function sheet(rows: number = 5000) {
   return sheet
 }
 
-export function expectedValues(_sheet: string[][]): ExpectedValue[] {
+export function expectedValues(): ExpectedValue[] {
   return [
     {address: 'A5000', value: 5000},
     {address: 'B5000', value: 2},

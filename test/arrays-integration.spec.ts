@@ -20,10 +20,10 @@ describe('integration test', () => {
 
     engine.addNamedExpression('LookupRange', '=Lookup!$A$1:Lookup!$D$8')
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(121)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(121)
 
-    engine.setCellContents(adr('B1', engine.getSheetId('Inputs')), 'A')
+    engine.setCellContents(adr('B1', engine.getSheetId('Inputs')), { cellValue: 'A' })
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(110)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(110)
   })
 })

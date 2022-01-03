@@ -9,7 +9,7 @@ describe('Percent operator', () => {
       [{ cellValue: '=3%' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(0.03)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(0.03)
   })
 
   it('use number coerce', () => {
@@ -19,9 +19,9 @@ describe('Percent operator', () => {
       [{ cellValue: '=TRUE()%' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(0.03)
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A3'))).toEqual(0.01)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(0.03)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(0.01)
   })
 
   it('pass reference', () => {
@@ -30,7 +30,7 @@ describe('Percent operator', () => {
       [{ cellValue: '=42' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0.42)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0.42)
   })
 
   it('pass error', () => {
@@ -39,13 +39,13 @@ describe('Percent operator', () => {
       [{ cellValue: '=FOOBAR()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOOBAR')))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOOBAR')))
   })
 
   it('works with other operator and coercion', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=TRUE()%*1' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0.01)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0.01)
   })
 
   it('range value results in VALUE error', () => {
@@ -56,6 +56,6 @@ describe('Percent operator', () => {
       [{ cellValue: '=A1:A3%' }],
     ], {useArrayArithmetic: false})
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
   })
 })

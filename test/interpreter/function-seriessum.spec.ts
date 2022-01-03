@@ -9,8 +9,8 @@ describe('Function SERIESSUM', () => {
       [{ cellValue: '=SERIESSUM(1,2,3,4,5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('computes correct answer', () => {
@@ -19,7 +19,7 @@ describe('Function SERIESSUM', () => {
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(137480)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(137480)
   })
 
   it('ignores nulls', () => {
@@ -28,16 +28,16 @@ describe('Function SERIESSUM', () => {
       [{ cellValue: 1 }, { cellValue: null }, { cellValue: 3 }, { cellValue: 4}]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(8584)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(8584)
   })
 
   it('throws error for non-numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=SERIESSUM(2,3,4,A2:D2)' }],
-      [1, '\'1', 3, 4]
+      [{ cellValue: 1}, { cellValue: '\'1'}, { cellValue: 3}, { cellValue: 4 }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberExpected))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberExpected))
   })
 
   it('works for non-integer args', () => {
@@ -47,8 +47,8 @@ describe('Function SERIESSUM', () => {
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(147347.41562949, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(168708.537245456, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(147347.41562949, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(168708.537245456, 6)
   })
 
   it('propagates errors', () => {
@@ -56,6 +56,6 @@ describe('Function SERIESSUM', () => {
       [{ cellValue: '=SERIESSUM(2,3,4,A2:D2)' }],
       [{ cellValue: 1 }, { cellValue: '=NA()' }, { cellValue: 3 }, { cellValue: 4}]
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 })

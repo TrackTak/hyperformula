@@ -10,8 +10,8 @@ describe('SLOPE', () => {
       [{ cellValue: '=SLOPE(B1:B5, C1:C5, D1:D5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('ranges need to have same amount of elements', () => {
@@ -19,7 +19,7 @@ describe('SLOPE', () => {
       [{ cellValue: '=SLOPE(B1:B5, C1:C6)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
   })
 
   it('works (simple)', () => {
@@ -29,7 +29,7 @@ describe('SLOPE', () => {
       [{ cellValue: '=SLOPE(A1:C1, A2:C2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(-0.5)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(-0.5)
   })
 
   it('works', () => {
@@ -42,7 +42,7 @@ describe('SLOPE', () => {
       [{ cellValue: '=SLOPE(A1:A5, B1:B5)' }]
     ])
 
-    expect(engine.getCellValue(adr('A6'))).toBeCloseTo(1.256756757, 6)
+    expect(engine.getCellValue(adr('A6')).cellValue).toBeCloseTo(1.256756757, 6)
   })
 
   it('error when not enough data', () => {
@@ -53,9 +53,9 @@ describe('SLOPE', () => {
       [{ cellValue: '=SLOPE("foo", "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
   })
 
   it('doesnt do coercions, nonnumeric values are skipped', () => {
@@ -67,7 +67,7 @@ describe('SLOPE', () => {
       [{ cellValue: '=SLOPE(A1:A4, B1:B4)' }],
     ])
 
-    expect(engine.getCellValue(adr('A5'))).toEqual(-0.5)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(-0.5)
   })
 
   it('over a range value', () => {
@@ -77,7 +77,7 @@ describe('SLOPE', () => {
       [{ cellValue: '=SLOPE(MMULT(A1:B2, A1:B2), MMULT(B1:C2, B1:C2))' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(0.75346687211094, 6)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(0.75346687211094, 6)
   })
 
   it('propagates errors', () => {
@@ -88,6 +88,6 @@ describe('SLOPE', () => {
       [{ cellValue: '=SLOPE(A1:A3, B1:B3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 })

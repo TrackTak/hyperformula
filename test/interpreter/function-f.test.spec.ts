@@ -10,8 +10,8 @@ describe('F.TEST', () => {
       [{ cellValue: '=F.TEST(1, 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('works', () => {
@@ -21,7 +21,7 @@ describe('F.TEST', () => {
       [{ cellValue: '=F.TEST(A1:A2, B1:B2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(0.2513318328, 6)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(0.2513318328, 6)
   })
 
   it('works for uneven ranges', () => {
@@ -32,7 +32,7 @@ describe('F.TEST', () => {
       [{ cellValue: '=F.TEST(A1:A2, B1:B3)' }]
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toBeCloseTo(0.794719414238988, 6)
+    expect(engine.getCellValue(adr('A4')).cellValue).toBeCloseTo(0.794719414238988, 6)
   })
 
   it('doesnt do coercions, nonnumeric values are skipped', () => {
@@ -44,7 +44,7 @@ describe('F.TEST', () => {
       [{ cellValue: '=F.TEST(A1:A4, B1:B3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A5'))).toBeCloseTo(1, 6)
+    expect(engine.getCellValue(adr('A5')).cellValue).toBeCloseTo(1, 6)
   })
 
   it('propagates errors', () => {
@@ -55,7 +55,7 @@ describe('F.TEST', () => {
       [{ cellValue: '=F.TEST(A1:A3, B1:B3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('error when not enough data', () => {
@@ -63,7 +63,7 @@ describe('F.TEST', () => {
       [{ cellValue: '=F.TEST(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('error when 0 variance', () => {
@@ -73,6 +73,6 @@ describe('F.TEST', () => {
       [{ cellValue: 0 }, { cellValue: 1 }, { cellValue: 0 }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

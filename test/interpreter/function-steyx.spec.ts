@@ -10,8 +10,8 @@ describe('STEYX', () => {
       [{ cellValue: '=STEYX(B1:B5, C1:C5, D1:D5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('ranges need to have same amount of elements', () => {
@@ -19,7 +19,7 @@ describe('STEYX', () => {
       [{ cellValue: '=STEYX(B1:B5, C1:C6)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
   })
 
   it('works (simple)', () => {
@@ -29,7 +29,7 @@ describe('STEYX', () => {
       [{ cellValue: '=STEYX(A1:C1, A2:C2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(0.7071067812, 6)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(0.7071067812, 6)
   })
 
   it('works', () => {
@@ -42,7 +42,7 @@ describe('STEYX', () => {
       [{ cellValue: '=STEYX(A1:A5, B1:B5)' }]
     ])
 
-    expect(engine.getCellValue(adr('A6'))).toBeCloseTo(2.146650439, 6)
+    expect(engine.getCellValue(adr('A6')).cellValue).toBeCloseTo(2.146650439, 6)
   })
 
   it('error when not enough data', () => {
@@ -53,9 +53,9 @@ describe('STEYX', () => {
       [{ cellValue: '=STEYX("foo", "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.ThreeValues))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.ThreeValues))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.ThreeValues))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.ThreeValues))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.ThreeValues))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.ThreeValues))
   })
 
   it('doesnt do coercions, nonnumeric values are skipped', () => {
@@ -67,7 +67,7 @@ describe('STEYX', () => {
       [{ cellValue: '=STEYX(A1:A4, B1:B4)' }],
     ])
 
-    expect(engine.getCellValue(adr('A5'))).toBeCloseTo(0.707106781186548, 6)
+    expect(engine.getCellValue(adr('A5')).cellValue).toBeCloseTo(0.707106781186548, 6)
   })
 
   it('over a range value', () => {
@@ -77,7 +77,7 @@ describe('STEYX', () => {
       [{ cellValue: '=STEYX(MMULT(A1:B2, A1:B2), MMULT(B1:C2, B1:C2))' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(0.526640075265055, 6)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(0.526640075265055, 6)
   })
 
   it('propagates errors', () => {
@@ -88,6 +88,6 @@ describe('STEYX', () => {
       [{ cellValue: '=STEYX(A1:A3, B1:B3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 })

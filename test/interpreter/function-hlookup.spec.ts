@@ -10,7 +10,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(1, A2:B3)' }],
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     })
 
     it('too many parameters', () => {
@@ -18,7 +18,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(1, A2:B3, 2, TRUE(), "foo")' }],
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     })
 
     it('wrong type of first argument', () => {
@@ -26,7 +26,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(D1:E1, A2:B3, 2, TRUE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
     })
 
     it('wrong type of second argument', () => {
@@ -34,7 +34,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(1, "foo", 2, TRUE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
     })
 
     it('wrong type of third argument', () => {
@@ -42,7 +42,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(1, A2:B3, "foo", TRUE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
     })
 
     it('wrong type of fourth argument', () => {
@@ -50,7 +50,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(1, A2:B3, 2, "bar")' }],
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
     })
 
     it('should return error when index argument greater that range height', () => {
@@ -58,7 +58,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(1, A2:B3, 3)' }],
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.REF, ErrorMessage.IndexLarge))
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.REF, ErrorMessage.IndexLarge))
     })
 
     it('should return error when index is less than one', () => {
@@ -67,8 +67,8 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(1, C2:D3, -1)' }],
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.LessThanOne))
-      expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.LessThanOne))
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.LessThanOne))
+      expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.LessThanOne))
     })
 
     it('should propagate errors properly', () => {
@@ -78,9 +78,9 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(1, A10:A11, 1, NA())' }]
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-      expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-      expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NA))
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+      expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NA))
     })
   })
 
@@ -92,7 +92,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(2, A1:E2, 2)' }]
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqual('b')
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqual('b')
     })
 
     it('should find value in sorted range using linearSearch', () => {
@@ -102,7 +102,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(2, A1:E2, 2, FALSE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqual('b')
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqual('b')
     })
 
     it('works with wildcards', () => {
@@ -112,7 +112,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP("*c*", A1:E2, 2, FALSE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqual('e')
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqual('e')
     })
 
     it('on sorted data ignores wildcards', () => {
@@ -122,7 +122,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP("*c*", A1:E2, 2, TRUE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqual('c')
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqual('c')
     })
 
     it('should find value in unsorted range using linearSearch', () => {
@@ -132,7 +132,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(2, A1:E2, 2, FALSE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqual('d')
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqual('d')
     })
 
     it('should find value in sorted range with different types', () => {
@@ -142,7 +142,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(TRUE(), A1:E2, 2, FALSE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqual('d')
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqual('d')
     })
 
     it('should find value in unsorted range with different types', () => {
@@ -152,7 +152,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(2, A1:E2, 2, FALSE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqual('d')
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqual('d')
     })
 
     it('should return lower bound for sorted values', () => {
@@ -162,7 +162,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(4, A1:C2, 2, TRUE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqual('c')
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqual('c')
     })
 
     it('should return error when all values are greater', () => {
@@ -172,7 +172,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(0, A1:C2, 2, TRUE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.ValueNotFound))
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.ValueNotFound))
     })
 
     it('should return error when value not present using linear search', () => {
@@ -182,7 +182,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(4, A1:C2, 2, FALSE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.ValueNotFound))
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.ValueNotFound))
     })
 
     it('should find value if index build during evaluation', () => {
@@ -192,7 +192,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(1, A1:C2, 2, TRUE())' }],
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqual('a')
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqual('a')
     })
 
     it('should properly calculate absolute row index', () => {
@@ -200,7 +200,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(3, C1:E1, 1, TRUE())' }, { cellValue: 'foo' }, { cellValue: '1' }, { cellValue: '2'}, {cellValue: '3' }]
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqual(3)
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqual(3)
     })
 
     it('should calculate indexes properly when using binary search', () => {
@@ -208,7 +208,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(4, E1:J1, 1, TRUE())' }, { cellValue: null }, { cellValue: null }, { cellValue: null}, {cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }, { cellValue: '4' }, { cellValue: '5' }]
       ], {useColumnIndex: false})
 
-      expect(engine.getCellValue(adr('A1'))).toEqual(4)
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqual(4)
     })
 
     it('should calculate indexes properly when using naitve approach', () => {
@@ -216,7 +216,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(4, E1:J1, 1, TRUE())' }, { cellValue: null }, { cellValue: null }, { cellValue: null}, {cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }, { cellValue: '4' }, { cellValue: '5' }]
       ], {useColumnIndex: false})
 
-      expect(engine.getCellValue(adr('A1'))).toEqual(4)
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqual(4)
     })
 
     it('should coerce empty arg to 0', () => {
@@ -227,8 +227,8 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: '=HLOOKUP(, A1:E2, 2)' }],
       ])
 
-      expect(engine.getCellValue(adr('A3'))).toEqual('a')
-      expect(engine.getCellValue(adr('A4'))).toEqual('a')
+      expect(engine.getCellValue(adr('A3')).cellValue).toEqual('a')
+      expect(engine.getCellValue(adr('A4')).cellValue).toEqual('a')
     })
 
     it('should not coerce', () => {
@@ -237,25 +237,25 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }],
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.ValueNotFound))
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.ValueNotFound))
     })
 
     it('should properly report no match', () => {
       const [engine] = HyperFormula.buildFromArray([
         [{ cellValue: '=HLOOKUP("0", A2:D2, 1)' }],
-        [1, 2, 3, '\'1'],
+        [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: '\'1' }],
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.ValueNotFound))
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.ValueNotFound))
     })
 
     it('should properly report approximate matching', () => {
       const [engine] = HyperFormula.buildFromArray([
         [{ cellValue: '=HLOOKUP("2", A2:D2, 1)' }],
-        [1, 2, 3, '\'1'],
+        [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: '\'1' }],
       ])
 
-      expect(engine.getCellValue(adr('A1'))).toEqual('1')
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1')
     })
 
     it('should coerce null to zero when using naive approach', () => {
@@ -264,7 +264,7 @@ describe('Function HLOOKUP', () => {
         [{ cellValue: 1 }, { cellValue: 3 }, { cellValue: 0 }],
       ], {useColumnIndex: false})
 
-      expect(engine.getCellValue(adr('A1'))).toEqual(0)
+      expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
     })
   })
 
@@ -274,7 +274,7 @@ describe('Function HLOOKUP', () => {
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }],
       [{ cellValue: 'a' }, { cellValue: 'b' }, { cellValue: 'c' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual('b')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('b')
   })
 
   it('works for strings, is not case sensitive', () => {
@@ -284,7 +284,7 @@ describe('Function HLOOKUP', () => {
       [{ cellValue: '=HLOOKUP("A", A1:E2, 2, FALSE())' }]
     ], {caseSensitive: false})
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(1)
   })
 
   it('works for strings, is not case sensitive even if config defines case sensitivity', () => {
@@ -294,7 +294,7 @@ describe('Function HLOOKUP', () => {
       [{ cellValue: '=HLOOKUP("A", A1:E2, 2, FALSE())' }]
     ], {caseSensitive: true})
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(1)
   })
 
   it('should find value in sorted range', () => {
@@ -303,6 +303,6 @@ describe('Function HLOOKUP', () => {
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}, {cellValue: 5 }],
       [{ cellValue: '=HLOOKUP("b", A1:E2, 2)' }],
     ], {caseSensitive: false})
-    expect(engine.getCellValue(adr('A3'))).toEqual(2)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(2)
   })
 })

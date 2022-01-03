@@ -9,9 +9,9 @@ describe('Function ISNUMBER', () => {
       [{ cellValue: '=ISNUMBER(1)' }, { cellValue: '=ISNUMBER(-0)' }, { cellValue: '=ISNUMBER(1+1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(true)
-    expect(engine.getCellValue(adr('B1'))).toEqual(true)
-    expect(engine.getCellValue(adr('C1'))).toEqual(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(true)
   })
 
   it('should return false for nonnumbers', () => {
@@ -19,16 +19,16 @@ describe('Function ISNUMBER', () => {
       [{ cellValue: '=ISNUMBER(1<1)' }, { cellValue: '=ISNUMBER(A2)' }, { cellValue: '=ISNUMBER("foo")' }],
       [{ cellValue: null }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(false)
-    expect(engine.getCellValue(adr('B1'))).toEqual(false)
-    expect(engine.getCellValue(adr('C1'))).toEqual(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
   })
 
   it('takes exactly one argument', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=ISNUMBER(1, 2)' }, { cellValue: '=ISNUMBER()' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 })

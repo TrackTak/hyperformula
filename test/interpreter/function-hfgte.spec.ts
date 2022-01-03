@@ -8,8 +8,8 @@ describe('Function HF.GTE', () => {
       [{ cellValue: '=HF.GTE(1)' }, { cellValue: '=HF.GTE(1, 1, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value', () => {
@@ -29,19 +29,19 @@ describe('Function HF.GTE', () => {
       [{ cellValue: '=HF.GTE(TRUE(),"1")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(true)
-    expect(engine.getCellValue(adr('A2'))).toEqual(true)
-    expect(engine.getCellValue(adr('A3'))).toEqual(true)
-    expect(engine.getCellValue(adr('A4'))).toEqual(true)
-    expect(engine.getCellValue(adr('A5'))).toEqual(true)
-    expect(engine.getCellValue(adr('A6'))).toEqual(true)
-    expect(engine.getCellValue(adr('A7'))).toEqual(true)
-    expect(engine.getCellValue(adr('A8'))).toEqual(true)
-    expect(engine.getCellValue(adr('A9'))).toEqual(true)
-    expect(engine.getCellValue(adr('A10'))).toEqual(true)
-    expect(engine.getCellValue(adr('A11'))).toEqual(true)
-    expect(engine.getCellValue(adr('A12'))).toEqual(true)
-    expect(engine.getCellValue(adr('A13'))).toEqual(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A8')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A9')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A10')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A11')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A12')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('A13')).cellValue).toEqual(true)
   })
 
   it('should throw correct error', () => {
@@ -50,7 +50,7 @@ describe('Function HF.GTE', () => {
       [{ cellValue: '=HF.GTE(B2:C2,)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 })

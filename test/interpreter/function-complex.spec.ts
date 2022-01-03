@@ -9,8 +9,8 @@ describe('Function COMPLEX', () => {
       [{ cellValue: '=COMPLEX(1, 2, 3, 4)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -19,8 +19,8 @@ describe('Function COMPLEX', () => {
       [{ cellValue: '=COMPLEX(1, "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work', () => {
@@ -42,21 +42,21 @@ describe('Function COMPLEX', () => {
       [{ cellValue: '=COMPLEX(-1, -2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('0')
-    expect(engine.getCellValue(adr('A2'))).toEqual('i')
-    expect(engine.getCellValue(adr('A3'))).toEqual('-i')
-    expect(engine.getCellValue(adr('A4'))).toEqual('2i')
-    expect(engine.getCellValue(adr('A5'))).toEqual('-2i')
-    expect(engine.getCellValue(adr('A6'))).toEqual('1')
-    expect(engine.getCellValue(adr('A7'))).toEqual('1+i')
-    expect(engine.getCellValue(adr('A8'))).toEqual('1-i')
-    expect(engine.getCellValue(adr('A9'))).toEqual('1+2i')
-    expect(engine.getCellValue(adr('A10'))).toEqual('1-2i')
-    expect(engine.getCellValue(adr('A11'))).toEqual('-1')
-    expect(engine.getCellValue(adr('A12'))).toEqual('-1+i')
-    expect(engine.getCellValue(adr('A13'))).toEqual('-1-i')
-    expect(engine.getCellValue(adr('A14'))).toEqual('-1+2i')
-    expect(engine.getCellValue(adr('A15'))).toEqual('-1-2i')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('0')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('i')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('-i')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('2i')
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual('-2i')
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual('1')
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual('1+i')
+    expect(engine.getCellValue(adr('A8')).cellValue).toEqual('1-i')
+    expect(engine.getCellValue(adr('A9')).cellValue).toEqual('1+2i')
+    expect(engine.getCellValue(adr('A10')).cellValue).toEqual('1-2i')
+    expect(engine.getCellValue(adr('A11')).cellValue).toEqual('-1')
+    expect(engine.getCellValue(adr('A12')).cellValue).toEqual('-1+i')
+    expect(engine.getCellValue(adr('A13')).cellValue).toEqual('-1-i')
+    expect(engine.getCellValue(adr('A14')).cellValue).toEqual('-1+2i')
+    expect(engine.getCellValue(adr('A15')).cellValue).toEqual('-1-2i')
   })
 
   it('should work with third argument', () => {
@@ -66,8 +66,8 @@ describe('Function COMPLEX', () => {
       [{ cellValue: '=COMPLEX(1, 1, "k")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('1+i')
-    expect(engine.getCellValue(adr('A2'))).toEqual('1+j')
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ShouldBeIorJ))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1+i')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('1+j')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ShouldBeIorJ))
   })
 })

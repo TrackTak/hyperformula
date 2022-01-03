@@ -10,8 +10,8 @@ describe('COVARIANCE.S', () => {
       [{ cellValue: '=COVARIANCE.S(B1:B5, C1:C5, D1:D5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('ranges need to have same amount of elements', () => {
@@ -19,7 +19,7 @@ describe('COVARIANCE.S', () => {
       [{ cellValue: '=COVARIANCE.S(B1:B5, C1:C6)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
   })
 
   it('works (simple)', () => {
@@ -29,7 +29,7 @@ describe('COVARIANCE.S', () => {
       [{ cellValue: '=COVARIANCE.S(A1:A2, B1:B2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(5)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(5)
   })
 
   it('works', () => {
@@ -42,7 +42,7 @@ describe('COVARIANCE.S', () => {
       [{ cellValue: '=COVARIANCE.S(A1:A5, B1:B5)' }]
     ])
 
-    expect(engine.getCellValue(adr('A6'))).toBeCloseTo(4.65)
+    expect(engine.getCellValue(adr('A6')).cellValue).toBeCloseTo(4.65)
   })
 
   it('error when not enough data', () => {
@@ -53,9 +53,9 @@ describe('COVARIANCE.S', () => {
       [{ cellValue: '=COVARIANCE.S("foo", "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO, ErrorMessage.TwoValues))
   })
 
   it('doesnt do coercions, nonnumeric values are skipped', () => {
@@ -66,7 +66,7 @@ describe('COVARIANCE.S', () => {
       [{ cellValue: '=COVARIANCE.S(A1:A3, B1:B3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(20)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(20)
   })
 
   it('over a range value', () => {
@@ -76,7 +76,7 @@ describe('COVARIANCE.S', () => {
       [{ cellValue: '=COVARIANCE.S(MMULT(A1:B2, A1:B2), MMULT(B1:C2, B1:C2))' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(163)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(163)
   })
 
   it('propagates errors', () => {
@@ -87,6 +87,6 @@ describe('COVARIANCE.S', () => {
       [{ cellValue: '=COVARIANCE.S(A1:A3, B1:B3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

@@ -10,8 +10,8 @@ describe('Function ISTEXT', () => {
       [{ cellValue: 'abcd' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(true)
-    expect(engine.getCellValue(adr('B1'))).toEqual(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(true)
   })
 
   it('should return false for nontext', () => {
@@ -19,17 +19,17 @@ describe('Function ISTEXT', () => {
       [{ cellValue: '=ISTEXT(-0)' }, { cellValue: '=ISTEXT(A2)' }, { cellValue: '=ISTEXT(1<1)' }],
       [{ cellValue: null }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(false)
-    expect(engine.getCellValue(adr('B1'))).toEqual(false)
-    expect(engine.getCellValue(adr('C1'))).toEqual(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
   })
 
   it('takes exactly one argument', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=ISTEXT(1, 2)' }, { cellValue: '=ISTEXT()' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('range value results in VALUE error', () => {
@@ -40,6 +40,6 @@ describe('Function ISTEXT', () => {
       [{ cellValue: '=ISTEXT(A1:A3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 })

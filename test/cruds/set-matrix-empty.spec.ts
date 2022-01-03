@@ -14,8 +14,8 @@ describe('Set matrix empty', () => {
 
     dependencyGraph.setArrayEmpty(matrixVertex)
 
-    expect(engine.getCellValue(adr('A2'))).toBe(null)
-    expect(engine.getCellValue(adr('A3'))).toBe(null)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(null)
     expect(dependencyGraph.arrayMapping.arrayMapping.size).toEqual(0)
   })
 
@@ -30,8 +30,8 @@ describe('Set matrix empty', () => {
 
     dependencyGraph.setArrayEmpty(matrixVertex)
 
-    expect(engine.getCellValue(adr('A2'))).toBe(null)
-    expect(engine.getCellValue(adr('A3'))).toBe(null)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(null)
     expect(dependencyGraph.arrayMapping.arrayMapping.size).toEqual(0)
 
     const formula = dependencyGraph.fetchCell(adr('C1'))
@@ -55,8 +55,8 @@ describe('Set matrix empty', () => {
 
     dependencyGraph.setArrayEmpty(matrixVertex)
 
-    expect(engine.getCellValue(adr('A2'))).toBe(null)
-    expect(engine.getCellValue(adr('A3'))).toBe(null)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(null)
     expect(dependencyGraph.arrayMapping.arrayMapping.size).toEqual(1)
 
     const formulaMatrix = dependencyGraph.fetchCell(adr('C1'))
@@ -116,6 +116,6 @@ describe('Set matrix empty', () => {
     expect(dependencyGraph.existsEdge(a1, rangeVertex)).toBe(true)
     expect(dependencyGraph.existsEdge(a2, rangeVertex)).toBe(true)
     expect(a3).toBe(undefined)
-    expect(engine.getCellValue(adr('A1'))).toBe(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
   })
 })

@@ -24,8 +24,8 @@ describe('i18n', () => {
       [{ cellValue: '=SUM(42)' }],
     ], {language: 'enGB'})
 
-    expect(enginePL.getCellValue(adr('A1'))).toBe(42)
-    expect(engineEN.getCellValue(adr('A1'))).toBe(42)
+    expect(enginePL.getCellValue(adr('A1')).cellValue).toBe(42)
+    expect(engineEN.getCellValue(adr('A1')).cellValue).toBe(42)
   })
 
   it('using functions in different languages with not standard characters', () => {
@@ -42,8 +42,8 @@ describe('i18n', () => {
       [{ cellValue: '=COUNTIF(A1:A3, ">=1")' }],
     ], {language: 'enGB'})
 
-    expect(enginePL.getCellValue(adr('A4'))).toBe(2)
-    expect(engineEN.getCellValue(adr('A4'))).toBe(2)
+    expect(enginePL.getCellValue(adr('A4')).cellValue).toBe(2)
+    expect(engineEN.getCellValue(adr('A4')).cellValue).toBe(2)
   })
 
   it('translation works for parser hardcoded offset procedure', () => {

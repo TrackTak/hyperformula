@@ -19,9 +19,9 @@ describe('vertex counting', () => {
       [{ cellValue: '3' }, { cellValue: '4' }]
     ])
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(4)
-    engine.setCellContents(adr('A1'), '=SUM(A2:B2)')
+    engine.setCellContents(adr('A1'), { cellValue: '=SUM(A2:B2)' })
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(5)
-    engine.setCellContents(adr('A1'), 1)
+    engine.setCellContents(adr('A1'), { cellValue: 1 })
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(4)
   })
 })
@@ -43,9 +43,9 @@ describe('range mapping', () => {
       [{ cellValue: '3' }, { cellValue: '4' }]
     ])
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
-    engine.setCellContents(adr('A1'), '=SUM(A2:B2)')
+    engine.setCellContents(adr('A1'), { cellValue: '=SUM(A2:B2)' })
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(1)
-    engine.setCellContents(adr('A1'), 1)
+    engine.setCellContents(adr('A1'), { cellValue: 1 })
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
   })
 })
@@ -68,11 +68,13 @@ describe('larger tests', () => {
       [
         '=SUM(B2:C3)',
       ],
-    ]
+    ].map(x => x.map(z => ({
+      cellValue: z
+    })))
     const [engine] = HyperFormula.buildFromArray(arr)
     for (let x = 0; x < 3; x++) {
       for (let y = 0; y < 3; y++) {
-        engine.setCellContents({sheet: 0, col: x, row: y}, null)
+        engine.setCellContents({sheet: 0, col: x, row: y}, { cellValue: null })
       }
     }
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
@@ -87,11 +89,13 @@ describe('larger tests', () => {
         '=SUM(A1:A1)',
         '=SUM(A1:A2)',
       ],
-    ]
+    ].map(x => x.map(z => ({
+      cellValue: z
+    })))
     const [engine] = HyperFormula.buildFromArray(arr)
-    engine.setCellContents({sheet: 0, col: 1, row: 0}, null)
-    engine.setCellContents({sheet: 0, col: 2, row: 0}, null)
-    engine.setCellContents({sheet: 0, col: 3, row: 0}, null)
+    engine.setCellContents({sheet: 0, col: 1, row: 0}, { cellValue: null })
+    engine.setCellContents({sheet: 0, col: 2, row: 0}, { cellValue: null })
+    engine.setCellContents({sheet: 0, col: 3, row: 0}, { cellValue: null })
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
   })
@@ -101,10 +105,12 @@ describe('larger tests', () => {
       [
         '=SUM(A1:B1)',
       ],
-    ]
+    ].map(x => x.map(z => ({
+      cellValue: z
+    })))
     const [engine] = HyperFormula.buildFromArray(arr)
 
-    engine.setCellContents({sheet: 0, col: 0, row: 0}, null)
+    engine.setCellContents({sheet: 0, col: 0, row: 0}, { cellValue: null })
 
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
@@ -115,13 +121,15 @@ describe('larger tests', () => {
       [
         null, '=SUM(A1:A1)', '=SUM(A1:A2)', '=SUM(A1:A3)', '=SUM(A1:A4)',
       ],
-    ]
+    ].map(x => x.map(z => ({
+      cellValue: z
+    })))
     const [engine] = HyperFormula.buildFromArray(arr)
 
-    engine.setCellContents({sheet: 0, col: 1, row: 0}, null)
-    engine.setCellContents({sheet: 0, col: 2, row: 0}, null)
-    engine.setCellContents({sheet: 0, col: 3, row: 0}, null)
-    engine.setCellContents({sheet: 0, col: 4, row: 0}, null)
+    engine.setCellContents({sheet: 0, col: 1, row: 0}, { cellValue: null })
+    engine.setCellContents({sheet: 0, col: 2, row: 0}, { cellValue: null })
+    engine.setCellContents({sheet: 0, col: 3, row: 0}, { cellValue: null })
+    engine.setCellContents({sheet: 0, col: 4, row: 0}, { cellValue: null })
 
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
@@ -147,13 +155,13 @@ describe('larger tests', () => {
             col: Math.max(col1, col2)
           }, 0)
           const formula = '=SUM(' + startAddress + ':' + endAddress + ')'
-          engine.setCellContents({sheet: 0, col: x, row: y}, formula)
+          engine.setCellContents({sheet: 0, col: x, row: y}, { cellValue: formula })
         }
       }
     }
     for (let x = 0; x < 10; x++) {
       for (let y = 0; y < 10; y++) {
-        engine.setCellContents({sheet: 0, col: x, row: y}, null)
+        engine.setCellContents({sheet: 0, col: x, row: y}, { cellValue: null })
       }
     }
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
@@ -172,8 +180,8 @@ describe('cruds', () => {
       [{ cellValue: '=SUM(A1:A3)' }],
     ])
 
-    engine.removeRows(0, [{ cellValue: 0 }, { cellValue: 2 }])
-    engine.removeRows(0, [{ cellValue: 2 }, { cellValue: 2 }])
+    engine.removeRows(0, [0, 2])
+    engine.removeRows(0, [2, 2])
 
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
@@ -188,9 +196,9 @@ describe('cruds', () => {
       [{ cellValue: '=SUM(A1:A3)' }],
     ])
 
-    engine.addRows(0, [{ cellValue: 2 }, { cellValue: 1 }])
-    engine.removeRows(0, [{ cellValue: 0 }, { cellValue: 2 }])
-    engine.removeRows(0, [{ cellValue: 2 }, { cellValue: 2 }])
+    engine.addRows(0, [2, 1])
+    engine.removeRows(0, [0, 2])
+    engine.removeRows(0, [2, 2])
 
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
@@ -204,9 +212,9 @@ describe('cruds', () => {
       [{ cellValue: '=SUM(A1:A2)' }],
       [{ cellValue: '=SUM(A1:A3)' }],
     ])
-    engine.addRows(0, [{ cellValue: 2 }, { cellValue: 1 }])
+    engine.addRows(0, [2, 1])
 
-    engine.removeRows(0, [{ cellValue: 4 }, { cellValue: 2 }])
+    engine.removeRows(0, [4, 2])
 
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
@@ -220,14 +228,14 @@ describe('cruds', () => {
       [{ cellValue: '=SUM(A1:A3)' }],
       [{ cellValue: '=SUM(A1:A2)' }],
     ])
-    engine.addRows(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addRows(0, [1, 1])
 
     engine.setCellContents(adr('A1'), [[{ cellValue: 1 }], [{ cellValue: 1 }], [{ cellValue: 1 }], [{ cellValue: 1 }]])
 
-    expect(engine.getCellValue(adr('A5'))).toBe(10)
-    expect(engine.getCellValue(adr('A6'))).toBe(6)
+    expect(engine.getCellValue(adr('A5')).cellValue).toBe(10)
+    expect(engine.getCellValue(adr('A6')).cellValue).toBe(6)
 
-    engine.removeRows(0, [{ cellValue: 0 }, { cellValue: 6 }])
+    engine.removeRows(0, [0, 6])
 
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
@@ -245,10 +253,10 @@ describe('cruds', () => {
 
     engine.setCellContents(adr('A1'), [[{ cellValue: 1 }], [{ cellValue: 1 }], [{ cellValue: 1 }], [{ cellValue: 1 }]])
 
-    expect(engine.getCellValue(adr('A5'))).toBe(10)
-    expect(engine.getCellValue(adr('A6'))).toBe(6)
+    expect(engine.getCellValue(adr('A5')).cellValue).toBe(10)
+    expect(engine.getCellValue(adr('A6')).cellValue).toBe(6)
 
-    engine.removeRows(0, [{ cellValue: 0 }, { cellValue: 6 }])
+    engine.removeRows(0, [0, 6])
 
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
@@ -264,10 +272,10 @@ describe('cruds', () => {
       [{ cellValue: '=SUM(A1:A3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A5'))).toBe(10)
-    expect(engine.getCellValue(adr('A6'))).toBe(6)
+    expect(engine.getCellValue(adr('A5')).cellValue).toBe(10)
+    expect(engine.getCellValue(adr('A6')).cellValue).toBe(6)
 
-    engine.removeRows(0, [{ cellValue: 0 }, { cellValue: 6 }])
+    engine.removeRows(0, [0, 6])
 
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
@@ -281,16 +289,16 @@ describe('cruds', () => {
       [{ cellValue: '=SUM(A1:A2)' }, { cellValue: '=SUM(B1:B3)' }],
       [{ cellValue: '=SUM(A1:A3)' }, { cellValue: '=SUM(B1:B2)' }],
     ])
-    engine.addRows(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addRows(0, [1, 1])
 
     engine.setCellContents(adr('A1'), [[{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }]])
 
-    expect(engine.getCellValue(adr('A5'))).toBe(6)
-    expect(engine.getCellValue(adr('B5'))).toBe(10)
-    expect(engine.getCellValue(adr('A6'))).toBe(10)
-    expect(engine.getCellValue(adr('B6'))).toBe(6)
+    expect(engine.getCellValue(adr('A5')).cellValue).toBe(6)
+    expect(engine.getCellValue(adr('B5')).cellValue).toBe(10)
+    expect(engine.getCellValue(adr('A6')).cellValue).toBe(10)
+    expect(engine.getCellValue(adr('B6')).cellValue).toBe(6)
 
-    engine.removeRows(0, [{ cellValue: 0 }, { cellValue: 6 }])
+    engine.removeRows(0, [0, 6])
 
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
@@ -304,12 +312,12 @@ describe('cruds', () => {
       [{ cellValue: '=SUM(A1:B2)' }],
       [{ cellValue: '=SUM(A1:B3)' }]
     ])
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
-    engine.setCellContents(adr('B3'), 1)
-    expect(engine.getCellSerialized(adr('A4'))).toBe('=SUM(A1:C2)')
-    expect(engine.getCellSerialized(adr('A5'))).toBe('=SUM(A1:C3)')
-    expect(engine.getCellValue(adr('A4'))).toBe(0)
-    expect(engine.getCellValue(adr('A5'))).toBe(1)
+    engine.addColumns(0, [1, 1])
+    engine.setCellContents(adr('B3'), { cellValue: 1 })
+    expect(engine.getCellSerialized(adr('A4')).cellValue).toBe('=SUM(A1:C2)')
+    expect(engine.getCellSerialized(adr('A5')).cellValue).toBe('=SUM(A1:C3)')
+    expect(engine.getCellValue(adr('A4')).cellValue).toBe(0)
+    expect(engine.getCellValue(adr('A5')).cellValue).toBe(1)
   })
 
   it('movecell', () => {
@@ -322,12 +330,12 @@ describe('cruds', () => {
       [{ cellValue: '=SUM(A1:A4)' }],
     ])
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A1'), 1, 3), adr('B1'))
-    engine.setCellContents(adr('B1'), null)
-    engine.setCellContents(adr('B2'), null)
-    engine.setCellContents(adr('B3'), null)
-    engine.setCellContents(adr('A4'), null)
-    engine.setCellContents(adr('A5'), null)
-    engine.setCellContents(adr('A6'), null)
+    engine.setCellContents(adr('B1'), { cellValue: null })
+    engine.setCellContents(adr('B2'), { cellValue: null })
+    engine.setCellContents(adr('B3'), { cellValue: null })
+    engine.setCellContents(adr('A4'), { cellValue: null })
+    engine.setCellContents(adr('A5'), { cellValue: null })
+    engine.setCellContents(adr('A6'), { cellValue: null })
 
     expect(engine.dependencyGraph.graph.nodesCount()).toBe(0)
     expect(engine.dependencyGraph.rangeMapping.getMappingSize(0)).toBe(0)
@@ -340,11 +348,11 @@ describe('cruds', () => {
       [{ cellValue: '3' }, { cellValue: '=SUM($A$1:A2)' }],
     ])
 
-    engine.addRows(0, [{ cellValue: 1 }, { cellValue: 1 }])
-    engine.addColumns(0, [{ cellValue: 0 }, { cellValue: 1 }])
-    engine.removeColumns(0, [{ cellValue: 0 }, { cellValue: 1 }])
+    engine.addRows(0, [1, 1])
+    engine.addColumns(0, [0, 1])
+    engine.removeColumns(0, [0, 1])
 
-    expect(engine.getCellValue(adr('B3'))).toEqual(1)
-    expect(engine.getCellValue(adr('B4'))).toEqual(3)
+    expect(engine.getCellValue(adr('B3')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('B4')).cellValue).toEqual(3)
   })
 })

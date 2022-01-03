@@ -9,8 +9,8 @@ describe('Function EXACT', () => {
       [{ cellValue: '=EXACT("foo", "bar", "baz")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should compare strings', () => {
@@ -21,10 +21,10 @@ describe('Function EXACT', () => {
       [{ cellValue: '=EXACT(B4, C4)' }, { cellValue: 'foo' }, { cellValue: 'bar' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('A2'))).toBe(true)
-    expect(engine.getCellValue(adr('A3'))).toBe(false)
-    expect(engine.getCellValue(adr('A4'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('A4')).cellValue).toBe(false)
   })
 
   it('should be case/accent sensitive', () => {
@@ -33,8 +33,8 @@ describe('Function EXACT', () => {
       [{ cellValue: '=EXACT(B2, C2)' }, { cellValue: 'foo' }, { cellValue: 'fóó' }],
     ], {caseSensitive: false})
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
-    expect(engine.getCellValue(adr('A2'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(false)
   })
 
   it('should be case sensitive', () => {
@@ -42,7 +42,7 @@ describe('Function EXACT', () => {
       [{ cellValue: '=EXACT(B1, C1)' }, { cellValue: 'foo' }, { cellValue: 'Foo' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
   })
 
   it('should coerce', () => {
@@ -53,10 +53,10 @@ describe('Function EXACT', () => {
       [{ cellValue: '=EXACT(B4, "TRUE")' }, { cellValue: '=TRUE()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('A2'))).toBe(true)
-    expect(engine.getCellValue(adr('A3'))).toBe(true)
-    expect(engine.getCellValue(adr('A4'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('A4')).cellValue).toBe(true)
   })
 
   it('should return error for range', () => {
@@ -65,7 +65,7 @@ describe('Function EXACT', () => {
       [{ cellValue: '=EXACT(B1:C1,"foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 })

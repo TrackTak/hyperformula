@@ -8,8 +8,8 @@ describe('Function ROMAN', () => {
       [{ cellValue: '=ROMAN()' }, { cellValue: '=ROMAN(1, 1, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should properly truncate values and use defaults', () => {
@@ -20,11 +20,11 @@ describe('Function ROMAN', () => {
       [{ cellValue: '=ROMAN(499.9)' }],
       [{ cellValue: '=ROMAN(499, 1.1)' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual('CDXCIX')
-    expect(engine.getCellValue(adr('A2'))).toEqual('CDXCIX')
-    expect(engine.getCellValue(adr('A3'))).toEqual('ID')
-    expect(engine.getCellValue(adr('A4'))).toEqual('CDXCIX')
-    expect(engine.getCellValue(adr('A5'))).toEqual('LDVLIV')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('CDXCIX')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('CDXCIX')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('ID')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('CDXCIX')
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual('LDVLIV')
   })
 
   it('should throw correct error if arguments are out of bounds', () => {
@@ -35,11 +35,11 @@ describe('Function ROMAN', () => {
       [{ cellValue: '=ROMAN(1,"a")' }],
       [{ cellValue: '=ROMAN(1,5)' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A5'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ValueLarge))
   })
 
   it('should output correct value for mode 0', () => {
@@ -71,7 +71,7 @@ describe('Function ROMAN', () => {
 function input(mode: number) {
   const ret = []
   for (let i = 1; i < 4000; i++) {
-    ret.push(`=ROMAN(${i},${mode})`)
+    ret.push({ cellValue: `=ROMAN(${i},${mode})` })
   }
   return ret
 }

@@ -8,7 +8,7 @@ describe('Function PRODUCT', () => {
       [{ cellValue: '=PRODUCT()' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate product', () => {
@@ -17,8 +17,8 @@ describe('Function PRODUCT', () => {
       [{ cellValue: '=PRODUCT(B2:D2, E2, F2)' }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 'foo'}, {cellValue: 'bar' }, { cellValue: 4 }],
       [{ cellValue: '=PRODUCT(5, "foo")' }]
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(6)
-    expect(engine.getCellValue(adr('A2'))).toEqual(24)
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(24)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 })

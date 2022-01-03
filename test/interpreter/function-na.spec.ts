@@ -7,7 +7,7 @@ describe('Function NA', () => {
       [{ cellValue: '=NA()' }, { cellValue: '=NA(1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 })

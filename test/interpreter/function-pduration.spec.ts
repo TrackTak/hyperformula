@@ -8,8 +8,8 @@ describe('Function PDURATION', () => {
       [{ cellValue: '=PDURATION(1,1)' }, { cellValue: '=PDURATION(1, 1, 1, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value with correct arguments and defaults', () => {
@@ -17,7 +17,7 @@ describe('Function PDURATION', () => {
       [{ cellValue: '=PDURATION(2%, 12, 24)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(35.00278878, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(35.00278878, 6)
   })
 
   it('should return proper error', () => {
@@ -27,8 +27,8 @@ describe('Function PDURATION', () => {
       [{ cellValue: '=PDURATION(0, 1, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 })

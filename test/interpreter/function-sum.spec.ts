@@ -6,13 +6,13 @@ describe('SUM', () => {
   it('SUM without args', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=SUM()' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('SUM with args', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=SUM(1, B1)' }, { cellValue: '3.14' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(4.14)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(4.14)
   })
 
   it('SUM with range args', () => {
@@ -20,7 +20,7 @@ describe('SUM', () => {
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '5' }],
       [{ cellValue: '3' }, { cellValue: '4' }, { cellValue: '=SUM(A1:B2)' }]
     ])
-    expect(engine.getCellValue(adr('C2'))).toEqual(10)
+    expect(engine.getCellValue(adr('C2')).cellValue).toEqual(10)
   })
 
   it('SUM with column range args', () => {
@@ -28,7 +28,7 @@ describe('SUM', () => {
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '5' }],
       [{ cellValue: '3' }, { cellValue: '4' }, { cellValue: '=SUM(A:B)' }]
     ])
-    expect(engine.getCellValue(adr('C2'))).toEqual(10)
+    expect(engine.getCellValue(adr('C2')).cellValue).toEqual(10)
   })
 
   it('SUM with using previously cached value', () => {
@@ -36,7 +36,7 @@ describe('SUM', () => {
       [{ cellValue: '3' }, { cellValue: '=SUM(A1:A1)' }],
       [{ cellValue: '4' }, { cellValue: '=SUM(A1:A2)' }],
     ])
-    expect(engine.getCellValue(adr('B2'))).toEqual(7)
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual(7)
   })
 
   it('doesnt do coercions', () => {
@@ -52,10 +52,10 @@ describe('SUM', () => {
       [{ cellValue: '=SUM(A5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A6'))).toEqual(3)
-    expect(engine.getCellValue(adr('A7'))).toEqual(0)
-    expect(engine.getCellValue(adr('A8'))).toEqual(0)
-    expect(engine.getCellValue(adr('A9'))).toEqual(0)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A8')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A9')).cellValue).toEqual(0)
   })
 
   it('works when precision (default setting)', () => {
@@ -64,7 +64,7 @@ describe('SUM', () => {
       [{ cellValue: '=SUM(A1:B1)' }]
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
   })
 
   it('explicitly called does coercions', () => {
@@ -74,10 +74,10 @@ describe('SUM', () => {
       [{ cellValue: '=SUM(TRUE())' }],
       [{ cellValue: '=SUM("10")' }]
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(3)
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A3'))).toEqual(1)
-    expect(engine.getCellValue(adr('A4'))).toEqual(10)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(10)
   })
 
   it('doesnt take value from range if it does not store cached value for that function', () => {
@@ -87,17 +87,17 @@ describe('SUM', () => {
       [{ cellValue: '=MAX(A1:A2)' }],
       [{ cellValue: '=SUM(A1:A3)' }],
     ])
-    expect(engine.getCellValue(adr('A4'))).toEqual(5)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(5)
   })
 
   it('range only with empty value', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '' }, { cellValue: '=SUM(A1:A1)' }]])
-    expect(engine.getCellValue(adr('B1'))).toEqual(0)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(0)
   })
 
   it('range only with some empty values', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '42' }, { cellValue: '' }, { cellValue: '13' }, { cellValue: '=SUM(A1:C1)'}]])
-    expect(engine.getCellValue(adr('D1'))).toEqual(55)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(55)
   })
 
   it('over a range value', () => {
@@ -107,7 +107,7 @@ describe('SUM', () => {
       [{ cellValue: '=SUM(MMULT(A1:B2, A1:B2))' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(54)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(54)
   })
 
   it('propagates errors', () => {
@@ -117,6 +117,6 @@ describe('SUM', () => {
       [{ cellValue: '=SUM(A1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

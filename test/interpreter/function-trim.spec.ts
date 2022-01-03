@@ -9,8 +9,8 @@ describe('Function TRIM', () => {
       [{ cellValue: '=TRIM("foo", "bar")' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should work', () => {
@@ -21,10 +21,10 @@ describe('Function TRIM', () => {
       [{ cellValue: '=TRIM(" f    o  o   ")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
-    expect(engine.getCellValue(adr('A2'))).toEqual('foo')
-    expect(engine.getCellValue(adr('A3'))).toEqual('foo')
-    expect(engine.getCellValue(adr('A4'))).toEqual('f o o')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('f o o')
   })
 
   it('should coerce other types to string', () => {
@@ -34,8 +34,8 @@ describe('Function TRIM', () => {
       [{ cellValue: '=TRIM(TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('1')
-    expect(engine.getCellValue(adr('A2'))).toEqual('10')
-    expect(engine.getCellValue(adr('A3'))).toEqual('TRUE')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('10')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('TRUE')
   })
 })

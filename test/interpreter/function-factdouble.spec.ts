@@ -8,8 +8,8 @@ describe('Function FACTDOUBLE', () => {
       [{ cellValue: '=FACTDOUBLE()' }, { cellValue: '=FACTDOUBLE(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('works', () => {
@@ -20,10 +20,10 @@ describe('Function FACTDOUBLE', () => {
       [{ cellValue: '=FACTDOUBLE(288)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(1)
-    expect(engine.getCellValue(adr('A2'))).toBe(1)
-    expect(engine.getCellValue(adr('A3'))).toBe(3840)
-    expect(engine.getCellValue(adr('A4')) as number / 1.23775688540895e+293).toBeCloseTo(1, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(3840)
+    expect(engine.getCellValue(adr('A4')).cellValue as number / 1.23775688540895e+293).toBeCloseTo(1, 6)
   })
 
   it('rounds argument', () => {
@@ -34,10 +34,10 @@ describe('Function FACTDOUBLE', () => {
       [{ cellValue: '=FACTDOUBLE(287.9)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(1)
-    expect(engine.getCellValue(adr('A2'))).toBe(1)
-    expect(engine.getCellValue(adr('A3'))).toBe(3840)
-    expect(engine.getCellValue(adr('A4')) as number / 5.81436347598024e+291).toBeCloseTo(1, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(3840)
+    expect(engine.getCellValue(adr('A4')).cellValue as number / 5.81436347598024e+291).toBeCloseTo(1, 6)
   })
 
   it('checks bounds', () => {
@@ -46,8 +46,8 @@ describe('Function FACTDOUBLE', () => {
       [{ cellValue: '=FACTDOUBLE(289)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 
   it('uses coercion', () => {
@@ -55,7 +55,7 @@ describe('Function FACTDOUBLE', () => {
       [{ cellValue: '=FACTDOUBLE("0")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
   })
 
   it('propagates error', () => {
@@ -63,6 +63,6 @@ describe('Function FACTDOUBLE', () => {
       [{ cellValue: '=FACTDOUBLE(NA())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 })

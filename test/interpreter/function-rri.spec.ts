@@ -9,8 +9,8 @@ describe('Function RRI', () => {
       [{ cellValue: '=RRI(1,1)' }, { cellValue: '=RRI(1, 1, 1, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value with correct arguments and defaults', () => {
@@ -19,13 +19,13 @@ describe('Function RRI', () => {
       [{ cellValue: '=RRI(1, -1, -1)' }, { cellValue: '=RRI(1, -1, 1)' }, { cellValue: '=RRI(1, 1, -1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(-0.5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(-0.5)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_PERCENT)
-    expect(engine.getCellValue(adr('B1'))).toBeCloseTo(0.414213562373095)
-    expect(engine.getCellValue(adr('C1'))).toBeCloseTo(-0.9990234375)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBeCloseTo(0.414213562373095)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBeCloseTo(-0.9990234375)
     //inconsistency with product #1 (returns #NUM!)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0)
-    expect(engine.getCellValue(adr('B2'))).toEqualError(detailedError(ErrorType.NUM))
-    expect(engine.getCellValue(adr('C2'))).toEqualError(detailedError(ErrorType.NUM))
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0)
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqualError(detailedError(ErrorType.NUM))
+    expect(engine.getCellValue(adr('C2')).cellValue).toEqualError(detailedError(ErrorType.NUM))
   })
 })

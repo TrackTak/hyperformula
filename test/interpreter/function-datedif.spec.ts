@@ -10,8 +10,8 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for wrong type of arguments', () => {
@@ -20,8 +20,8 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF(2, "bar", "Y")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('numerical errors', () => {
@@ -31,9 +31,9 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF(1.9, 1.8, "Y")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.BadMode))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.StartEndDate))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.StartEndDate))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.BadMode))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.StartEndDate))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.StartEndDate))
   })
 
   it('"D" mode', () => {
@@ -43,9 +43,9 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("28/02/2020", "01/03/2020", "D")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(2)
   })
 
   it('ignores time', () => {
@@ -55,9 +55,9 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("28/02/2020 2:00pm", "01/03/2020", "D")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(2)
   })
 
   it('"M" mode', () => {
@@ -67,9 +67,9 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("29/02/2020", "28/03/2020", "M")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(12)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(12)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(0)
   })
 
   it('"YM" mode', () => {
@@ -79,9 +79,9 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("29/02/2020", "28/03/2020", "YM")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(0)
   })
 
   it('"Y" mode', () => {
@@ -96,14 +96,14 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("28/02/2020", "01/03/2021", "Y")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
-    expect(engine.getCellValue(adr('A3'))).toEqual(1)
-    expect(engine.getCellValue(adr('A4'))).toEqual(1)
-    expect(engine.getCellValue(adr('A5'))).toEqual(0)
-    expect(engine.getCellValue(adr('A6'))).toEqual(1)
-    expect(engine.getCellValue(adr('A7'))).toEqual(1)
-    expect(engine.getCellValue(adr('A8'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A8')).cellValue).toEqual(1)
   })
 
   it('"MD" mode #1', () => {
@@ -112,8 +112,8 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("28/03/2019", "28/02/2020", "MD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
   })
 
   it('"MD" mode #2', () => {
@@ -124,10 +124,10 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("28/01/2016", "01/05/2020", "MD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(3)
-    expect(engine.getCellValue(adr('A2'))).toEqual(3)
-    expect(engine.getCellValue(adr('A3'))).toEqual(3)
-    expect(engine.getCellValue(adr('A4'))).toEqual(3)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
   })
 
   it('"MD" mode #3', () => {
@@ -138,10 +138,10 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("28/01/2016", "01/03/2020", "MD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2)
-    expect(engine.getCellValue(adr('A2'))).toEqual(2)
-    expect(engine.getCellValue(adr('A3'))).toEqual(2)
-    expect(engine.getCellValue(adr('A4'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(2)
   })
 
   it('"MD" mode #4', () => {
@@ -152,10 +152,10 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("28/01/2016", "01/03/2021", "MD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(1)
-    expect(engine.getCellValue(adr('A4'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(1)
   })
 
   it('"MD" mode #5', () => {
@@ -166,10 +166,10 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("28/01/2016", "01/02/2020", "MD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(4)
-    expect(engine.getCellValue(adr('A2'))).toEqual(4)
-    expect(engine.getCellValue(adr('A3'))).toEqual(4)
-    expect(engine.getCellValue(adr('A4'))).toEqual(4)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(4)
   })
 
   it('"MD" mode #6', () => {
@@ -180,10 +180,10 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("28/01/2016", "01/01/2020", "MD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(4)
-    expect(engine.getCellValue(adr('A2'))).toEqual(4)
-    expect(engine.getCellValue(adr('A3'))).toEqual(4)
-    expect(engine.getCellValue(adr('A4'))).toEqual(4)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(4)
   })
 
   it('"MD" mode negative result', () => {
@@ -192,8 +192,8 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("31/01/2021", "01/03/2021", "MD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(-1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(-2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(-1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(-2)
   })
 
   it('"YD" mode #1', () => {
@@ -207,13 +207,13 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("27/02/2016", "01/03/2021", "YD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(2)
-    expect(engine.getCellValue(adr('A4'))).toEqual(3)
-    expect(engine.getCellValue(adr('A5'))).toEqual(0)
-    expect(engine.getCellValue(adr('A6'))).toEqual(1)
-    expect(engine.getCellValue(adr('A7'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(2)
   })
 
   it('"YD" mode #2', () => {
@@ -227,13 +227,13 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("28/02/2016", "01/03/2021", "YD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(365)
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
-    expect(engine.getCellValue(adr('A3'))).toEqual(1)
-    expect(engine.getCellValue(adr('A4'))).toEqual(2)
-    expect(engine.getCellValue(adr('A5'))).toEqual(365)
-    expect(engine.getCellValue(adr('A6'))).toEqual(0)
-    expect(engine.getCellValue(adr('A7'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(365)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(365)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(1)
   })
 
   it('"YD" mode #3', () => {
@@ -247,13 +247,13 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("29/02/2016", "01/03/2021", "YD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(364)
-    expect(engine.getCellValue(adr('A2'))).toEqual(365)
-    expect(engine.getCellValue(adr('A3'))).toEqual(0)
-    expect(engine.getCellValue(adr('A4'))).toEqual(1)
-    expect(engine.getCellValue(adr('A5'))).toEqual(364)
-    expect(engine.getCellValue(adr('A6'))).toEqual(365)
-    expect(engine.getCellValue(adr('A7'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(364)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(365)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(364)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(365)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(0)
   })
 
   it('"YD" mode #4', () => {
@@ -267,13 +267,13 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("01/03/2016", "01/03/2021", "YD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(363)
-    expect(engine.getCellValue(adr('A2'))).toEqual(364)
-    expect(engine.getCellValue(adr('A3'))).toEqual(365)
-    expect(engine.getCellValue(adr('A4'))).toEqual(0)
-    expect(engine.getCellValue(adr('A5'))).toEqual(363)
-    expect(engine.getCellValue(adr('A6'))).toEqual(364)
-    expect(engine.getCellValue(adr('A7'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(363)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(364)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(365)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(363)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(364)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(0)
   })
 
   it('"YD" mode #5', () => {
@@ -287,13 +287,13 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("27/02/2015", "01/03/2021", "YD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(2)
-    expect(engine.getCellValue(adr('A4'))).toEqual(3)
-    expect(engine.getCellValue(adr('A5'))).toEqual(0)
-    expect(engine.getCellValue(adr('A6'))).toEqual(1)
-    expect(engine.getCellValue(adr('A7'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(2)
   })
 
   it('"YD" mode #6', () => {
@@ -307,13 +307,13 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("28/02/2015", "01/03/2021", "YD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(364)
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
-    expect(engine.getCellValue(adr('A3'))).toEqual(1)
-    expect(engine.getCellValue(adr('A4'))).toEqual(2)
-    expect(engine.getCellValue(adr('A5'))).toEqual(364)
-    expect(engine.getCellValue(adr('A6'))).toEqual(0)
-    expect(engine.getCellValue(adr('A7'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(364)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(364)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(1)
   })
 
   it('"YD" mode #7', () => {
@@ -327,13 +327,13 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF("01/03/2015", "01/03/2021", "YD")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(363)
-    expect(engine.getCellValue(adr('A2'))).toEqual(364)
-    expect(engine.getCellValue(adr('A3'))).toEqual(365)
-    expect(engine.getCellValue(adr('A4'))).toEqual(0)
-    expect(engine.getCellValue(adr('A5'))).toEqual(363)
-    expect(engine.getCellValue(adr('A6'))).toEqual(364)
-    expect(engine.getCellValue(adr('A7'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(363)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(364)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(365)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(363)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(364)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(0)
   })
 
   //inconsistency with product 1
@@ -343,7 +343,7 @@ describe('Function DATEDIF', () => {
       [{ cellValue: '=DATEDIF(0, -1, "M")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 })

@@ -9,8 +9,8 @@ describe('Function FV', () => {
       [{ cellValue: '=FV(1,1)' }, { cellValue: '=FV(1, 1, 1, 1, 1, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value with correct arguments and defaults', () => {
@@ -18,9 +18,9 @@ describe('Function FV', () => {
       [{ cellValue: '=FV(2%, 24, 100)' }, { cellValue: '=FV(2%, 24, 100, 400)' }, { cellValue: '=FV(2%, 24, 100, 400, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(-3042.18624737613)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(-3042.18624737613)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
-    expect(engine.getCellValue(adr('B1'))).toBeCloseTo(-3685.56114716622)
-    expect(engine.getCellValue(adr('C1'))).toBeCloseTo(-3746.40487211374)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBeCloseTo(-3685.56114716622)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBeCloseTo(-3746.40487211374)
   })
 })

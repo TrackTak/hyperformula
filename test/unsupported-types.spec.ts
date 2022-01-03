@@ -89,7 +89,7 @@ describe('unsupported types should result in error', () => {
     const [engine] = HyperFormula.buildFromArray(sheet)
     // eslint-disable-next-line
     // @ts-ignore
-    expect(() => engine.setCellContents(adr('A1'), () => {}))
+    expect(() => engine.setCellContents(adr('A1'), { cellValue: () => {}}))
       .toThrowError(/^Unable to parse value\: "(\(\) \=\> \{ \}|function \(\) \{\})"$/)
     // eslint-disable-next-line
     // @ts-ignore

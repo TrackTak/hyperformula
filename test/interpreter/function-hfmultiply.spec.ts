@@ -9,8 +9,8 @@ describe('Function HF.MULTIPLY', () => {
       [{ cellValue: '=HF.MULTIPLY(1)' }, { cellValue: '=HF.MULTIPLY(1, 1, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value with correct defaults', () => {
@@ -20,9 +20,9 @@ describe('Function HF.MULTIPLY', () => {
       [{ cellValue: '=HF.MULTIPLY(,)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(6)
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
-    expect(engine.getCellValue(adr('A3'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(0)
   })
 
   it('should coerce to correct types', () => {
@@ -32,9 +32,9 @@ describe('Function HF.MULTIPLY', () => {
       [{ cellValue: '=HF.MULTIPLY("1",1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
-    expect(engine.getCellValue(adr('A3'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(1)
   })
 
   it('should throw correct error', () => {
@@ -44,9 +44,9 @@ describe('Function HF.MULTIPLY', () => {
       [{ cellValue: '=HF.MULTIPLY(B3:C3,)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 
   it('passes subtypes', () => {

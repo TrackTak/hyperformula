@@ -10,8 +10,8 @@ describe('Function DECIMAL', () => {
       [{ cellValue: '=DECIMAL("foo", 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error when value does not correspond to base', () => {
@@ -20,8 +20,8 @@ describe('Function DECIMAL', () => {
       [{ cellValue: '=DECIMAL("123XYZ", 33)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
   })
 
   it('should work', () => {
@@ -35,25 +35,25 @@ describe('Function DECIMAL', () => {
       [{ cellValue: '=DECIMAL("123XYZ", 36)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2)
-    expect(engine.getCellValue(adr('A2'))).toEqual(34359738366)
-    expect(engine.getCellValue(adr('A3'))).toEqual(27)
-    expect(engine.getCellValue(adr('A4'))).toEqual(12648430)
-    expect(engine.getCellValue(adr('A5'))).toEqual(117431614)
-    expect(engine.getCellValue(adr('A6'))).toEqual(9846500)
-    expect(engine.getCellValue(adr('A7'))).toEqual(64009403)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(34359738366)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(27)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(12648430)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(117431614)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(9846500)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(64009403)
   })
 
   it('should work for of max length 255', () => {
     const longNumber = '1'.repeat(255)
     const tooLongNumber = '1'.repeat(256)
     const [engine] = HyperFormula.buildFromArray([
-      [`=DECIMAL(\"${longNumber}\", 2)`],
-      [`=DECIMAL(\"${tooLongNumber}\", 2)`],
+      [{ cellValue: `=DECIMAL(\"${longNumber}\", 2)` }],
+      [{ cellValue: `=DECIMAL(\"${tooLongNumber}\", 2)` }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(5.78960446186581e+76)
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(5.78960446186581e+76)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotHex))
   })
 
   it('should work only for bases from 2 to 36', () => {
@@ -64,10 +64,10 @@ describe('Function DECIMAL', () => {
       [{ cellValue: '=DECIMAL("XYZ", 37)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqual(2)
-    expect(engine.getCellValue(adr('A3'))).toEqual(44027)
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(44027)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 
   it('should return number', () => {

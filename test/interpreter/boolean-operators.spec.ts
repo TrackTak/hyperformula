@@ -9,9 +9,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=1=2' }, { cellValue: '=1=1' }, { cellValue: '=1+2=3' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
   })
 
   it('Equals operator - strings', () => {
@@ -19,9 +19,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="abc"="abc"' }, { cellValue: '="foo"="bar"' }, { cellValue: '="a"="foo"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
   })
 
   it('Equals operator - booleans', () => {
@@ -29,9 +29,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=TRUE()=TRUE()' }, { cellValue: '=FALSE()=FALSE()' }, { cellValue: '=TRUE()=FALSE()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
   })
 
   it('Equal operator with different types', () => {
@@ -39,10 +39,10 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="foo"=1' }, { cellValue: '="foo"=TRUE()' }, { cellValue: '=1="foo"' }, { cellValue: '=TRUE()="foo"'}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
-    expect(engine.getCellValue(adr('D1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('D1')).cellValue).toBe(false)
   })
 
   it('Equals operator with error', () => {
@@ -50,8 +50,8 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=1/0' }, { cellValue: '=A1=2' }, { cellValue: '=2=A1' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('Not equals operator - numbers', () => {
@@ -59,9 +59,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=1<>2' }, { cellValue: '=1<>1' }, { cellValue: '=1+2<>3' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
   })
 
   it('Not equals operator - strings', () => {
@@ -69,9 +69,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="abc"<>"abc"' }, { cellValue: '="foo"<>"bar"' }, { cellValue: '="a"<>"foo"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
   })
 
   it('Not equals operator - booleans', () => {
@@ -79,9 +79,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=TRUE()<>TRUE()' }, { cellValue: '=FALSE()<>FALSE()' }, { cellValue: '=TRUE()<>FALSE()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
   })
 
   it('Not equals operator with error', () => {
@@ -89,8 +89,8 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=1/0' }, { cellValue: '=A1<>2' }, { cellValue: '=2<>A1' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('Not Equal operator with different types', () => {
@@ -98,10 +98,10 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="foo"<>1' }, { cellValue: '="foo"<>TRUE()' }, { cellValue: '=1<>"foo"' }, { cellValue: '=TRUE()<>"foo"'}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
-    expect(engine.getCellValue(adr('D1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('D1')).cellValue).toBe(true)
   })
 
   it('Less than operator with number arguments', () => {
@@ -109,10 +109,10 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=1<2' }, { cellValue: '=2<2' }, { cellValue: '=-3<4' }, { cellValue: '=-4<-3'}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
-    expect(engine.getCellValue(adr('D1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('D1')).cellValue).toBe(true)
   })
 
   it('Less than operator with different types', () => {
@@ -120,11 +120,11 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="foo"<1' }, { cellValue: '="foo"<TRUE()' }, { cellValue: '=1<"0"' }, { cellValue: '=2 < TRUE()'}, {cellValue: '="02/02/2020"<"000"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
-    expect(engine.getCellValue(adr('D1'))).toBe(true)
-    expect(engine.getCellValue(adr('E1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('D1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('E1')).cellValue).toBe(false)
   })
 
   it('Less than operator with strings', () => {
@@ -132,9 +132,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="abcd"<"abc"' }, { cellValue: '="11"<"2"' }, { cellValue: '="02/02/2020"<"true"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
   })
 
   it('Less than operator with coercions', () => {
@@ -142,9 +142,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=FALSE()<"2"' }, { cellValue: '="1"<"2"' }, { cellValue: '=TRUE()<FALSE()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
   })
 
   it('Greater than operator with number arguments', () => {
@@ -152,10 +152,10 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=2>1' }, { cellValue: '=2>2' }, { cellValue: '=4>-3' }, { cellValue: '=-3>-4'}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
-    expect(engine.getCellValue(adr('D1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('D1')).cellValue).toBe(true)
   })
 
   it('Greater than operator with different types', () => {
@@ -163,11 +163,11 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="foo">1' }, { cellValue: '="foo">TRUE()' }, { cellValue: '=1>"0"' }, { cellValue: '=2 > TRUE()'}, {cellValue: '="02/02/2020">"000"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
-    expect(engine.getCellValue(adr('D1'))).toBe(false)
-    expect(engine.getCellValue(adr('E1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('D1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('E1')).cellValue).toBe(true)
   })
 
   it('Greater than operator with strings', () => {
@@ -175,9 +175,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="abcd">"abc"' }, { cellValue: '="11">"2"' }, { cellValue: '="02/02/2020">"true"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
   })
 
   it('Greater than operator with coercions', () => {
@@ -185,9 +185,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=FALSE()>"2"' }, { cellValue: '="1">"2"' }, { cellValue: '=TRUE()>FALSE()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
   })
 
   it('Less than or equal operator with number arguments', () => {
@@ -195,11 +195,11 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=1<=2' }, { cellValue: '=2<=2' }, { cellValue: '=-3<=4' }, { cellValue: '=-4<=-3'}, {cellValue: '=5<=4' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
-    expect(engine.getCellValue(adr('D1'))).toBe(true)
-    expect(engine.getCellValue(adr('E1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('D1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('E1')).cellValue).toBe(false)
   })
 
   it('Less than or equal operator with strings', () => {
@@ -207,18 +207,18 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="abcd"<="abc"' }, { cellValue: '="11"<="2"' }, { cellValue: '="02/02/2020"<="true"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
   })
   it('Less than or equal operator with coercions', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=FALSE()<="2"' }, { cellValue: '="1"<="2"' }, { cellValue: '=TRUE()<=FALSE()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
   })
 
   it('Less than or equal operator with different types', () => {
@@ -226,11 +226,11 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="foo"<=1' }, { cellValue: '="foo"<=TRUE()' }, { cellValue: '=1<="0"' }, { cellValue: '=2 <= TRUE()'}, {cellValue: '="02/02/2020"<="000"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(false)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
-    expect(engine.getCellValue(adr('D1'))).toBe(true)
-    expect(engine.getCellValue(adr('E1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('D1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('E1')).cellValue).toBe(false)
   })
 
   it('Greater than or equal operator with number arguments', () => {
@@ -238,11 +238,11 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=2>=1' }, { cellValue: '=2>=2' }, { cellValue: '=4>=-3' }, { cellValue: '=-3>=-4'}, {cellValue: '=4>=5' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(true)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
-    expect(engine.getCellValue(adr('D1'))).toBe(true)
-    expect(engine.getCellValue(adr('E1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('D1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('E1')).cellValue).toBe(false)
   })
 
   it('Greater than or equal operator with different types', () => {
@@ -250,11 +250,11 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="foo">=1' }, { cellValue: '="foo">=TRUE()' }, { cellValue: '=1>="0"' }, { cellValue: '=2 >= TRUE()'}, {cellValue: '="02/02/2020">="000"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
-    expect(engine.getCellValue(adr('D1'))).toBe(false)
-    expect(engine.getCellValue(adr('E1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('D1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('E1')).cellValue).toBe(true)
   })
 
   it('Greater than or equal operator with strings', () => {
@@ -262,9 +262,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '="abcd">="abc"' }, { cellValue: '="11">="2"' }, { cellValue: '="02/02/2020">="true"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(false)
   })
 
   it('Greater than or equal operator with coercions', () => {
@@ -272,9 +272,9 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '=FALSE()>="2"' }, { cellValue: '="1">="2"' }, { cellValue: '=TRUE()>=FALSE()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
   })
 
   it('Less than propagates errors correctly', () => {
@@ -282,59 +282,59 @@ describe('Interpreter - Boolean operators', () => {
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=(1/0)<2' }, { cellValue: '=2<(1/0)'}, {cellValue: '=(A1:B1)<(1/0)' }, { cellValue: '=(1/0)<(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('E1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
   it('Greater than propagates errors correctly', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=(1/0)>2' }, { cellValue: '=2>(1/0)'}, {cellValue: '=(A1:B1)>(1/0)' }, { cellValue: '=(1/0)>(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('E1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
   it('Less than or equal propagates errors correctly', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=(1/0)<=2' }, { cellValue: '=2<=(1/0)'}, {cellValue: '=(A1:B1)<=(1/0)' }, { cellValue: '=(1/0)<=(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('E1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
   it('Greater than or equal propagates errors correctly', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=(1/0)>=2' }, { cellValue: '=2>=(1/0)'}, {cellValue: '=(A1:B1)>=(1/0)' }, { cellValue: '=(1/0)>=(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('E1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
   it('Equal propagates errors correctly', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=(1/0)=2' }, { cellValue: '=2=(1/0)'}, {cellValue: '=(A1:B1)=(1/0)' }, { cellValue: '=(1/0)=(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('E1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
   it('Not equal propagates errors correctly', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=(1/0)<>2' }, { cellValue: '=2<>(1/0)'}, {cellValue: '=(A1:B1)<>(1/0)' }, { cellValue: '=(1/0)<>(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('E1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

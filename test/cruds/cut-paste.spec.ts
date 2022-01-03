@@ -44,10 +44,10 @@ describe('Address dependencies, moved formulas', () => {
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 4))
     engine.paste(adr('B1'))
 
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.CYCLE))
-    expect(engine.getCellValue(adr('B2'))).toEqualError(detailedError(ErrorType.CYCLE))
-    expect(engine.getCellValue(adr('B3'))).toEqualError(detailedError(ErrorType.CYCLE))
-    expect(engine.getCellValue(adr('B4'))).toEqualError(detailedError(ErrorType.CYCLE))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
+    expect(engine.getCellValue(adr('B3')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
+    expect(engine.getCellValue(adr('B4')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
     expect(engine.getCellFormula(adr('B1'))).toEqual('=B1')
     expect(engine.getCellFormula(adr('B2'))).toEqual('=$B2')
     expect(engine.getCellFormula(adr('B3'))).toEqual('=B$3')
@@ -62,8 +62,8 @@ describe('Address dependencies, moved formulas', () => {
 
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A1'), 1, 2), adr('B1'))
 
-    expect(engine.getCellValue(adr('B1'))).toEqual(3)
-    expect(engine.getCellValue(adr('B2'))).toEqual(3)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual(3)
   })
 
   it('should update internal dependency when overriding dependent cell', () => {
@@ -109,8 +109,8 @@ describe('Address dependencies, moved formulas', () => {
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 3))
     engine.paste(adr('B1'))
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(4)
-    expect(engine.getCellValue(adr('A5'))).toEqual(5)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(4)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(5)
   })
 })
 
@@ -124,7 +124,7 @@ describe('Move cells', () => {
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('A2'))
 
-    expect(engine.getCellValue(adr('A2'))).toEqual('foo')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('foo')
   })
 
   it('should update reference of moved formula when moving to other sheet', () => {
@@ -134,7 +134,7 @@ describe('Move cells', () => {
         [{ cellValue: '=A1' }],
       ],
       Sheet2: [
-        [null /* =A1 */],
+        [{ cellValue: null }],
       ],
     })
 
@@ -146,7 +146,7 @@ describe('Move cells', () => {
 
   it('should update reference', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['foo' /* foo */],
+      [{ cellValue: 'foo' }],
       [{ cellValue: '=A1' }],
       [{ cellValue: '=$A1' }],
       [{ cellValue: '=A$1' }],
@@ -164,7 +164,7 @@ describe('Move cells', () => {
 
   it('value moved has appropriate edges', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['foo' /* foo */],
+      [{ cellValue: 'foo' }],
       [{ cellValue: '=A1' }],
     ])
 
@@ -202,8 +202,8 @@ describe('Move cells', () => {
 
     expect(engine.graph.edgesCount()).toBe(0)
     expect(engine.graph.nodesCount()).toBe(1)
-    expect(engine.getCellValue(adr('A1'))).toBe(null)
-    expect(engine.getCellValue(adr('A2'))).toBe(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(1)
   })
 
   it('moving empty vertex', () => {
@@ -270,14 +270,14 @@ describe('Move cells', () => {
     expect(source).toBe(undefined)
     expect(engine.graph.existsEdge(target, b2)).toBe(true)
     expect(engine.graph.existsEdge(target, b1)).toBe(true)
-    expect(engine.getCellValue(adr('A2'))).toBe(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(1)
   })
 })
 
 describe('moving ranges', () => {
   it('should not update range when only part of it is moved', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1' /* 1 */],
+      [{ cellValue: '1' }],
       [{ cellValue: '2' }],
       [{ cellValue: '=SUM(A1:A2)' }],
     ])
@@ -288,7 +288,7 @@ describe('moving ranges', () => {
     const range = extractRange(engine, adr('A3'))
     expect(range.start).toEqual(adr('A1'))
     expect(range.end).toEqual(adr('A2'))
-    expect(engine.getCellValue(adr('A3'))).toEqual(2)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(2)
 
     const a1 = engine.addressMapping.fetchCell(adr('A1'))
     const a2 = engine.addressMapping.fetchCell(adr('A2'))
@@ -306,8 +306,8 @@ describe('moving ranges', () => {
 
   it('should update moved range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1' /* 1 */],
-      ['2' /* 2 */],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
       [{ cellValue: '=SUM(A1:A2)' }],
     ])
 
@@ -319,7 +319,7 @@ describe('moving ranges', () => {
     const range = extractRange(engine, adr('A3'))
     expect(range.start).toEqual(adr('B1'))
     expect(range.end).toEqual(adr('B2'))
-    expect(engine.getCellValue(adr('A3'))).toEqual(3)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(3)
 
     expect(engine.addressMapping.getCell(adr('A1'))).toBe(undefined)
     expect(engine.addressMapping.getCell(adr('A2'))).toBe(undefined)
@@ -387,7 +387,7 @@ describe('moving ranges', () => {
     expect(engine.graph.existsEdge(source, range)).toBe(true)
     expect(engine.graph.existsEdge(target, range)).toBe(true)
     expect(engine.graph.existsEdge(range, b1)).toBe(true)
-    expect(engine.getCellValue(adr('A2'))).toBe(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(1)
 
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([
       [{ cellValue: null }, { cellValue: '=SUM(A1:A2)' }],
@@ -437,8 +437,8 @@ describe('moving ranges', () => {
 
   it('should adjust edges when moving smaller range', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', null            /* 1 */],
-      ['2', '=SUM(A1:A2)' /* 2 */],
+      [{ cellValue: '1' }, { cellValue: null }],
+      [{ cellValue: '2' }, { cellValue: '=SUM(A1:A2)' }],
       [{ cellValue: '3' }, { cellValue: '=SUM(A1:A3)' }],
     ])
 
@@ -476,9 +476,9 @@ describe('moving ranges', () => {
 
   it('should adjust edges when moving smaller ranges - more complex', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['1', null            /* 1 */],
-      ['2', '=SUM(A1:A2)' /* 2 */],
-      ['3', '=SUM(A1:A3)'  /* 3 */],
+      [{ cellValue: '1' }, { cellValue: null }],
+      [{ cellValue: '2' }, { cellValue: '=SUM(A1:A2)' }],
+      [{ cellValue: '3' }, { cellValue: '=SUM(A1:A3)' }],
       [{ cellValue: '4' }, { cellValue: '=SUM(A1:A4)' }],
     ])
 
@@ -847,7 +847,7 @@ describe('aborting cut paste', () => {
     ])
 
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
-    engine.addRows(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addRows(0, [1, 1])
 
     expect(engine.isClipboardEmpty()).toBe(true)
   })
@@ -859,7 +859,7 @@ describe('aborting cut paste', () => {
     ])
 
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
-    engine.removeRows(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.removeRows(0, [1, 1])
 
     expect(engine.isClipboardEmpty()).toBe(true)
   })
@@ -870,7 +870,7 @@ describe('aborting cut paste', () => {
     ])
 
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
-    engine.addColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addColumns(0, [1, 1])
 
     expect(engine.isClipboardEmpty()).toBe(true)
   })
@@ -881,7 +881,7 @@ describe('aborting cut paste', () => {
     ])
 
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
-    engine.removeColumns(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.removeColumns(0, [1, 1])
 
     expect(engine.isClipboardEmpty()).toBe(true)
   })
@@ -915,7 +915,7 @@ describe('aborting cut paste', () => {
     ])
 
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
-    engine.setCellContents(adr('B1'), 'foo')
+    engine.setCellContents(adr('B1'), { cellValue: 'foo' })
 
     expect(engine.isClipboardEmpty()).toBe(true)
   })
@@ -959,7 +959,7 @@ describe('aborting cut paste', () => {
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
 
     expect(() => {
-      engine.addRows(1, [{ cellValue: 1 }, { cellValue: 1 }])
+      engine.addRows(1, [1, 1])
     }).toThrow(new NoSheetWithIdError(1))
 
     expect(engine.isClipboardEmpty()).toBe(false)
@@ -967,7 +967,7 @@ describe('aborting cut paste', () => {
 
   it('should be aborted when doing undo', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }]])
-    engine.setCellContents(adr('A1'), 42)
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
 
     engine.undo()
@@ -977,7 +977,7 @@ describe('aborting cut paste', () => {
 
   it('should be aborted when doing redo', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }]])
-    engine.setCellContents(adr('A1'), 42)
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
 
@@ -989,28 +989,28 @@ describe('aborting cut paste', () => {
   it('should be aborted when swapping rows', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }]])
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
-    engine.swapRowIndexes(0, [[{ cellValue: 0 }, { cellValue: 0 }]])
+    engine.swapRowIndexes(0, [[0, 0]])
     expect(engine.isClipboardEmpty()).toBe(true)
   })
 
   it('should be aborted when swapping columns', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }]])
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
-    engine.swapColumnIndexes(0, [[{ cellValue: 0 }, { cellValue: 0 }]])
+    engine.swapColumnIndexes(0, [[0, 0]])
     expect(engine.isClipboardEmpty()).toBe(true)
   })
 
   it('should be aborted when setting row order', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }]])
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
-    engine.setRowOrder(0, [{ cellValue: 0 }])
+    engine.setRowOrder(0, [0])
     expect(engine.isClipboardEmpty()).toBe(true)
   })
 
   it('should be aborted when setting column order', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }]])
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
-    engine.setColumnOrder(0, [{ cellValue: 0 }])
+    engine.setColumnOrder(0, [0])
     expect(engine.isClipboardEmpty()).toBe(true)
   })
 })

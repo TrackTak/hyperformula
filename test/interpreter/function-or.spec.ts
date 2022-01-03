@@ -9,10 +9,10 @@ describe('Function OR', () => {
       [{ cellValue: '=OR(TRUE())' }, { cellValue: '=OR(FALSE())' }, { cellValue: '=OR(FALSE(), TRUE(), FALSE())' }, { cellValue: '=OR("asdf")'}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 
   it('use coercion #1', () => {
@@ -21,8 +21,8 @@ describe('Function OR', () => {
       [{ cellValue: '=OR("foo", 0)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 
   it('use coercion #2', () => {
@@ -33,9 +33,9 @@ describe('Function OR', () => {
       [{ cellValue: 'TRUE' }, { cellValue: 1 }, { cellValue: 'foo' }, { cellValue: '=TRUE()'}],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('A2'))).toBe(true)
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 
   it('function OR with numerical arguments', () => {
@@ -43,9 +43,9 @@ describe('Function OR', () => {
       [{ cellValue: '=OR(1)' }, { cellValue: '=OR(0)' }, { cellValue: '=OR(FALSE(), 42)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(true)
-    expect(engine.getCellValue(adr('B1'))).toBe(false)
-    expect(engine.getCellValue(adr('C1'))).toBe(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(true)
   })
 
   it('function OR takes at least one argument', () => {
@@ -53,7 +53,7 @@ describe('Function OR', () => {
       [{ cellValue: '=OR()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('if error in range found, returns first one in row-by-row order', () => {
@@ -63,7 +63,7 @@ describe('Function OR', () => {
       [{ cellValue: '=OR(A1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('works with ranges', () => {
@@ -73,7 +73,7 @@ describe('Function OR', () => {
       [{ cellValue: '=OR(A1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(true)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(true)
   })
 
   it('is computed eagerly', () => {
@@ -83,6 +83,6 @@ describe('Function OR', () => {
       [{ cellValue: '=OR(A1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

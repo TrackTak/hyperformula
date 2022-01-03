@@ -10,8 +10,8 @@ describe('Function NORM.S.INV', () => {
       [{ cellValue: '=NORM.S.INV(3, 4)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -19,7 +19,7 @@ describe('Function NORM.S.INV', () => {
       [{ cellValue: '=NORM.S.INV("foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work', () => {
@@ -28,8 +28,8 @@ describe('Function NORM.S.INV', () => {
       [{ cellValue: '=NORM.S.INV(0.5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(1.2815515655446, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(1.2815515655446, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0, 6)
   })
 
   it('checks bounds', () => {
@@ -40,9 +40,9 @@ describe('Function NORM.S.INV', () => {
       [{ cellValue: '=NORM.S.INV(1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(-2.32634787404084, 6)
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(2.32634787404084, 6)
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(-2.32634787404084, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(2.32634787404084, 6)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 })

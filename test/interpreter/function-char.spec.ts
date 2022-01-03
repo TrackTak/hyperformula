@@ -10,8 +10,8 @@ describe('Function CHAR', () => {
       [{ cellValue: '=CHAR(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for wrong type of arguments', () => {
@@ -19,7 +19,7 @@ describe('Function CHAR', () => {
       [{ cellValue: '=CHAR("foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work', () => {
@@ -32,12 +32,12 @@ describe('Function CHAR', () => {
       [{ cellValue: '=CHAR(255)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('')
-    expect(engine.getCellValue(adr('A2'))).toEqual('!')
-    expect(engine.getCellValue(adr('A3'))).toEqual('A')
-    expect(engine.getCellValue(adr('A4'))).toEqual('Z')
-    expect(engine.getCellValue(adr('A5'))).toEqual('Ñ')
-    expect(engine.getCellValue(adr('A6'))).toEqual('ÿ')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('!')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('A')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('Z')
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual('Ñ')
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual('ÿ')
   })
 
   it('should round down floats', () => {
@@ -47,9 +47,9 @@ describe('Function CHAR', () => {
       [{ cellValue: '=CHAR(42.8)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('*')
-    expect(engine.getCellValue(adr('A2'))).toEqual('*')
-    expect(engine.getCellValue(adr('A3'))).toEqual('*')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('*')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('*')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('*')
   })
 
   it('should work only for values from 1 to 255 truncating decimal part', () => {
@@ -62,11 +62,11 @@ describe('Function CHAR', () => {
       [{ cellValue: '=CHAR(255.5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CharacterCodeBounds))
-    expect(engine.getCellValue(adr('A2'))).toEqual('')
-    expect(engine.getCellValue(adr('A3'))).toEqual('ÿ')
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CharacterCodeBounds))
-    expect(engine.getCellValue(adr('A5'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CharacterCodeBounds))
-    expect(engine.getCellValue(adr('A6'))).toEqual('ÿ')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CharacterCodeBounds))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('ÿ')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CharacterCodeBounds))
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.CharacterCodeBounds))
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual('ÿ')
   })
 })

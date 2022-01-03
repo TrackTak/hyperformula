@@ -8,8 +8,8 @@ describe('Function COMBINA', () => {
       [{ cellValue: '=COMBINA(1)' }, { cellValue: '=COMBINA(1, 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('works', () => {
@@ -26,16 +26,16 @@ describe('Function COMBINA', () => {
       [{ cellValue: '=COMBINA(518,512)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(1)
-    expect(engine.getCellValue(adr('A2'))).toBe(1)
-    expect(engine.getCellValue(adr('A3'))).toBe(3)
-    expect(engine.getCellValue(adr('A4'))).toBe(1)
-    expect(engine.getCellValue(adr('A5'))).toBe(92378)
-    expect(engine.getCellValue(adr('A6'))).toBe(20030010)
-    expect(engine.getCellValue(adr('A7'))).toBe(635745396)
-    expect(engine.getCellValue(adr('A8')) as number / 1.8523520317769801e+115).toBeCloseTo(1, 6)
-    expect(engine.getCellValue(adr('A9'))).toBe(325949656825)
-    expect(engine.getCellValue(adr('A10')) as number / 1.41325918108873e+308).toBeCloseTo(1, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(3)
+    expect(engine.getCellValue(adr('A4')).cellValue).toBe(1)
+    expect(engine.getCellValue(adr('A5')).cellValue).toBe(92378)
+    expect(engine.getCellValue(adr('A6')).cellValue).toBe(20030010)
+    expect(engine.getCellValue(adr('A7')).cellValue).toBe(635745396)
+    expect(engine.getCellValue(adr('A8')).cellValue as number / 1.8523520317769801e+115).toBeCloseTo(1, 6)
+    expect(engine.getCellValue(adr('A9')).cellValue).toBe(325949656825)
+    expect(engine.getCellValue(adr('A10')).cellValue as number / 1.41325918108873e+308).toBeCloseTo(1, 6)
   })
 
   it('truncates argument', () => {
@@ -44,8 +44,8 @@ describe('Function COMBINA', () => {
       [{ cellValue: '=COMBINA(518, 512.9)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(3003)
-    expect(engine.getCellValue(adr('A2')) as number / 1.41325918108873e+308).toBeCloseTo(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(3003)
+    expect(engine.getCellValue(adr('A2')).cellValue as number / 1.41325918108873e+308).toBeCloseTo(1)
   })
 
   it('checks bounds', () => {
@@ -56,10 +56,10 @@ describe('Function COMBINA', () => {
       [{ cellValue: '=COMBINA(518, 513)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 
   it('uses coercion', () => {
@@ -67,7 +67,7 @@ describe('Function COMBINA', () => {
       [{ cellValue: '=COMBINA(TRUE(),"0")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
   })
 
   it('propagates error', () => {
@@ -75,6 +75,6 @@ describe('Function COMBINA', () => {
       [{ cellValue: '=COMBINA(NA(), NA())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })
 })

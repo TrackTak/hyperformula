@@ -8,7 +8,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('works', () => {
@@ -19,7 +19,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:A3,B1:B3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(14)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(14)
   })
 
   it('works for more args', () => {
@@ -30,7 +30,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:A3, B1:B3, A1:A3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(36)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(36)
   })
 
   it('works for less args', () => {
@@ -41,7 +41,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:A3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(6)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(6)
   })
 
   it('works with wider ranges', () => {
@@ -51,7 +51,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:B2,C1:D2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(30)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(30)
   })
 
   it('works with cached smaller range', () => {
@@ -61,9 +61,9 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '3' }, { cellValue: '3' }, { cellValue: '=SUMPRODUCT(A1:A3, B1:B3)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqual(1)
-    expect(engine.getCellValue(adr('C2'))).toEqual(5)
-    expect(engine.getCellValue(adr('C3'))).toEqual(14)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('C2')).cellValue).toEqual(5)
+    expect(engine.getCellValue(adr('C3')).cellValue).toEqual(14)
   })
 
   it('sumproduct from scalars', () => {
@@ -71,7 +71,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(42, 78)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(3276)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(3276)
   })
 
   it('use cached value if the same formula used', () => {
@@ -82,7 +82,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:A2,B1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(5)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(5)
   })
 
   it('it makes a coercion from other values', () => {
@@ -91,7 +91,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1,B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual(42)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(42)
   })
 
   it('if coercion unsuccessful, it ignores it', () => {
@@ -100,7 +100,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1,B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
   })
 
   it('works even if some string in data', () => {
@@ -110,7 +110,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:A2,B1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(1)
   })
 
   it('works even if both strings passed', () => {
@@ -119,7 +119,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1,B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
   })
 
   it('works even if both booleans passed', () => {
@@ -128,7 +128,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1,B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
   })
 
   it('error if error is somewhere in right value', () => {
@@ -138,7 +138,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:A2,B1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('error if error is somewhere in left value', () => {
@@ -148,7 +148,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:A2,B1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('error in left has precedence over error in right', () => {
@@ -158,7 +158,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:A2,B1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('UNKNOWNFUNCTION')))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('UNKNOWNFUNCTION')))
   })
 
   it('error when different size', () => {
@@ -169,8 +169,8 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:B2,C1:D1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.EqualLength))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.EqualLength))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.EqualLength))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.EqualLength))
   })
 
   it('works with matrices', () => {
@@ -179,7 +179,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '3' }],
       [{ cellValue: '=SUMPRODUCT(A1:B1, TRANSPOSE(A1:A2))' }],
     ])
-    expect(engine.getCellValue(adr('A3'))).toEqual(7)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(7)
   })
 
   it('error if mismatched range shape', () => {
@@ -190,7 +190,7 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:C1,A1:A3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.EqualLength))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.EqualLength))
   })
 
   // Inconsistency with Product 1
@@ -201,6 +201,6 @@ describe('Function SUMPRODUCT', () => {
       [{ cellValue: '=SUMPRODUCT(A1:B2, D1:E2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOOBAR')))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOOBAR')))
   })
 })

@@ -9,8 +9,8 @@ describe('Function LOWER', () => {
       [{ cellValue: '=LOWER("foo", "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should convert text to lowercase', () => {
@@ -22,11 +22,11 @@ describe('Function LOWER', () => {
       [{ cellValue: '=LOWER("BaR")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('')
-    expect(engine.getCellValue(adr('A2'))).toEqual('')
-    expect(engine.getCellValue(adr('A3'))).toEqual('foo')
-    expect(engine.getCellValue(adr('A4'))).toEqual('foo')
-    expect(engine.getCellValue(adr('A5'))).toEqual('bar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual('bar')
   })
 
   it('should coerce', () => {
@@ -35,7 +35,7 @@ describe('Function LOWER', () => {
       [{ cellValue: '=LOWER(0)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('true')
-    expect(engine.getCellValue(adr('A2'))).toEqual('0')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('true')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('0')
   })
 })

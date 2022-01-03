@@ -7,9 +7,9 @@ describe('Function ISBINARY', () => {
       [{ cellValue: '=ISBINARY("1010")' }, { cellValue: '=ISBINARY(1001)' }, { cellValue: '=ISBINARY(010)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(true)
-    expect(engine.getCellValue(adr('B1'))).toEqual(true)
-    expect(engine.getCellValue(adr('C1'))).toEqual(true)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(true)
   })
 
   it('should return false otherwise', () => {
@@ -17,8 +17,8 @@ describe('Function ISBINARY', () => {
       [{ cellValue: '=ISBINARY("foo")' }, { cellValue: '=ISBINARY(123)' }, { cellValue: '=ISBINARY(TRUE())' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(false)
-    expect(engine.getCellValue(adr('B1'))).toEqual(false)
-    expect(engine.getCellValue(adr('C1'))).toEqual(false)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
   })
 })

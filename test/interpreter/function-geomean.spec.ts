@@ -8,7 +8,7 @@ describe('Function GEOMEAN', () => {
       [{ cellValue: '=GEOMEAN(1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
   })
 
   it('two numbers', () => {
@@ -16,7 +16,7 @@ describe('Function GEOMEAN', () => {
       [{ cellValue: '=GEOMEAN(1, 4)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
   })
 
   it('more numbers', () => {
@@ -24,7 +24,7 @@ describe('Function GEOMEAN', () => {
       [{ cellValue: '=GEOMEAN(8, 1, 2, 4, 16)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(4)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(4)
   })
 
   it('validates input', () => {
@@ -33,8 +33,8 @@ describe('Function GEOMEAN', () => {
       [{ cellValue: '=GEOMEAN(8, -1, -2, 4, 16)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 
   it('works with ranges', () => {
@@ -43,7 +43,7 @@ describe('Function GEOMEAN', () => {
       [{ cellValue: '=GEOMEAN(A1:C1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual(3)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(3)
   })
 
   it('propagates error from regular argument', () => {
@@ -51,7 +51,7 @@ describe('Function GEOMEAN', () => {
       [{ cellValue: '=3/0' }, { cellValue: '=GEOMEAN(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('propagates first error from range argument', () => {
@@ -59,7 +59,7 @@ describe('Function GEOMEAN', () => {
       [{ cellValue: '=3/0' }, { cellValue: '=FOO(' }, { cellValue: '=GEOMEAN(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('returns error for empty ranges', () => {
@@ -69,7 +69,7 @@ describe('Function GEOMEAN', () => {
       [{ cellValue: null }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.OneValue))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.OneValue))
   })
 
   /**
@@ -80,15 +80,15 @@ describe('Function GEOMEAN', () => {
       [{ cellValue: '=GEOMEAN(TRUE(),"4")' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
   })
 
   it('ignores nonnumeric values in ranges', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=GEOMEAN(A2:D2)' }],
-      [1, 1, false, null, '\'0']
+      [{ cellValue: 1 }, { cellValue: 1 }, { cellValue: false }, { cellValue: null }, { cellValue: '\'0' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
   })
 })

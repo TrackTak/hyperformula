@@ -10,8 +10,8 @@ describe('Function NEGBINOM.DIST', () => {
       [{ cellValue: '=NEGBINOM.DIST(1, 2, 3, 4, 5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -22,10 +22,10 @@ describe('Function NEGBINOM.DIST', () => {
       [{ cellValue: '=NEGBINOM.DIST(1, 2, 1, "abcd")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 
   it('should work as cdf', () => {
@@ -34,8 +34,8 @@ describe('Function NEGBINOM.DIST', () => {
       [{ cellValue: '=NEGBINOM.DIST(2, 3, 0.1, TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.0493685733526945, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.00856, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.0493685733526945, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.00856, 6)
   })
 
   it('should work as pdf', () => {
@@ -44,8 +44,8 @@ describe('Function NEGBINOM.DIST', () => {
       [{ cellValue: '=NEGBINOM.DIST(2, 3, 0.1, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.0186544004827738, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.00486, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.0186544004827738, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.00486, 6)
   })
 
   it('truncates first and second arg', () => {
@@ -54,8 +54,8 @@ describe('Function NEGBINOM.DIST', () => {
       [{ cellValue: '=NEGBINOM.DIST(2, 3.9, 0.1, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.0186544004827738, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.00486, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.0186544004827738, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.00486, 6)
   })
 
   it('checks bounds', () => {
@@ -69,14 +69,14 @@ describe('Function NEGBINOM.DIST', () => {
       [{ cellValue: '=NEGBINOM.DIST(0, 1, 1.01, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0.5)
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0.5)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
     //product #2 returns error
-    expect(engine.getCellValue(adr('A4'))).toEqual(0)
-    expect(engine.getCellValue(adr('A5'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
     //product #2 returns error
-    expect(engine.getCellValue(adr('A6'))).toEqual(1)
-    expect(engine.getCellValue(adr('A7'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
   })
 })

@@ -9,8 +9,8 @@ describe('Function ROUND', () => {
       [{ cellValue: '=ROUND()' }, { cellValue: '=ROUND(1, 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('works for positive numbers', () => {
@@ -18,8 +18,8 @@ describe('Function ROUND', () => {
       [{ cellValue: '=ROUND(1.3)' }, { cellValue: '=ROUND(1.7)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(1)
-    expect(engine.getCellValue(adr('B1'))).toBe(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(2)
   })
 
   it('works for negative numbers', () => {
@@ -27,8 +27,8 @@ describe('Function ROUND', () => {
       [{ cellValue: '=ROUND(-1.3)' }, { cellValue: '=ROUND(-1.7)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(-1)
-    expect(engine.getCellValue(adr('B1'))).toBe(-2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(-1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(-2)
   })
 
   it('no -0', () => {
@@ -36,8 +36,8 @@ describe('Function ROUND', () => {
       [{ cellValue: '=ROUND(-0.001)' }, { cellValue: '=ROUND(0.001)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(0)
-    expect(engine.getCellValue(adr('B1'))).toBe(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(0)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(0)
   })
 
   it('works with positive rounding argument', () => {
@@ -45,8 +45,8 @@ describe('Function ROUND', () => {
       [{ cellValue: '=ROUND(1.43, 1)' }, { cellValue: '=ROUND(1.47, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(1.4)
-    expect(engine.getCellValue(adr('B1'))).toBe(1.5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(1.4)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(1.5)
   })
 
   it('works with negative rounding argument', () => {
@@ -54,8 +54,8 @@ describe('Function ROUND', () => {
       [{ cellValue: '=ROUND(43, -1)' }, { cellValue: '=ROUND(47, -1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(40)
-    expect(engine.getCellValue(adr('B1'))).toBe(50)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(40)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(50)
   })
 
   it('use coercion', () => {
@@ -63,7 +63,7 @@ describe('Function ROUND', () => {
       [{ cellValue: '=ROUND("42.3")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(42)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(42)
   })
 
   it('propagates error', () => {
@@ -72,8 +72,8 @@ describe('Function ROUND', () => {
       [{ cellValue: '=ROUND(A1)' }, { cellValue: '=ROUND(42, A1)' }, { cellValue: '=ROUND(A1, FOO())' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('B2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('C2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

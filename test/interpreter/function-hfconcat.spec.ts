@@ -8,8 +8,8 @@ describe('Function HF.CONCAT', () => {
       [{ cellValue: '=HF.CONCAT(1)' }, { cellValue: '=HF.CONCAT(1, 1, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value with correct defaults', () => {
@@ -19,9 +19,9 @@ describe('Function HF.CONCAT', () => {
       [{ cellValue: '=HF.CONCAT(,)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('hokuspokusczarymary')
-    expect(engine.getCellValue(adr('A2'))).toEqual('a')
-    expect(engine.getCellValue(adr('A3'))).toEqual('')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('hokuspokusczarymary')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('a')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('')
   })
 
   it('should coerce to correct types', () => {
@@ -30,8 +30,8 @@ describe('Function HF.CONCAT', () => {
       [{ cellValue: '=HF.CONCAT(1,)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('TRUE')
-    expect(engine.getCellValue(adr('A2'))).toEqual('1')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('TRUE')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('1')
   })
 
   it('should throw correct error', () => {
@@ -40,7 +40,7 @@ describe('Function HF.CONCAT', () => {
       [{ cellValue: '=HF.CONCAT(B2:C2,)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 })

@@ -9,8 +9,8 @@ describe('Function EVEN', () => {
       [{ cellValue: '=EVEN()' }, { cellValue: '=EVEN(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('works for positive numbers', () => {
@@ -18,8 +18,8 @@ describe('Function EVEN', () => {
       [{ cellValue: '=EVEN(0.3)' }, { cellValue: '=EVEN(1.7)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(2)
-    expect(engine.getCellValue(adr('B1'))).toBe(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(2)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(2)
   })
 
   it('works for negative numbers', () => {
@@ -27,8 +27,8 @@ describe('Function EVEN', () => {
       [{ cellValue: '=EVEN(-0.3)' }, { cellValue: '=EVEN(-1.7)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(-2)
-    expect(engine.getCellValue(adr('B1'))).toBe(-2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(-2)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(-2)
   })
 
   it('use coercion', () => {
@@ -36,7 +36,7 @@ describe('Function EVEN', () => {
       [{ cellValue: '=EVEN("42.3")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(44)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(44)
   })
 
   it('propagates error', () => {
@@ -45,6 +45,6 @@ describe('Function EVEN', () => {
       [{ cellValue: '=EVEN(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

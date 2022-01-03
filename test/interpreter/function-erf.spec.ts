@@ -11,8 +11,8 @@ describe('Function ERF', () => {
       [{ cellValue: '=ERF(1, 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -21,8 +21,8 @@ describe('Function ERF', () => {
       [{ cellValue: '=ERF(1, "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work for single argument', () => {
@@ -33,9 +33,9 @@ describe('Function ERF', () => {
       [{ cellValue: '=ERF(-2.56)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(0.9999910304344467, 6)
-    expect(engine.getCellValue(adr('A4'))).toBeCloseTo(-0.999705836979508, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(0.9999910304344467, 6)
+    expect(engine.getCellValue(adr('A4')).cellValue).toBeCloseTo(-0.999705836979508, 6)
   })
 
   it('should work with second argument', () => {
@@ -45,8 +45,8 @@ describe('Function ERF', () => {
       [{ cellValue: '=ERF(5.6, -3.1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.32105562956522493, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(1.9941790884215962, 6)
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(-1.9999883513426304, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.32105562956522493, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(1.9941790884215962, 6)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(-1.9999883513426304, 6)
   })
 })

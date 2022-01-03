@@ -6,19 +6,19 @@ describe('Function FILTER', () => {
   it('validates input #1', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=FILTER(D2:E3, D2:E3)' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongDimension))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongDimension))
   })
 
   it('validates input #2', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=FILTER(D2:D3, D2:D3, D2:D4)' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
   })
 
   it('validates input #3', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=FILTER(1, FALSE())' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EmptyRange))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EmptyRange))
   })
 
   it('works #1', () => {

@@ -7,21 +7,21 @@ describe('Function ASINH', () => {
   it('happy path', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=ASINH(0)' }, { cellValue: '=ASINH(0.5)' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(0)
-    expect(engine.getCellValue(adr('B1'))).toBeCloseTo(0.481211825059604)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(0)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBeCloseTo(0.481211825059604)
   })
 
   it('when value not numeric', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=ASINH("foo")' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('wrong number of arguments', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=ASINH()' }, { cellValue: '=ASINH(1,-1)' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('use number coercion', () => {
@@ -29,7 +29,7 @@ describe('Function ASINH', () => {
       [{ cellValue: '="-1"' }, { cellValue: '=ASINH(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toBeCloseTo(-0.881373587019543)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBeCloseTo(-0.881373587019543)
   })
 
   it('errors propagation', () => {
@@ -37,6 +37,6 @@ describe('Function ASINH', () => {
       [{ cellValue: '=ASINH(4/0)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

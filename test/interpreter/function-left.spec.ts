@@ -9,8 +9,8 @@ describe('Function LEFT', () => {
       [{ cellValue: '=LEFT("foo", 1, 2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return VALUE when wrong type of second parameter', () => {
@@ -18,7 +18,7 @@ describe('Function LEFT', () => {
       [{ cellValue: '=LEFT("foo", "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work with empty argument', () => {
@@ -26,7 +26,7 @@ describe('Function LEFT', () => {
       [{ cellValue: '=LEFT(, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('')
   })
 
   it('should return one character by default', () => {
@@ -34,7 +34,7 @@ describe('Function LEFT', () => {
       [{ cellValue: '=LEFT("bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('b')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('b')
   })
 
   it('should return VALUE when second parameter is less than 0', () => {
@@ -42,7 +42,7 @@ describe('Function LEFT', () => {
       [{ cellValue: '=LEFT("foo", -1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NegativeLength))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NegativeLength))
   })
 
   it('should work', () => {
@@ -55,12 +55,12 @@ describe('Function LEFT', () => {
       [{ cellValue: '=LEFT(123, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('')
-    expect(engine.getCellValue(adr('A2'))).toEqual('')
-    expect(engine.getCellValue(adr('A3'))).toEqual('b')
-    expect(engine.getCellValue(adr('A4'))).toEqual('bar')
-    expect(engine.getCellValue(adr('A5'))).toEqual('bar')
-    expect(engine.getCellValue(adr('A6'))).toEqual('12')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('b')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('bar')
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual('bar')
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual('12')
   })
 
   it('should coerce other types to string', () => {
@@ -70,8 +70,8 @@ describe('Function LEFT', () => {
       [{ cellValue: '=LEFT(TRUE(), 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('1')
-    expect(engine.getCellValue(adr('A2'))).toEqual('1')
-    expect(engine.getCellValue(adr('A3'))).toEqual('T')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('1')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('T')
   })
 })

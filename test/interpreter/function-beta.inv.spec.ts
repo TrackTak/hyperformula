@@ -10,8 +10,8 @@ describe('Function BETA.INV', () => {
       [{ cellValue: '=BETA.INV(1, 2, 3, 4, 5, 6)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -23,11 +23,11 @@ describe('Function BETA.INV', () => {
       [{ cellValue: '=BETA.INV(1, 2, 3, 1, "b")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A5'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work', () => {
@@ -36,8 +36,8 @@ describe('Function BETA.INV', () => {
       [{ cellValue: '=BETA.INV(0.5, 2, 4)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.0513167019494862, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.313810170455698, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.0513167019494862, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.313810170455698, 6)
   })
 
   it('scaling works', () => {
@@ -46,8 +46,8 @@ describe('Function BETA.INV', () => {
       [{ cellValue: '=BETA.INV(0.5, 2, 4, -1, 0)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(2.41053361559589, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(-0.686189829544302, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(2.41053361559589, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(-0.686189829544302, 6)
   })
 
   it('checks bounds', () => {
@@ -60,11 +60,11 @@ describe('Function BETA.INV', () => {
       [{ cellValue: '=BETA.INV(0.6, 1, 1, 0.7, 0.6)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A4'))).toEqual(1) //product #2 returns NUM
-    expect(engine.getCellValue(adr('A5'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
-    expect(engine.getCellValue(adr('A6'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.WrongOrder))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(1) //product #2 returns NUM
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.WrongOrder))
   })
 })

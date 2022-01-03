@@ -9,8 +9,8 @@ describe('Function UNICODE', () => {
       [{ cellValue: '=UNICODE("foo", "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for empty strings', () => {
@@ -18,7 +18,7 @@ describe('Function UNICODE', () => {
       [{ cellValue: '=UNICODE("")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.EmptyString))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.EmptyString))
   })
 
   it('should work for single chars', () => {
@@ -34,15 +34,15 @@ describe('Function UNICODE', () => {
       [{ cellValue: '=UNICODE("􏿿")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(33)
-    expect(engine.getCellValue(adr('A3'))).toEqual(65)
-    expect(engine.getCellValue(adr('A4'))).toEqual(90)
-    expect(engine.getCellValue(adr('A5'))).toEqual(209)
-    expect(engine.getCellValue(adr('A6'))).toEqual(255)
-    expect(engine.getCellValue(adr('A7'))).toEqual(84)
-    expect(engine.getCellValue(adr('A8'))).toEqual(8364)
-    expect(engine.getCellValue(adr('A9'))).toEqual(1114111)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(33)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(65)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(90)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(209)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(255)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(84)
+    expect(engine.getCellValue(adr('A8')).cellValue).toEqual(8364)
+    expect(engine.getCellValue(adr('A9')).cellValue).toEqual(1114111)
   })
 
   it('should return code of first character', () => {
@@ -51,8 +51,8 @@ describe('Function UNICODE', () => {
       [{ cellValue: '=UNICODE("Ñbaz")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(65)
-    expect(engine.getCellValue(adr('A2'))).toEqual(209)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(65)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(209)
   })
 
   it('should return number', () => {
@@ -72,10 +72,10 @@ describe('Function UNICODE', () => {
       [{ cellValue: '=UNICODE(UNICHAR(1114111))' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(128)
-    expect(engine.getCellValue(adr('A3'))).toEqual(256)
-    expect(engine.getCellValue(adr('A4'))).toEqual(8364)
-    expect(engine.getCellValue(adr('A5'))).toEqual(1114111)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(128)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(256)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(8364)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(1114111)
   })
 })

@@ -10,8 +10,8 @@ describe('Function FISHERINV', () => {
       [{ cellValue: '=FISHERINV(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -19,7 +19,7 @@ describe('Function FISHERINV', () => {
       [{ cellValue: '=FISHERINV("foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work', () => {
@@ -29,8 +29,8 @@ describe('Function FISHERINV', () => {
       [{ cellValue: '=FISHERINV(-5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.46211715726001, 6)
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(-0.999909204262595, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.46211715726001, 6)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(-0.999909204262595, 6)
   })
 })

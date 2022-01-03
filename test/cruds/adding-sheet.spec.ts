@@ -47,7 +47,7 @@ describe('add sheet to engine', () => {
 
     engine.addSheet()
 
-    expect(engine.getCellValue(adr('A1', 0))).toBe(null)
+    expect(engine.getCellValue(adr('A1', 0)).cellValue).toBe(null)
   })
 
   it('should add sheet with translated sheet name', function() {

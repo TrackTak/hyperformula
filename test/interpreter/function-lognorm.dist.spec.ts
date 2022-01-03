@@ -11,8 +11,8 @@ describe('Function LOGNORM.DIST', () => {
       [{ cellValue: '=LOGNORM.DIST(1, 2, 3, 4, 5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   //in product #1, this function takes 3 arguments
@@ -24,10 +24,10 @@ describe('Function LOGNORM.DIST', () => {
       [{ cellValue: '=LOGNORM.DIST(1, 2, 3, "abcd")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
   })
 
   //in product #1, this function takes 3 arguments
@@ -37,8 +37,8 @@ describe('Function LOGNORM.DIST', () => {
       [{ cellValue: '=LOGNORM.DIST(0.5, 2, 4, TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.0493394267528022, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.250382425968177, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.0493394267528022, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.250382425968177, 6)
   })
 
   //in product #1, this function takes 3 arguments
@@ -48,8 +48,8 @@ describe('Function LOGNORM.DIST', () => {
       [{ cellValue: '=LOGNORM.DIST(0.5, 2, 4, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(0.510234855730895, 6)
-    expect(engine.getCellValue(adr('A2'))).toBeCloseTo(0.159017142514074, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.510234855730895, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.159017142514074, 6)
   })
 
   //in product #1, this function takes 3 arguments
@@ -60,8 +60,8 @@ describe('Function LOGNORM.DIST', () => {
       [{ cellValue: '=LOGNORM.DIST(0.01, 0, 0, FALSE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 })

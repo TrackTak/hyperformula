@@ -129,7 +129,7 @@ function validate(engine: HyperFormula, expectedValues: ExpectedValue[]) {
     let expectedValue = expectedValues[i].value
 
     const address = engine.simpleCellAddressFromString(expectedValues[i].address, 0)!
-    let actualValue = engine.getCellValue(address)
+    let actualValue = engine.getCellValue(address).cellValue
 
     if (typeof expectedValue === 'number' && typeof actualValue === 'number') {
       expectedValue = expectedValue.toPrecision(8)

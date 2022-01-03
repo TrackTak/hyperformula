@@ -10,8 +10,8 @@ describe('Function GAUSS', () => {
       [{ cellValue: '=GAUSS(1, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
@@ -19,7 +19,7 @@ describe('Function GAUSS', () => {
       [{ cellValue: '=GAUSS("foo")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should work', () => {
@@ -29,8 +29,8 @@ describe('Function GAUSS', () => {
       [{ cellValue: '=GAUSS(1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(-0.5, 6)
-    expect(engine.getCellValue(adr('A2'))).toEqual(0)
-    expect(engine.getCellValue(adr('A3'))).toBeCloseTo(0.341344746068543, 6)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(-0.5, 6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBeCloseTo(0.341344746068543, 6)
   })
 })

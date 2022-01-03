@@ -9,7 +9,7 @@ describe('Operator MINUS', () => {
       [{ cellValue: '=8-3' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(5)
   })
 
   it('use number coerce', () => {
@@ -18,8 +18,8 @@ describe('Operator MINUS', () => {
       [{ cellValue: '="foobar"-1' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(5)
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(5)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('pass error from left operand', () => {
@@ -28,7 +28,7 @@ describe('Operator MINUS', () => {
       [{ cellValue: '=4/0' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('pass error from right operand', () => {
@@ -37,7 +37,7 @@ describe('Operator MINUS', () => {
       [{ cellValue: '=4/0' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('pass error from left operand if both operands have error', () => {
@@ -46,7 +46,7 @@ describe('Operator MINUS', () => {
       [{ cellValue: '=FOOBAR()' }, { cellValue: '=4/0' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOOBAR')))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOOBAR')))
   })
 
   it('range value results in VALUE error', () => {
@@ -58,8 +58,8 @@ describe('Operator MINUS', () => {
       [{ cellValue: '=A1:A3 - 10' }],
     ], {useArrayArithmetic: false})
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
-    expect(engine.getCellValue(adr('A5'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
   })
 
   it('Minus propagates errors correctly', () => {
@@ -67,9 +67,9 @@ describe('Operator MINUS', () => {
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=(1/0)-2' }, { cellValue: '=2-(1/0)'}, {cellValue: '=(A1:B1)-(1/0)' }, { cellValue: '=(1/0)-(A1:B1)' }],
     ])
 
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('D1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
-    expect(engine.getCellValue(adr('E1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

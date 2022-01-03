@@ -50,7 +50,7 @@ class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlu
   }
 
   public arrayfoo(_ast: ProcedureAst, _state: InterpreterState): SimpleRangeValue {
-    return SimpleRangeValue.onlyValues([[{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }]])
+    return SimpleRangeValue.onlyValues([[1, 1], [1, 1]])
   }
 
   public arraysizeFoo(_ast: ProcedureAst, _state: InterpreterState): ArraySize {
@@ -142,7 +142,7 @@ describe('Register static custom plugin', () => {
 
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=FOO()' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
   })
 
   it('should return registered formula translations', () => {
@@ -164,8 +164,8 @@ describe('Register static custom plugin', () => {
 
     expect(HyperFormula.getRegisteredFunctionNames('enGB')).toContain('FOO')
     expect(HyperFormula.getRegisteredFunctionNames('enGB')).toContain('BAR')
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
-    expect(engine.getCellValue(adr('B1'))).toEqual('bar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual('bar')
   })
 
   it('should register single formula from plugin', () => {
@@ -176,8 +176,8 @@ describe('Register static custom plugin', () => {
 
     expect(HyperFormula.getRegisteredFunctionNames('enGB')).not.toContain('FOO')
     expect(HyperFormula.getRegisteredFunctionNames('enGB')).toContain('BAR')
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOO')))
-    expect(engine.getCellValue(adr('B1'))).toEqual('bar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOO')))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual('bar')
   })
 
   it('should register single array functions', () => {
@@ -195,8 +195,8 @@ describe('Register static custom plugin', () => {
       [{ cellValue: '=SUM(1, 2)' }, { cellValue: '=MAX(1, 2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(45)
-    expect(engine.getCellValue(adr('B1'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(45)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(2)
   })
 
   it('should allow to register only alias', () => {
@@ -205,8 +205,8 @@ describe('Register static custom plugin', () => {
       [{ cellValue: '=SUMALIAS(1, 2)' }, { cellValue: '=MAX(1, 2)' }]
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(45)
-    expect(engine.getCellValue(adr('B1'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(45)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(2)
   })
 
   it('should throw plugin validation error', () => {
@@ -273,9 +273,9 @@ describe('Instance level formula registry', () => {
     ], {functionPlugins: [FooPlugin]})
 
     expectArrayWithSameContent(['FOO', 'BAR', 'VERSION'], engine.getRegisteredFunctionNames())
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
-    expect(engine.getCellValue(adr('B1'))).toEqual('bar')
-    expect(engine.getCellValue(adr('C1'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('SUM')))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual('bar')
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('SUM')))
   })
 
   it('modifying static plugins should not affect existing engine instance registry', () => {
@@ -285,11 +285,11 @@ describe('Instance level formula registry', () => {
     ])
     HyperFormula.unregisterFunction('FOO')
 
-    engine.setCellContents(adr('C1'), '=A1')
+    engine.setCellContents(adr('C1'), { cellValue: '=A1' })
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
-    expect(engine.getCellValue(adr('B1'))).toEqual('bar')
-    expect(engine.getCellValue(adr('C1'))).toEqual('foo')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual('bar')
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual('foo')
   })
 
   it('should return registered plugins', () => {

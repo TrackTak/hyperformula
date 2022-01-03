@@ -10,8 +10,8 @@ describe('Function DAYS360', () => {
       [{ cellValue: '=DAYS360(1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for wrong type of arguments', () => {
@@ -20,8 +20,8 @@ describe('Function DAYS360', () => {
       [{ cellValue: '=DAYS360(2, "bar")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('US mode', () => {
@@ -36,14 +36,14 @@ describe('Function DAYS360', () => {
       [{ cellValue: '=DAYS360("01/03/2021", "28/02/2021")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(1)
-    expect(engine.getCellValue(adr('A4'))).toEqual(1)
-    expect(engine.getCellValue(adr('A5'))).toEqual(0)
-    expect(engine.getCellValue(adr('A6'))).toEqual(-2)
-    expect(engine.getCellValue(adr('A7'))).toEqual(-2)
-    expect(engine.getCellValue(adr('A8'))).toEqual(-3)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(-2)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(-2)
+    expect(engine.getCellValue(adr('A8')).cellValue).toEqual(-3)
   })
 
   it('EU mode', () => {
@@ -58,13 +58,13 @@ describe('Function DAYS360', () => {
       [{ cellValue: '=DAYS360("01/03/2021", "28/02/2021", TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(2)
-    expect(engine.getCellValue(adr('A4'))).toEqual(3)
-    expect(engine.getCellValue(adr('A5'))).toEqual(0)
-    expect(engine.getCellValue(adr('A6'))).toEqual(-1)
-    expect(engine.getCellValue(adr('A7'))).toEqual(-2)
-    expect(engine.getCellValue(adr('A8'))).toEqual(-3)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(-1)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(-2)
+    expect(engine.getCellValue(adr('A8')).cellValue).toEqual(-3)
   })
 })

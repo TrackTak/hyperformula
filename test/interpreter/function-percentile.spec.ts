@@ -11,19 +11,19 @@ describe('Function PERCENTILE.INC', () => {
       [{ cellValue: '=PERCENTILE.INC(3, 0.5, 2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('throws error for non-numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: 3 }],
-      ['\'1'],
+      [{ cellValue: '\'1' }],
       [{ cellValue: 2 }],
       [{ cellValue: '=PERCENTILE.INC(A1:A3, 0.3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberExpected))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberExpected))
   })
 
   it('should work', () => {
@@ -34,6 +34,6 @@ describe('Function PERCENTILE.INC', () => {
       [{ cellValue: '=PERCENTILE.INC(A1:A3, 0.3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(1.6)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(1.6)
   })
 })

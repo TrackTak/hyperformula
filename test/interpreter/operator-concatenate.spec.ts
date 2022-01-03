@@ -8,7 +8,7 @@ describe('Interpreter - concatenate operator', () => {
       [{ cellValue: '="foo"&"bar"' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe('foobar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe('foobar')
   })
 
   it('Ampersand with cell address', () => {
@@ -16,7 +16,7 @@ describe('Interpreter - concatenate operator', () => {
       [{ cellValue: 'foo' }, { cellValue: '=A1&"bar"' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toBe('foobar')
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe('foobar')
   })
 
   it('Ampersand with number', () => {
@@ -24,7 +24,7 @@ describe('Interpreter - concatenate operator', () => {
       [{ cellValue: '=1&2' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe('12')
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe('12')
   })
 
   it('Ampersand with bool', () => {
@@ -32,7 +32,7 @@ describe('Interpreter - concatenate operator', () => {
       [{ cellValue: '="foo"&TRUE()' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe('fooTRUE')
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe('fooTRUE')
   })
 
   it('Ampersand with null', () => {
@@ -40,7 +40,7 @@ describe('Interpreter - concatenate operator', () => {
       [{ cellValue: '="foo"&B1' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toBe('foo')
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe('foo')
   })
 
   it('Ampersand with error', () => {
@@ -48,6 +48,6 @@ describe('Interpreter - concatenate operator', () => {
       [{ cellValue: '=1/0' }, { cellValue: '=A1&TRUE()' }],
     ])
 
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

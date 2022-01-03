@@ -240,7 +240,7 @@ describe('formatting info', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '1$' }, { cellValue: '1' }, { cellValue: '1PLN' }],
       [{ cellValue: '=-A1' }, { cellValue: '=-B1' }, { cellValue: '=C1' }],
-    ], {currencySymbol: [{ cellValue: '$' }, { cellValue: 'PLN' }]})
+    ], {currencySymbol: ['$', 'PLN']})
     expect(engine.getCellValueFormat(adr('A2'))).toBe('$')
     expect(engine.getCellValueFormat(adr('B2'))).toBe(undefined)
     expect(engine.getCellValueFormat(adr('C2'))).toBe('PLN')
@@ -250,7 +250,7 @@ describe('formatting info', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '1$' }, { cellValue: '1' }, { cellValue: '1PLN' }],
       [{ cellValue: '=+A1' }, { cellValue: '=+B1' }, { cellValue: '=+C1' }],
-    ], {currencySymbol: [{ cellValue: '$' }, { cellValue: 'PLN' }]})
+    ], {currencySymbol: ['$', 'PLN']})
     expect(engine.getCellValueFormat(adr('A2'))).toBe('$')
     expect(engine.getCellValueFormat(adr('B2'))).toBe(undefined)
     expect(engine.getCellValueFormat(adr('C2'))).toBe('PLN')
@@ -262,7 +262,7 @@ describe('formatting info', () => {
       [{ cellValue: '=A1+A1' }, { cellValue: '=A1+B1' }, { cellValue: '=A1+C1' }],
       [{ cellValue: '=B1+A1' }, { cellValue: '=B1+B1' }, { cellValue: '=B1+C1' }],
       [{ cellValue: '=C1+A1' }, { cellValue: '=C1+B1' }, { cellValue: '=C1+C1' }],
-    ], {currencySymbol: [{ cellValue: '$' }, { cellValue: 'PLN' }]})
+    ], {currencySymbol: ['$', 'PLN']})
     expect(engine.getCellValueFormat(adr('A2'))).toBe('$')
     expect(engine.getCellValueFormat(adr('B2'))).toBe('$')
     expect(engine.getCellValueFormat(adr('C2'))).toBe('$')
@@ -280,7 +280,7 @@ describe('formatting info', () => {
       [{ cellValue: '=A1-A1' }, { cellValue: '=A1-B1' }, { cellValue: '=A1-C1' }],
       [{ cellValue: '=B1-A1' }, { cellValue: '=B1-B1' }, { cellValue: '=B1-C1' }],
       [{ cellValue: '=C1-A1' }, { cellValue: '=C1-B1' }, { cellValue: '=C1-C1' }],
-    ], {currencySymbol: [{ cellValue: '$' }, { cellValue: 'PLN' }]})
+    ], {currencySymbol: ['$', 'PLN']})
     expect(engine.getCellValueFormat(adr('A2'))).toBe('$')
     expect(engine.getCellValueFormat(adr('B2'))).toBe('$')
     expect(engine.getCellValueFormat(adr('C2'))).toBe('$')
@@ -298,7 +298,7 @@ describe('formatting info', () => {
       [{ cellValue: '=A1*A1' }, { cellValue: '=A1*B1' }, { cellValue: '=A1*C1' }],
       [{ cellValue: '=B1*A1' }, { cellValue: '=B1*B1' }, { cellValue: '=B1*C1' }],
       [{ cellValue: '=C1*A1' }, { cellValue: '=C1*B1' }, { cellValue: '=C1*C1' }],
-    ], {currencySymbol: [{ cellValue: '$' }, { cellValue: 'PLN' }]})
+    ], {currencySymbol: ['$', 'PLN']})
     expect(engine.getCellValueFormat(adr('A2'))).toBe(undefined)
     expect(engine.getCellValueFormat(adr('B2'))).toBe('$')
     expect(engine.getCellValueFormat(adr('C2'))).toBe(undefined)
@@ -316,7 +316,7 @@ describe('formatting info', () => {
       [{ cellValue: '=A1/A1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1/C1' }],
       [{ cellValue: '=B1/A1' }, { cellValue: '=B1/B1' }, { cellValue: '=B1/C1' }],
       [{ cellValue: '=C1/A1' }, { cellValue: '=C1/B1' }, { cellValue: '=C1/C1' }],
-    ], {currencySymbol: [{ cellValue: '$' }, { cellValue: 'PLN' }]})
+    ], {currencySymbol: ['$', 'PLN']})
     expect(engine.getCellValueFormat(adr('A2'))).toBe(undefined)
     expect(engine.getCellValueFormat(adr('B2'))).toBe('$')
     expect(engine.getCellValueFormat(adr('C2'))).toBe(undefined)

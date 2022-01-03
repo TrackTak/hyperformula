@@ -6,22 +6,22 @@ import {adr, detailedError} from '../testUtils'
 describe('MAX', () => {
   it('MAX with empty args', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=MAX()' }]])
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('MAX with args', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=MAX(1, B1)' }, { cellValue: '3.14' }]])
-    expect(engine.getCellValue(adr('A1'))).toBeCloseTo(3.14)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(3.14)
   })
 
   it('MAX with range', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }]])
-    expect(engine.getCellValue(adr('A4'))).toEqual(3)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
   })
 
   it('MAX with mixed arguments', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }]])
-    expect(engine.getCellValue(adr('A4'))).toEqual(4)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(4)
   })
 
   it('doesnt do coercions', () => {
@@ -34,22 +34,22 @@ describe('MAX', () => {
       [{ cellValue: '=MAX(A1:A5)' }],
     ])
 
-    expect(engine.getCellValue(adr('A6'))).toEqual(2)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(2)
   })
 
   it('MAX of strings and -1', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }]])
-    expect(engine.getCellValue(adr('A4'))).toEqual(-1)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(-1)
   })
 
   it('MAX of empty value', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '' }, { cellValue: '=MAX(A1)' }]])
-    expect(engine.getCellValue(adr('B1'))).toEqual(0)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(0)
   })
 
   it('MAX of empty value and some negative number', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '' }, { cellValue: '-1' }, { cellValue: '=MAX(A1,B1)' }]])
-    expect(engine.getCellValue(adr('C1'))).toEqual(-1)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(-1)
   })
 
   it('over a range value', () => {
@@ -59,7 +59,7 @@ describe('MAX', () => {
       [{ cellValue: '=MAX(MMULT(A1:B2, A1:B2))' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(22)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(22)
   })
 
   it('propagates errors', () => {
@@ -69,6 +69,6 @@ describe('MAX', () => {
       [{ cellValue: '=MAX(A1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

@@ -7,25 +7,25 @@ describe('COUNTA', () => {
   it('COUNTA with empty args', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=COUNTA()' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('COUNTA with args', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=COUNTA(1, B1)' }, { cellValue: '3.14' }]])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
   })
 
   it('COUNTA with range', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }]])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(3)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
   })
 
   it('COUNTA doesnt count only empty values', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }]])
 
-    expect(engine.getCellValue(adr('A5'))).toEqual(3)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(3)
   })
 
   it('over a range value', () => {
@@ -35,7 +35,7 @@ describe('COUNTA', () => {
       [{ cellValue: '=COUNTA(MMULT(A1:B2, A1:B2))' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(4)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(4)
   })
 
   it('error in ranges', () => {
@@ -46,7 +46,7 @@ describe('COUNTA', () => {
       [{ cellValue: '=COUNTA(MMULT(A1:B3, A1:B3))' }],
     ])
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(1)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(1)
   })
 
   it('doesnt propagate errors', () => {
@@ -56,14 +56,14 @@ describe('COUNTA', () => {
       [{ cellValue: '=COUNTA(A1:B2)' }],
     ])
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(4)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(4)
   })
 
   it('should work with explicit error in arg', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=COUNTA(NA())' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
   })
 
   it('should work for empty arg', () => {
@@ -71,6 +71,6 @@ describe('COUNTA', () => {
       [{ cellValue: '=COUNTA(1,)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2) //Compatible with product 2
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2) //Compatible with product 2
   })
 })

@@ -1,4 +1,4 @@
-import {EvaluationSuspendedError, ExportedCellChange, HyperFormula} from '../src'
+import {CellData, EvaluationSuspendedError, ExportedCellChange, HyperFormula} from '../src'
 import {AbsoluteCellRange} from '../src/AbsoluteCellRange'
 import {CellType} from '../src/Cell'
 import AsyncTestPlugin from './helpers/AsyncTestPlugin'
@@ -12,7 +12,7 @@ describe('Evaluation suspension', () => {
 
     engine.setCellContents(adr('C1'), [[{ cellValue: '=B1' }]])
 
-    expect(engine.getCellValue(adr('C1'))).toBe(2)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(2)
   })
 
   it('when evaluation is stopped, getting cell values is forbidden', () => {
@@ -25,10 +25,10 @@ describe('Evaluation suspension', () => {
     engine.suspendEvaluation()
 
     expect(() => {
-      engine.getCellValue(adr('C1'))
+      engine.getCellValue(adr('C1')).cellValue
     }).toThrow(new EvaluationSuspendedError())
     expect(() => {
-      engine.getCellValue(adr('D1'))
+      engine.getCellValue(adr('D1')).cellValue
     }).toThrow(new EvaluationSuspendedError())
     expect(() => {
       engine.getSheetValues(0)
@@ -52,7 +52,7 @@ describe('Evaluation suspension', () => {
     engine.suspendEvaluation()
 
     expect(() => {
-      engine.getCellSerialized(adr('C1'))
+      engine.getCellSerialized(adr('C1')).cellValue
     }).toThrow(new EvaluationSuspendedError())
     expect(() => {
       engine.getSheetSerialized(0)
@@ -112,7 +112,7 @@ describe('Evaluation suspension', () => {
     ])
     engine.suspendEvaluation()
 
-    engine.addRows(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addRows(0, [1, 1])
 
     expect(engine.getCellFormula(adr('C1'))).toEqual('=A3+42')
   })
@@ -132,9 +132,9 @@ describe('Evaluation suspension', () => {
 
     await promise
 
-    expect(engine.getCellValue(adr('C1'))).toBe(2)
-    expect(engine.getCellValue(adr('D1'))).toBe(1)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('C1'), 2))
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(2)
+    expect(engine.getCellValue(adr('D1')).cellValue).toBe(1)
+    expect(changes).toContainEqual(new ExportedCellChange(adr('C1'), new CellData(2)))
   })
 
   it('#isEvaluationSuspended when evaluation is suspended', () => {
@@ -196,7 +196,7 @@ describe('Evaluation suspension', () => {
       [{ cellValue: '42' }]
     ])
     engine.suspendEvaluation()
-    engine.addRows(0, [{ cellValue: 1 }, { cellValue: 1 }])
+    engine.addRows(0, [1, 1])
 
     engine.undo()
 

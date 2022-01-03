@@ -31,8 +31,8 @@ describe('Clear sheet content', () => {
 
     engine.clearSheet(0)
 
-    expect(engine.getCellValue(adr('A1'))).toBe(null)
-    expect(engine.getCellValue(adr('B1'))).toBe(null)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBe(null)
   })
 
   it('should recalculate and return changes', () => {
@@ -48,8 +48,8 @@ describe('Clear sheet content', () => {
 
     const [changes] = engine.clearSheet(0)
 
-    expect(engine.getCellValue(adr('A1', 1))).toBe(null)
-    expect(engine.getCellValue(adr('A2', 1))).toEqual(1)
+    expect(engine.getCellValue(adr('A1', 1)).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('A2', 1)).cellValue).toEqual(1)
 
     expect(changes.length).toEqual(2)
   })
@@ -68,8 +68,8 @@ describe('Clear sheet content', () => {
 
     const [changes] = engine.clearSheet(0)
 
-    expect(engine.getCellValue(adr('A1', 1))).toBe(null)
-    expect(engine.getCellValue(adr('A2', 1))).toBe(null)
+    expect(engine.getCellValue(adr('A1', 1)).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('A2', 1)).cellValue).toBe(null)
 
     expect(changes.length).toEqual(2)
   })
@@ -85,9 +85,9 @@ describe('Clear sheet content', () => {
     })
 
     engine.clearSheet(0)
-    engine.setCellContents(adr('A1'), '2')
+    engine.setCellContents(adr('A1'), { cellValue: '2' })
 
-    expect(engine.getCellValue(adr('A1', 1))).toEqual(2)
+    expect(engine.getCellValue(adr('A1', 1)).cellValue).toEqual(2)
   })
 
   it('should clear sheet and dont break edge between cells, case with range', () => {
@@ -103,9 +103,9 @@ describe('Clear sheet content', () => {
     // eslint-disable-next-line
     const [changes] = engine.clearSheet(0)
 
-    engine.setCellContents(adr('A1'), '2')
-    engine.setCellContents(adr('B1'), '3')
+    engine.setCellContents(adr('A1'), { cellValue: '2' })
+    engine.setCellContents(adr('B1'), { cellValue: '3' })
 
-    expect(engine.getCellValue(adr('A1', 1))).toEqual(5)
+    expect(engine.getCellValue(adr('A1', 1)).cellValue).toEqual(5)
   })
 })

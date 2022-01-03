@@ -9,7 +9,7 @@ describe('function OCT2DEC', () => {
       [{ cellValue: '=OCT2DEC("foo", 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for non-oct arguments', () => {
@@ -19,9 +19,9 @@ describe('function OCT2DEC', () => {
       [{ cellValue: '=OCT2DEC(TRUE())' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotOctal))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotOctal))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotOctal))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotOctal))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotOctal))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotOctal))
   })
 
   it('should work', () => {
@@ -37,15 +37,15 @@ describe('function OCT2DEC', () => {
       [{ cellValue: '=OCT2DEC(7777777777)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('A2'))).toEqual(8)
-    expect(engine.getCellValue(adr('A3'))).toEqual(57)
-    expect(engine.getCellValue(adr('A4'))).toEqual(5349)
-    expect(engine.getCellValue(adr('A5'))).toEqual(1131893)
-    expect(engine.getCellValue(adr('A6'))).toEqual(175304620)
-    expect(engine.getCellValue(adr('A7'))).toEqual(-512)
-    expect(engine.getCellValue(adr('A8'))).toEqual(-478)
-    expect(engine.getCellValue(adr('A9'))).toEqual(-1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(8)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(57)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(5349)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(1131893)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(175304620)
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqual(-512)
+    expect(engine.getCellValue(adr('A8')).cellValue).toEqual(-478)
+    expect(engine.getCellValue(adr('A9')).cellValue).toEqual(-1)
   })
 
   it('should work for strings', () => {
@@ -53,7 +53,7 @@ describe('function OCT2DEC', () => {
       [{ cellValue: '=OCT2DEC("456")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(302)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(302)
   })
 
   it('should work for reference', () => {
@@ -62,7 +62,7 @@ describe('function OCT2DEC', () => {
       [{ cellValue: '=OCT2DEC(A1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A2'))).toEqual(83)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(83)
   })
 
   it('should return a number', () => {
@@ -79,7 +79,7 @@ describe('function OCT2DEC', () => {
       [{ cellValue: '=OCT2DEC(7777777042)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotOctal))
-    expect(engine.getCellValue(adr('A2'))).toEqual(-478)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.NotOctal))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(-478)
   })
 })

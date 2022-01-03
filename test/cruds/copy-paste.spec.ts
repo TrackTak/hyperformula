@@ -1,4 +1,4 @@
-import {ExportedCellChange, HyperFormula, NothingToPasteError} from '../../src'
+import {CellData, ExportedCellChange, HyperFormula, NothingToPasteError} from '../../src'
 import {AbsoluteCellRange} from '../../src/AbsoluteCellRange'
 import {ErrorType, simpleCellAddress} from '../../src/Cell'
 import {Config} from '../../src/Config'
@@ -82,7 +82,7 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     const [changes] = engine.paste(adr('A2'))
 
-    expectArrayWithSameContent([new ExportedCellChange(adr('A2'), null)], changes)
+    expectArrayWithSameContent([new ExportedCellChange(adr('A2'), new CellData(null))], changes)
   })
 
   it('should work for single number', () => {
@@ -93,7 +93,7 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('B1'))
 
-    expect(engine.getCellValue(adr('B1'))).toEqual(1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
   })
 
   it('should work for parsing error', () => {
@@ -117,10 +117,10 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 2))
     engine.paste(adr('C1'))
 
-    expect(engine.getCellValue(adr('C1'))).toEqual(1)
-    expect(engine.getCellValue(adr('D1'))).toEqual(2)
-    expect(engine.getCellValue(adr('C2'))).toEqual('foo')
-    expect(engine.getCellValue(adr('D2'))).toEqual('bar')
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('C2')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('D2')).cellValue).toEqual('bar')
   })
 
   it('should not round here', () => {
@@ -149,7 +149,7 @@ describe('Copy - paste integration', () => {
 
     expect(engine.dependencyGraph.existsEdge(a2, b2)).toBe(true)
     expect(engine.dependencyGraph.existsEdge(a1, b2)).toBe(false)
-    expect(engine.getCellValue(adr('B2'))).toEqual(1)
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual(1)
   })
 
   it('should work for absolute cell reference', () => {
@@ -166,7 +166,7 @@ describe('Copy - paste integration', () => {
 
     expect(engine.dependencyGraph.existsEdge(a1, b1)).toBe(true)
     expect(engine.dependencyGraph.existsEdge(a1, b2)).toBe(true)
-    expect(engine.getCellValue(adr('B2'))).toEqual(1)
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual(1)
   })
 
   it('should work for cell reference pointing outside copied area', () => {
@@ -178,7 +178,7 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('B1'), 1, 1))
     engine.paste(adr('B2'))
 
-    expect(engine.getCellValue(adr('B2'))).toEqual(2)
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual(2)
   })
 
   it('should return ref when pasted reference is out of scope', () => {
@@ -190,8 +190,8 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('B2'), 1, 1))
     engine.paste(adr('A1'))
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.REF))
-    expect(engine.getCellSerialized(adr('A1'))).toEqual('=#REF!')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.REF))
+    expect(engine.getCellSerialized(adr('A1')).cellValue).toEqual('=#REF!')
   })
 
   it('should return ref when pasted range is out of scope', () => {
@@ -203,8 +203,8 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('B2'), 1, 1))
     engine.paste(adr('A1'))
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.REF))
-    expect(engine.getCellSerialized(adr('A1'))).toEqual('=#REF!')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.REF))
+    expect(engine.getCellSerialized(adr('A1')).cellValue).toEqual('=#REF!')
   })
 
   it('should return ref when pasted range is out of scope 2', () => {
@@ -217,8 +217,8 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('C3'), 1, 1))
     engine.paste(adr('B2'))
 
-    expect(engine.getCellValue(adr('B2'))).toEqualError(detailedError(ErrorType.REF))
-    expect(engine.getCellSerialized(adr('B2'))).toEqual('=SUM(#REF!)')
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqualError(detailedError(ErrorType.REF))
+    expect(engine.getCellSerialized(adr('B2')).cellValue).toEqual('=SUM(#REF!)')
   })
 
   it('should return ref when pasted column range is out of scope', () => {
@@ -230,8 +230,8 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('B2'), 1, 1))
     engine.paste(adr('A1'))
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.REF))
-    expect(engine.getCellSerialized(adr('A1'))).toEqual('=#REF!')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.REF))
+    expect(engine.getCellSerialized(adr('A1')).cellValue).toEqual('=#REF!')
   })
 
   it('should return ref when pasted row range is out of scope', () => {
@@ -243,8 +243,8 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('B2'), 1, 1))
     engine.paste(adr('A1'))
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.REF))
-    expect(engine.getCellSerialized(adr('A1'))).toEqual('=#REF!')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.REF))
+    expect(engine.getCellSerialized(adr('A1')).cellValue).toEqual('=#REF!')
   })
 
   it('should create new range vertex - cell range', () => {
@@ -258,7 +258,7 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('A3'), 1, 1))
     engine.paste(adr('B3'))
 
-    expect(engine.getCellValue(adr('B3'))).toEqual(7)
+    expect(engine.getCellValue(adr('B3')).cellValue).toEqual(7)
     expect(Array.from(engine.dependencyGraph.rangeMapping.rangesInSheet(0)).length).toBe(2)
     expect(engine.dependencyGraph.getRange(adr('B1'), adr('B2'))).not.toBeUndefined()
   })
@@ -273,7 +273,7 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('D1'), 1, 1))
     engine.paste(adr('E1'))
 
-    expect(engine.getCellValue(adr('E1'))).toEqual(18)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(18)
     expect(Array.from(engine.dependencyGraph.rangeMapping.rangesInSheet(0)).length).toBe(2)
     expect(engine.dependencyGraph.getRange(colStart('B'), colEnd('C'))).not.toBeUndefined()
   })
@@ -290,7 +290,7 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('A4'), 1, 1))
     engine.paste(adr('A5'))
 
-    expect(engine.getCellValue(adr('A5'))).toEqual(18)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(18)
     expect(Array.from(engine.dependencyGraph.rangeMapping.rangesInSheet(0)).length).toBe(2)
     expect(engine.dependencyGraph.getRange(rowStart(2), rowEnd(3))).not.toBeUndefined()
   })
@@ -310,7 +310,7 @@ describe('Copy - paste integration', () => {
     const a3 = engine.addressMapping.fetchCell(adr('A3'))
     expect(engine.graph.existsEdge(a2, range))
     expect(engine.graph.existsEdge(a3, range))
-    expect(engine.getCellValue(adr('A1'))).toEqual(4)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(4)
   })
 
   it('paste should return newly pasted values', () => {
@@ -322,8 +322,8 @@ describe('Copy - paste integration', () => {
     const [changes] = engine.paste(adr('A2'))
 
     expectArrayWithSameContent([
-      new ExportedCellChange(adr('A2'), 1),
-      new ExportedCellChange(adr('B2'), 1),
+      new ExportedCellChange(adr('A2'), new CellData(1)),
+      new ExportedCellChange(adr('B2'), new CellData(1)),
     ], changes)
   })
 
@@ -340,10 +340,10 @@ describe('Copy - paste integration', () => {
 
     expect(engine.arrayMapping.arrayMapping.size).toEqual(1)
     expect(engine.getCellFormula(adr('A5'))).toBe(undefined)
-    expect(engine.getCellValue(adr('A5'))).toEqual(1)
-    expect(engine.getCellValue(adr('B5'))).toEqual(3)
-    expect(engine.getCellValue(adr('A6'))).toEqual(2)
-    expect(engine.getCellValue(adr('B6'))).toEqual(4)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('B5')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('B6')).cellValue).toEqual(4)
   })
 
   it('should not be possible to paste onto formula matrix', () => {

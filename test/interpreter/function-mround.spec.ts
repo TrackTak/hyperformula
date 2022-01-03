@@ -10,8 +10,8 @@ describe('Function MROUND', () => {
       [{ cellValue: '=MROUND(1, 2, 3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for arguments of wrong type', () => {
@@ -21,9 +21,9 @@ describe('Function MROUND', () => {
       [{ cellValue: '=MROUND("foo", "baz")' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should return 0 when dividing by 0', () => {
@@ -31,7 +31,7 @@ describe('Function MROUND', () => {
       [{ cellValue: '=MROUND(42, 0)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
   })
 
   it('should return error for args of different signs', () => {
@@ -40,8 +40,8 @@ describe('Function MROUND', () => {
       [{ cellValue: '=MROUND(-42, 1)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.DistinctSigns))
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.DistinctSigns))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.DistinctSigns))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.DistinctSigns))
   })
 
   it('should work', () => {
@@ -54,12 +54,12 @@ describe('Function MROUND', () => {
       [{ cellValue: '=MROUND(-10.5, -3)' }],
     ])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(6)
-    expect(engine.getCellValue(adr('A2'))).toEqual(39)
-    expect(engine.getCellValue(adr('A3'))).toEqual(12)
-    expect(engine.getCellValue(adr('A4'))).toEqual(-6)
-    expect(engine.getCellValue(adr('A5'))).toEqual(-39)
-    expect(engine.getCellValue(adr('A6'))).toEqual(-12)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(39)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(12)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(-6)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(-39)
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqual(-12)
   })
 
   /**
@@ -72,7 +72,7 @@ describe('Function MROUND', () => {
       [{ cellValue: '=MROUND(6.05, 0.1)' }],
       [{ cellValue: '=MROUND(7.05, 0.1)' }],
     ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(6)
-    expect(engine.getCellValue(adr('A2'))).toEqual(7.1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(6)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(7.1)
   })
 })

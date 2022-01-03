@@ -8,7 +8,7 @@ export function sheet(cols: number = 50) {
 
   for (let i = 1; i < cols; ++i) {
     const adr = simpleCellAddressToString(() => '', {sheet: 0, row: 0, col: i - 1}, 0)
-    firstRow.push(`=${adr} + 1`)
+    firstRow.push({ cellValue: `=${adr} + 1`})
   }
 
   sheet.push(firstRow)
@@ -22,7 +22,7 @@ export function sheet(cols: number = 50) {
 
     for (let j = i - 1; j < cols - 1; ++j) {
       const endColumn = columnIndexToLabel(j)
-      rowToPush.push(`=SUM(${startColumn}:${endColumn})`)
+      rowToPush.push({ cellValue: `=SUM(${startColumn}:${endColumn})`})
     }
 
     sheet.push(rowToPush)
