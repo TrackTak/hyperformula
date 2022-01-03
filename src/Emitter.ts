@@ -5,6 +5,7 @@
 
 import {TinyEmitter} from 'tiny-emitter'
 import {ExportedChange} from './Exporter'
+import { UndoEntry } from './UndoRedo'
 
 export enum Events {
   SheetAdded = 'sheetAdded',
@@ -16,6 +17,9 @@ export enum Events {
   AsyncValuesUpdated = 'asyncValuesUpdated',
   EvaluationSuspended = 'evaluationSuspended',
   EvaluationResumed = 'evaluationResumed',
+  AddUndoEntry = 'addUndoEntry',
+  Undo = 'undo',
+  Redo = 'redo'
 }
 
 export interface Listeners {
@@ -241,6 +245,21 @@ export interface Listeners {
    * @category Values
    */
   asyncValuesUpdated: (changes: ExportedChange[]) => any,
+
+  /**
+   * @category UndoRedo
+   */
+  addUndoEntry: (operation: UndoEntry) => any,
+
+  /**
+   * @category UndoRedo
+   */
+  undo: (operation: UndoEntry) => any,
+
+  /**
+   * @category UndoRedo
+   */
+  redo: (operation: UndoEntry) => any,
 
   /**
    * Occurs when evaluation is suspended.

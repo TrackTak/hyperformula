@@ -12,6 +12,7 @@ import { ContentChanges } from './ContentChanges'
 import {CrudOperations} from './CrudOperations'
 import {DateTimeHelper} from './DateTimeHelper'
 import {DependencyGraph} from './DependencyGraph'
+import { Emitter } from './Emitter'
 import {SheetSizeLimitExceededError} from './errors'
 import {Evaluator} from './Evaluator'
 import {Exporter} from './Exporter'
@@ -46,6 +47,7 @@ export type EngineState = {
   namedExpressions: NamedExpressions,
   serialization: Serialization,
   functionRegistry: FunctionRegistry,
+  eventEmitter: Emitter,
 }
 
 export class BuildEngineFactory {
@@ -71,6 +73,7 @@ export class BuildEngineFactory {
   private static buildEngine(config: Config, sheets: Sheets = {}, inputNamedExpressions: SerializedNamedExpression[] = [], stats: Statistics = config.useStats ? new Statistics() : new EmptyStatistics()): [EngineState, Promise<ContentChanges>] {
     stats.start(StatType.BUILD_ENGINE_TOTAL)
 
+    const eventEmitter = new Emitter()
     const namedExpressions = new NamedExpressions()
     const functionRegistry = new FunctionRegistry(config)
     const asyncPromiseFetcher = new AsyncPromiseFetcher(config, functionRegistry)
@@ -103,7 +106,7 @@ export class BuildEngineFactory {
 
     const arraySizePredictor = new ArraySizePredictor(config, functionRegistry)
     const operations = new Operations(config, dependencyGraph, columnSearch, cellContentParser, parser, stats, lazilyTransformingAstService, namedExpressions, arraySizePredictor, asyncPromiseFetcher)
-    const undoRedo = new UndoRedo(config, operations)
+    const undoRedo = new UndoRedo(config, operations, eventEmitter)
     lazilyTransformingAstService.undoRedo = undoRedo
     const clipboardOperations = new ClipboardOperations(config, dependencyGraph, operations)
     const crudOperations = new CrudOperations(config, operations, undoRedo, clipboardOperations, dependencyGraph, columnSearch, parser, cellContentParser, lazilyTransformingAstService, namedExpressions)
@@ -143,6 +146,7 @@ export class BuildEngineFactory {
       namedExpressions,
       serialization,
       functionRegistry,
+      eventEmitter
     }, evaluatorPromise]
   }
 }

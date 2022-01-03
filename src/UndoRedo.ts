@@ -7,6 +7,7 @@ import {equalSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Ce
 import {DataRawCellContent, RawCellContent} from './CellContentParser'
 import {ClipboardCell} from './ClipboardOperations'
 import {Config} from './Config'
+import { Emitter } from './Emitter'
 import { CellMetadata } from './interpreter/InterpreterValue'
 import { Maybe } from './Maybe'
 import {InternalNamedExpression, NamedExpressionOptions} from './NamedExpressions'
@@ -423,6 +424,7 @@ export class UndoRedo {
   constructor(
     config: Config,
     private readonly operations: Operations,
+    private readonly eventEmitter: Emitter
   ) {
     this.undoLimit = config.undoLimit
   }
@@ -760,10 +762,12 @@ export class UndoRedo {
   private addUndoEntry(operation: UndoEntry) {
     this.undoStack.push(operation)
     this.undoStack.splice(0, Math.max(0, this.undoStack.length - this.undoLimit))
+    this.eventEmitter.emit('addUndoEntry', operation)
   }
 
   private undoEntry(operation: UndoEntry) {
     operation.doUndo(this)
+    this.eventEmitter.emit('undo', operation)
   }
 
   private restoreOperationOldContent(oldContent: [SimpleCellAddress, ClipboardCell][]) {
@@ -774,6 +778,7 @@ export class UndoRedo {
 
   private redoEntry(operation: UndoEntry) {
     operation.doRedo(this)
+    this.eventEmitter.emit('redo', operation)
   }
 
   private restoreOldDataFromVersion(version: number) {

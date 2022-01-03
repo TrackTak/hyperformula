@@ -54,6 +54,30 @@ import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {NamedExpression, NamedExpressionOptions} from './NamedExpressions'
 import {SerializedNamedExpression} from './Serialization'
 import {Sheet, SheetDimensions, Sheets} from './Sheet'
+import {
+  UndoEntry,
+  BaseUndoEntry,
+  RemoveRowsUndoEntry, 
+  MoveCellsUndoEntry, 
+  AddRowsUndoEntry, 
+  SetRowOrderUndoEntry, 
+  SetColumnOrderUndoEntry, 
+  SetSheetContentUndoEntry, 
+  MoveRowsUndoEntry, 
+  MoveColumnsUndoEntry,
+  AddColumnsUndoEntry,
+  RemoveColumnsUndoEntry,
+  AddSheetUndoEntry,
+  RemoveSheetUndoEntry,
+  RenameSheetUndoEntry,
+  ClearSheetUndoEntry,
+  SetCellContentsUndoEntry,
+  PasteUndoEntry,
+  AddNamedExpressionUndoEntry,
+  RemoveNamedExpressionUndoEntry,
+  ChangeNamedExpressionUndoEntry,
+  BatchUndoEntry
+} from './UndoRedo'
 
 /** @internal */
 class HyperFormulaNS extends HyperFormula {
@@ -173,4 +197,26 @@ export {
   TargetLocationHasArrayError,
   UnableToParseError,
   SerializedNamedExpression,
+  UndoEntry,
+  BaseUndoEntry,
+  RemoveRowsUndoEntry, 
+  MoveCellsUndoEntry, 
+  AddRowsUndoEntry, 
+  SetRowOrderUndoEntry, 
+  SetColumnOrderUndoEntry, 
+  SetSheetContentUndoEntry, 
+  MoveRowsUndoEntry, 
+  MoveColumnsUndoEntry,
+  AddColumnsUndoEntry,
+  RemoveColumnsUndoEntry,
+  AddSheetUndoEntry,
+  RemoveSheetUndoEntry,
+  RenameSheetUndoEntry,
+  ClearSheetUndoEntry,
+  SetCellContentsUndoEntry,
+  PasteUndoEntry,
+  AddNamedExpressionUndoEntry,
+  RemoveNamedExpressionUndoEntry,
+  ChangeNamedExpressionUndoEntry,
+  BatchUndoEntry
 }
