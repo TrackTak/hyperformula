@@ -23,22 +23,22 @@ describe('without arrayformula, with useArrayArithmetic flag', () => {
 
   it('unary op, array ret', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: '=-A1:C1' }]], {useArrayArithmetic: true})
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [-1, -2, -3]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: -1 }, { cellValue: -2 }, { cellValue: -3 }]])
   })
 
   it('binary op, scalar ret', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: '=SUM(2*A1:C1+A2:C2)' }]], {useArrayArithmetic: true})
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }], [{ cellValue: '=SUM(2*A1:C1+A2:C2)' }]], {useArrayArithmetic: true})
     expect(engine.getCellValue(adr('A3')).cellValue).toEqual(27)
   })
 
   it('binary op, array ret', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: '=2*A1:C1+A2:C2' }]], {useArrayArithmetic: true})
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }], [{ cellValue: '=2*A1:C1+A2:C2' }]], {useArrayArithmetic: true})
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }], [{ cellValue: 6 }, { cellValue: 9 }, { cellValue: 12 }]])
   })
 
   it('binary op, array ret, concat', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'a' }, { cellValue: 'b' }, { cellValue: 'c' }], [{ cellValue: 'a' }, { cellValue: 'b' }, { cellValue: 'c' }], [{ cellValue: '=A1:C1&A2:C2' }]], {useArrayArithmetic: true})
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 'a' }, { cellValue: 'b' }, { cellValue: 'c' }], [{ cellValue: 'a' }, { cellValue: 'b' }, { cellValue: 'c' }], [{ cellValue: 'a' }, { cellValue: 'b' }, { cellValue: 'c' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'a' }, { cellValue: 'b' }, { cellValue: 'c' }], [{ cellValue: 'd' }, { cellValue: 'e' }, { cellValue: 'f' }], [{ cellValue: '=A1:C1&A2:C2' }]], {useArrayArithmetic: true})
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 'a' }, { cellValue: 'b' }, { cellValue: 'c' }], [{ cellValue: 'd' }, { cellValue: 'e' }, { cellValue: 'f' }], [{ cellValue: 'ad' }, { cellValue: 'be' }, { cellValue: 'cf' }]])
   })
 
   it('index', () => {
@@ -91,7 +91,7 @@ describe('without arrayformula, without useArrayArithmetic flag', () => {
   })
 
   it('binary op', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: undefined }, { cellValue: undefined }, { cellValue: undefined }, { cellValue: '=SUM(2*A1:C1+A2:C2)'}]], {useArrayArithmetic: false})
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }], [{ cellValue: undefined }, { cellValue: undefined }, { cellValue: undefined }, { cellValue: '=SUM(2*A1:C1+A2:C2)'}]], {useArrayArithmetic: false})
     expect(engine.getCellValue(adr('D3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ScalarExpected))
   })
 
@@ -150,12 +150,12 @@ describe('with arrayformula, without useArrayArithmetic flag', () => {
   })
 
   it('binary op', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: '=ARRAYFORMULA(SUM(2*A1:C1+A2:C2))' }]], {useArrayArithmetic: false})
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }], [{ cellValue: '=ARRAYFORMULA(SUM(2*A1:C1+A2:C2))' }]], {useArrayArithmetic: false})
     expect(engine.getCellValue(adr('A3')).cellValue).toEqual(27)
   })
 
   it('binary op #2', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: '=SUM(ARRAYFORMULA(2*A1:C1+A2:C2))' }]], {useArrayArithmetic: false})
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }], [{ cellValue: '=SUM(ARRAYFORMULA(2*A1:C1+A2:C2))' }]], {useArrayArithmetic: false})
     expect(engine.getCellValue(adr('A3')).cellValue).toEqual(27)
   })
 
@@ -230,12 +230,12 @@ describe('coercion of array to scalar', () => {
 
   it('ad-hoc array + unary op #1', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: '=-ARRAYFORMULA(2*A1:C1)' }]])
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [-2]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: -2 }]])
   })
 
   it('ad-hoc array + unary op #2', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=-{1,2,3}' }]])
-    expect(engine.getSheetValues(0)).toEqual([[-1]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: -1 }]])
   })
 })
 
@@ -289,17 +289,17 @@ describe('array parsing', () => {
 
     await promise
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }], [{ cellValue: 1 }, { cellValue: 2 }]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }], [{ cellValue: 3 }, { cellValue: 4 }]])
   })
 
   it('simple array', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '={1,2;3,4}' }]])
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }], [{ cellValue: 1 }, { cellValue: 2 }]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }], [{ cellValue: 3 }, { cellValue: 4 }]])
   })
 
   it('nested arrays', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '={1,{2,3},4;{5;6},{7,8;9,10},{11;12};13,{14,15},16}' }]])
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}], [{ cellValue: 5 }, { cellValue: 7 }, { cellValue: 8 }, { cellValue: 11 }], [{ cellValue: 6 }, { cellValue: 9 }, { cellValue: 10 }, { cellValue: 12}], [{ cellValue: 13 }, { cellValue: 14 }, { cellValue: 15 }, { cellValue: 16}]])
   })
 
   it('size mismatch', () => {
@@ -309,7 +309,8 @@ describe('array parsing', () => {
 
   it('nested with ops', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=ARRAYFORMULA({1,{2,3}+{0,0},4;{5;6},2*{7,8;9,10},-{11;12};13,{14,15},16})' }]])
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}], [5, 14, 16, -11], [6, 18, 20, -12], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}]])
+
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }, { cellValue: 4}], [{ cellValue: 5 }, { cellValue: 14 }, { cellValue: 16 }, { cellValue: -11 }], [{ cellValue: 6 }, { cellValue: 18 }, { cellValue: 20 }, { cellValue: -12}], [{ cellValue: 13 }, { cellValue: 14 }, { cellValue: 15 }, { cellValue: 16 }]])
   })
 })
 
@@ -346,7 +347,7 @@ describe('vectorization', () => {
 
   it('multi arg function #3', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=DATE({1,2},{1;2},{1})' }]], {useArrayArithmetic: true})
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 367 }, { cellValue: 732 }], [{ cellValue: 367 }, { cellValue: 732 }]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 367 }, { cellValue: 732 }], [{ cellValue: 398 }, { cellValue: 763 }]])
   })
 
   it('multi arg function #4', () => {
@@ -374,7 +375,7 @@ describe('vectorization', () => {
 
   it('vectorize with defaults', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=IF({TRUE(),FALSE()},{1;2;3}, {2;3})' }]], {useArrayArithmetic: true})
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }], [{ cellValue: 1 }, { cellValue: 2 }], [{ cellValue: 1 }, { cellValue: 2 }]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }], [{ cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 3 }, { cellValue: false }]])
   })
 
   it('should work with switch', () => {
@@ -393,8 +394,8 @@ describe('build from array', () => {
     ], {useArrayArithmetic: true})
 
     expect(engine.getSheetValues(0)).toEqual([
-      [1, 2, -1, -2],
-      [3, 4, -3, -4],
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue:-1 }, { cellValue:-2 }],
+      [{ cellValue:3 }, { cellValue:4 }, { cellValue:-3 }, { cellValue:-4 }],
     ])
   })
 
@@ -424,7 +425,7 @@ describe('build from array', () => {
     expect(engine.getSheetValues(0))
   })
 
-  it('should REF last array', () => {
+  it.only('should REF last array', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=TRANSPOSE(D1:E2)' }, { cellValue: '=TRANSPOSE(D1:E2)' }, { cellValue: null }, { cellValue: 1}, {cellValue: 2 }],
       [{ cellValue: '=TRANSPOSE(D1:E2)' }, { cellValue: null }, { cellValue: null }, { cellValue: 1}, {cellValue: 2 }],
@@ -433,11 +434,11 @@ describe('build from array', () => {
     expectVerticesOfTypes(engine, [
       [ArrayVertex, ArrayVertex, ArrayVertex],
       [ArrayVertex, ArrayVertex, ArrayVertex],
-      [{ cellValue: undefined }, { cellValue: undefined }],
+      [undefined, undefined],
     ])
     expect(engine.getSheetValues(0)).toEqual([
-      [noSpace(), 1, 1, 1, 2],
-      [noSpace(), 2, 2, 1, 2],
+      [{ cellValue: noSpace() }, { cellValue: 1}, { cellValue:1}, { cellValue:1}, { cellValue:2}],
+      [{ cellValue: noSpace() }, { cellValue: 2}, { cellValue:2}, { cellValue:1}, { cellValue:2}],
     ])
     expect(engine.arrayMapping.arrayMapping.size).toEqual(3)
     expect(engine.getSheetValues(0))
@@ -479,7 +480,7 @@ describe('build from array', () => {
     ], {useArrayArithmetic: true})
 
     expect(engine.getSheetValues(0)).toEqual([
-      [noSpace(), 2],
+      [{ cellValue: noSpace() }, { cellValue: 2 }],
       [{ cellValue: 3 }, { cellValue: 4 }],
     ])
   })
@@ -531,7 +532,7 @@ describe('column ranges', () => {
 
     await promise
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 2 }, { cellValue: 1 }], [{ cellValue: 2 }, { cellValue: 1 }]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 2 }, { cellValue: 1 }], [{ cellValue: 12 }, { cellValue: 6 }]])
   })
 
   it('arithmetic should work for column range', () => {
@@ -540,7 +541,7 @@ describe('column ranges', () => {
       [{ cellValue: null }, { cellValue: 2 }],
     ], {useArrayArithmetic: true})
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 2 }, { cellValue: 1 }], [{ cellValue: 2 }, { cellValue: 1 }]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 2 }, { cellValue: 1 }], [{ cellValue: 4 }, { cellValue: 2 }]])
   })
 
   it('arithmetic should work for row range', () => {
@@ -549,7 +550,7 @@ describe('column ranges', () => {
       [{ cellValue: 1 }, { cellValue: 2 }],
     ], {useArrayArithmetic: true})
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 2 }, { cellValue: 4 }], [{ cellValue: 2 }, { cellValue: 4 }]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 2 }, { cellValue: 4 }], [{ cellValue: 1 }, { cellValue: 2 }]])
   })
 
   it('arithmetic for shifted column range -- error', () => {
@@ -559,15 +560,6 @@ describe('column ranges', () => {
     ], {useArrayArithmetic: true})
 
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.SPILL, ErrorMessage.NoSpaceForArrayResult))
-  })
-
-  it('arithmetic should work for row range', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [{ cellValue: '=2*(2:2)' }, { cellValue: null }],
-      [{ cellValue: 1 }, { cellValue: 2 }],
-    ], {useArrayArithmetic: true})
-
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 2 }, { cellValue: 4 }], [{ cellValue: 2 }, { cellValue: 4 }]])
   })
 
   it('arithmetic for shifted row range -- error', () => {

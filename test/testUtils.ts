@@ -202,6 +202,7 @@ export function expectVerticesOfTypes(engine: HyperFormula, types: any[][], shee
     for (let col = 0; col < types[row].length; ++col) {
       const expectedType = types[row][col]
       const cell = engine.dependencyGraph.getCell(simpleCellAddress(sheet, col, row))
+
       if (expectedType === undefined) {
         expect(cell === undefined).toBe(true)
       } else {
@@ -244,6 +245,7 @@ export function expectColumnIndexToMatchSheet(expected: Sheet, engine: HyperForm
   expect(columnIndex).toBeInstanceOf(ColumnIndex)
   const exportedColumnIndex = columnIndexToSheet(columnIndex, engine.getSheetDimensions(sheetId).width, sheetId)
   const dimensions = engine.getSheetDimensions(0)
-  expectArrayWithSameContent(normalizeSheet(expected, dimensions), normalizeSheet(exportedColumnIndex, dimensions))
+  const indexes = expected.map(x => x.map(z => z.cellValue))
+  expectArrayWithSameContent(normalizeSheet(indexes, dimensions), normalizeSheet(exportedColumnIndex, dimensions))
 }
 

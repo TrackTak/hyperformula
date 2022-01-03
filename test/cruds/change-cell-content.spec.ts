@@ -944,7 +944,7 @@ describe('arrays', () => {
     expectVerticesOfTypes(engine, [
       [ArrayVertex, ArrayVertex, ArrayVertex],
       [ArrayVertex, ArrayVertex, ArrayVertex],
-      [{ cellValue: undefined }, { cellValue: undefined }],
+      [undefined,  undefined],
     ])
     expect(engine.getSheetValues(0)).toEqual([
       [noSpace(), 1, 1, 1, 2],

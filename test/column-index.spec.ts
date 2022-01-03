@@ -193,12 +193,12 @@ describe('ColumnIndex change/remove', () => {
     ])
     index.add(range, adr('A1'))
     deepStrictEqual(index.getColumnMap(0, 0), new Map([
-      [1, {index: [{ cellValue: 0 }], version: 0}],
-      [3, {index: [{ cellValue: 1 }], version: 0}],
+      [1, {index: [0], version: 0}],
+      [3, {index: [1], version: 0}],
     ]))
     deepStrictEqual(index.getColumnMap(0, 1), new Map([
-      [2, {index: [{ cellValue: 0 }], version: 0}],
-      [4, {index: [{ cellValue: 1 }], version: 0}],
+      [2, {index: [0], version: 0}],
+      [4, {index: [1], version: 0}],
     ]))
 
     index.change(range, SimpleRangeValue.onlyNumbers([
@@ -207,12 +207,12 @@ describe('ColumnIndex change/remove', () => {
     ]), adr('A1'))
 
     deepStrictEqual(index.getColumnMap(0, 0), new Map([
-      [5, {index: [{ cellValue: 0 }], version: 0}],
-      [7, {index: [{ cellValue: 1 }], version: 0}],
+      [5, {index: [0], version: 0}],
+      [7, {index: [1], version: 0}],
     ]))
     deepStrictEqual(index.getColumnMap(0, 1), new Map([
-      [6, {index: [{ cellValue: 0 }], version: 0}],
-      [8, {index: [{ cellValue: 1 }], version: 0}],
+      [6, {index: [0], version: 0}],
+      [8, {index: [1], version: 0}],
     ]))
   })
 
