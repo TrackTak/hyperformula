@@ -130,7 +130,7 @@
       throw new UnableToParseError(content)
     }
 
-     return this.parseRawCellContent(content as RawCellContent)
+     return this.parseRawCellContent(content.cellValue, content.metadata)
    }
 
    public isCurrency(text: string): boolean {

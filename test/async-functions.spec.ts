@@ -122,7 +122,7 @@ describe('async functions', () => {
         [{ cellValue: 1 }, { cellValue: '=ASYNC_FOO()+ASYNC_FOO(A1)' }],
       ])
   
-      expect(engine.getSheetValues(0)).toEqual([[1, getLoadingError('Sheet1!B1')]])
+      expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: getLoadingError('Sheet1!B1') }]])
   
       await promise
   

@@ -16,7 +16,7 @@ export function sheet(cols: number = 50) {
   for (let i = 1; i < cols; ++i) {
     const rowToPush: DataRawCellContent[] = []
 
-    rowToPush.push(...Array(i).fill(null))
+    rowToPush.push(...Array(i).fill({ cellValue: null }))
 
     const startColumn = columnIndexToLabel(i - 1)
 

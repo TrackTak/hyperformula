@@ -20,7 +20,7 @@ describe('split', () => {
     const result = split(arr[Symbol.iterator]())
 
     expect(result.value?.cellValue).toBe(42)
-    expect(Array.from(result.rest)).toEqual([])
+    expect(Array.from(result.rest).map(x => x.cellValue)).toEqual([])
   })
 
   it('works for more elements case', () => {
@@ -29,7 +29,7 @@ describe('split', () => {
     const result = split(arr[Symbol.iterator]())
 
     expect(result.value?.cellValue).toBe(42)
-    expect(Array.from(result.rest)).toEqual([43])
+    expect(Array.from(result.rest).map(x => x.cellValue)).toEqual([43])
   })
 })
 

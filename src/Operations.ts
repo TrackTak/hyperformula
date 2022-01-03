@@ -561,7 +561,7 @@ export class Operations {
   }
 
   public setCellContent(address: SimpleCellAddress, newCellContent: DataRawCellContent): [SimpleCellAddress, ClipboardCell] {
-    const parsedCellContent = this.cellContentParser.parse(newCellContent.cellValue)
+    const parsedCellContent = this.cellContentParser.parse(newCellContent)
     
     return this.setParsedCellContent(newCellContent, parsedCellContent, address)
   }
@@ -869,7 +869,7 @@ export class Operations {
   }
 
   private storeNamedExpressionInCell(address: SimpleCellAddress, expression: RawCellContent) {
-    const cellValue = this.cellContentParser.parse(expression)
+    const cellValue = this.cellContentParser.parse(new CellData(expression))
 
     if (cellValue instanceof CellContent.Formula) {
       const parsingResult = this.parser.parse(cellValue.formula, simpleCellAddress(-1, 0, 0))

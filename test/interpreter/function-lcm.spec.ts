@@ -59,7 +59,7 @@ describe('Function LCM', () => {
   it('coerces to number', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=LCM("4",2)' }],
-      ['=LCM(B2:C2)', '\'4', 2],
+      [{ cellValue: '=LCM(B2:C2)' }, { cellValue: '\'4' }, { cellValue: 2 }],
       [{ cellValue: '=LCM(FALSE(),4)' }],
       [{ cellValue: '=LCM(B4:C4)' }, { cellValue: false }, { cellValue: 4 }],
       [{ cellValue: '=LCM(,4)' }],
@@ -100,7 +100,7 @@ describe('Function LCM', () => {
 
   it('truncates numbers', () => {
     const [engine] = HyperFormula.buildFromArray([
-      ['=LCM(B1:C1)', 5.5, 10],
+      [{ cellValue: '=LCM(B1:C1)' }, { cellValue: 5.5 }, { cellValue: 10 }],
     ])
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBe(10)

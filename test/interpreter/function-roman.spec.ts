@@ -1,4 +1,4 @@
-import {ErrorType, HyperFormula} from '../../src'
+import {CellData, ErrorType, HyperFormula} from '../../src'
 import {ErrorMessage} from '../../src/error-message'
 import {adr, detailedError} from '../testUtils'
 
@@ -44,27 +44,27 @@ describe('Function ROMAN', () => {
 
   it('should output correct value for mode 0', () => {
     const [engine] = HyperFormula.buildFromArray([input(0)])
-    expect(engine.getSheetValues(0)).toEqual([mode0])
+    expect(engine.getSheetValues(0)).toEqual([mode0.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 1', () => {
     const [engine] = HyperFormula.buildFromArray([input(1)])
-    expect(engine.getSheetValues(0)).toEqual([mode1])
+    expect(engine.getSheetValues(0)).toEqual([mode1.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 2', () => {
     const [engine] = HyperFormula.buildFromArray([input(2)])
-    expect(engine.getSheetValues(0)).toEqual([mode2])
+    expect(engine.getSheetValues(0)).toEqual([mode2.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 3', () => {
     const [engine] = HyperFormula.buildFromArray([input(3)])
-    expect(engine.getSheetValues(0)).toEqual([mode3])
+    expect(engine.getSheetValues(0)).toEqual([mode3.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 4', () => {
     const [engine] = HyperFormula.buildFromArray([input(4)])
-    expect(engine.getSheetValues(0)).toEqual([mode4])
+    expect(engine.getSheetValues(0)).toEqual([mode4.map(x => new CellData(x))])
   })
 })
 

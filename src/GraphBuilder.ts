@@ -91,7 +91,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
         for (let j = 0; j < row.length; ++j) {
           const cellContent = row[j]
           const address = simpleCellAddress(sheetId, j, i)
-          const parsedCellContent = this.cellContentParser.parse(cellContent.cellValue)
+          const parsedCellContent = this.cellContentParser.parse(cellContent)
           const dependency = this.setDependency(address, cellContent, parsedCellContent)
 
           if (dependency) {

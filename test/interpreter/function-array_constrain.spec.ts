@@ -35,7 +35,7 @@ describe('Interpreter - function ARRAY_CONSTRAIN', () => {
         [{ cellValue: 7 }, { cellValue: 8 }, { cellValue: 9 }],
       ]
     })
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }], [{ cellValue: 1 }, { cellValue: 2 }]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }], [{ cellValue: 4 }, { cellValue: 5 }]])
   })
 
   it('works #4', () => {
@@ -49,7 +49,7 @@ describe('Interpreter - function ARRAY_CONSTRAIN', () => {
         [{ cellValue: 7 }, { cellValue: 8 }, { cellValue: 9 }],
       ]
     })
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }]])
   })
 
   it('validates number of arguments', () => {

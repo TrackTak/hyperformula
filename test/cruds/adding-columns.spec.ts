@@ -67,7 +67,7 @@ describe('Adding column - checking if its possible', () => {
 
   it('no if adding column would exceed sheet size limit', () => {
     const [engine] = HyperFormula.buildFromArray([
-      Array(Config.defaultConfig.maxColumns - 1).fill('')
+      Array(Config.defaultConfig.maxColumns - 1).fill({ cellValue: ''})
     ])
 
     expect(engine.isItPossibleToAddColumns(0, [0, 2])).toBe(false)
@@ -269,7 +269,7 @@ describe('Adding column - sheet dimensions', () => {
 
   it('should throw error when trying to expand sheet beyond limits', () => {
     const [engine] = HyperFormula.buildFromArray([
-      Array(Config.defaultConfig.maxColumns - 1).fill('')
+      Array(Config.defaultConfig.maxColumns - 1).fill({ cellValue: '' })
     ])
 
     expect(() => {

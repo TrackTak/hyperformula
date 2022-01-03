@@ -60,8 +60,8 @@ describe('Copy - paste integration', () => {
 
     const values = engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 2))
 
-    expectArrayWithSameContent([1, 2], values[0])
-    expectArrayWithSameContent(['foo', 1], values[1])
+    expectArrayWithSameContent([1, 2], values[0].map(x => x.cellValue))
+    expectArrayWithSameContent(['foo', 1], values[1].map(x => x.cellValue))
   })
 
   it('copy should round return values', () => {
@@ -71,7 +71,7 @@ describe('Copy - paste integration', () => {
 
     const values = engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 1))
 
-    expectArrayWithSameContent([1.0000000001, 1], values[0])
+    expectArrayWithSameContent([1.0000000001, 1], values[0].map(x => x.cellValue))
   })
 
   it('should copy empty cell vertex', () => {

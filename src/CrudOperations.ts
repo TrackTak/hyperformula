@@ -635,7 +635,7 @@ export class CrudOperations {
   }
 
   private ensureNamedExpressionIsValid(expression: RawCellContent): void {
-    const parsedExpression = this.cellContentParser.parse(expression)
+    const parsedExpression = this.cellContentParser.parse(new CellData(expression))
     if (parsedExpression instanceof CellContent.Formula) {
       const parsingResult = this.parser.parse(parsedExpression.formula, simpleCellAddress(-1, 0, 0))
       if (doesContainRelativeReferences(parsingResult.ast)) {

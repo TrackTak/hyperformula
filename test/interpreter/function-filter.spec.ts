@@ -30,7 +30,7 @@ describe('Function FILTER', () => {
   it('works #2', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=FILTER(A2:C2,A3:C3,A4:C4)' }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: true }, { cellValue: false }, { cellValue: true}], [{ cellValue: true }, { cellValue: false }, { cellValue: true }]])
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: true }, { cellValue: false }, { cellValue: true}], [{ cellValue: true }, { cellValue: false }, { cellValue: true }]])
+    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 3 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: true }, { cellValue: false }, { cellValue: true}], [{ cellValue: true }, { cellValue: false }, { cellValue: true }]])
   })
 
   it('works #3', () => {

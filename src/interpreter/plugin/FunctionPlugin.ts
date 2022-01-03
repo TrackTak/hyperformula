@@ -3,6 +3,7 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
+import { CellData } from '../..'
 import {AbsoluteCellRange} from '../../AbsoluteCellRange'
 import {ArraySize, ArraySizePredictor} from '../../ArraySize'
 import {CellError, ErrorType, SimpleCellAddress} from '../../Cell'
@@ -627,7 +628,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     if (typeof val === 'string' || 
       typeof val === 'boolean' || 
       typeof val === 'number') {
-      const cellValue = this.cellContentParser.parse(val)
+      const cellValue = this.cellContentParser.parse(new CellData(val))
     
       if (cellValue instanceof CellContent.Formula) {
         return cellValue.formula

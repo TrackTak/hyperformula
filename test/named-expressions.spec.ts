@@ -857,7 +857,7 @@ describe('Named expressions - named ranges', () => {
 
     const [changes] = engine.addNamedExpression('fooo', '=TRANSPOSE(Sheet1!$A$1:Sheet1!$B$2)')
 
-    expect(changes).toContainEqual(new ExportedNamedExpressionChange('fooo', [[1, 3], [1, 3]]))
+    expect(changes).toContainEqual(new ExportedNamedExpressionChange('fooo', [[1, 3], [2, 4]]))
   })
 })
 

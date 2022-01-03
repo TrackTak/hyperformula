@@ -60,7 +60,7 @@ describe('Adding row - checking if its possible', () => {
 
   it('no if adding row would exceed sheet size limit', () => {
     const [engine] = HyperFormula.buildFromArray(
-      Array(Config.defaultConfig.maxRows - 1).fill([''])
+      Array(Config.defaultConfig.maxRows - 1).fill([{ cellValue: '' }])
     )
 
     expect(engine.isItPossibleToAddRows(0, [0, 2])).toEqual(false)
@@ -279,7 +279,7 @@ describe('Adding row - sheet dimensions', () => {
   })
 
   it('should throw error when trying to expand sheet beyond limits', () => {
-    const [engine] = HyperFormula.buildFromArray(Array(Config.defaultConfig.maxRows - 1).fill(['']))
+    const [engine] = HyperFormula.buildFromArray(Array(Config.defaultConfig.maxRows - 1).fill([{ cellValue: '' }]))
 
     expect(() => {
       engine.addRows(0, [0, 2])
