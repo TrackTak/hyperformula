@@ -1,4 +1,4 @@
-import {DetailedCellError, ErrorType, HyperFormula} from '../src'
+import {CellData, DataRawCellContent, DetailedCellError, ErrorType, HyperFormula} from '../src'
 import {AbsoluteCellRange} from '../src/AbsoluteCellRange'
 import {CellType, CellValueDetailedType, CellValueType} from '../src/Cell'
 import {Config} from '../src/Config'
@@ -813,73 +813,77 @@ describe('Graph dependency topological ordering module', () => {
   })
 })
 
+
+const mapToCellData = (values: any[][]) => values.map(x => x.map(z => new CellData(z)))
+const mapFromCellData = (cellData: (DataRawCellContent | CellData<any>)[][]) => cellData.map(x => x.map(z => z.cellValue))
+
 describe('#getFillRangeData from corner source', () => {
   it('should properly apply wrap-around #1', () => {
-    const [engine] = HyperFormula.buildFromArray([[], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }]])
+    const [engine] = HyperFormula.buildFromArray(mapToCellData([[], [undefined, 1, '=A1'], [undefined, '=$A$1', '2']]))
 
-    expect(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('C3'), 3, 3))
-    ).toEqual([[{ cellValue: '2' }, { cellValue: '=$A$1' }, { cellValue: '2' }], [{ cellValue: '2' }, { cellValue: '=$A$1' }, { cellValue: '2' }], [{ cellValue: '2' }, { cellValue: '=$A$1' }, { cellValue: '2' }]])
+    expect(mapFromCellData(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('C3'), 3, 3))
+    )).toEqual([['2', '=$A$1', '2'], ['=A3', 1, '=C3'], ['2', '=$A$1', '2']])
   })
 
   it('should properly apply wrap-around #2', () => {
-    const [engine] = HyperFormula.buildFromArray([[], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }]])
+    const [engine] = HyperFormula.buildFromArray(mapToCellData([[], [undefined, 1, '=A1'], [undefined, '=$A$1', '2']]))
 
-    expect(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('B2'), 3, 3))
-    ).toEqual([[{ cellValue: 1 }, { cellValue: '=A1' }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: '=A1' }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: '=A1' }, { cellValue: 1 }]])
+    expect(mapFromCellData(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('B2'), 3, 3))
+    )).toEqual([[1, '=A1', 1], ['=$A$1', '2', '=$A$1'], [1, '=A3', 1]])
   })
 
   it('should properly apply wrap-around #3', () => {
-    const [engine] = HyperFormula.buildFromArray([[], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }]])
+    const [engine] = HyperFormula.buildFromArray(mapToCellData([[], [undefined, 1, '=A1'], [undefined, '=$A$1', '2']]))
 
-    expect(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('A1'), 3, 3))
-    ).toEqual([[{ cellValue: '2' }, { cellValue: '=$A$1' }, { cellValue: '2' }], [{ cellValue: '2' }, { cellValue: '=$A$1' }, { cellValue: '2' }], [{ cellValue: '2' }, { cellValue: '=$A$1' }, { cellValue: '2' }]])
+    expect(mapFromCellData(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('A1'), 3, 3))
+    )).toEqual([['2', '=$A$1', '2'], ['=#REF!', 1, '=A1'], ['2', '=$A$1', '2']])
   })
 })
 
 describe('#getFillRangeData from target source', () => {
   it('should properly apply wrap-around #1', () => {
-    const [engine] = HyperFormula.buildFromArray([[], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }]])
+    const [engine] = HyperFormula.buildFromArray(mapToCellData([[], [undefined, 1, '=A1'], [undefined, '=$A$1', '2']]))
 
-    expect(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('C3'), 3, 3), true)
-    ).toEqual([[{ cellValue: 1 }, { cellValue: '=B2' }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: '=B2' }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: '=B2' }, { cellValue: 1 }]])
+    expect(mapFromCellData(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('C3'), 3, 3), true)
+    )).toEqual([[1, '=B2', 1], ['=$A$1', '2', '=$A$1'], [1, '=B4', 1]])
   })
 
   it('should properly apply wrap-around #2', () => {
-    const [engine] = HyperFormula.buildFromArray([[], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }]])
+    const [engine] = HyperFormula.buildFromArray(mapToCellData([[], [undefined, 1, '=A1'], [undefined, '=$A$1', '2']]))
 
-    expect(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('B2'), 3, 3), true)
-    ).toEqual([[{ cellValue: 1 }, { cellValue: '=A1' }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: '=A1' }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: '=A1' }, { cellValue: 1 }]])
+    expect(mapFromCellData(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('B2'), 3, 3), true)
+    )).toEqual([[1, '=A1', 1], ['=$A$1', '2', '=$A$1'], [1, '=A3', 1]])
   })
 
   it('should properly apply wrap-around #3', () => {
-    const [engine] = HyperFormula.buildFromArray([[], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }]])
+    const [engine] = HyperFormula.buildFromArray(mapToCellData([[], [undefined, 1, '=A1'], [undefined, '=$A$1', '2']]))
 
-    expect(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('A1'), 3, 3), true)
-    ).toEqual([[{ cellValue: 1 }, { cellValue: '=#REF!' }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: '=#REF!' }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: '=#REF!' }, { cellValue: 1 }]])
+    expect(mapFromCellData(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2'), 2, 2), AbsoluteCellRange.spanFrom(adr('A1'), 3, 3), true)
+    )).toEqual([[1, '=#REF!', 1], ['=$A$1', '2', '=$A$1'], [1, '=#REF!', 1]])
   })
 })
 
 describe('#getFillRangeData', () => {
   it('should move between sheets - sheet relative addresses', () => {
     const [engine] = HyperFormula.buildFromSheets({
-        'Sheet1': [[], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=A1' }]],
+        'Sheet1': mapToCellData([[], [undefined, 1, '=A1'], [undefined, '=$A$1', '2']]),
         'Sheet2': [],
       }
     )
 
-    expect(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2', 0), 2, 2), AbsoluteCellRange.spanFrom(adr('C3', 1), 3, 3))
-    ).toEqual([[{ cellValue: '2' }, { cellValue: '=$A$1' }, { cellValue: '2' }], [{ cellValue: '2' }, { cellValue: '=$A$1' }, { cellValue: '2' }], [{ cellValue: '2' }, { cellValue: '=$A$1' }, { cellValue: '2' }]])
+    expect(mapFromCellData(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2', 0), 2, 2), AbsoluteCellRange.spanFrom(adr('C3', 1), 3, 3))
+    )).toEqual([['2', '=$A$1', '2'], ['=A3', 1, '=C3'], ['2', '=$A$1', '2']])
   })
 
   it('should move between sheets - sheet absolute addresses', () => {
     const [engine] = HyperFormula.buildFromSheets({
-        'Sheet1': [[], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=Sheet1!A1' }], [{ cellValue: undefined }, { cellValue: 1 }, { cellValue: '=Sheet1!A1' }]],
+        'Sheet1': mapToCellData([[], [undefined, 1, '=Sheet1!A1'], [undefined, '=Sheet2!$A$1', '2']]),
         'Sheet2': [],
       }
     )
 
-    expect(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2', 0), 2, 2), AbsoluteCellRange.spanFrom(adr('C3', 1), 3, 3))
-    ).toEqual([[{ cellValue: '2' }, { cellValue: '=Sheet2!$A$1' }, { cellValue: '2' }], [{ cellValue: '2' }, { cellValue: '=Sheet2!$A$1' }, { cellValue: '2' }], [{ cellValue: '2' }, { cellValue: '=Sheet2!$A$1' }, { cellValue: '2' }]])
+    expect(mapFromCellData(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2', 0), 2, 2), AbsoluteCellRange.spanFrom(adr('C3', 1), 3, 3))
+    )).toEqual([['2', '=Sheet2!$A$1', '2'], ['=Sheet1!A3', 1, '=Sheet1!C3'], ['2', '=Sheet2!$A$1', '2']])
   })
 
   it('should move between sheets - no sheet of a given name', () => {
@@ -888,8 +892,8 @@ describe('#getFillRangeData', () => {
       }
     )
 
-    expect(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2', 0), 1, 1), AbsoluteCellRange.spanFrom(adr('C3', 1), 1, 1))
-    ).toEqual([[{ cellValue: null }]])
+    expect(mapFromCellData(engine.getFillRangeData(AbsoluteCellRange.spanFrom(adr('B2', 0), 1, 1), AbsoluteCellRange.spanFrom(adr('C3', 1), 1, 1))
+    )).toEqual([[null]])
   })
 
 })

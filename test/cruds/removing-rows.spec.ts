@@ -659,7 +659,7 @@ describe('Removing rows - arrays', () => {
     engine.removeRows(0, [1, 1])
 
     expect(engine.getSheetValues(0)).toEqual([
-      [noSpace()],
+      [{ cellValue: noSpace() }],
       [{ cellValue: 1 }, { cellValue: 1 }],
       [{ cellValue: null }, { cellValue: 2 }],
     ])
@@ -683,7 +683,7 @@ describe('Removing rows - arrays', () => {
     engine.removeRows(0, [1, 1])
 
     expect(engine.getSheetValues(0)).toEqual([
-      [noSpace()],
+      [{ cellValue: noSpace() }],
       [{ cellValue: 1 }],
       [{ cellValue: 2 }]
     ])

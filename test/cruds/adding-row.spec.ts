@@ -70,7 +70,7 @@ describe('Adding row - checking if its possible', () => {
   it('yes otherwise', () => {
     const [engine] = HyperFormula.buildFromArray([[]])
 
-    expect(engine.isItPossibleToAddRows(0, [0, 1])).toEqual(false)
+    expect(engine.isItPossibleToAddRows(0, [0, 1])).toEqual(true)
   })
 })
 

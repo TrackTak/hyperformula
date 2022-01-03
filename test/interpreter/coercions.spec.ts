@@ -272,7 +272,7 @@ describe('check if type coercions are applied', () => {
 
   it('order operations, -1 vs null', () => {
     const [engine] = HyperFormula.buildFromArray([
-      [-1, null, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
+      [{ cellValue: -1}, { cellValue: null}, { cellValue: '=A1>B1'}, { cellValue: '=A1<B1'}, { cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
     ])
     expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
     expect(engine.getCellValue(adr('D1')).cellValue).toEqual(true)

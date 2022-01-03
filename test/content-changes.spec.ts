@@ -11,14 +11,14 @@ class SimpleChangeExporter implements ChangeExporter<CellValueChange> {
 
 class SpreadRangeExporter implements ChangeExporter<CellValueChange> {
   exportChange(change: CellValueChange): CellValueChange | CellValueChange[] {
-    const value = change.value
+    const value = change.value.cellValue
     const address = change.address
     if (value instanceof SimpleRangeValue) {
       return Array.from(value.entriesFromTopLeftCorner(address)).map(([v, a]) => {
         return {address: a, value: new CellData(v)}
       })
     } else {
-      return {address: address, value: value}
+      return {address: address, value: new CellData(value)}
     }
   }
 }

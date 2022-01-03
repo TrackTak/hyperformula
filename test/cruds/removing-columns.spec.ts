@@ -582,7 +582,7 @@ describe('Removing rows - arrays', () => {
     engine.removeColumns(0, [1, 1])
 
     expect(engine.getSheetValues(0)).toEqual([
-      [noSpace(), 1],
+      [{ cellValue: noSpace() }, { cellValue: 1 }],
       [{ cellValue: null }, { cellValue: 1 }, { cellValue: 2 }],
     ])
 
@@ -602,7 +602,7 @@ describe('Removing rows - arrays', () => {
     engine.removeColumns(0, [1, 1])
 
     expect(engine.getSheetValues(0)).toEqual([
-      [noSpace(), 1, 2],
+      [{ cellValue: noSpace() }, { cellValue: 1 }, { cellValue: 2 }],
     ])
 
     const expected = HyperFormula.buildFromArray([
@@ -677,7 +677,6 @@ describe('Removing columns - dependencies', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: [
         [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=Sheet2!$A1' }],
-        /*      */
       ],
       Sheet2: [
         [{ cellValue: '3' }],
