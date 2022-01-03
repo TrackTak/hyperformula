@@ -263,7 +263,7 @@ describe('changing cell content', () => {
     engine.setCellContents(adr('A1'), { cellValue: '=SUM(' })
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.ERROR, ErrorMessage.ParseError))
-    expect(engine.getCellFormula(adr('A1'))).toEqual('=SUM(')
+    expect(engine.getCellFormula(adr('A1')).cellValue).toEqual('=SUM(')
   })
 
   it('changing value inside range', () => {
@@ -588,7 +588,7 @@ describe('changing cell content', () => {
     engine.setCellContents(adr('A1'), { cellValue: '=TRANSPOSE(' })
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.ERROR, ErrorMessage.ParseError))
-    expect(engine.getCellFormula(adr('A1'))).toEqual('=TRANSPOSE(')
+    expect(engine.getCellFormula(adr('A1')).cellValue).toEqual('=TRANSPOSE(')
   })
 
   it('should throw when trying to set cell content outside sheet limits', () => {

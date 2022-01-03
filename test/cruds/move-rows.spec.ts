@@ -195,7 +195,7 @@ describe('Move rows', () => {
 
     engine.moveRows(0, 1, 1, 3)
 
-    expect(engine.getCellFormula(adr('B3'))).toEqual('=COUNTBLANK(A1:A1)')
+    expect(engine.getCellFormula(adr('B3')).cellValue).toEqual('=COUNTBLANK(A1:A1)')
     expect(engine.getCellValue(adr('B3')).cellValue).toEqual(0)
   })
 
@@ -278,7 +278,7 @@ describe('Move rows - row ranges', () => {
     engine.moveRows(0, 0, 1, 2)
 
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
-    expect(engine.getCellFormula(adr('A2'))).toEqual('=SUM(1:3)')
+    expect(engine.getCellFormula(adr('A2')).cellValue).toEqual('=SUM(1:3)')
   })
 })
 

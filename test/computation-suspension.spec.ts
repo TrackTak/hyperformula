@@ -99,7 +99,7 @@ describe('Evaluation suspension', () => {
     engine.suspendEvaluation()
     engine.setCellContents(adr('C1'), [[{ cellValue: '=A1+78' }]])
 
-    expect(engine.getCellFormula(adr('C1'))).toEqual('=A1+78')
+    expect(engine.getCellFormula(adr('C1')).cellValue).toEqual('=A1+78')
     expect(engine.getSheetFormulas(0)).toEqual([[{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '=A1+78' }]])
     expect(engine.getAllSheetsFormulas()).toEqual({Sheet1: [[{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '=A1+78' }]]})
     expect(engine.getRangeFormulas(AbsoluteCellRange.spanFrom(adr('A1'), 3, 1))).toEqual([[{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '=A1+78' }]])
@@ -114,7 +114,7 @@ describe('Evaluation suspension', () => {
 
     engine.addRows(0, [1, 1])
 
-    expect(engine.getCellFormula(adr('C1'))).toEqual('=A3+42')
+    expect(engine.getCellFormula(adr('C1')).cellValue).toEqual('=A3+42')
   })
 
   it('resuming evaluation', async() => {
@@ -200,6 +200,6 @@ describe('Evaluation suspension', () => {
 
     engine.undo()
 
-    expect(engine.getCellFormula(adr('C1'))).toEqual('=A2+42')
+    expect(engine.getCellFormula(adr('C1')).cellValue).toEqual('=A2+42')
   })
 })

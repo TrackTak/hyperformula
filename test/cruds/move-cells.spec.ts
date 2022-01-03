@@ -125,10 +125,10 @@ describe('Address dependencies, moved formulas', () => {
     expect(engine.getCellValue(adr('B2')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
     expect(engine.getCellValue(adr('B3')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
     expect(engine.getCellValue(adr('B4')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
-    expect(engine.getCellFormula(adr('B1'))).toEqual('=B1')
-    expect(engine.getCellFormula(adr('B2'))).toEqual('=$B2')
-    expect(engine.getCellFormula(adr('B3'))).toEqual('=B$3')
-    expect(engine.getCellFormula(adr('B4'))).toEqual('=$B$4')
+    expect(engine.getCellFormula(adr('B1')).cellValue).toEqual('=B1')
+    expect(engine.getCellFormula(adr('B2')).cellValue).toEqual('=$B2')
+    expect(engine.getCellFormula(adr('B3')).cellValue).toEqual('=B$3')
+    expect(engine.getCellFormula(adr('B4')).cellValue).toEqual('=$B$4')
   })
 
   it('should work when overriding moved dependency', () => {
@@ -943,9 +943,9 @@ describe('cell ranges', () => {
 
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('C1'), 3, 1), adr('D2'))
 
-    expect(engine.getCellFormula(adr('D2'))).toEqual('=SUM(A1:B1)')
-    expect(engine.getCellFormula(adr('E2'))).toEqual('=SUM($A1:B$1)')
-    expect(engine.getCellFormula(adr('F2'))).toEqual('=SUM(A$1:$B$1)')
+    expect(engine.getCellFormula(adr('D2')).cellValue).toEqual('=SUM(A1:B1)')
+    expect(engine.getCellFormula(adr('E2')).cellValue).toEqual('=SUM($A1:B$1)')
+    expect(engine.getCellFormula(adr('F2')).cellValue).toEqual('=SUM(A$1:$B$1)')
   })
 
   it('move formula and one end of a range', () => {
@@ -956,7 +956,7 @@ describe('cell ranges', () => {
 
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('B1'), 1, 2), adr('C1'))
 
-    expect(engine.getCellFormula(adr('C2'))).toEqual('=SUM(A1:B1)')
+    expect(engine.getCellFormula(adr('C2')).cellValue).toEqual('=SUM(A1:B1)')
   })
 
   it('should be #CYCLE! if one of ends is in target range', () => {
@@ -964,7 +964,7 @@ describe('cell ranges', () => {
 
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('C1'), 1, 1), adr('B1'))
 
-    expect(engine.getCellFormula(adr('B1'))).toEqual('=SUM(A1:B1)')
+    expect(engine.getCellFormula(adr('B1')).cellValue).toEqual('=SUM(A1:B1)')
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
   })
 })
@@ -1008,7 +1008,7 @@ describe('column ranges', () => {
 
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('C1'), 1, 1), adr('B1'))
 
-    expect(engine.getCellFormula(adr('B1'))).toEqual('=SUM(A:B)')
+    expect(engine.getCellFormula(adr('B1')).cellValue).toEqual('=SUM(A:B)')
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
   })
 })
@@ -1061,7 +1061,7 @@ describe('row ranges', () => {
 
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A3'), 1, 1), adr('A2'))
 
-    expect(engine.getCellFormula(adr('A2'))).toEqual('=SUM(1:2)')
+    expect(engine.getCellFormula(adr('A2')).cellValue).toEqual('=SUM(1:2)')
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
   })
 })

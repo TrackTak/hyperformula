@@ -48,10 +48,10 @@ describe('Address dependencies, moved formulas', () => {
     expect(engine.getCellValue(adr('B2')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
     expect(engine.getCellValue(adr('B3')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
     expect(engine.getCellValue(adr('B4')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
-    expect(engine.getCellFormula(adr('B1'))).toEqual('=B1')
-    expect(engine.getCellFormula(adr('B2'))).toEqual('=$B2')
-    expect(engine.getCellFormula(adr('B3'))).toEqual('=B$3')
-    expect(engine.getCellFormula(adr('B4'))).toEqual('=$B$4')
+    expect(engine.getCellFormula(adr('B1')).cellValue).toEqual('=B1')
+    expect(engine.getCellFormula(adr('B2')).cellValue).toEqual('=$B2')
+    expect(engine.getCellFormula(adr('B3')).cellValue).toEqual('=B$3')
+    expect(engine.getCellFormula(adr('B4')).cellValue).toEqual('=$B$4')
   })
 
   it('should work when overriding moved dependency', () => {

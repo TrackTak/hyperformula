@@ -182,7 +182,7 @@ describe('Move columns', () => {
 
     engine.moveColumns(0, 1, 1, 3)
 
-    expect(engine.getCellFormula(adr('C2'))).toEqual('=COUNTBLANK(A1:A1)')
+    expect(engine.getCellFormula(adr('C2')).cellValue).toEqual('=COUNTBLANK(A1:A1)')
     expect(engine.getCellValue(adr('C2')).cellValue).toEqual(0)
   })
 
@@ -227,7 +227,7 @@ describe('Move columns', () => {
     engine.moveColumns(0, 0, 1, 2)
 
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
-    expect(engine.getCellFormula(adr('B1'))).toEqual('=SUM(A1:C1)')
+    expect(engine.getCellFormula(adr('B1')).cellValue).toEqual('=SUM(A1:C1)')
   })
 
   it('should produce only one history entry', () => {
@@ -276,7 +276,7 @@ describe('Move columns - column ranges', () => {
     engine.moveColumns(0, 0, 1, 2)
 
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.CYCLE))
-    expect(engine.getCellFormula(adr('B1'))).toEqual('=SUM(A:C)')
+    expect(engine.getCellFormula(adr('B1')).cellValue).toEqual('=SUM(A:C)')
   })
 })
 

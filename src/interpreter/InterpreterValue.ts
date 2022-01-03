@@ -38,7 +38,24 @@ export function getRawValue<T>(num: RichNumber | T): number | T {
 }
 
 export class CellData<T> {
-  constructor(public cellValue: T, public metadata?: CellMetadata) {
+  public metadata?: CellMetadata
+
+  constructor(public cellValue: T, metadata?: CellMetadata) {
+    if (metadata !== undefined) {
+      this.metadata = metadata
+    }
+  }
+
+  public toRawContent() {
+    if (this.metadata !== undefined) {
+      return {
+        cellValue: this.cellValue,
+        metadata: this.metadata
+      }
+    }
+    return {
+      cellValue: this.cellValue
+    }
   }
 }
 

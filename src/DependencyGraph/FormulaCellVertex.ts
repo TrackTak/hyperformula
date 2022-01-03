@@ -195,10 +195,10 @@ export class ArrayVertex extends FormulaVertex {
   getArrayCellRawValue(address: SimpleCellAddress): DataRawCellContent {
     const val = this.getArrayCellValue(address)
     if (val.cellValue instanceof CellError || val.cellValue === EmptyValue) {
-      return new CellData(undefined, this.metadata)
+      return new CellData(undefined, this.metadata).toRawContent()
     }
       
-    return new CellData(getRawValue(val.cellValue), this.metadata)
+    return new CellData(getRawValue(val.cellValue), this.metadata).toRawContent()
   }
 
   setArrayCellValue(address: SimpleCellAddress, value: number): void {

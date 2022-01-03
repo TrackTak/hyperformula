@@ -62,7 +62,7 @@ export class Serialization {
   public getCellSerialized(address: SimpleCellAddress, targetAddress?: SimpleCellAddress): DataRawCellContent {
     const cellFormula = this.getCellFormula(address, targetAddress)
 
-    return cellFormula.cellValue !== undefined ? cellFormula : this.getRawValue(address)
+    return cellFormula.cellValue !== undefined ? cellFormula.toRawContent() : this.getRawValue(address)
   }
 
   public getCellValue(address: SimpleCellAddress): CellData<CellValue> {
@@ -85,7 +85,7 @@ export class Serialization {
     return this.genericSheetGetter(sheet, (arg) => this.getCellFormula(arg))
   }
 
-  public genericSheetGetter<T>(sheet: number, getter: (address: SimpleCellAddress) => T): T[][] {
+  public genericSheetGetter<T extends CellData<any> | DataRawCellContent>(sheet: number, getter: (address: SimpleCellAddress) => T): T[][] {
     const sheetHeight = this.dependencyGraph.getSheetHeight(sheet)
     const sheetWidth = this.dependencyGraph.getSheetWidth(sheet)
 
@@ -98,7 +98,9 @@ export class Serialization {
         arr[i][j] = getter(address)
       }
       for (let j = sheetWidth - 1; j >= 0; j--) {
-        if (arr[i][j] === null || arr[i][j] === undefined) {
+        const cell = arr[i][j]
+
+        if ((cell.cellValue === null || cell.cellValue === undefined) && !cell.metadata) {
           arr[i].pop()
         } else {
           break

@@ -190,7 +190,7 @@ describe('Undo - moving rows', () => {
     engine.moveRows(0, 1, 1, 3)
     engine.undo()
 
-    expect(engine.getCellFormula(adr('B2'))).toEqual('=SUM(A1:A2)')
+    expect(engine.getCellFormula(adr('B2')).cellValue).toEqual('=SUM(A1:A2)')
   })
 
   it('should restore range when moving other way', () => {
@@ -202,7 +202,7 @@ describe('Undo - moving rows', () => {
     engine.moveRows(0, 2, 1, 1)
     engine.undo()
 
-    expect(engine.getCellFormula(adr('B2'))).toEqual('=SUM(A1:A2)')
+    expect(engine.getCellFormula(adr('B2')).cellValue).toEqual('=SUM(A1:A2)')
   })
 })
 
@@ -237,7 +237,7 @@ describe('Undo - moving columns', () => {
     engine.moveColumns(0, 1, 1, 3)
     engine.undo()
 
-    expect(engine.getCellFormula(adr('B2'))).toEqual('=SUM(A1:B1)')
+    expect(engine.getCellFormula(adr('B2')).cellValue).toEqual('=SUM(A1:B1)')
   })
 
   it('should restore range when moving to left', () => {
@@ -249,7 +249,7 @@ describe('Undo - moving columns', () => {
     engine.moveColumns(0, 2, 1, 1)
     engine.undo()
 
-    expect(engine.getCellFormula(adr('B2'))).toEqual('=SUM(A1:B1)')
+    expect(engine.getCellFormula(adr('B2')).cellValue).toEqual('=SUM(A1:B1)')
   })
 })
 
@@ -914,7 +914,7 @@ describe('Undo', () => {
     engine.removeColumns(0, [0, 1])
 
     expect(() => engine.undo()).not.toThrowError()
-    expect(engine.getCellFormula(adr('F1'))).toEqual('=SUM(A1:C1)')
+    expect(engine.getCellFormula(adr('F1')).cellValue).toEqual('=SUM(A1:C1)')
   })
 })
 
@@ -1207,7 +1207,7 @@ describe('Redo - setting cell content', () => {
 
     engine.redo()
 
-    expect(engine.getCellValue(adr('A1')).cellValue).toEqual({ cellValue: '', metadata: { test: 'value' }})
+    expect(engine.getCellValue(adr('A1'))).toEqual({ cellValue: '', metadata: { test: 'value' }})
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromSheets(snapshot)[0])
   })
 

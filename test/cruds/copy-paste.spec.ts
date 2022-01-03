@@ -105,7 +105,7 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('B1'))
 
-    expect(engine.getCellFormula(adr('B1'))).toEqual('=SUM(')
+    expect(engine.getCellFormula(adr('B1')).cellValue).toEqual('=SUM(')
   })
 
   it('should work for area', () => {
@@ -339,7 +339,7 @@ describe('Copy - paste integration', () => {
     engine.paste(adr('A5'))
 
     expect(engine.arrayMapping.arrayMapping.size).toEqual(1)
-    expect(engine.getCellFormula(adr('A5'))).toBe(undefined)
+    expect(engine.getCellFormula(adr('A5')).cellValue).toBe(undefined)
     expect(engine.getCellValue(adr('A5')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('B5')).cellValue).toEqual(3)
     expect(engine.getCellValue(adr('A6')).cellValue).toEqual(2)

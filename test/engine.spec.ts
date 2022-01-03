@@ -104,7 +104,7 @@ describe('#buildFromArray', () => {
   it('should be possible to build graph with reference to not existing sheet', () => {
     const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=Sheet2!A2' }]])
 
-    expect(engine.getCellFormula(adr('A1'))).toEqual('=Sheet2!A2')
+    expect(engine.getCellFormula(adr('A1')).cellValue).toEqual('=Sheet2!A2')
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.REF))
   })
 
@@ -114,10 +114,10 @@ describe('#buildFromArray', () => {
     ])
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.ERROR, ErrorMessage.ParseError))
-    expect(engine.getCellFormula(adr('A1'))).toEqual('=SUM(')
+    expect(engine.getCellFormula(adr('A1')).cellValue).toEqual('=SUM(')
 
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.ERROR, ErrorMessage.ParseError))
-    expect(engine.getCellFormula(adr('B1'))).toEqual('=A1')
+    expect(engine.getCellFormula(adr('B1')).cellValue).toEqual('=A1')
   })
 })
 
@@ -127,7 +127,7 @@ describe('#getCellFormula', () => {
       [{ cellValue: '=SUM(1,2,3,C3)' }],
     ])
 
-    expect(engine.getCellFormula(adr('A1'))).toEqual('=SUM(1,2,3,C3)')
+    expect(engine.getCellFormula(adr('A1')).cellValue).toEqual('=SUM(1,2,3,C3)')
   })
 
   it('works with -0', () => {
@@ -135,7 +135,7 @@ describe('#getCellFormula', () => {
       [{ cellValue: '=-0' }],
     ])
 
-    expect(engine.getCellFormula(adr('A1'))).toEqual('=-0')
+    expect(engine.getCellFormula(adr('A1')).cellValue).toEqual('=-0')
   })
 
   it('returns undefined for simple values', () => {
@@ -145,10 +145,10 @@ describe('#getCellFormula', () => {
       [{ cellValue: 'foobar' }],
     ])
 
-    expect(engine.getCellFormula(adr('A1'))).toEqual(undefined)
-    expect(engine.getCellFormula(adr('A2'))).toEqual(undefined)
-    expect(engine.getCellFormula(adr('A3'))).toEqual(undefined)
-    expect(engine.getCellFormula(adr('A4'))).toEqual(undefined)
+    expect(engine.getCellFormula(adr('A1')).cellValue).toEqual(undefined)
+    expect(engine.getCellFormula(adr('A2')).cellValue).toEqual(undefined)
+    expect(engine.getCellFormula(adr('A3')).cellValue).toEqual(undefined)
+    expect(engine.getCellFormula(adr('A4')).cellValue).toEqual(undefined)
   })
 
   it('returns matrix formula for matrix vertices', () => {
@@ -158,10 +158,10 @@ describe('#getCellFormula', () => {
       [{ cellValue: '=MMULT(A1:B2,A1:B2)' }],
     ])
 
-    expect(engine.getCellFormula(adr('A3'))).toEqual('=MMULT(A1:B2,A1:B2)')
-    expect(engine.getCellFormula(adr('A4'))).toEqual(undefined)
-    expect(engine.getCellFormula(adr('B3'))).toEqual(undefined)
-    expect(engine.getCellFormula(adr('B4'))).toEqual(undefined)
+    expect(engine.getCellFormula(adr('A3')).cellValue).toEqual('=MMULT(A1:B2,A1:B2)')
+    expect(engine.getCellFormula(adr('A4')).cellValue).toEqual(undefined)
+    expect(engine.getCellFormula(adr('B3')).cellValue).toEqual(undefined)
+    expect(engine.getCellFormula(adr('B4')).cellValue).toEqual(undefined)
   })
 
   it('returns invalid formula literal', () => {
@@ -170,7 +170,7 @@ describe('#getCellFormula', () => {
     ])
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.ERROR, ErrorMessage.ParseError))
-    expect(engine.getCellFormula(adr('A1'))).toEqual('=SUM(')
+    expect(engine.getCellFormula(adr('A1')).cellValue).toEqual('=SUM(')
   })
 
   it('returns invalid matrix formula literal', () => {
@@ -179,7 +179,7 @@ describe('#getCellFormula', () => {
     ])
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.ERROR, ErrorMessage.ParseError))
-    expect(engine.getCellFormula(adr('A1'))).toEqual('=TRANSPOSE(')
+    expect(engine.getCellFormula(adr('A1')).cellValue).toEqual('=TRANSPOSE(')
   })
 })
 
@@ -211,12 +211,12 @@ describe('#getSheetFormulas', () => {
   it('should return formulas from sheet', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: '=SUM(1, A2)' }, { cellValue: '=TRUE()' }],
-      [{ cellValue: '=SUM(', metadata: { test: 'value' }}, { cellValue: '=SUM(' },  { cellValue: null }, { cellValue: 1 }]
+      [{ cellValue: '=SUM(', metadata: { test: 'value' }}, { cellValue: '=SUM(1' },  { cellValue: null }, { cellValue: 1 }]
     ])
 
     const out = engine.getSheetFormulas(0)
 
-    expectArrayWithSameContent([[{ cellValue: '=SUM(1, A2)' }, { cellValue: '=TRUE()' }], [{ cellValue: '=SUM(', metadata: { test: 'value' }}, '=SUM(']], out)
+    expectArrayWithSameContent([[{ cellValue: '=SUM(1, A2)' }, { cellValue: '=TRUE()' }], [{ cellValue: '=SUM(', metadata: { test: 'value' }}, { cellValue: '=SUM(1' }]], out)
   })
 })
 
@@ -227,7 +227,7 @@ describe('#getCellValue', () => {
     ])
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual('')
-    expect(engine.getCellValue(adr('B1')).cellValue).toEqual({ cellValue: 1, metadata: { test: 'value' }})
+    expect(engine.getCellValue(adr('B1'))).toEqual({ cellValue: 1, metadata: { test: 'value' }})
     expect(engine.getCellValue(adr('C1')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('D1')).cellValue).toEqual('foo')
     expect(engine.getCellValue(adr('E1')).cellValue).toEqual(true)
@@ -333,13 +333,13 @@ describe('#getRangeValues', () => {
 })
 
 describe('#getSheetValues', () => {
-  it('should return values from sheet', () => {
+  it('sholud return values from sheet', () => {
     const [engine] = HyperFormula.buildFromArray([
       [{ cellValue: 1 }, { cellValue: 'foo' }, { cellValue: '=SUM(1, A1)' }, { cellValue: null}, {cellValue: '=TRUE()' }, { cellValue: null }]
     ])
 
     const out = engine.getSheetValues(0)
-
+    
     expectArrayWithSameContent([[{ cellValue: 1 }, { cellValue: 'foo' }, { cellValue: 2 }, { cellValue: null}, {cellValue: true }]], out)
   })
 })
@@ -654,7 +654,7 @@ describe('#getCellValueFormat', () => {
   })
 
   it('unicode currency', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1₪' }]], {currencySymbol: ['1₪']})
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1₪' }]], {currencySymbol: ['₪']})
     expect(engine.getCellValueFormat(adr('A1'))).toEqual('₪')
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getCellValueDetailedType(adr('A1'))).toEqual(CellValueDetailedType.NUMBER_CURRENCY)

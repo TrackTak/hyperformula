@@ -91,7 +91,7 @@ describe('Function FORMULATEXT', () => {
 
     engine.addRows(0, [1, 1])
 
-    expect(engine.getCellFormula(adr('A1'))).toEqual('=SUM(A3)')
+    expect(engine.getCellFormula(adr('A1')).cellValue).toEqual('=SUM(A3)')
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual('=SUM(A3)')
   })
 })

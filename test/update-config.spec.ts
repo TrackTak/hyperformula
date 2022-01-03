@@ -26,10 +26,10 @@ describe('update config', () => {
     ])
     engine.updateConfig({})
 
-    expect(engine.getCellFormula(adr('B1'))).toBe('=A1')
-    expect(engine.getCellFormula(adr('C1'))).toBe('=SUM(A1:B1)')
-    expect(engine.getCellFormula(adr('B2'))).toBe('=B2')
-    expect(engine.getCellFormula(adr('C2'))).toBe('=F(')
+    expect(engine.getCellFormula(adr('B1')).cellValue).toBe('=A1')
+    expect(engine.getCellFormula(adr('C1')).cellValue).toBe('=SUM(A1:B1)')
+    expect(engine.getCellFormula(adr('B2')).cellValue).toBe('=B2')
+    expect(engine.getCellFormula(adr('C2')).cellValue).toBe('=F(')
   })
 
   it('simple reload preserves values', () => {
@@ -49,11 +49,11 @@ describe('update config', () => {
     ])
     engine.updateConfig({language: 'plPL'})
 
-    expect(engine.getCellFormula(adr('A1'))).toBe('=FOO()')
-    expect(engine.getCellFormula(adr('B1'))).toBe('=SUMA()')
-    expect(engine.getCellFormula(adr('C1'))).toBe('=SUMA()')
-    expect(engine.getCellFormula(adr('D1'))).toBe(undefined)
-    expect(engine.getCellFormula(adr('E1'))).toBe('=SUM(')
+    expect(engine.getCellFormula(adr('A1')).cellValue).toBe('=FOO()')
+    expect(engine.getCellFormula(adr('B1')).cellValue).toBe('=SUMA()')
+    expect(engine.getCellFormula(adr('C1')).cellValue).toBe('=SUMA()')
+    expect(engine.getCellFormula(adr('D1')).cellValue).toBe(undefined)
+    expect(engine.getCellFormula(adr('E1')).cellValue).toBe('=SUM(')
   })
 
   it('simple reload preserves namedexpressions', () => {

@@ -55,7 +55,7 @@ export function findBoundaries(sheet: Sheet): SheetBoundaries {
     let currentRowWidth = 0
     for (let currentCol = 0; currentCol < sheet[currentRow].length; currentCol++) {
       const currentValue = sheet[currentRow][currentCol]
-      if (currentValue === undefined || currentValue === null) {
+      if ((currentValue.cellValue === undefined || currentValue.cellValue === null) && !currentValue.metadata) {
         continue
       }
       currentRowWidth = currentCol + 1

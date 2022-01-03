@@ -85,11 +85,11 @@ export class AddressMapping {
     if (vertex instanceof ValueCellVertex) {
       const values = vertex.getValues()
 
-      return new CellData(values.rawValue, values.metadata)
+      return new CellData(values.rawValue, values.metadata).toRawContent()
     } else if (vertex instanceof ArrayVertex) {
       return vertex.getArrayCellRawValue(address)
     } else {
-      return new CellData(null)
+      return new CellData(null).toRawContent()
     }
   }
 

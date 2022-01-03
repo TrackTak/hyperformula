@@ -563,7 +563,7 @@ export class Operations {
   public setCellContent(address: SimpleCellAddress, newCellContent: DataRawCellContent): [SimpleCellAddress, ClipboardCell] {
     const parsedCellContent = this.cellContentParser.parse(newCellContent.cellValue)
     
-    return this.setParsedCellContent(newCellContent, parsedCellContent, address, newCellContent.metadata)
+    return this.setParsedCellContent(newCellContent, parsedCellContent, address)
   }
 
   public setSheetContent(sheetId: number, newSheetContent: DataRawCellContent[][]) {
@@ -675,7 +675,7 @@ export class Operations {
     this.dependencyGraph.forceApplyPostponedTransformations()
   }
 
-  private setParsedCellContent(rawCellContent: DataRawCellContent, parsedCellContent: CellContent.Type, address: SimpleCellAddress, metadata?: CellMetadata): [SimpleCellAddress, ClipboardCell] {
+  private setParsedCellContent(rawCellContent: DataRawCellContent, parsedCellContent: CellContent.Type, address: SimpleCellAddress): [SimpleCellAddress, ClipboardCell] {
     const oldContent = this.getOldContent(address)
 
     if (parsedCellContent instanceof CellContent.Formula) {
@@ -683,17 +683,17 @@ export class Operations {
       const {ast, errors} = parserResult
 
       if (errors.length > 0) {
-        this.setParsingErrorToCell(parsedCellContent.formula, errors, address, metadata)
+        this.setParsingErrorToCell(parsedCellContent.formula, errors, address, rawCellContent.metadata)
       } else {
         const size = this.arraySizePredictor.checkArraySize(ast, address)
         const asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(ast, address)
 
-        this.setFormulaToCell(address, size, asyncPromises, metadata, parserResult, true)
+        this.setFormulaToCell(address, size, asyncPromises, rawCellContent.metadata, parserResult, true)
       }
     } else if (parsedCellContent instanceof CellContent.Empty) {
       this.setCellEmpty(address)
     } else {
-      this.setValueToCell({parsedValue: parsedCellContent.value, rawValue: rawCellContent.cellValue, metadata}, address)
+      this.setValueToCell({parsedValue: parsedCellContent.value, rawValue: rawCellContent.cellValue, metadata: rawCellContent.metadata}, address)
     }
 
     return oldContent
