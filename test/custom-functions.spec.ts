@@ -264,7 +264,7 @@ describe('Instance level formula registry', () => {
   it('should return registered formula ids', () => {
     const [engine] = HyperFormula.buildFromArray([], {functionPlugins: [FooPlugin, SumWithExtra]})
 
-    expectArrayWithSameContent(engine.getRegisteredFunctionNames(), [{ cellValue: 'SUM' }, { cellValue: 'FOO' }, { cellValue: 'BAR' }, { cellValue: 'VERSION'}])
+    expectArrayWithSameContent(engine.getRegisteredFunctionNames(), ['SUM', 'FOO', 'BAR', 'VERSION'])
   })
 
   it('should create engine only with plugins passed to configuration', () => {

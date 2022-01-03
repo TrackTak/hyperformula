@@ -61,7 +61,7 @@ export class Exporter implements ChangeExporter<ExportedChange> {
   }
 
   public exportChange(change: CellValueChange): ExportedChange | ExportedChange[] {
-    const value = change.value
+    const value = change.value.cellValue
     const address = change.address
 
     if (address.sheet === NamedExpressions.SHEET_FOR_WORKBOOK_EXPRESSIONS) {
@@ -71,21 +71,21 @@ export class Exporter implements ChangeExporter<ExportedChange> {
       }
       return new ExportedNamedExpressionChange(
         namedExpression.displayName,
-        this.parseExportedScalarOrRange(value.cellValue),
+        this.parseExportedScalarOrRange(value),
       )
     } else if (value instanceof SimpleRangeValue) {
       const result: ExportedChange[] = []
       for (const [cellValue, cellAddress] of value.entriesFromTopLeftCorner(address)) {
         result.push(new ExportedCellChange(
           cellAddress,
-          this.exportValue(new CellData(cellValue, value.metadata))
+          this.exportValue(new CellData(cellValue, change.value.metadata))
         ))
       }
       return result
     } else {
       return new ExportedCellChange(
         address,
-        this.exportValue(value),
+        this.exportValue(change.value),
       )
     }
   }

@@ -99,7 +99,7 @@ describe('changing cell content', () => {
     expect(engine.graph.existsEdge(a1, b1)).toBe(true)
     expect(engine.getCellValue(adr('B1')).cellValue).toBe(1)
     engine.setCellContents(adr('B1'), [[{ cellValue: '7', metadata: {test: 'value'} }]])
-    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(new CellData(7, { test: 'value'}))
+    expect(engine.getCellValue(adr('B1'))).toEqual(new CellData(7, { test: 'value'}))
     expect(engine.graph.existsEdge(a1, b1)).toBe(false)
   })
 
@@ -112,7 +112,7 @@ describe('changing cell content', () => {
     const b1 = engine.addressMapping.fetchCell(adr('B1'))
 
     engine.setCellContents(adr('B1'), [[{ cellValue: undefined, metadata: {test: 'value'} }]])
-    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(new CellData('', { test: 'value'}))
+    expect(engine.getCellValue(adr('B1'))).toEqual(new CellData('', { test: 'value'}))
     expect(engine.graph.existsEdge(a1, b1)).toBe(false)
   })
 
@@ -702,7 +702,7 @@ describe('change multiple cells contents', () => {
     ]
     const [engine] = HyperFormula.buildFromArray(sheet)
 
-    const [changes] = engine.setCellContents(adr('A1'), [[{ cellValue: '7' }, { cellValue: '8' }], [{ cellValue: '7' }, { cellValue: '8' }]])
+    const [changes] = engine.setCellContents(adr('A1'), [[{ cellValue: '7' }, { cellValue: '8' }], [{ cellValue: '9' }, { cellValue: '10' }]])
 
     expect(changes.length).toEqual(6)
     expectArrayWithSameContent(changes.map((change) => change.newValue), [{ cellValue: 7 }, { cellValue: 8 }, { cellValue: 9 }, { cellValue: 10}, {cellValue: 15 }, { cellValue: 18 }])
@@ -728,7 +728,7 @@ describe('updating column index', () => {
     engine.setCellContents(adr('B2'), { cellValue: '8' })
 
     expectArrayWithSameContent((engine.columnSearch as ColumnIndex).getValueIndex(0, 1, 15).index, [])
-    expectArrayWithSameContent((engine.columnSearch as ColumnIndex).getValueIndex(0, 1, 8).index, [{ cellValue: 1 }])
+    expectArrayWithSameContent((engine.columnSearch as ColumnIndex).getValueIndex(0, 1, 8).index, [1])
   })
 
   it('should update column index when clearing cell content', () => {
@@ -759,7 +759,7 @@ describe('updating column index', () => {
     engine.setCellContents(adr('B1'), { cellValue: '=SUM(A1)' })
 
     expectArrayWithSameContent((engine.columnSearch as ColumnIndex).getValueIndex(0, 1, 2).index, [])
-    expectArrayWithSameContent((engine.columnSearch as ColumnIndex).getValueIndex(0, 1, 1).index, [{ cellValue: 0 }])
+    expectArrayWithSameContent((engine.columnSearch as ColumnIndex).getValueIndex(0, 1, 1).index, [0])
   })
 })
 
@@ -947,8 +947,8 @@ describe('arrays', () => {
       [undefined,  undefined],
     ])
     expect(engine.getSheetValues(0)).toEqual([
-      [noSpace(), 1, 1, 1, 2],
-      [noSpace(), 2, 2, 1, 2],
+      [{ cellValue: noSpace() }, { cellValue:1}, { cellValue:1}, { cellValue:1}, { cellValue:2}],
+      [{ cellValue:noSpace()}, { cellValue:2}, { cellValue:2}, { cellValue:1}, { cellValue:2}],
     ])
     expect(engine.arrayMapping.arrayMapping.size).toEqual(3)
     expect(engine.getSheetValues(0))
@@ -966,7 +966,7 @@ describe('arrays', () => {
     expect(engine.getSheetValues(0)).toEqual([
       [{ cellValue: 1 }, { cellValue: 2 }],
       [{ cellValue: 3 }, { cellValue: 4 }, { cellValue: 'foo' }],
-      [noSpace()],
+      [{  cellValue: noSpace() }],
       [{ cellValue: null }, { cellValue: 'foo' }]
     ])
   })
@@ -982,9 +982,9 @@ describe('arrays', () => {
 
     expect(engine.getSheetValues(0)).toEqual([
       [{ cellValue: 1 }, { cellValue: 2 }],
-      [3, 4, -4],
-      [-1, -2],
-      [-3, -4],
+      [{ cellValue:3}, { cellValue:4}, { cellValue: -4}],
+      [{ cellValue:-1}, { cellValue:-2}],
+      [{ cellValue:-3}, { cellValue:-4}],
     ])
   })
 
@@ -1006,7 +1006,7 @@ describe('arrays', () => {
     expect(engine.getSheetValues(0)).toEqual([
       [{ cellValue: 1 }, { cellValue: 2 }],
       [{ cellValue: 3 }, { cellValue: 4 }, { cellValue: 10 }],
-      [noSpace()],
+      [{ cellValue: noSpace() }],
       [{ cellValue: null }, { cellValue: 10 }]
     ])
   })
@@ -1040,7 +1040,7 @@ describe('arrays', () => {
     expect(engine.getSheetValues(0)).toEqual([
       [{ cellValue: 1 }, { cellValue: 2 }],
       [{ cellValue: 3 }, { cellValue: 4 }, { cellValue: 3 }],
-      [noSpace(), 1, 2],
+      [{ cellValue: noSpace() }, { cellValue: 1 }, { cellValue: 2 }],
       [{ cellValue: null }, { cellValue: 3 }, { cellValue: 4 }]
     ])
   })
@@ -1085,7 +1085,7 @@ describe('arrays', () => {
     ], {useArrayArithmetic: true})
 
     engine.setCellContents(adr('B1'), { cellValue: 'foo' })
-    engine.setCellContents(adr('B1'), [[{ cellValue: 4 }], [{ cellValue: 4 }], [{ cellValue: 4 }]])
+    engine.setCellContents(adr('B1'), [[{ cellValue: 4 }], [{ cellValue: 5 }], [{ cellValue: 6 }]])
 
     const b1 = engine.dependencyGraph.getCell(adr('b1'))!
     const b2 = engine.dependencyGraph.getCell(adr('b2'))!

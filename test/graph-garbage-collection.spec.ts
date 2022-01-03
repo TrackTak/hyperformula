@@ -230,7 +230,7 @@ describe('cruds', () => {
     ])
     engine.addRows(0, [1, 1])
 
-    engine.setCellContents(adr('A1'), [[{ cellValue: 1 }], [{ cellValue: 1 }], [{ cellValue: 1 }], [{ cellValue: 1 }]])
+    engine.setCellContents(adr('A1'), [[{ cellValue: 1 }], [{ cellValue: 2 }], [{ cellValue: 3}], [{ cellValue: 4 }]])
 
     expect(engine.getCellValue(adr('A5')).cellValue).toBe(10)
     expect(engine.getCellValue(adr('A6')).cellValue).toBe(6)
@@ -251,7 +251,7 @@ describe('cruds', () => {
       [{ cellValue: '=SUM(A1:A3)' }],
     ])
 
-    engine.setCellContents(adr('A1'), [[{ cellValue: 1 }], [{ cellValue: 1 }], [{ cellValue: 1 }], [{ cellValue: 1 }]])
+    engine.setCellContents(adr('A1'), [[{ cellValue: 1 }], [{ cellValue: 2 }], [{ cellValue: 3 }], [{ cellValue: 4 }]])
 
     expect(engine.getCellValue(adr('A5')).cellValue).toBe(10)
     expect(engine.getCellValue(adr('A6')).cellValue).toBe(6)
@@ -291,7 +291,7 @@ describe('cruds', () => {
     ])
     engine.addRows(0, [1, 1])
 
-    engine.setCellContents(adr('A1'), [[{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }]])
+    engine.setCellContents(adr('A1'), [[{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 2 }, { cellValue: 2 }], [{ cellValue: 3 }, { cellValue: 3 }], [{ cellValue: 4 }, { cellValue: 4 }]])
 
     expect(engine.getCellValue(adr('A5')).cellValue).toBe(6)
     expect(engine.getCellValue(adr('B5')).cellValue).toBe(10)

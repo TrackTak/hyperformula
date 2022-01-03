@@ -143,7 +143,7 @@ export class Evaluator {
               asyncVertices.push(vertex)
             }
 
-            if (newCellValue !== currentValue) {
+            if (newCellValue.cellValue !== currentValue?.cellValue) {
               const address = vertex.getAddress(this.lazilyTransformingAstService)
               const currentRawValue = getRawValue(currentValue?.cellValue)
               const newRawValue = getRawValue(newCellValue.cellValue)

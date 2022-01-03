@@ -59,7 +59,7 @@ export class ContentChanges {
   }
 
   private add(address: SimpleCellAddress, change: CellValueChange) {
-    const value = change.value
+    const value = change.value.cellValue
     if (value instanceof SimpleRangeValue) {
       for (const cellAddress of value.effectiveAddressesFromData(address)) {
         this.changes.delete(`${cellAddress.sheet},${cellAddress.col},${cellAddress.row}`)

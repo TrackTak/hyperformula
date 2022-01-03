@@ -41,7 +41,7 @@ class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlu
 
   public arrayinferfoo(ast: ProcedureAst, state: InterpreterState): InterpreterValue {
     return this.runFunction(ast.args, state, this.metadata('ARRAYINFERFOO'), () => {
-      return SimpleRangeValue.onlyValues([['$2', '2%'], ['$2', '2%']])
+      return SimpleRangeValue.onlyValues([['$2', '2%'], [2, '"2%"']])
     })
   }
 
@@ -79,10 +79,9 @@ describe('infer return types', () => {
     expect(engine.getCellValueDetailedType(adr('B1'))).toBe(CellValueDetailedType.NUMBER_PERCENT)
   
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
-    expect(engine.getCellValueDetailedType(adr('A2'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
+    expect(engine.getCellValueDetailedType(adr('A2'))).toBe(CellValueDetailedType.NUMBER_RAW)
     
     expect(engine.getCellValue(adr('B2')).cellValue).toEqual('\"2%\"')
     expect(engine.getCellValueDetailedType(adr('B2'))).toBe(CellValueDetailedType.STRING)
-
   })
 })

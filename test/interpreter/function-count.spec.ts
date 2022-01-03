@@ -16,13 +16,13 @@ describe('COUNT', () => {
   })
 
   it('COUNT with range', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '3' }], [{ cellValue: '2' }], [{ cellValue: '=COUNT(A1:A3)' }]])
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
   })
 
   it('COUNT ignores all nonnumeric arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: null }], [{ cellValue: '=TRUE()' }], [{ cellValue: '=COUNT(A1:A3)' }]])
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(0)
   })

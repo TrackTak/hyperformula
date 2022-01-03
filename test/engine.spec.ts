@@ -362,7 +362,7 @@ describe('#getCellSerialized', () => {
     ])
 
     expect(engine.getCellSerialized(adr('A1')).cellValue).toEqual('=SUM(1, A2)')
-    expect(engine.getCellSerialized(adr('B1')).cellValue).toEqual({
+    expect(engine.getCellSerialized(adr('B1'))).toEqual({
       cellValue: '=SUM(1, A2)',
       metadata: {
         test: 'value'

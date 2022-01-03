@@ -15,17 +15,17 @@ describe('MIN', () => {
   })
 
   it('MIN with range', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '3' }], [{ cellValue: '2' }], [{ cellValue: '=MIN(A1:A3)' }]])
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(1)
   })
 
   it('MIN with mixed arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }], [{ cellValue: '1' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '1' }], [{ cellValue: '3' }], [{ cellValue: '2' }], [{ cellValue: '=MIN(4,A1:A3)' }]])
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(1)
   })
 
   it('MIN of strings and number', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }], [{ cellValue: 'foo' }]])
+    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 'foo' }], [{ cellValue: 'bar' }], [{ cellValue: '5' }], [{ cellValue: '=MIN(A1:A3)' }]])
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(5)
   })
 
