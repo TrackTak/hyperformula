@@ -16,7 +16,6 @@ import {ErrorMessage} from '../error-message'
 import {FunctionRegistry} from '../interpreter/FunctionRegistry'
 import {
   CellData,
-  CellMetadata,
   DataInternalScalarValue,
   DataInterpreterValue,
   EmptyValue,
@@ -87,7 +86,7 @@ export class DependencyGraph {
     )
   }
 
-  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: Maybe<AsyncPromise[]>, metadata: Maybe<CellMetadata>, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean, markNodeAsSpecialRecentlyChanged = true): ContentChanges {
+  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: Maybe<AsyncPromise[]>, metadata: Maybe<any>, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean, markNodeAsSpecialRecentlyChanged = true): ContentChanges {
     const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version(), asyncPromises, metadata)
 
     this.exchangeOrAddFormulaVertex(newVertex)

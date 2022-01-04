@@ -4,14 +4,14 @@
  */
 
 import {CellError} from '../Cell'
-import { CellData, CellMetadata } from '../interpreter/InterpreterValue'
+import { CellData } from '../interpreter/InterpreterValue'
 import {ParsingError} from '../parser/Ast'
 
 export class ParsingErrorVertex {
   constructor(
     public readonly errors: ParsingError[],
     public readonly rawInput: string,
-    public readonly metadata?: CellMetadata
+    public readonly metadata?: any
   ) {
   }
 

@@ -27,8 +27,6 @@ export type DataRawScalarValue = CellData<RawScalarValue>
 export type RawInterpreterValue = RawScalarValue | SimpleRangeValue
 export type DataRawInterpreterValue = CellData<RawInterpreterValue>
 
-export type CellMetadata = Record<string | number, any>
-
 export function getRawValue<T>(num: RichNumber | T): number | T {
   if (num instanceof RichNumber) {
     return num.val
@@ -37,10 +35,10 @@ export function getRawValue<T>(num: RichNumber | T): number | T {
   }
 }
 
-export class CellData<T> {
+export class CellData<CellValue, CellMetadata = any> {
   public metadata?: CellMetadata
 
-  constructor(public cellValue: T, metadata?: CellMetadata) {
+  constructor(public cellValue: CellValue, metadata?: CellMetadata) {
     if (metadata !== undefined) {
       this.metadata = metadata
     }

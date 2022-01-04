@@ -91,7 +91,7 @@ export interface Listeners {
    *
    * @category Sheet
    */
-  sheetRemoved: (removedSheetDisplayName: string, changes: ExportedChange[]) => any,
+  sheetRemoved: (removedSheetDisplayName: string, changes: ExportedChange[], previousSheetNames: string[]) => any,
 
   /**
    * Occurs when a sheet is renamed anywhere inside the workbook.

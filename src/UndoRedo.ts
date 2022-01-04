@@ -8,7 +8,6 @@ import {DataRawCellContent, RawCellContent} from './CellContentParser'
 import {ClipboardCell} from './ClipboardOperations'
 import {Config} from './Config'
 import { Emitter } from './Emitter'
-import { CellMetadata } from './interpreter/InterpreterValue'
 import { Maybe } from './Maybe'
 import {InternalNamedExpression, NamedExpressionOptions} from './NamedExpressions'
 import {
@@ -415,7 +414,7 @@ export class BatchUndoEntry extends BaseUndoEntry {
 }
 
 export class UndoRedo {
-  public oldData: Map<number, [SimpleCellAddress, Maybe<CellMetadata>, string][]> = new Map()
+  public oldData: Map<number, [SimpleCellAddress, Maybe<any>, string][]> = new Map()
   private undoStack: UndoEntry[] = []
   private redoStack: UndoEntry[] = []
   private readonly undoLimit: number
@@ -449,7 +448,7 @@ export class UndoRedo {
     this.batchUndoEntry = undefined
   }
 
-  public storeDataForVersion(version: number, address: SimpleCellAddress, astHash: string, metadata: Maybe<CellMetadata>) {
+  public storeDataForVersion(version: number, address: SimpleCellAddress, astHash: string, metadata: Maybe<any>) {
     if (!this.oldData.has(version)) {
       this.oldData.set(version, [])
     }

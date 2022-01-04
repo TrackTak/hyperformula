@@ -42,7 +42,7 @@ import {
   SourceLocationHasArrayError,
   TargetLocationHasArrayError
 } from './errors'
-import {CellData, CellMetadata, EmptyValue, getRawValue} from './interpreter/InterpreterValue'
+import {CellData, EmptyValue, getRawValue} from './interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import { Maybe } from './Maybe'
@@ -576,7 +576,7 @@ export class Operations {
     }
   }
 
-  public setParsingErrorToCell(rawInput: string, errors: ParsingError[], address: SimpleCellAddress, metadata: Maybe<CellMetadata>) {
+  public setParsingErrorToCell(rawInput: string, errors: ParsingError[], address: SimpleCellAddress, metadata: Maybe<any>) {
     const oldValue = this.dependencyGraph.getCellValue(address)
     const vertex = new ParsingErrorVertex(errors, rawInput, metadata)
     const arrayChanges = this.dependencyGraph.setParsingErrorToCell(address, vertex)
@@ -601,7 +601,7 @@ export class Operations {
     this.setFormulaToCell(address, size, asyncPromises, cell.metadata, parserResult, false)
   }  
 
-  public setFormulaToCell(address: SimpleCellAddress, size: ArraySize, asyncPromises: Maybe<AsyncPromise[]>, metadata: Maybe<CellMetadata>, {
+  public setFormulaToCell(address: SimpleCellAddress, size: ArraySize, asyncPromises: Maybe<AsyncPromise[]>, metadata: Maybe<any>, {
     ast,
     hasVolatileFunction,
     hasStructuralChangeFunction,
@@ -636,7 +636,7 @@ export class Operations {
     this.changes.addChange(new CellData(EmptyValue), address)
   }
 
-  public setFormulaToCellFromCache(formulaHash: string, address: SimpleCellAddress, metadata: Maybe<CellMetadata>) {
+  public setFormulaToCellFromCache(formulaHash: string, address: SimpleCellAddress, metadata: Maybe<any>) {
     const {
       ast,
       hasVolatileFunction,

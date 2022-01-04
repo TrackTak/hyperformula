@@ -10,7 +10,7 @@ import { AsyncPromise } from '../AsyncPromise'
 import {CellError, equalSimpleCellAddress, ErrorType, SimpleCellAddress} from '../Cell'
 import {DataRawCellContent} from '../CellContentParser'
 import {ErrorMessage} from '../error-message'
-import {CellData, CellMetadata, DataInternalScalarValue, DataInterpreterValue, EmptyValue, getRawValue, InterpreterValue} from '../interpreter/InterpreterValue'
+import {CellData, DataInternalScalarValue, DataInterpreterValue, EmptyValue, getRawValue, InterpreterValue} from '../interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from '../LazilyTransformingAstService'
 import {Maybe} from '../Maybe'
 import {Ast} from '../parser'
@@ -24,7 +24,7 @@ export abstract class FormulaVertex {
     protected cellAddress: SimpleCellAddress,
     public version: number,
     protected asyncPromises?: AsyncPromise[],
-    public metadata?: CellMetadata
+    public metadata?: any
   ) {
   }
 
@@ -64,7 +64,7 @@ export abstract class FormulaVertex {
     return 1
   }
 
-  static fromAst(formula: Ast, address: SimpleCellAddress, size: ArraySize, version: number, asyncPromises?: AsyncPromise[], metadata?: CellMetadata) {
+  static fromAst(formula: Ast, address: SimpleCellAddress, size: ArraySize, version: number, asyncPromises?: AsyncPromise[], metadata?: any) {
     if (size.isScalar()) {
       return new FormulaCellVertex(formula, address, version, asyncPromises, metadata)
     } else {
@@ -128,7 +128,7 @@ export abstract class FormulaVertex {
 export class ArrayVertex extends FormulaVertex {
   array: IArray
 
-  constructor(formula: Ast, cellAddress: SimpleCellAddress, size: ArraySize, asyncPromises?: AsyncPromise[], metadata?: CellMetadata, version: number = 0) {
+  constructor(formula: Ast, cellAddress: SimpleCellAddress, size: ArraySize, asyncPromises?: AsyncPromise[], metadata?: any, version: number = 0) {
     super(formula, cellAddress, version, asyncPromises, metadata)
     if (size.isRef) {
       this.array = new ErroredArray(new CellError(ErrorType.REF, ErrorMessage.NoSpaceForArrayResult), ArraySize.error())
@@ -283,7 +283,7 @@ export class FormulaCellVertex extends FormulaVertex {
     address: SimpleCellAddress,
     version: number,
     asyncPromises?: AsyncPromise[],
-    metadata?: CellMetadata
+    metadata?: any
   ) {
     super(formula, address, version, asyncPromises, metadata)
   }

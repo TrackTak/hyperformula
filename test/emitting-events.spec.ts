@@ -28,7 +28,7 @@ describe('Events', () => {
     engine.removeSheet(1)
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(handler).toHaveBeenCalledWith('Sheet2', [new ExportedCellChange(adr('A1'), new CellData(detailedErrorWithOrigin(ErrorType.REF, 'Sheet1!A1')))])
+    expect(handler).toHaveBeenCalledWith('Sheet2', [new ExportedCellChange(adr('A1'), new CellData(detailedErrorWithOrigin(ErrorType.REF, 'Sheet1!A1')))], ['Sheet1', 'Sheet2'])
   })
 
   it('sheetRemoved name contains actual display name', function() {
@@ -42,7 +42,7 @@ describe('Events', () => {
     engine.removeSheet(1)
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(handler).toHaveBeenCalledWith('Sheet2', [new ExportedCellChange(adr('A1'), new CellData(detailedErrorWithOrigin(ErrorType.REF, 'Sheet1!A1')))])
+    expect(handler).toHaveBeenCalledWith('Sheet2', [new ExportedCellChange(adr('A1'), new CellData(detailedErrorWithOrigin(ErrorType.REF, 'Sheet1!A1')))], ['Sheet1', 'Sheet2'])
   })
 
   it('sheetRenamed works', () => {

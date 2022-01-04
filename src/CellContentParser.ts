@@ -10,7 +10,6 @@
  import {UnableToParseError} from './errors'
  import {fixNegativeZero, isNumberOverflow} from './interpreter/ArithmeticHelper'
  import {
-   CellMetadata,
    cloneNumber,
    CurrencyNumber,
    DateNumber,
@@ -25,7 +24,9 @@
  
  export type RawCellContent = Date | string | number | boolean | null | undefined
 
- export type DataRawCellContent = {
+ export type DataRawCellContent = GenericDataRawCellContent<any>
+
+ export type GenericDataRawCellContent<CellMetadata> = {
   cellValue?: RawCellContent,
   metadata?: CellMetadata,
  }
@@ -139,7 +140,7 @@
      return !!this.currencyMatcher(trimmedContent)
    }
 
-   private parseRawCellContent(content: RawCellContent, metadata?: CellMetadata): CellContent.Type {
+   private parseRawCellContent(content: RawCellContent, metadata?: any): CellContent.Type {
       if (content === undefined || content === null) {
         if (metadata) {
           return new CellContent.OnlyMetadata()

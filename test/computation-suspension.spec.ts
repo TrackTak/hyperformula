@@ -52,7 +52,7 @@ describe('Evaluation suspension', () => {
     engine.suspendEvaluation()
 
     expect(() => {
-      engine.getCellSerialized(adr('C1')).cellValue
+      engine.getCellSerialized(adr('C1')).cellValue 
     }).toThrow(new EvaluationSuspendedError())
     expect(() => {
       engine.getSheetSerialized(0)
