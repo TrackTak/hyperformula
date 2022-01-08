@@ -1206,8 +1206,8 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public setCellContents<CellMetadata>(topLeftCornerAddress: SimpleCellAddress, cellContents: GenericDataRawCellContent<CellMetadata>[][] | GenericDataRawCellContent<CellMetadata>): [ExportedChange[], Promise<ExportedChange[]>] {
-    this._crudOperations.setCellContents(topLeftCornerAddress, cellContents)
+  public setCellContents<CellMetadata>(topLeftCornerAddress: SimpleCellAddress, cellContents: GenericDataRawCellContent<CellMetadata>[][] | GenericDataRawCellContent<CellMetadata>, clearRedoStack = true): [ExportedChange[], Promise<ExportedChange[]>] {
+    this._crudOperations.setCellContents(topLeftCornerAddress, cellContents, clearRedoStack)
     return this.recomputeIfDependencyGraphNeedsIt()
   }
 
@@ -2250,6 +2250,22 @@ export class HyperFormula implements TypedEmitter {
    */
   public clearClipboard(): void {
     this._crudOperations.clearClipboard()
+  }
+
+  /**
+  *
+  * @category Undo and Redo
+  */
+  public suspendAddingUndoEntries(): void {
+    this._crudOperations.undoRedo.suspendAddingUndoEntries()
+  }
+
+  /**
+    *
+    * @category Undo and Redo
+    */
+  public resumeAddingUndoEntries(): void {
+    this._crudOperations.undoRedo.resumeAddingUndoEntries()
   }
 
   /**

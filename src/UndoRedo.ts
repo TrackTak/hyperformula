@@ -34,7 +34,7 @@ export abstract class BaseUndoEntry implements UndoEntry {
 
 export class RemoveRowsUndoEntry extends BaseUndoEntry {
   constructor(
-    public readonly command: RemoveRowsCommand,
+    public command: RemoveRowsCommand,
     public readonly rowsRemovals: RowsRemoval[],
   ) {
     super()
@@ -73,7 +73,7 @@ export class MoveCellsUndoEntry extends BaseUndoEntry {
 
 export class AddRowsUndoEntry extends BaseUndoEntry {
   constructor(
-    public readonly command: AddRowsCommand,
+    public command: AddRowsCommand,
   ) {
     super()
   }
@@ -193,7 +193,7 @@ export class MoveColumnsUndoEntry extends BaseUndoEntry {
 
 export class AddColumnsUndoEntry extends BaseUndoEntry {
   constructor(
-    public readonly command: AddColumnsCommand,
+    public command: AddColumnsCommand,
   ) {
     super()
   }
@@ -209,7 +209,7 @@ export class AddColumnsUndoEntry extends BaseUndoEntry {
 
 export class RemoveColumnsUndoEntry extends BaseUndoEntry {
   constructor(
-    public readonly command: RemoveColumnsCommand,
+    public command: RemoveColumnsCommand,
     public readonly columnsRemovals: ColumnsRemoval[],
   ) {
     super()
@@ -419,6 +419,7 @@ export class UndoRedo {
   private redoStack: UndoEntry[] = []
   private readonly undoLimit: number
   private batchUndoEntry?: BatchUndoEntry
+  private undoEntriesSuspended = false
 
   constructor(
     config: Config,
@@ -758,7 +759,17 @@ export class UndoRedo {
     this.operations.setColumnOrder(operation.sheetId, operation.columnMapping)
   }
 
+  public suspendAddingUndoEntries() {
+    this.undoEntriesSuspended = true
+  }
+
+  public resumeAddingUndoEntries() {
+    this.undoEntriesSuspended = false
+  }
+
   private addUndoEntry(operation: UndoEntry) {
+    if (this.undoEntriesSuspended) return
+
     this.undoStack.push(operation)
     this.undoStack.splice(0, Math.max(0, this.undoStack.length - this.undoLimit))
     this.eventEmitter.emit('addUndoEntry', operation)

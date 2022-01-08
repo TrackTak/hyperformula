@@ -241,7 +241,7 @@ export class CrudOperations {
     this.undoRedo.saveOperation(new ClearSheetUndoEntry(sheetId, oldSheetContent))
   }
 
-  public setCellContents(topLeftCornerAddress: SimpleCellAddress, cellContents: DataRawCellContent[][] | DataRawCellContent): void {
+  public setCellContents(topLeftCornerAddress: SimpleCellAddress, cellContents: DataRawCellContent[][] | DataRawCellContent, clearRedoStack = true): void {
     if (!(cellContents instanceof Array)) {
       cellContents = [[cellContents]]
     } else {
@@ -254,7 +254,9 @@ export class CrudOperations {
 
     this.ensureItIsPossibleToChangeCellContents(topLeftCornerAddress, cellContents)
 
-    this.undoRedo.clearRedoStack()
+    if (clearRedoStack) {
+      this.undoRedo.clearRedoStack()
+    }
 
     const oldContents: { address: SimpleCellAddress, newContent: DataRawCellContent, oldContent: [SimpleCellAddress, ClipboardCell] }[] = []
 

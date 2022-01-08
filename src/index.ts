@@ -76,7 +76,8 @@ import {
   AddNamedExpressionUndoEntry,
   RemoveNamedExpressionUndoEntry,
   ChangeNamedExpressionUndoEntry,
-  BatchUndoEntry
+  BatchUndoEntry,
+  UndoRedo
 } from './UndoRedo'
 
 /** @internal */
@@ -217,5 +218,6 @@ export {
   AddNamedExpressionUndoEntry,
   RemoveNamedExpressionUndoEntry,
   ChangeNamedExpressionUndoEntry,
-  BatchUndoEntry
+  BatchUndoEntry,
+  UndoRedo,
 }
