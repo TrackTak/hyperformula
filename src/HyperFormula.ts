@@ -3427,6 +3427,18 @@ export class HyperFormula implements TypedEmitter {
     return this.resumeEvaluation()
   }
 
+  public batchUndoRedo(batchOperations: () => void) {
+    this._crudOperations.beginUndoRedoBatchMode()
+
+    try {
+      batchOperations()
+    } catch (e) {
+      this._crudOperations.commitUndoRedoBatchMode()
+      throw (e)
+    }
+    this._crudOperations.commitUndoRedoBatchMode()
+  }
+
   /**
    * Suspends the dependency graph recalculation.
    * It allows optimizing the performance.
