@@ -227,6 +227,7 @@ export class RemoveColumnsUndoEntry extends BaseUndoEntry {
 export class AddSheetUndoEntry extends BaseUndoEntry {
   constructor(
     public readonly sheetName: string,
+    public readonly sheetMetadata: any
   ) {
     super()
   }
@@ -244,8 +245,8 @@ export class RemoveSheetUndoEntry extends BaseUndoEntry {
   constructor(
     public readonly sheetName: string,
     public readonly sheetId: number,
+    public readonly sheetMetadata: any,
     public readonly oldSheetContent: ClipboardCell[][],
-    public readonly oldSheetNames: string[],
     public readonly scopedNamedExpressions: [InternalNamedExpression, ClipboardCell][],
     public readonly version: number,
   ) {
@@ -589,7 +590,7 @@ export class UndoRedo {
   public undoRemoveSheet(operation: RemoveSheetUndoEntry) {
     this.operations.forceApplyPostponedTransformations()
     const {oldSheetContent, sheetId} = operation
-    this.operations.addSheet(operation.sheetName)
+    this.operations.addSheet(operation.sheetName, operation.sheetMetadata)
     for (let rowIndex = 0; rowIndex < oldSheetContent.length; rowIndex++) {
       const row = oldSheetContent[rowIndex]
       for (let col = 0; col < row.length; col++) {
@@ -716,7 +717,7 @@ export class UndoRedo {
   }
 
   public redoAddSheet(operation: AddSheetUndoEntry) {
-    this.operations.addSheet(operation.sheetName)
+    this.operations.addSheet(operation.sheetName, operation.sheetMetadata)
   }
 
   public redoRenameSheet(operation: RenameSheetUndoEntry) {

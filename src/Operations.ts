@@ -248,10 +248,13 @@ export class Operations {
     this.columnSearch.removeSheet(sheetId)
   }
 
-  public addSheet(name?: string) {
-    const sheetId = this.sheetMapping.addSheet(name)
-    const sheet: Sheet = []
-    this.dependencyGraph.addressMapping.autoAddSheet(sheetId, sheet, findBoundaries(sheet))
+  public addSheet(name?: string, sheetMetadata?: any) {
+    const sheetId = this.sheetMapping.addSheet(name, sheetMetadata)
+    const sheet: Sheet = {
+      cells: [],
+      sheetMetadata
+    }
+    this.dependencyGraph.addressMapping.autoAddSheet(sheetId, findBoundaries(sheet.cells))
     return this.sheetMapping.fetchDisplayName(sheetId)
   }
 

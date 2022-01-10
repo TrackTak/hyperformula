@@ -38,7 +38,7 @@ import {
 } from './NamedExpressions'
 import {AddColumnsCommand, AddRowsCommand, Operations, RemoveColumnsCommand, RemoveRowsCommand} from './Operations'
 import {ParserWithCaching} from './parser'
-import {findBoundaries, validateAsSheet} from './Sheet'
+import {findBoundaries, validateAsSheetContent} from './Sheet'
 import {ColumnsSpan, RowsSpan} from './Span'
 import {
   AddColumnsUndoEntry,
@@ -202,13 +202,13 @@ export class CrudOperations {
     this.clipboardOperations.clear()
   }
 
-  public addSheet(name?: string): string {
+  public addSheet(name?: string, sheetMetadata?: any): string {
     if (name !== undefined) {
       this.ensureItIsPossibleToAddSheet(name)
     }
     this.undoRedo.clearRedoStack()
-    const addedSheetName = this.operations.addSheet(name)
-    this.undoRedo.saveOperation(new AddSheetUndoEntry(addedSheetName))
+    const addedSheetName = this.operations.addSheet(name, sheetMetadata)
+    this.undoRedo.saveOperation(new AddSheetUndoEntry(addedSheetName, sheetMetadata))
     return addedSheetName
   }
 
@@ -216,11 +216,10 @@ export class CrudOperations {
     this.ensureScopeIdIsValid(sheetId)
     this.undoRedo.clearRedoStack()
     this.clipboardOperations.abortCut()
-    const originalName = this.sheetMapping.fetchDisplayName(sheetId)
+    const sheet = this.sheetMapping.fetchSheetById(sheetId)
     const oldSheetContent = this.operations.getSheetClipboardCells(sheetId)
-    const oldSheetNames = this.sheetMapping.sheetNames()
     const {version, scopedNamedExpressions} = this.operations.removeSheet(sheetId)
-    this.undoRedo.saveOperation(new RemoveSheetUndoEntry(originalName, sheetId, oldSheetContent, oldSheetNames, scopedNamedExpressions, version))
+    this.undoRedo.saveOperation(new RemoveSheetUndoEntry(sheet.displayName, sheetId, sheet.sheetMetadata, oldSheetContent, scopedNamedExpressions, version))
   }
 
   public renameSheet(sheetId: number, newName: string): Maybe<string> {
@@ -282,7 +281,7 @@ export class CrudOperations {
     this.ensureScopeIdIsValid(sheetId)
     this.ensureItIsPossibleToChangeSheetContents(sheetId, values)
 
-    validateAsSheet(values)
+    validateAsSheetContent(values)
     this.undoRedo.clearRedoStack()
     this.clipboardOperations.abortCut()
     const oldSheetContent = this.operations.getSheetClipboardCells(sheetId)

@@ -65,7 +65,7 @@ import {
   Unparser,
 } from './parser'
 import {Serialization, SerializedNamedExpression} from './Serialization'
-import {Sheet, SheetDimensions, Sheets} from './Sheet'
+import {GenericSheet, GenericSheets, Sheet, SheetDimensions, Sheets} from './Sheet'
 import {Statistics, StatType} from './statistics'
 
 /**
@@ -741,7 +741,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetValues<CellMetadata>(sheetId: number): CellData<CellValue, CellMetadata>[][] {
+  public getSheetValues<CellMetadata>(sheetId: number): GenericSheet<CellData<CellValue, CellMetadata>> {
     validateArgToType(sheetId, 'number', 'sheetId')
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getSheetValues(sheetId)
@@ -774,7 +774,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetFormulas<CellMetadata>(sheetId: number): CellData<string | undefined, CellMetadata>[][] {
+  public getSheetFormulas<CellMetadata>(sheetId: number): GenericSheet<CellData<string | undefined, CellMetadata>> {
     validateArgToType(sheetId, 'number', 'sheetId')
     return this._serialization.getSheetFormulas(sheetId)
   }
@@ -957,7 +957,7 @@ export class HyperFormula implements TypedEmitter {
     const newConfig = this._config.mergeConfig(newParams)
 
     const configNewLanguage = this._config.mergeConfig({language: newParams.language})
-    const serializedSheets = this._serialization.withNewConfig(configNewLanguage, this._namedExpressions).getAllSheetsSerialized()
+    const serializedSheets= this._serialization.withNewConfig(configNewLanguage, this._namedExpressions).getAllSheetsSerialized()
     const serializedNamedExpressions = this._serialization.getAllNamedExpressionsSerialized()
 
     const [newEngine, evaluatorPromise] = BuildEngineFactory.rebuildWithConfig(newConfig, serializedSheets, serializedNamedExpressions, this._stats)
@@ -2532,11 +2532,11 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public addSheet(sheetName?: string): string {
+  public addSheet<T>(sheetName?: string, sheetMetadata?: T): string {
     if (sheetName !== undefined) {
       validateArgToType(sheetName, 'string', 'sheetName')
     }
-    const addedSheetName = this._crudOperations.addSheet(sheetName)
+    const addedSheetName = this._crudOperations.addSheet(sheetName, sheetMetadata)
     this._emitter.emit(Events.SheetAdded, addedSheetName)
     return addedSheetName
   }

@@ -87,12 +87,12 @@ export class BuildEngineFactory {
       if (Object.prototype.hasOwnProperty.call(sheets, sheetName)) {
         const sheet = sheets[sheetName]
         validateAsSheet(sheet)
-        const boundaries = findBoundaries(sheet)
+        const boundaries = findBoundaries(sheet.cells)
         if (boundaries.height > config.maxRows || boundaries.width > config.maxColumns) {
           throw new SheetSizeLimitExceededError()
         }
         const sheetId = sheetMapping.addSheet(sheetName)
-        addressMapping.autoAddSheet(sheetId, sheet, boundaries)
+        addressMapping.autoAddSheet(sheetId, boundaries)
       }
     }
 
@@ -116,7 +116,7 @@ export class BuildEngineFactory {
     })
 
     const exporter = new Exporter(config, namedExpressions, sheetMapping.fetchDisplayName, lazilyTransformingAstService)
-    const serialization = new Serialization(dependencyGraph, unparser, exporter)
+    const serialization = new Serialization(dependencyGraph, unparser, exporter, sheetMapping)
 
     const interpreter = new Interpreter(config, dependencyGraph, columnSearch, stats, arithmeticHelper, functionRegistry, namedExpressions, serialization, arraySizePredictor, dateTimeHelper, cellContentParser)
 

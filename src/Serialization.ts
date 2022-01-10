@@ -3,17 +3,18 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import { RawCellContent } from '.'
+import { RawCellContent, Sheet } from '.'
 import {simpleCellAddress, SimpleCellAddress} from './Cell'
 import {DataRawCellContent} from './CellContentParser'
 import {CellValue} from './CellValue'
 import {Config} from './Config'
-import {ArrayVertex, CellVertex, DependencyGraph, EmptyCellVertex, FormulaCellVertex, ParsingErrorVertex} from './DependencyGraph'
+import {ArrayVertex, CellVertex, DependencyGraph, EmptyCellVertex, FormulaCellVertex, ParsingErrorVertex, SheetMapping} from './DependencyGraph'
 import {Exporter} from './Exporter'
 import {CellData} from './interpreter/InterpreterValue'
 import {Maybe} from './Maybe'
 import {NamedExpressionOptions, NamedExpressions} from './NamedExpressions'
 import {buildLexerConfig, Unparser} from './parser'
+import { GenericSheet, GenericSheets } from './Sheet'
 
 export interface SerializedNamedExpression {
   name: string,
@@ -26,7 +27,8 @@ export class Serialization {
   constructor(
     private readonly dependencyGraph: DependencyGraph,
     private readonly unparser: Unparser,
-    private readonly exporter: Exporter
+    private readonly exporter: Exporter,
+    private readonly sheetMapping: SheetMapping
   ) {
   }
 
@@ -77,19 +79,20 @@ export class Serialization {
     return cell
   }
 
-  public getSheetValues(sheet: number): CellData<CellValue>[][] {
+  public getSheetValues(sheet: number): GenericSheet<CellData<CellValue>> {
     return this.genericSheetGetter(sheet, (arg) => this.getCellValue(arg))
   }
 
-  public getSheetFormulas(sheet: number): CellData<string | undefined>[][] {
+  public getSheetFormulas(sheet: number): GenericSheet<CellData<string | undefined>> {
     return this.genericSheetGetter(sheet, (arg) => this.getCellFormula(arg))
   }
 
-  public genericSheetGetter<T extends CellData<any> | DataRawCellContent>(sheet: number, getter: (address: SimpleCellAddress) => T): T[][] {
+  public genericSheetGetter<T extends CellData<any> | DataRawCellContent>(sheet: number, getter: (address: SimpleCellAddress) => T): GenericSheet<T> {
     const sheetHeight = this.dependencyGraph.getSheetHeight(sheet)
     const sheetWidth = this.dependencyGraph.getSheetWidth(sheet)
-
+    const sheetMetadata = this.sheetMapping.fetchSheetById(sheet).sheetMetadata
     const arr: T[][] = new Array(sheetHeight)
+
     for (let i = 0; i < sheetHeight; i++) {
       arr[i] = new Array(sheetWidth)
 
@@ -115,7 +118,10 @@ export class Serialization {
         break
       }
     }
-    return arr
+    return {
+      cells: arr,
+      sheetMetadata
+    }
   }
 
   public genericAllSheetsGetter<T>(sheetGetter: (sheet: number) => T): Record<string, T> {
@@ -127,19 +133,19 @@ export class Serialization {
     return result
   }
 
-  public getSheetSerialized(sheet: number): DataRawCellContent[][] {
+  public getSheetSerialized(sheet: number): Sheet {
     return this.genericSheetGetter(sheet, (arg) => this.getCellSerialized(arg))
   }
 
-  public getAllSheetsValues(): Record<string, CellData<CellValue>[][]> {
+  public getAllSheetsValues(): GenericSheets<CellData<CellValue>> {
     return this.genericAllSheetsGetter((arg) => this.getSheetValues(arg))
   }
 
-  public getAllSheetsFormulas(): Record<string, CellData<string | undefined>[][]> {
+  public getAllSheetsFormulas(): GenericSheets<CellData<string | undefined>> {
     return this.genericAllSheetsGetter((arg) => this.getSheetFormulas(arg))
   }
 
-  public getAllSheetsSerialized(): Record<string, DataRawCellContent[][]> {
+  public getAllSheetsSerialized(): Record<string, Sheet> {
     return this.genericAllSheetsGetter((arg) => this.getSheetSerialized(arg))
   }
 
@@ -163,6 +169,6 @@ export class Serialization {
 
   public withNewConfig(newConfig: Config, namedExpressions: NamedExpressions): Serialization {
     const newUnparser = new Unparser(newConfig, buildLexerConfig(newConfig), this.dependencyGraph.sheetMapping.fetchDisplayName, namedExpressions)
-    return new Serialization(this.dependencyGraph, newUnparser, this.exporter)
+    return new Serialization(this.dependencyGraph, newUnparser, this.exporter, this.sheetMapping)
   }
 }
