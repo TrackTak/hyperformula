@@ -91,7 +91,7 @@ export class BuildEngineFactory {
         if (boundaries.height > config.maxRows || boundaries.width > config.maxColumns) {
           throw new SheetSizeLimitExceededError()
         }
-        const sheetId = sheetMapping.addSheet(sheetName)
+        const sheetId = sheetMapping.addSheet(sheetName, sheet.sheetMetadata)
         addressMapping.autoAddSheet(sheetId, boundaries)
       }
     }

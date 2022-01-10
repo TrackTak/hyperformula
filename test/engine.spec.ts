@@ -424,7 +424,7 @@ describe('#getCellSerialized', () => {
 describe('#getAllSheetsSerialized', () => {
   it('should serialize all sheets', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: { cells:  [[{ cellValue: '=A()' }]] },
+      Sheet1: { cells:  [[{ cellValue: '=A()' }]], sheetMetadata: { test: 'value' } },
       Foo: { cells: [[{ cellValue: 1 }]]},
       Err1: { cells: [[{ cellValue: '=A1' }]] },
       Err2: { cells: [[{ cellValue: '234.23141234.2314' }]]},
@@ -432,7 +432,7 @@ describe('#getAllSheetsSerialized', () => {
     })
 
     expect(engine.getAllSheetsSerialized()).toEqual({
-      'Foo': { cells: [[{ cellValue: 1 }]]},
+      'Foo': { cells: [[{ cellValue: 1 }]], sheetMetadata: { test: 'value' } },
       'Sheet1': { cells: [[{ cellValue: '=A()' }]]},
       'Err1': { cells: [[{ cellValue: '=A1' }]]},
       'Err2': { cells: [[{ cellValue: '234.23141234.2314' }]]},
