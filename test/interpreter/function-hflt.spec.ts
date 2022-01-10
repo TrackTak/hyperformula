@@ -4,16 +4,16 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function HF.LT', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=HF.LT(1)' }, { cellValue: '=HF.LT(1, 1, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=HF.LT(1,0)' }],
       [{ cellValue: '=HF.LT(1,1)' }],
       [{ cellValue: '=HF.LT("1","0")' }],
@@ -27,7 +27,7 @@ describe('Function HF.LT', () => {
       [{ cellValue: '=HF.LT("1",1)' }],
       [{ cellValue: '=HF.LT(TRUE(),1)' }],
       [{ cellValue: '=HF.LT(TRUE(),"1")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(false)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(false)
@@ -45,10 +45,10 @@ describe('Function HF.LT', () => {
   })
 
   it('should throw correct error', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=HF.LT(NA(),)' }],
       [{ cellValue: '=HF.LT(B2:C2,)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))

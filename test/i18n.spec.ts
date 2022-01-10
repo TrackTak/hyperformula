@@ -17,42 +17,42 @@ describe('i18n', () => {
   })
 
   it('using functions in different languages', () => {
-    const [enginePL] = HyperFormula.buildFromArray([
+    const [enginePL] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUMA(42)' }],
-    ], {language: 'plPL'})
-    const [engineEN] = HyperFormula.buildFromArray([
+    ] }, {language: 'plPL'})
+    const [engineEN] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUM(42)' }],
-    ], {language: 'enGB'})
+    ] }, {language: 'enGB'})
 
     expect(enginePL.getCellValue(adr('A1')).cellValue).toBe(42)
     expect(engineEN.getCellValue(adr('A1')).cellValue).toBe(42)
   })
 
   it('using functions in different languages with not standard characters', () => {
-    const [enginePL] = HyperFormula.buildFromArray([
+    const [enginePL] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '0' }],
       [{ cellValue: '1' }],
       [{ cellValue: '2' }],
       [{ cellValue: '=LICZ.JEŻELI(A1:A3, ">=1")' }],
-    ], {language: 'plPL'})
-    const [engineEN] = HyperFormula.buildFromArray([
+    ] }, {language: 'plPL'})
+    const [engineEN] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '0' }],
       [{ cellValue: '1' }],
       [{ cellValue: '2' }],
       [{ cellValue: '=COUNTIF(A1:A3, ">=1")' }],
-    ], {language: 'enGB'})
+    ] }, {language: 'enGB'})
 
     expect(enginePL.getCellValue(adr('A4')).cellValue).toBe(2)
     expect(engineEN.getCellValue(adr('A4')).cellValue).toBe(2)
   })
 
   it('translation works for parser hardcoded offset procedure', () => {
-    const [enginePL] = HyperFormula.buildFromArray([
+    const [enginePL] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=PRZESUNIĘCIE(A1, 1, 1)' }],
-    ], {language: 'plPL'})
-    const [engineEN] = HyperFormula.buildFromArray([
+    ] }, {language: 'plPL'})
+    const [engineEN] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=OFFSET(A1, 1, 1)' }],
-    ])
+    ]})
 
     expect(extractReference(enginePL, adr('A1'))).toEqual(CellAddress.relative(1, 1))
     expect(extractReference(engineEN, adr('A1'))).toEqual(CellAddress.relative(1, 1))

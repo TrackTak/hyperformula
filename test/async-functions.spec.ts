@@ -118,55 +118,55 @@ describe('async functions', () => {
 
   describe('operations buildFromArray', () => {
     it('plus op', async() => {
-      const [engine, promise] = HyperFormula.buildFromArray([
+      const [engine, promise] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: 1 }, { cellValue: '=ASYNC_FOO()+ASYNC_FOO(A1)' }],
-      ])
+      ]})
   
-      expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: getLoadingError('Sheet1!B1') }]])
+      expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: getLoadingError('Sheet1!B1') }]])
   
       await promise
   
-      expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 7 }]])
+      expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: 7 }]])
     })
 
     it('nested cell reference op', async() => {
-      const [engine, promise] = HyperFormula.buildFromArray([
+      const [engine, promise] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: '=ASYNC_FOO() / 10' }],
         [{ cellValue: '=A1+1' }]
-      ])
+      ]})
     
       await promise
   
-      expect(engine.getSheetValues(0)).toEqual([[{ cellValue: .1 }], [{ cellValue: 1.1 }]])
+      expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: .1 }], [{ cellValue: 1.1 }]])
     })
 
     it('async functions operations on dependent async value', async() => {
-      const [engine, promise] = HyperFormula.buildFromArray([[
+      const [engine, promise] = HyperFormula.buildFromArray({ cells: [[
         { cellValue: '=ASYNC_FOO()' }, { cellValue: '=ASYNC_FOO()+A1' }
-      ]])
+      ]]})
   
       await promise
   
-      expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 2}]])
+      expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: 2}]])
 
     })  
 
     it('unary minus op', async() => {
-      const [engine, promise] = HyperFormula.buildFromArray([
+      const [engine, promise] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: 1 }, { cellValue: '=-ASYNC_FOO()' }],
-      ])
+      ]})
   
-      expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: getLoadingError('Sheet1!B1') }]])
+      expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: getLoadingError('Sheet1!B1') }]])
   
       await promise
   
-      expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: -1 }]])
+      expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: -1 }]])
     })
   })
 
   describe('exported changes', () => {
     it('async values are calculated after promises resolve', async() => {
-      const [engine] = HyperFormula.buildFromArray([])
+      const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
       const [, promise] = engine.setSheetContent(0, [[{ cellValue: 1 }, { cellValue: '=ASYNC_FOO()' }, { cellValue: '=SUM(A1:B1)' }, { cellValue: '=ASYNC_FOO(A1)'}]])
 
@@ -176,7 +176,7 @@ describe('async functions', () => {
     })
 
     it('asyncValuesUpdated fires once per public async action', async() => {
-      const [engine] = HyperFormula.buildFromArray([])
+      const [engine] = HyperFormula.buildFromArray({ cells: [] })
       const handler = jasmine.createSpy()
 
       engine.on(Events.AsyncValuesUpdated, handler)
@@ -195,9 +195,9 @@ describe('async functions', () => {
   })
 
   it('should return #TIMEOUT error if function does not resolve due to the request taking too long', async() => {
-    const [engine, promise] = HyperFormula.buildFromArray([
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=TIMEOUT_FOO()' }, { cellValue: 'foo' }],
-    ])
+    ]})
 
     await promise
 
@@ -206,9 +206,9 @@ describe('async functions', () => {
   }, Config.defaultConfig.timeoutTime + 3000)
 
   it('should throw an error if function does not resolve', async() => {      
-    const [, promise] = HyperFormula.buildFromArray([
+    const [, promise] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=ASYNC_ERROR_FOO()' }],
-    ])
+    ]})
 
     try {
       await promise
@@ -218,39 +218,39 @@ describe('async functions', () => {
   })
 
   it('rebuildAndRecalculate', async() => {
-    const [engine, promise] = HyperFormula.buildFromArray([
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=ASYNC_FOO()+2' }],
-    ])
+    ]})
 
     await promise
 
     await engine.rebuildAndRecalculate()
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 3 }]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 3 }]])
   })
 
   it('handles promise races gracefully', async() => {
-    const [engine, enginePromise] = HyperFormula.buildFromArray([[
+    const [engine, enginePromise] = HyperFormula.buildFromArray({ cells: [[
       { cellValue: 'foo' }, { cellValue: '=LONG_ASYNC_FOO(A1)' }
-    ]])
+    ]]})
 
     const [, cellContentPromise] = engine.setCellContents(adr('A1'), { cellValue: '=ASYNC_FOO()' })
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: getLoadingError('Sheet1!A1') }, { cellValue: getLoadingError('Sheet1!B1') }]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: getLoadingError('Sheet1!A1') }, { cellValue: getLoadingError('Sheet1!B1') }]])
 
     await Promise.all([
       enginePromise,
       cellContentPromise
     ])
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: '1 longAsyncFoo' }]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: '1 longAsyncFoo' }]])
   })
 
   it('works with multiple async functions one after another', async() => {
     const sheet = [[
       { cellValue: 2 }, { cellValue: '=ASYNC_FOO()' }
     ]]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
 
     const [,promise] = engine.setSheetContent(0, [[
       { cellValue: '=ASYNC_FOO()' }, { cellValue: 3 }
@@ -258,7 +258,7 @@ describe('async functions', () => {
 
     await promise
 
-    expect(engine.getSheetValues(0)).toEqual([[
+    expect(engine.getSheetValues(0).cells).toEqual([[
       { cellValue: 1 }, { cellValue: 3 }
     ]])
   })
@@ -267,12 +267,12 @@ describe('async functions', () => {
     const sheet = [[
       { cellValue: 1 }, { cellValue: '=ASYNC_FOO(A1)' }
     ]]
-    const [engine, promise] = HyperFormula.buildFromArray(sheet)
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: sheet })
 
     await promise
     await engine.setCellContents(adr('A1'), { cellValue: 5 })[1]
 
-    expect(engine.getSheetValues(0)).toEqual([[
+    expect(engine.getSheetValues(0).cells).toEqual([[
       { cellValue: 5 }, { cellValue: 10 }
     ]])
   })
@@ -291,9 +291,9 @@ describe('async functions', () => {
   })
 
   it('calculateFormula works with async functions', async() => {
-    const [engine] = HyperFormula.buildFromArray([[
+    const [engine] = HyperFormula.buildFromArray({ cells: [[
       { cellValue: 1 }
-    ]])
+    ]]})
     
     const [cellValue, promise] = engine.calculateFormula('=ASYNC_FOO(A1)', 0)
 
@@ -305,24 +305,24 @@ describe('async functions', () => {
   })
 
   it('batch works with async functions', async() => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     const [,promise] = engine.batch(() => {
       engine.setCellContents(adr('A1'), { cellValue: 1 })
       engine.setCellContents(adr('B1'), { cellValue: '=ASYNC_FOO()' })
 
       try {
-        engine.getSheetValues(0)
+        engine.getSheetValues(0).cells
       } catch(error) {
         expect(error).toEqualError(new EvaluationSuspendedError())
       }
     })
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: getLoadingError('Sheet1!B1') }]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: getLoadingError('Sheet1!B1') }]])
 
     const asyncChanges = await promise
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 1 }]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: 1 }]])
     expect(asyncChanges).toEqual([new ExportedCellChange(adr('B1'), new CellData(1))])
   })
 
@@ -331,7 +331,7 @@ describe('async functions', () => {
       const sheet = [[
         { cellValue: 1 }, { cellValue: '=ASYNC_FOO()' }
       ]]
-      const [engine] = HyperFormula.buildFromArray(sheet)
+      const [engine] = HyperFormula.buildFromArray({ cells: sheet })
   
       engine.setSheetContent(0, [[
         { cellValue: '=ASYNC_FOO()' }, { cellValue: 1 }
@@ -339,7 +339,7 @@ describe('async functions', () => {
   
       engine.undo()
 
-      const [expectedEngine] = HyperFormula.buildFromArray(sheet)
+      const [expectedEngine] = HyperFormula.buildFromArray({ cells: sheet })
 
       expectEngineToBeTheSameAs(engine, expectedEngine)
     })
@@ -348,7 +348,7 @@ describe('async functions', () => {
       const sheet = [[
         { cellValue: 2 }, { cellValue: '=ASYNC_FOO()' }
       ]]
-      const [engine] = HyperFormula.buildFromArray(sheet)
+      const [engine] = HyperFormula.buildFromArray({ cells: sheet })
   
       const [,promise] = engine.setSheetContent(0, [[
         { cellValue: '=ASYNC_FOO()' }, { cellValue: 2 }
@@ -358,7 +358,7 @@ describe('async functions', () => {
   
       engine.undo()
 
-      const [expectedEngine, enginePromise] = HyperFormula.buildFromArray(sheet)
+      const [expectedEngine, enginePromise] = HyperFormula.buildFromArray({ cells: sheet })
 
       await enginePromise
 
@@ -368,9 +368,9 @@ describe('async functions', () => {
 
   describe('redo', () => {
     it('redo works with async functions before promises resolve', () => {
-      const [engine] = HyperFormula.buildFromArray([[
+      const [engine] = HyperFormula.buildFromArray({ cells: [[
         { cellValue: 1 }, { cellValue: '=ASYNC_FOO()' }
-      ]])
+      ]]})
   
       const sheet = [[
         { cellValue: '=ASYNC_FOO()' }, { cellValue: 1 }
@@ -381,15 +381,15 @@ describe('async functions', () => {
       engine.undo()
       engine.redo()
 
-      const [expectedEngine] = HyperFormula.buildFromArray(sheet)
+      const [expectedEngine] = HyperFormula.buildFromArray({ cells: sheet })
 
       expectEngineToBeTheSameAs(engine, expectedEngine)
     })
 
     it('redo works with async functions after promises resolve', async() => {
-      const [engine] = HyperFormula.buildFromArray([[
+      const [engine] = HyperFormula.buildFromArray({ cells: [[
         { cellValue: '=ASYNC_FOO()' }, { cellValue: 2 }
-      ]])
+      ]]})
   
       const sheet = [[
         { cellValue: 2 }, { cellValue: '=ASYNC_FOO()' }
@@ -399,7 +399,7 @@ describe('async functions', () => {
       await engine.undo()[1]
       await engine.redo()[1]
 
-      const [expectedEngine, enginePromise] = HyperFormula.buildFromArray(sheet)
+      const [expectedEngine, enginePromise] = HyperFormula.buildFromArray({ cells: sheet })
 
       await enginePromise
 

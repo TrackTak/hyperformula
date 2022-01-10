@@ -5,23 +5,23 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function TBILLYIELD', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=TBILLYIELD(1,1)' }, { cellValue: '=TBILLYIELD(1, 1, 1, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value with correct arguments and defaults', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=TBILLYIELD(0, 100, 10)' }],
       [{ cellValue: '=TBILLYIELD(0, 360, 10)' }, { cellValue: '=TBILLYIELD(0, 183, 10)' }],
       [{ cellValue:'=TBILLYIELD(0, 180, 10)'}, { cellValue:'=TBILLYIELD(0, 180, 100)'}, { cellValue:'=TBILLYIELD(0, 180, 110)'}, ],
       [{ cellValue: '=TBILLYIELD("1/2/2000", "31/1/2001", 10)' }, { cellValue: '=TBILLYIELD(0, 365, 10)' }],
       [{ cellValue: '=TBILLYIELD("28/2/2003", "29/2/2004", 10)' }],
       [{ cellValue: '=TBILLYIELD(2, 2.1, 10)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(32.4, 6)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_PERCENT)

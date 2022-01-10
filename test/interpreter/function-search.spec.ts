@@ -4,11 +4,11 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function SEARCH', () => {
   it('should return N/A when number of arguments is incorrect', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SEARCH()' }],
       [{ cellValue: '=SEARCH("foo")' }],
       [{ cellValue: '=SEARCH("foo", 1, 2, 3)' }]
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -16,19 +16,19 @@ describe('Function SEARCH', () => {
   })
 
   it('should return VALUE when wrong type of third parameter', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SEARCH("foo", "bar", "baz")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should return VALUE if third parameter is not between 1 and text length', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SEARCH("foo", "bar", 0)' }],
       [{ cellValue: '=SEARCH("foo", "bar", -1)' }],
       [{ cellValue: '=SEARCH("foo", "bar", 4)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.LengthBounds))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.LengthBounds))
@@ -36,12 +36,12 @@ describe('Function SEARCH', () => {
   })
 
   it('should work with simple strings', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SEARCH("f", "foo")' }],
       [{ cellValue: '=SEARCH("o", "foo")' }],
       [{ cellValue: '=SEARCH("o", "foo", 3)' }],
       [{ cellValue: '=SEARCH("g", "foo")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
@@ -50,13 +50,13 @@ describe('Function SEARCH', () => {
   })
 
   it('should work with wildcards', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SEARCH("*f", "foobarbaz")' }],
       [{ cellValue: '=SEARCH("b*b", "foobarbaz")' }],
       [{ cellValue: '=SEARCH("b?z", "foobarbaz")' }],
       [{ cellValue: '=SEARCH("b?b", "foobarbaz")' }],
       [{ cellValue: '=SEARCH("?b", "foobarbaz", 5)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(4)
@@ -66,13 +66,13 @@ describe('Function SEARCH', () => {
   })
 
   it('should work with regular expressions', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SEARCH(".*f", "foobarbaz")' }],
       [{ cellValue: '=SEARCH("b.*b", "foobarbaz")' }],
       [{ cellValue: '=SEARCH("b.z", "foobarbaz")' }],
       [{ cellValue: '=SEARCH("b.b", "foobarbaz")' }],
       [{ cellValue: '=SEARCH(".b", "foobarbaz", 5)' }],
-    ], {useRegularExpressions: true})
+    ] }, {useRegularExpressions: true})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(4)
@@ -82,12 +82,12 @@ describe('Function SEARCH', () => {
   })
 
   it('should be case insensitive', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SEARCH("R", "bar")' }],
       [{ cellValue: '=SEARCH("r", "baR")' }],
       [{ cellValue: '=SEARCH("?R", "bar")' }],
       [{ cellValue: '=SEARCH("*r", "baR")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(3)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(3)
@@ -96,11 +96,11 @@ describe('Function SEARCH', () => {
   })
 
   it('should coerce other types to string', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SEARCH(1, 1, 1)' }],
       [{ cellValue: '=SEARCH(0, 5+5)' }],
       [{ cellValue: '=SEARCH("U", TRUE())' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)

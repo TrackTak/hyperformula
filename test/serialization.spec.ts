@@ -4,13 +4,13 @@ import {adr} from './testUtils'
 
 describe('serialization', () => {
   it('should not loose sheet information on serialization', () => {
-    const formuals = [
+    const formulas = [
       [1, '2', 'foo', true, '\'1', '33$', '12/01/15', '1%', '=FOO(', '#DIV/0!', new Date(1995, 11, 17)]
     ].map(x => x.map(z => ({
       cellValue: z
     })))
 
-    const [engine1] =HyperFormula.buildFromArray(formuals)
+    const [engine1] =HyperFormula.buildFromArray({ cells: formulas })
 
     expect(engine1.getCellSerialized(adr('A1')).cellValue).toEqual(1)
     expect(engine1.getCellValueFormat(adr('A1'))).toEqual(undefined)

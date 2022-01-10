@@ -394,22 +394,22 @@ describe('DenseStrategy', () => {
 describe('AddressMapping', () => {
   it('#buildAddresMapping - when sparse matrix', () => {
     const addressMapping = new AddressMapping(new DenseSparseChooseBasedOnThreshold(0.8))
-    const sheet = [
+    const cells = [
       [{ cellValue: null }, { cellValue: null }, { cellValue: null }],
       [{ cellValue: null }, { cellValue: null }, { cellValue: '1' }],
     ]
-    addressMapping.autoAddSheet(0, sheet, findBoundaries(sheet))
+    addressMapping.autoAddSheet(0, findBoundaries(cells))
 
     expect(addressMapping.strategyFor(0)).toBeInstanceOf(SparseStrategy)
   })
 
   it('#buildAddresMapping - when dense matrix', () => {
     const addressMapping = new AddressMapping(new DenseSparseChooseBasedOnThreshold(0.8))
-    const sheet = [
+    const cells = [
       [{ cellValue: '1' }, { cellValue: '1' }],
       [{ cellValue: '1' }, { cellValue: '1' }],
     ]
-    addressMapping.autoAddSheet(0, sheet, findBoundaries(sheet))
+    addressMapping.autoAddSheet(0, findBoundaries(cells))
 
     expect(addressMapping.strategyFor(0)).toBeInstanceOf(DenseStrategy)
   })

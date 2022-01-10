@@ -5,27 +5,27 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function YEARFRAC', () => {
   it('should not work for wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=YEARFRAC(1, 2, 3, 4)' }],
       [{ cellValue: '=YEARFRAC(1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for wrong type of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=YEARFRAC("foo", 1, TRUE())' }],
       [{ cellValue: '=YEARFRAC(2, "bar")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('US mode', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=YEARFRAC("30/03/2020", "31/03/2020")' }],
       [{ cellValue: '=YEARFRAC("28/02/2020", "29/02/2020")' }],
       [{ cellValue: '=YEARFRAC("29/02/2020", "01/03/2020")' }],
@@ -34,7 +34,7 @@ describe('Function YEARFRAC', () => {
       [{ cellValue: '=YEARFRAC("29/02/2020", "28/02/2020")' }],
       [{ cellValue: '=YEARFRAC("01/03/2020", "29/02/2020")' }],
       [{ cellValue: '=YEARFRAC("01/03/2021", "28/02/2021")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
     expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(1 / 360, 9)
@@ -47,7 +47,7 @@ describe('Function YEARFRAC', () => {
   })
 
   it('actual/actual mode', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=YEARFRAC("01/01/2020", "02/01/2020", 1)' }],
       [{ cellValue: '=YEARFRAC("01/01/2021", "02/01/2021", 1)' }],
       [{ cellValue: '=YEARFRAC("28/02/2020", "01/03/2020", 1)' }],
@@ -58,7 +58,7 @@ describe('Function YEARFRAC', () => {
       [{ cellValue: '=YEARFRAC("01/01/2020", "01/01/2021", 1)' }],
       [{ cellValue: '=YEARFRAC("01/01/2020", "02/01/2021", 1)' }],
       [{ cellValue: '=YEARFRAC("01/01/2020", "01/01/2024", 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(1 / 366, 9)
     expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(1 / 365, 9)
@@ -73,14 +73,14 @@ describe('Function YEARFRAC', () => {
   })
 
   it('actual/360 mode', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=YEARFRAC("30/03/2020", "31/03/2020", 2)' }],
       [{ cellValue: '=YEARFRAC("28/02/2020", "29/02/2020", 2)' }],
       [{ cellValue: '=YEARFRAC("29/02/2020", "01/03/2020", 2)' }],
       [{ cellValue: '=YEARFRAC("28/02/2021", "01/03/2021", 2)' }],
       [{ cellValue: '=YEARFRAC("31/03/2020", "30/03/2021", 2)' }],
       [{ cellValue: '=YEARFRAC("01/03/2021", "28/02/2020", 2)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(1 / 360, 9)
     expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(1 / 360, 9)
@@ -91,14 +91,14 @@ describe('Function YEARFRAC', () => {
   })
 
   it('actual/365 mode', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=YEARFRAC("30/03/2020", "31/03/2020", 3)' }],
       [{ cellValue: '=YEARFRAC("28/02/2020", "29/02/2020", 3)' }],
       [{ cellValue: '=YEARFRAC("29/02/2020", "01/03/2020", 3)' }],
       [{ cellValue: '=YEARFRAC("28/02/2021", "01/03/2021", 3)' }],
       [{ cellValue: '=YEARFRAC("31/03/2020", "30/03/2021", 3)' }],
       [{ cellValue: '=YEARFRAC("01/03/2021", "28/02/2020", 3)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(1 / 365, 9)
     expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(1 / 365, 9)
@@ -109,7 +109,7 @@ describe('Function YEARFRAC', () => {
   })
 
   it('EU mode', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=YEARFRAC("30/03/2020", "31/03/2020", 4)' }],
       [{ cellValue: '=YEARFRAC("28/02/2020", "29/02/2020", 4)' }],
       [{ cellValue: '=YEARFRAC("29/02/2020", "01/03/2020", 4)' }],
@@ -118,7 +118,7 @@ describe('Function YEARFRAC', () => {
       [{ cellValue: '=YEARFRAC("29/02/2020", "28/02/2020", 4)' }],
       [{ cellValue: '=YEARFRAC("01/03/2020", "29/02/2020", 4)' }],
       [{ cellValue: '=YEARFRAC("01/03/2021", "28/02/2021", 4)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
     expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(1 / 360, 9)

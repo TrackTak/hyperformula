@@ -1,4 +1,4 @@
-import { Sheet } from '../../../src'
+import { DataRawCellContent } from '../../../src'
 import {ExpectedValue} from '../benchmark'
 
 export function sheet(rows: number = 10000) {
@@ -21,10 +21,10 @@ export function sheet(rows: number = 10000) {
   return sheet
 }
 
-export function expectedValues(sheet: Sheet): ExpectedValue[] {
+export function expectedValues(cells: DataRawCellContent[][]): ExpectedValue[] {
   return [
-    {address: 'C1', value: `${sheet[0][0].cellValue}${sheet[0][1].cellValue}`},
-    {address: 'C1000', value: `${sheet[999][0].cellValue}${sheet[999][1].cellValue}`},
-    {address: 'C10000', value: `${sheet[9999][0].cellValue}${sheet[9999][1].cellValue}`},
+    {address: 'C1', value: `${cells[0][0].cellValue}${cells[0][1].cellValue}`},
+    {address: 'C1000', value: `${cells[999][0].cellValue}${cells[999][1].cellValue}`},
+    {address: 'C10000', value: `${cells[9999][0].cellValue}${cells[9999][1].cellValue}`},
   ]
 }

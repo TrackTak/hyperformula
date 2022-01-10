@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 
 describe('decimal parsing', () => {
   it('parsing decimal without leading zero', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '.1' }, { cellValue: '=.1' }],
       [{ cellValue: '-.1' }, { cellValue: '=-.1' }],
       [{ cellValue: '+.1' }, { cellValue: '=+.1' }],
@@ -16,7 +16,7 @@ describe('decimal parsing', () => {
       [{ cellValue: '1e1' }, { cellValue: '=1e1' }],
       [{ cellValue: '1e+1' }, { cellValue: '=1e+1' }],
       [{ cellValue: '1e-1' }, { cellValue: '=1e-1' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBe(0.1)
     expect(engine.getCellValue(adr('B1')).cellValue).toBe(0.1)

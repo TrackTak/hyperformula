@@ -4,18 +4,18 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function DOLLARDE', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=DOLLARDE(1)' }, { cellValue: '=DOLLARDE(1, 1, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('div/0 when second argument too small', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=DOLLARDE(1,0)' }, { cellValue: '=DOLLARDE(1, 0.9)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -44,7 +44,7 @@ describe('Function DOLLARDE', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(1.0125)
     expect(engine.getCellValue(adr('B1')).cellValue).toBeCloseTo(1.000000125)

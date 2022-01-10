@@ -60,7 +60,7 @@ describe('infer return types', () => {
   })
 
   it('numbers', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=INFERFOO()' }, { cellValue: '=INFERFOO(0)' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=INFERFOO()' }, { cellValue: '=INFERFOO(0)' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
@@ -70,7 +70,7 @@ describe('infer return types', () => {
   })
 
   it('arrays', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=ARRAYINFERFOO()' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=ARRAYINFERFOO()' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)

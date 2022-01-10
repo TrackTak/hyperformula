@@ -2,7 +2,7 @@ import {DataRawCellContent, Sheet} from '../../../src'
 import {columnIndexToLabel, simpleCellAddressToString} from '../../../src/parser/addressRepresentationConverters'
 
 export function sheet(cols: number = 50) {
-  const sheet: Sheet = []
+  const sheet: DataRawCellContent[][] = []
 
   const firstRow: DataRawCellContent[] = [{ cellValue: 1 }]
 

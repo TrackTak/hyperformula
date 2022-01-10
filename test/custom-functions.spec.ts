@@ -140,7 +140,7 @@ describe('Register static custom plugin', () => {
   it('should register single function with translations', () => {
     HyperFormula.registerFunction('FOO', FooPlugin, FooPlugin.translations)
 
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=FOO()' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=FOO()' }]] })
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
   })
@@ -158,9 +158,9 @@ describe('Register static custom plugin', () => {
   it('should register all formulas from plugin', () => {
     HyperFormula.registerFunctionPlugin(FooPlugin, FooPlugin.translations)
 
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=foo()' }, { cellValue: '=bar()' }]
-    ])
+    ]})
 
     expect(HyperFormula.getRegisteredFunctionNames('enGB')).toContain('FOO')
     expect(HyperFormula.getRegisteredFunctionNames('enGB')).toContain('BAR')
@@ -170,9 +170,9 @@ describe('Register static custom plugin', () => {
 
   it('should register single formula from plugin', () => {
     HyperFormula.registerFunction('BAR', FooPlugin, FooPlugin.translations)
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=foo()' }, { cellValue: '=bar()' }]
-    ])
+    ]})
 
     expect(HyperFormula.getRegisteredFunctionNames('enGB')).not.toContain('FOO')
     expect(HyperFormula.getRegisteredFunctionNames('enGB')).toContain('BAR')
@@ -182,18 +182,18 @@ describe('Register static custom plugin', () => {
 
   it('should register single array functions', () => {
     HyperFormula.registerFunction('ARRAYFOO', FooPlugin, FooPlugin.translations)
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=ARRAYFOO()' }]
-    ])
+    ]})
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: 1 }], [{ cellValue: 1 }, { cellValue: 1 }]])
   })
 
   it('should override one formula with custom implementation', () => {
     HyperFormula.registerFunction('SUM', SumWithExtra)
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUM(1, 2)' }, { cellValue: '=MAX(1, 2)' }]
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(45)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual(2)
@@ -201,9 +201,9 @@ describe('Register static custom plugin', () => {
 
   it('should allow to register only alias', () => {
     HyperFormula.registerFunction('SUMALIAS', SumWithExtra, {'enGB': {'SUMALIAS': 'SUMALIAS'}})
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUMALIAS(1, 2)' }, { cellValue: '=MAX(1, 2)' }]
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(45)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual(2)
@@ -262,15 +262,15 @@ describe('Instance level formula registry', () => {
   })
 
   it('should return registered formula ids', () => {
-    const [engine] = HyperFormula.buildFromArray([], {functionPlugins: [FooPlugin, SumWithExtra]})
+    const [engine] = HyperFormula.buildFromArray({ cells: [] }, {functionPlugins: [FooPlugin, SumWithExtra]})
 
     expectArrayWithSameContent(engine.getRegisteredFunctionNames(), ['SUM', 'FOO', 'BAR', 'VERSION'])
   })
 
   it('should create engine only with plugins passed to configuration', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=foo()' }, { cellValue: '=bar()' }, { cellValue: '=SUM(1, 2)' }]
-    ], {functionPlugins: [FooPlugin]})
+    ] }, {functionPlugins: [FooPlugin]})
 
     expectArrayWithSameContent(['FOO', 'BAR', 'VERSION'], engine.getRegisteredFunctionNames())
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
@@ -280,9 +280,9 @@ describe('Instance level formula registry', () => {
 
   it('modifying static plugins should not affect existing engine instance registry', () => {
     HyperFormula.registerFunctionPlugin(FooPlugin)
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=foo()' }, { cellValue: '=bar()' }]
-    ])
+    ]})
     HyperFormula.unregisterFunction('FOO')
 
     engine.setCellContents(adr('C1'), { cellValue: '=A1' })
@@ -293,13 +293,13 @@ describe('Instance level formula registry', () => {
   })
 
   it('should return registered plugins', () => {
-    const [engine] = HyperFormula.buildFromArray([], {functionPlugins: [SumifPlugin, NumericAggregationPlugin, SumWithExtra]})
+    const [engine] = HyperFormula.buildFromArray({ cells: [] }, {functionPlugins: [SumifPlugin, NumericAggregationPlugin, SumWithExtra]})
 
     expectArrayWithSameContent(engine.getAllFunctionPlugins(), [SumifPlugin, NumericAggregationPlugin, SumWithExtra])
   })
 
   it('should instantiate engine with additional plugin', () => {
-    const [engine] = HyperFormula.buildFromArray([], {
+    const [engine] = HyperFormula.buildFromArray({ cells: [] }, {
       functionPlugins: [...HyperFormula.getAllFunctionPlugins(), FooPlugin]
     })
 
@@ -310,7 +310,7 @@ describe('Instance level formula registry', () => {
   })
 
   it('should rebuild engine and override plugins', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
     let registeredPlugins = new Set(engine.getAllFunctionPlugins())
     expect(registeredPlugins.has(SumifPlugin)).toBe(true)
@@ -323,7 +323,7 @@ describe('Instance level formula registry', () => {
   })
 
   it('should return plugin for given functionId', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
     expect(engine.getFunctionPlugin('SUMIF')).toBe(SumifPlugin)
   })

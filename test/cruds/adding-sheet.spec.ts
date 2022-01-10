@@ -12,8 +12,8 @@ describe('Adding sheet - checking if its possible', () => {
 
   it('no', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [],
-      Foo: [],
+      Sheet1: { cells:  [] },
+      Foo: { cells:  [] },
     })
 
     expect(engine.isItPossibleToAddSheet('Sheet1')).toEqual(false)
@@ -32,9 +32,9 @@ describe('add sheet to engine', () => {
   })
 
   it('should add sheet to engine with one sheet', function() {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 'foo' }],
-    ])
+    ]})
 
     engine.addSheet()
 

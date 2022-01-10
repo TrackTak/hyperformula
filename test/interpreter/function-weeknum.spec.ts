@@ -5,44 +5,44 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function WEEKNUM', () => {
   it('should not work for wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=WEEKNUM(1, 2, 3)' }],
       [{ cellValue: '=WEEKNUM()' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should not work for wrong type of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=WEEKNUM("foo", 1)' }],
       [{ cellValue: '=WEEKNUM(2, "bar")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should not work for wrong value of args', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=WEEKNUM(-1, 1)' }],
       [{ cellValue: '=WEEKNUM(2, 9)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.BadMode))
   })
 
   it('should work for strings', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=WEEKNUM("02/08/2020")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "1")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "2")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "21")' }],
       [{ cellValue: '=WEEKNUM("02/08/2017", "2")' }],
       [{ cellValue: '=WEEKNUM("02/08/2017", "21")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(32)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(32)
@@ -53,11 +53,11 @@ describe('Function WEEKNUM', () => {
   })
 
   it('should work for numbers', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=WEEKNUM(0)' }],
       [{ cellValue: '=WEEKNUM(0, 1)' }],
       [{ cellValue: '=WEEKNUM(0, 2)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(52)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(52)
@@ -65,14 +65,14 @@ describe('Function WEEKNUM', () => {
   })
 
   it('should work for strings with different nullDate', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=WEEKNUM("02/08/2020")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "1")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "2")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "21")' }],
       [{ cellValue: '=WEEKNUM("02/08/2017", "2")' }],
       [{ cellValue: '=WEEKNUM("02/08/2017", "21")' }],
-    ], {nullDate: {day: 20, month: 10, year: 1920}})
+    ] }, {nullDate: {day: 20, month: 10, year: 1920}})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(32)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(32)
@@ -83,14 +83,14 @@ describe('Function WEEKNUM', () => {
   })
 
   it('should work for strings with compatibility mode', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=WEEKNUM("02/08/2020")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "1")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "2")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "21")' }],
       [{ cellValue: '=WEEKNUM("02/08/2017", "2")' }],
       [{ cellValue: '=WEEKNUM("02/08/2017", "21")' }],
-    ], {leapYear1900: true})
+    ] }, {leapYear1900: true})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(32)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(32)
@@ -100,14 +100,14 @@ describe('Function WEEKNUM', () => {
     expect(engine.getCellValue(adr('A6')).cellValue).toEqual(31)
   })
   it('should work for strings with compatibility mode and different nullDate', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=WEEKNUM("02/08/2020")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "1")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "2")' }],
       [{ cellValue: '=WEEKNUM("02/08/2020", "21")' }],
       [{ cellValue: '=WEEKNUM("02/08/2017", "2")' }],
       [{ cellValue: '=WEEKNUM("02/08/2017", "21")' }],
-    ], {leapYear1900: true, nullDate: {day: 20, month: 10, year: 1920}})
+    ] }, {leapYear1900: true, nullDate: {day: 20, month: 10, year: 1920}})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(32)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(32)
@@ -128,8 +128,8 @@ describe('Function WEEKNUM', () => {
       }
       arrs.push(arr)
     }
-    const [engine] = HyperFormula.buildFromArray(arrs)
-    expect(engine.getSheetValues(0)).toEqual(
+    const [engine] = HyperFormula.buildFromArray({ cells: arrs })
+    expect(engine.getSheetValues(0).cells).toEqual(
       [[{ cellValue: 33 }, { cellValue: 33 }, { cellValue: 33 }, { cellValue: 34}, {cellValue: 34 }, { cellValue: 34 }, { cellValue: 34 }],
         [{ cellValue: 33 }, { cellValue: 33 }, { cellValue: 33 }, { cellValue: 33}, {cellValue: 34 }, { cellValue: 34 }, { cellValue: 34 }],
         [{ cellValue: 33 }, { cellValue: 33 }, { cellValue: 33 }, { cellValue: 33}, {cellValue: 34 }, { cellValue: 34 }, { cellValue: 34 }],

@@ -4,12 +4,12 @@ import {adr, expectArrayWithSameContent} from '../testUtils'
 
 describe('batch cruds', () => {
   it('should run batch cruds and call recompute only once', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       //
       [{ cellValue: 'foo' }],
       //
       [{ cellValue: 'bar' }],
-    ])
+    ]})
 
     const evaluatorSpy = spyOn(engine.evaluator, 'partialRun')
 
@@ -26,12 +26,12 @@ describe('batch cruds', () => {
   })
 
   it('should run batch cruds unitl fail and call recompute only once', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       //
       [{ cellValue: 'foo' }],
       //
       [{ cellValue: 'bar' }],
-    ])
+    ]})
 
     const evaluatorSpy = spyOn(engine.evaluator, 'partialRun')
 

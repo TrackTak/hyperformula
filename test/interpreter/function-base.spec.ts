@@ -5,25 +5,25 @@ import {adr, detailedError} from '../testUtils'
 
 describe('function BASE', () => {
   it('should return error when argument of wrong type', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BASE("foo", 2, 3)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('should return error when wrong number of argument', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BASE("foo")' }],
       [{ cellValue: '=BASE("foo", 2, 3, 4)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should work', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BASE(1, 2, 3)' }],
       [{ cellValue: '=BASE(2, 5)' }],
       [{ cellValue: '=BASE(23, "10")' }],
@@ -31,7 +31,7 @@ describe('function BASE', () => {
       [{ cellValue: '=BASE(634, 33)' }],
       [{ cellValue: '=BASE(789, 36)' }],
       [{ cellValue: '=BASE(1234123412341230, 2)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual('001')
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual('2')
@@ -43,56 +43,56 @@ describe('function BASE', () => {
   })
 
   it('should work for numeric strings', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BASE("123", 4)' }],
       [{ cellValue: '=BASE("1234", 16)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1323')
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual('4D2')
   })
 
   it('should return string value', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BASE(123, 2)' }],
-    ])
+    ]})
 
     expect(engine.getCellValueType(adr('A1'))).toBe(CellValueType.STRING)
   })
 
   it('should respect third argument and fill with zeros', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BASE(2, 8, 3)' }],
       [{ cellValue: '=BASE(94862, "33", 16)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual('002')
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual('0000000000002L3K')
   })
 
   it('should return result as is if padding shorter than result', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BASE(123, 2, 5)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1111011')
   })
 
   it('should return error for negative values', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BASE(-2, 5)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 
   it('should allow base from 2 to 36', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BASE(2, 1)' }],
       [{ cellValue: '=BASE(2, 2)' }],
       [{ cellValue: '=BASE(2, 36)' }],
       [{ cellValue: '=BASE(2, 37)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual('10')

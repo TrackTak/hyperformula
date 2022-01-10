@@ -5,21 +5,21 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function CONFIDENCE.T', () => {
   it('should return error for wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=CONFIDENCE.T(1, 2)' }],
       [{ cellValue: '=CONFIDENCE.T(1, 2, 3, 4)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=CONFIDENCE.T("foo", 2, 3)' }],
       [{ cellValue: '=CONFIDENCE.T(0.5, "baz", 3)' }],
       [{ cellValue: '=CONFIDENCE.T(0.5, 2, "abcd")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -27,27 +27,27 @@ describe('Function CONFIDENCE.T', () => {
   })
 
   it('should work', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=CONFIDENCE.T(0.1, 1, 2)' }],
       [{ cellValue: '=CONFIDENCE.T(0.9, 10, 5)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(4.46449651075278, 6)
     expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.59850759663214, 6)
   })
 
   it('should truncate third argument', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=CONFIDENCE.T(0.1, 1, 2.9)' }],
       [{ cellValue: '=CONFIDENCE.T(0.9, 10, 5.9)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(4.46449651075278, 6)
     expect(engine.getCellValue(adr('A2')).cellValue).toBeCloseTo(0.59850759663214, 6)
   })
 
   it('checks bounds', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=CONFIDENCE.T(0.01, 0.01, 2)' }],
       [{ cellValue: '=CONFIDENCE.T(0, 0.01, 2)' }],
       [{ cellValue: '=CONFIDENCE.T(0.01, 0, 2)' }],
@@ -56,7 +56,7 @@ describe('Function CONFIDENCE.T', () => {
       [{ cellValue: '=CONFIDENCE.T(1, 0.01, 2)' }],
       [{ cellValue: '=CONFIDENCE.T(0.01, 0.1, 0.99)' }],
       [{ cellValue: '=CONFIDENCE.T(0.01, 0.1, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.450121133444994, 6)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))

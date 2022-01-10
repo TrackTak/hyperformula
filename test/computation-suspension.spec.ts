@@ -6,9 +6,9 @@ import {adr} from './testUtils'
 
 describe('Evaluation suspension', () => {
   it('by default, evaluation is automatic', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A1' }],
-    ])
+    ]})
 
     engine.setCellContents(adr('C1'), [[{ cellValue: '=B1' }]])
 
@@ -18,9 +18,9 @@ describe('Evaluation suspension', () => {
   it('when evaluation is stopped, getting cell values is forbidden', () => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '42' }, { cellValue: '=ASYNC_FOO()'}],
-    ])
+    ]})
 
     engine.suspendEvaluation()
 
@@ -31,7 +31,7 @@ describe('Evaluation suspension', () => {
       engine.getCellValue(adr('D1')).cellValue
     }).toThrow(new EvaluationSuspendedError())
     expect(() => {
-      engine.getSheetValues(0)
+      engine.getSheetValues(0).cells
     }).toThrow(new EvaluationSuspendedError())
     expect(() => {
       engine.getAllSheetsValues()
@@ -45,9 +45,9 @@ describe('Evaluation suspension', () => {
   })
 
   it('when evaluation is stopped, getting serialized cell values is forbidden', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '42' }],
-    ])
+    ]})
 
     engine.suspendEvaluation()
 
@@ -55,7 +55,7 @@ describe('Evaluation suspension', () => {
       engine.getCellSerialized(adr('C1')).cellValue 
     }).toThrow(new EvaluationSuspendedError())
     expect(() => {
-      engine.getSheetSerialized(0)
+      engine.getSheetSerialized(0).cells
     }).toThrow(new EvaluationSuspendedError())
     expect(() => {
       engine.getAllSheetsSerialized()
@@ -66,9 +66,9 @@ describe('Evaluation suspension', () => {
   })
 
   it('when evaluation is stopped, getting cell value types is forbidden', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '42' }],
-    ])
+    ]})
 
     engine.suspendEvaluation()
 
@@ -78,9 +78,9 @@ describe('Evaluation suspension', () => {
   })
 
   it('when evaluation is stopped, getting cell types is possible', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '42' }],
-    ])
+    ]})
 
     engine.suspendEvaluation()
     engine.setCellContents(adr('C1'), [[{ cellValue: '=A1+78' }]])
@@ -93,23 +93,23 @@ describe('Evaluation suspension', () => {
   })
 
   it('when evaluation is stopped, getting cell formulas is possible', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A1+42' }],
-    ])
+    ]})
     engine.suspendEvaluation()
     engine.setCellContents(adr('C1'), [[{ cellValue: '=A1+78' }]])
 
     expect(engine.getCellFormula(adr('C1')).cellValue).toEqual('=A1+78')
-    expect(engine.getSheetFormulas(0)).toEqual([[{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '=A1+78' }]])
-    expect(engine.getAllSheetsFormulas()).toEqual({Sheet1: [[{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '=A1+78' }]]})
+    expect(engine.getSheetFormulas(0).cells).toEqual([[{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '=A1+78' }]])
+    expect(engine.getAllSheetsFormulas()).toEqual({Sheet1: { cells: [[{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '=A1+78' }]] } })
     expect(engine.getRangeFormulas(AbsoluteCellRange.spanFrom(adr('A1'), 3, 1))).toEqual([[{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '=A1+78' }]])
   })
 
   it('formulas are rebuild even if evaluation is suspended', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A2+42' }],
       [{ cellValue: '42' }]
-    ])
+    ]})
     engine.suspendEvaluation()
 
     engine.addRows(0, [1, 1])
@@ -120,9 +120,9 @@ describe('Evaluation suspension', () => {
   it('resuming evaluation', async() => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A1' }, { cellValue: '=ASYNC_FOO(A1)'}],
-    ])
+    ]})
 
     engine.suspendEvaluation()
     engine.setCellContents(adr('C1'), [[{ cellValue: '=B1' }]])
@@ -138,27 +138,27 @@ describe('Evaluation suspension', () => {
   })
 
   it('#isEvaluationSuspended when evaluation is suspended', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A1' }],
-    ])
+    ]})
     engine.suspendEvaluation()
 
     expect(engine.isEvaluationSuspended()).toBe(true)
   })
 
   it('#isEvaluationSuspended when evaluation is resumed', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A1' }],
-    ])
+    ]})
 
     expect(engine.isEvaluationSuspended()).toBe(false)
   })
 
   describe('clipboard operations depend on values, so they are forbidden', () => {
     it('copy', () => {
-      const [engine] = HyperFormula.buildFromArray([
+      const [engine] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A1' }],
-      ])
+      ]})
       engine.suspendEvaluation()
 
       expect(() => {
@@ -167,9 +167,9 @@ describe('Evaluation suspension', () => {
     })
 
     it('cut', () => {
-      const [engine] = HyperFormula.buildFromArray([
+      const [engine] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A1' }],
-      ])
+      ]})
       engine.suspendEvaluation()
 
       expect(() => {
@@ -178,9 +178,9 @@ describe('Evaluation suspension', () => {
     })
 
     it('paste', () => {
-      const [engine] = HyperFormula.buildFromArray([
+      const [engine] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A1' }],
-      ])
+      ]})
       engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 2))
       engine.suspendEvaluation()
 
@@ -191,10 +191,10 @@ describe('Evaluation suspension', () => {
   })
 
   it('undo-redo works when computation suspended', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A2+42' }],
       [{ cellValue: '42' }]
-    ])
+    ]})
     engine.suspendEvaluation()
     engine.addRows(0, [1, 1])
 

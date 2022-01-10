@@ -9,7 +9,7 @@ describe('should properly build', () => {
       [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
       [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
     ])
-    expect(engine.getSheetValues(0)).toEqual(
+    expect(engine.getSheetValues(0).cells).toEqual(
       [
         [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1') }],
         [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A2')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B2') }],
@@ -18,11 +18,11 @@ describe('should properly build', () => {
   })
 
   it('and for this', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
       [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
-    ])
-    expect(engine.getSheetValues(0)).toEqual(
+    ]})
+    expect(engine.getSheetValues(0).cells).toEqual(
       [
         [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1') }],
         [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A2')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B2') }],

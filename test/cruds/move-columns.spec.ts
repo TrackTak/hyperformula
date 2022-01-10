@@ -15,9 +15,9 @@ import {
 
 describe('Ensure it is possible to move columns', () => {
   it('should return false when target makes no sense', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }],
-    ])
+    ]})
 
     expect(engine.isItPossibleToMoveColumns(0, 0, 1, -1)).toEqual(false)
     expect(engine.isItPossibleToMoveColumns(0, 0, 1, 1)).toEqual(false)
@@ -28,26 +28,26 @@ describe('Ensure it is possible to move columns', () => {
   })
 
   it('should not be possible to move columns when sheet does not exists', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }],
-    ])
+    ]})
 
     expect(engine.isItPossibleToMoveColumns(1, 0, 1, 2)).toEqual(false)
   })
 
   it('should not be possible to move columns when number of columns is non-positive', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }]
-    ])
+    ]})
 
     expect(engine.isItPossibleToMoveColumns(0, 0, 0, 1)).toEqual(false)
     expect(engine.isItPossibleToMoveColumns(0, 0, -5, 1)).toEqual(false)
   })
 
   it('should be possible to move columns', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '0' }, { cellValue: '1' }, { cellValue: '2' }],
-    ])
+    ]})
 
     expect(engine.isItPossibleToMoveColumns(0, 1, 1, 0)).toEqual(true)
     expect(engine.isItPossibleToMoveColumns(0, 1, 1, 3)).toEqual(true)
@@ -58,20 +58,20 @@ describe('Ensure it is possible to move columns', () => {
   })
 
   it('should not be possible to move row with formula matrix', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '=TRANSPOSE(A1:A2)' }],
       [{ cellValue: '2' }],
-    ])
+    ]})
 
     expect(engine.isItPossibleToMoveColumns(0, 1, 1, 5)).toBe(false)
     expect(engine.isItPossibleToMoveColumns(0, 1, 2, 5)).toBe(false)
   })
 
   it('should not be possible to move row inside formula matrix', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '' }, { cellValue: '=TRANSPOSE(A1:A2)' }],
       [{ cellValue: '2' }],
-    ])
+    ]})
 
     expect(engine.isItPossibleToMoveColumns(0, 0, 1, 2)).toBe(true)
     expect(engine.isItPossibleToMoveColumns(0, 0, 1, 3)).toBe(false)
@@ -81,9 +81,9 @@ describe('Ensure it is possible to move columns', () => {
 
 describe('Move columns', () => {
   it('should throw error when target makes no sense', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }],
-    ])
+    ]})
 
     expect(() => engine.moveColumns(0, 0, 1, -1)).toThrow(new InvalidArgumentsError('column number to be nonnegative and number of columns to add to be positive.'))
     expect(() => engine.moveColumns(0, 0, 1, 1)).toThrow(new InvalidArgumentsError('a valid range of columns to move.'))
@@ -94,9 +94,9 @@ describe('Move columns', () => {
   })
 
   it('should move one column', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }, { cellValue: '4'}]
-    ])
+    ]})
 
     engine.moveColumns(0, 1, 1, 3)
 
@@ -107,9 +107,9 @@ describe('Move columns', () => {
   })
 
   it('should move column when moving to left', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }, { cellValue: '4'}]
-    ])
+    ]})
 
     engine.moveColumns(0, 2, 1, 1)
 
@@ -120,9 +120,9 @@ describe('Move columns', () => {
   })
 
   it('should move multiple columns', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }, { cellValue: '4'}]
-    ])
+    ]})
 
     engine.moveColumns(0, 0, 3, 4)
 
@@ -133,9 +133,9 @@ describe('Move columns', () => {
   })
 
   it('should work when moving multiple columns far away', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }]
-    ])
+    ]})
 
     engine.moveColumns(0, 1, 2, 5)
 
@@ -147,10 +147,10 @@ describe('Move columns', () => {
   })
 
   it('should adjust reference when swapping formula with dependency ', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '=A1' }],
       [{ cellValue: '=B2' }, { cellValue: '1' }],
-    ])
+    ]})
 
     engine.moveColumns(0, 1, 1, 0)
 
@@ -163,10 +163,10 @@ describe('Move columns', () => {
   })
 
   it('should adjust absolute references', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=$B$1' }],
       [{ cellValue: '=B2' }]
-    ])
+    ]})
 
     engine.moveColumns(0, 0, 1, 2)
 
@@ -175,10 +175,10 @@ describe('Move columns', () => {
   })
 
   it('should adjust range', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }],
       [{ cellValue: '' }, { cellValue: '=COUNTBLANK(A1:B1)' }],
-    ])
+    ]})
 
     engine.moveColumns(0, 1, 1, 3)
 
@@ -187,10 +187,10 @@ describe('Move columns', () => {
   })
 
   it('should return changes', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: null }],
       [{ cellValue: '' }, { cellValue: '=COUNTBLANK(A1:B1)' }],
-    ])
+    ]})
 
     const [changes] = engine.moveColumns(0, 1, 1, 3)
 
@@ -199,9 +199,9 @@ describe('Move columns', () => {
   })
 
   it('should return #CYCLE when moving formula onto referred range', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }, { cellValue: '=AVERAGE(A1:C1)'}, {cellValue: '=SUM(A1:C1)' }]
-    ])
+    ]})
 
     engine.moveColumns(0, 3, 1, 1)
 
@@ -210,9 +210,9 @@ describe('Move columns', () => {
   })
 
   it('should work with moving formulas', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }, { cellValue: '4'}, {cellValue: '=SUM(A1:C1)' }]
-    ])
+    ]})
 
     engine.moveColumns(0, 3, 1, 1)
 
@@ -220,9 +220,9 @@ describe('Move columns', () => {
   })
 
   it('should return #CYCLE when moving formula onto referred range, simple case', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUM(B1:C1)' }, { cellValue: '1' }, { cellValue: '2' }]
-    ])
+    ]})
 
     engine.moveColumns(0, 0, 1, 2)
 
@@ -231,7 +231,7 @@ describe('Move columns', () => {
   })
 
   it('should produce only one history entry', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: 0 }, { cellValue: 1 }, { cellValue: 2 }, { cellValue: 3}]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: 0 }, { cellValue: 1 }, { cellValue: 2 }, { cellValue: 3}]]})
 
     const version = engine.lazilyTransformingAstService.version()
 
@@ -243,9 +243,9 @@ describe('Move columns', () => {
 
 describe('Move columns - column ranges', () => {
   it('should adjust relative references of dependent formulas', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUM(B:C)' }, { cellValue: '1' }, { cellValue: '2' }]
-    ])
+    ]})
 
     engine.moveColumns(0, 1, 2, 4)
 
@@ -256,9 +256,9 @@ describe('Move columns - column ranges', () => {
   })
 
   it('should adjust relative dependencies of moved formulas', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUM(B:C)' }, { cellValue: '1' }, { cellValue: '2' }]
-    ])
+    ]})
 
     engine.moveColumns(0, 0, 1, 3)
 
@@ -269,9 +269,9 @@ describe('Move columns - column ranges', () => {
   })
 
   it('should return #CYCLE when moving formula onto referred range', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUM(B:C)' }, { cellValue: '1' }, { cellValue: '2' }]
-    ])
+    ]})
 
     engine.moveColumns(0, 0, 1, 2)
 
@@ -282,11 +282,11 @@ describe('Move columns - column ranges', () => {
 
 describe('Move columns - row ranges', () => {
   it('should not affect moved row range', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUM(2:3)' }],
       [{ cellValue: '1' }],
       [{ cellValue: '2' }]
-    ])
+    ]})
 
     engine.moveColumns(0, 0, 1, 2)
 
@@ -297,11 +297,11 @@ describe('Move columns - row ranges', () => {
   })
 
   it('should not affect dependent row range', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUM(2:3)' }],
       [{ cellValue: '1' }, { cellValue: '3' }],
       [{ cellValue: '2' }, { cellValue: '4' }]
-    ])
+    ]})
 
     engine.moveColumns(0, 1, 1, 3)
 

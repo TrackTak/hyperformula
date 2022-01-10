@@ -3,13 +3,13 @@ import {adr, expectArrayWithSameContent} from '../testUtils'
 
 describe('Replace sheet content - checking if its possible', () => {
   it('no if theres no such sheet', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(engine.isItPossibleToReplaceSheetContent(1, [])).toEqual(false)
   })
 
   it('yes otherwise', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(engine.isItPossibleToReplaceSheetContent(0, [])).toEqual(true)
   })
@@ -17,10 +17,10 @@ describe('Replace sheet content - checking if its possible', () => {
 
 describe('Replace sheet content', () => {
   it('should throw error trying to replace not existing sheet', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }],
       [{ cellValue: '3' }, { cellValue: 'foo' }],
-    ])
+    ]})
 
     expect(() => {
       engine.setSheetContent(1, [[{ cellValue: '3' }, { cellValue: '4' }]])
@@ -29,10 +29,10 @@ describe('Replace sheet content', () => {
   })
 
   it('should replace sheet content with new values', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }],
       [{ cellValue: '3' }, { cellValue: 'foo' }],
-    ])
+    ]})
 
     engine.setSheetContent(0, [[{ cellValue: '3' }, { cellValue: '4' }]])
 
@@ -44,10 +44,10 @@ describe('Replace sheet content', () => {
 
   /* for now return only new values */
   it('should return changes', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }],
       [{ cellValue: '3' }, { cellValue: 'foo' }],
-    ])
+    ]})
 
     const [changes] = engine.setSheetContent(0, [[{ cellValue: '3' }, { cellValue: '4' }]])
 
@@ -59,10 +59,10 @@ describe('Replace sheet content', () => {
 
   /* should we return removed values? */
   xit('should return new values', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '2' }],
       [{ cellValue: '3' }, { cellValue: 'foo' }],
-    ])
+    ]})
 
     const [changes] = engine.setSheetContent(0, [[{ cellValue: '3' }, { cellValue: '4' }]])
 
@@ -78,14 +78,14 @@ describe('Replace sheet content', () => {
 
   it('should replace content of a sheet with formula matrix', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [
+      Sheet1: { cells:  [
         [{ cellValue: '1' }, { cellValue: '2' }],
         [{ cellValue: '{=TRANSPOSE(A1:B1)}' }],
-      ],
-      Sheet2: [
+      ]},
+      Sheet2: { cells:  [
         [{ cellValue: '=Sheet1!A2' }],
         [{ cellValue: '=Sheet1!A3' }],
-      ],
+      ]},
     })
 
     engine.setSheetContent(0, [
@@ -99,13 +99,13 @@ describe('Replace sheet content', () => {
 
   it('should replace content of a sheet with formula matrix and recalculate range formula', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [
+      Sheet1: { cells:  [
         [{ cellValue: '1' }, { cellValue: '2' }],
         [{ cellValue: '{=TRANSPOSE(A1:B1)}' }],
-      ],
-      Sheet2: [
+      ]},
+      Sheet2: { cells:  [
         [{ cellValue: '=SUM(Sheet1!A1:A2)' }],
-      ],
+      ]},
     })
 
     engine.setSheetContent(0, [

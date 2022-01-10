@@ -4,22 +4,22 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function NETWORKDAYS.INTL', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=NETWORKDAYS.INTL(1)' }, { cellValue: '=NETWORKDAYS.INTL(1, 1, 1, 1, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should check for types or value of third argument', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=NETWORKDAYS.INTL(0, 1, TRUE())' }],
       [{ cellValue: '=NETWORKDAYS.INTL(0, 1, "1")' }],
       [{ cellValue: '=NETWORKDAYS.INTL(0, 1, "1010102")' }],
       [{ cellValue: '=NETWORKDAYS.INTL(0, 1, -1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL(0, 1, "1111111")' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.WeekendString))
     expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.WeekendString))
@@ -28,12 +28,12 @@ describe('Function NETWORKDAYS.INTL', () => {
   })
 
   it('works correctly for first two arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=NETWORKDAYS.INTL(0, 1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL(0, 6)' }],
       [{ cellValue: '=NETWORKDAYS.INTL(0, 6.9)' }],
       [{ cellValue: '=NETWORKDAYS.INTL(6.9,0.1)' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(5)
     expect(engine.getCellValue(adr('A3')).cellValue).toEqual(5)
@@ -41,13 +41,13 @@ describe('Function NETWORKDAYS.INTL', () => {
   })
 
   it('today', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=NETWORKDAYS.INTL("29/09/2020", "29/09/2020")' }],
       [{ cellValue: '=NETWORKDAYS.INTL("29/09/2020", "29/09/2020", 3)' }],
       [{ cellValue: '=NETWORKDAYS.INTL("29/09/2020", "29/09/2020", 4)' }],
       [{ cellValue: '=NETWORKDAYS.INTL("29/09/2020", "29/09/2020", 13)' }],
       [{ cellValue: '=NETWORKDAYS.INTL("29/09/2020", "29/09/2020", "1011111")' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
     expect(engine.getCellValue(adr('A3')).cellValue).toEqual(0)
@@ -56,14 +56,14 @@ describe('Function NETWORKDAYS.INTL', () => {
   })
 
   it('this year', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '29/09/2020' }, { cellValue: '=A1+0.1' }, { cellValue: '31/12/2019' }, { cellValue: '01/01/2021'}, {cellValue: '27/09/2020' }],
       [{ cellValue: '=NETWORKDAYS.INTL("01/01/2020", "31/12/2020", 1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL("01/01/2020", "31/12/2020", 1, A1:A1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL("01/01/2020", "31/12/2020", 1, A1:B1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL("01/01/2020", "31/12/2020", 1, A1:D1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL("01/01/2020", "31/12/2020", 1, A1:E1)' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(262)
     expect(engine.getCellValue(adr('A3')).cellValue).toEqual(261)
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(261)
@@ -72,14 +72,14 @@ describe('Function NETWORKDAYS.INTL', () => {
   })
 
   it('should output correct values', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '01/01/2020' }, { cellValue: '=A1+5' }, { cellValue: '=A1+8' }, { cellValue: '=A1+9'}, {cellValue: '=A1+15' }, { cellValue: '=A1+18' }, { cellValue: '=A1+19' }, { cellValue: '=A1+32' }, { cellValue: '=A1+54' }, { cellValue: '=A1+55' }],
       [{ cellValue: '=NETWORKDAYS.INTL(A1, A1+100, "0000000", A1:J1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL(A1+7, A1+20, "0000000", A1:J1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL(A1+7, A1+100, "0000000", A1:J1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL(A1+13, A1+50, "0000000", A1:J1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL(A1+50, A1+56, "0000000", A1:J1)' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(91)
     expect(engine.getCellValue(adr('A3')).cellValue).toEqual(9)
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(86)
@@ -88,13 +88,13 @@ describe('Function NETWORKDAYS.INTL', () => {
   })
 
   it('checks types in last argument', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: true}, { cellValue: '\'1'}, { cellValue: null}, { cellValue: '=NA()'}],
       [{ cellValue: '=NETWORKDAYS.INTL(1000, 1, 1, A1:A1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL(1000, 1, 1, B1:B1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL(1000, 1, 1, C1:C1)' }],
       [{ cellValue: '=NETWORKDAYS.INTL(1000, 1, 1, A1:D1)' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
     expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.WrongType))
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(-715)

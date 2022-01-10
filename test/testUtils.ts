@@ -1,4 +1,4 @@
-import {CellValue, DetailedCellError, ErrorType, HyperFormula, Sheet, SheetDimensions} from '../src'
+import {CellValue, DataRawCellContent, DetailedCellError, ErrorType, HyperFormula, SheetDimensions} from '../src'
 import {AbsoluteCellRange, AbsoluteColumnRange, AbsoluteRowRange} from '../src/AbsoluteCellRange'
 import {CellError, SimpleCellAddress, simpleCellAddress} from '../src/Cell'
 import {Config} from '../src/Config'
@@ -240,7 +240,7 @@ function normalizeSheet(sheet: any[][], dimensions: SheetDimensions): any[][] {
   })
 }
 
-export function expectColumnIndexToMatchSheet(expected: Sheet, engine: HyperFormula, sheetId: number = 0) {
+export function expectColumnIndexToMatchSheet(expected: DataRawCellContent[][], engine: HyperFormula, sheetId: number = 0) {
   const columnIndex = engine.columnSearch as ColumnIndex
   expect(columnIndex).toBeInstanceOf(ColumnIndex)
   const exportedColumnIndex = columnIndexToSheet(columnIndex, engine.getSheetDimensions(sheetId).width, sheetId)

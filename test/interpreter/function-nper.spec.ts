@@ -4,23 +4,23 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function NPER', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=NPER(1,1)' }, { cellValue: '=NPER(1, 1, 1, 1, 1, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value with correct arguments and defaults', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=NPER(1%, 1, 100, 1)' }, { cellValue: '=NPER(1%, 1, 100, 1, 1)' }, { cellValue: '=NPER(1%, 1, 100, 1, 2)' }],
       [{ cellValue: '=NPER(100%, -50, 100, 0, 1)' }, { cellValue: '=NPER(100%, -50, 100, -100, 1)' }, { cellValue: '=NPER(-100%, 1, 100, 1, 1)' }, { cellValue: '=NPER(-200%, 1, 100, 1, 1)'}],
       [{ cellValue: '=NPER(-20%, -50, 100, 300, 1)' }],
       [{ cellValue: '=NPER(0%, -50, 100, 300, 1)' }],
       [{ cellValue: '=NPER(0%, 0, 100, 100, 1)' }, { cellValue: '=NPER(0%, 0, 100, -100, 1)' }],
       [{ cellValue: '=NPER(1%, 0, 100, 100, 1)' }, { cellValue: '=NPER(1%, 0, 100, -50, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(-70.67076731)
     expect(engine.getCellValue(adr('B1')).cellValue).toBeCloseTo(-70.16196068)

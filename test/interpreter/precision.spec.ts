@@ -221,9 +221,9 @@ describe('Snap to zero', () => {
 
 describe('Value-fixed', () => {
   it('should correctly calculate 0.2 + 0.1 as 0.3', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=0.2+0.1' }],
-    ], {smartRounding: true})
+    ] }, {smartRounding: true})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBe(0.3)
   })
@@ -231,17 +231,17 @@ describe('Value-fixed', () => {
 
 describe('tests', () => {
   it('addition of small numbers with smartRounding #1', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '0.000123456789' }, { cellValue: '1' }, { cellValue: '=A1+B1' }],
-    ], {smartRounding: true})
+    ] }, {smartRounding: true})
 
     expect(engine.getCellValue(adr('C1')).cellValue).toEqual(1.000123456789)
   })
 
   it('addition of small numbers with smartRounding #2', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '0.000123456789' }, { cellValue: '1' }, { cellValue: '=A1+B1' }],
-    ], {smartRounding: true, precisionRounding: 9})
+    ] }, {smartRounding: true, precisionRounding: 9})
 
     expect(engine.getCellValue(adr('C1')).cellValue).toEqual(1.000123457) //as GS and E
   })
@@ -256,7 +256,7 @@ describe('internal rounding', () => {
       cellValue: z
     })))
 
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
     const expectedFormulas = [
       ['', 'Revenue', '', 1000.000000000000000, 1100.000000000000000, 1210.000000000000000, 1331.000000000000000, 1464.100000000000000, 1610.510000000000000, 1771.561000000000000, 1948.717100000000000, 2143.588810000000000, 2357.947691000000000, 2593.742460100000000],
@@ -264,13 +264,13 @@ describe('internal rounding', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    expect(engine.getSheetValues(0)).toEqual(expectedFormulas)
+    expect(engine.getSheetValues(0).cells).toEqual(expectedFormulas)
   })
 })
 
 describe('number of leading digits', () => {
   it('rounding extensive test', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '0.33333333333333300000' }, { cellValue: '=A1/3' }],
       [{ cellValue: '10' }, { cellValue: '3.33333333333333000000' }, { cellValue: '=A2/3' }],
       [{ cellValue: '100' }, { cellValue: '33.33333333333330000000' }, { cellValue: '=A3/3' }],
@@ -291,7 +291,7 @@ describe('number of leading digits', () => {
       [{ cellValue: '100000000000000000' }, { cellValue: '33333333333333300.00000000000000000000' }, { cellValue: '=A18/3' }],
       [{ cellValue: '1000000000000000000' }, { cellValue: '333333333333333000.00000000000000000000' }, { cellValue: '=A19/3' }],
       [{ cellValue: '10000000000000000000' }, { cellValue: '3333333333333330000.00000000000000000000' }, { cellValue: '=A20/3' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('C1')).cellValue).toEqual(engine.getCellValue(adr('B1')).cellValue)
     expect(engine.getCellValue(adr('C2')).cellValue).toEqual(engine.getCellValue(adr('B2')).cellValue)

@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function HOUR', () => {
   it('with wrong arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=HOUR("foo")' }, { cellValue: '=HOUR("12/30/2018")' }, { cellValue: '=HOUR(1, 2)' }, { cellValue: '=HOUR()'}]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=HOUR("foo")' }, { cellValue: '=HOUR("12/30/2018")' }, { cellValue: '=HOUR(1, 2)' }, { cellValue: '=HOUR()'}]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -14,7 +14,7 @@ describe('Function HOUR', () => {
   })
 
   it('with numerical arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=HOUR(0.5123456)' }, { cellValue: '=HOUR(0)' }, { cellValue: '=HOUR(0.999999)' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=HOUR(0.5123456)' }, { cellValue: '=HOUR(0)' }, { cellValue: '=HOUR(0.999999)' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(12)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual(0)
@@ -22,7 +22,7 @@ describe('Function HOUR', () => {
   })
 
   it('with string arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=HOUR("14:42:59")' }, { cellValue: '=HOUR("01/01/1900 03:01:02am")' }, { cellValue: '=HOUR("31/12/2018")' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=HOUR("14:42:59")' }, { cellValue: '=HOUR("01/01/1900 03:01:02am")' }, { cellValue: '=HOUR("31/12/2018")' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(14)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual(3)
@@ -30,17 +30,17 @@ describe('Function HOUR', () => {
   })
 
   it('use datenumber coercion for 1st argument', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=HOUR(TRUE())' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
   })
 
   it('propagate errors', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=HOUR(4/0)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })

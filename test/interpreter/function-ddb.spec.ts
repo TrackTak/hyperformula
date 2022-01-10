@@ -5,9 +5,9 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function DDB', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=DDB(1,1,1)' }, { cellValue: '=DDB(1, 1, 1, 1, 1, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -25,7 +25,7 @@ describe('Function DDB', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(900)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
@@ -48,7 +48,7 @@ describe('Function DDB', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(853.8149682, 6)
     expect(engine.getCellValue(adr('B1')).cellValue).toBeCloseTo(1564.69243, 6)

@@ -5,9 +5,9 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function DB', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=DB(1,1,1)' }, { cellValue: '=DB(1, 1, 1, 1, 1, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
@@ -25,7 +25,7 @@ describe('Function DB', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(2420.79)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
@@ -45,7 +45,7 @@ describe('Function DB', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
     //product #1 returns #NUM! instead of an actual value
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(15845.10)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.PeriodLong))
