@@ -79,15 +79,15 @@ export class Serialization {
     return cell
   }
 
-  public getSheetValues(sheet: number): GenericSheet<CellData<CellValue>> {
+  public getSheetValues(sheet: number): GenericSheet<CellData<CellValue>, any> {
     return this.genericSheetGetter(sheet, (arg) => this.getCellValue(arg))
   }
 
-  public getSheetFormulas(sheet: number): GenericSheet<CellData<string | undefined>> {
+  public getSheetFormulas(sheet: number): GenericSheet<CellData<string | undefined>, any > {
     return this.genericSheetGetter(sheet, (arg) => this.getCellFormula(arg))
   }
 
-  public genericSheetGetter<T extends CellData<any> | DataRawCellContent>(sheet: number, getter: (address: SimpleCellAddress) => T): GenericSheet<T> {
+  public genericSheetGetter<T extends CellData<any> | DataRawCellContent>(sheet: number, getter: (address: SimpleCellAddress) => T): GenericSheet<T, any> {
     const sheetHeight = this.dependencyGraph.getSheetHeight(sheet)
     const sheetWidth = this.dependencyGraph.getSheetWidth(sheet)
     const sheetMetadata = this.sheetMapping.fetchSheetById(sheet).sheetMetadata
@@ -137,11 +137,11 @@ export class Serialization {
     return this.genericSheetGetter(sheet, (arg) => this.getCellSerialized(arg))
   }
 
-  public getAllSheetsValues(): GenericSheets<CellData<CellValue>> {
+  public getAllSheetsValues(): GenericSheets<CellData<CellValue>, any> {
     return this.genericAllSheetsGetter((arg) => this.getSheetValues(arg))
   }
 
-  public getAllSheetsFormulas(): GenericSheets<CellData<string | undefined>> {
+  public getAllSheetsFormulas(): GenericSheets<CellData<string | undefined>, any> {
     return this.genericAllSheetsGetter((arg) => this.getSheetFormulas(arg))
   }
 

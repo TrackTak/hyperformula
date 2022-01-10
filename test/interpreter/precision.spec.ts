@@ -18,7 +18,7 @@ describe('Imprecise comparisons', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas, {smartRounding: true})
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas }, {smartRounding: true})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
     expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
@@ -53,7 +53,7 @@ describe('Imprecise comparisons', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas, {smartRounding: true})
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas }, {smartRounding: true})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
     expect(engine.getCellValue(adr('B1')).cellValue).toBe(false)
@@ -89,7 +89,7 @@ describe('Imprecise comparisons', () => {
       cellValue: z
     })))
 
-    const [engine] = HyperFormula.buildFromArray(formulas, {smartRounding: true})
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas }, {smartRounding: true})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBe(false)
     expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
@@ -125,7 +125,7 @@ describe('Imprecise comparisons', () => {
       cellValue: z
     })))
 
-    const [engine] = HyperFormula.buildFromArray(formulas, {smartRounding: true})
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas }, {smartRounding: true})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBe(true)
     expect(engine.getCellValue(adr('B1')).cellValue).toBe(true)
@@ -163,7 +163,7 @@ describe('Snap to zero', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas, {smartRounding: true})
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas }, {smartRounding: true})
 
     expect(engine.dependencyGraph.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.0000000001, 5)
     expect(engine.dependencyGraph.getCellValue(adr('B1')).cellValue).toEqual(0)
@@ -198,7 +198,7 @@ describe('Snap to zero', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas, {smartRounding: true})
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas }, {smartRounding: true})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(0.0000000001, 5)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual(0)

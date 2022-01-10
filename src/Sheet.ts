@@ -41,6 +41,8 @@ export function validateAsSheet(sheet: Sheet): void {
   if (typeof sheet !== 'object' || sheet === null) {
     throw new InvalidArgumentsError('a sheet object.')
   }
+
+  validateAsSheetContent(sheet.cells)
 }
 
 export function validateAsSheetContent(cells: DataRawCellContent[][]): void {

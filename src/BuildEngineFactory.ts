@@ -28,7 +28,7 @@ import {NumberLiteralHelper} from './NumberLiteralHelper'
 import {Operations} from './Operations'
 import {buildLexerConfig, ParserWithCaching, Unparser} from './parser'
 import {Serialization, SerializedNamedExpression} from './Serialization'
-import {findBoundaries, Sheet, Sheets, validateAsSheet} from './Sheet'
+import {findBoundaries, Sheet, Sheets, validateAsSheet, validateAsSheetContent} from './Sheet'
 import {EmptyStatistics, Statistics, StatType} from './statistics'
 import {UndoRedo} from './UndoRedo'
 

@@ -29,11 +29,11 @@ describe('Address preservation.', () => {
 
   it('Should work between sheets.', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: { cells:  [[{ cellValue: '=NA()' }]]},
-      Sheet2: { cells:  [[{ cellValue: '=sheet1!A1' }]]}
+      Sheet1: { cells: [[{ cellValue: '=NA()' }]]},
+      Sheet2: { cells: [[{ cellValue: '=sheet1!A1' }]]}
     })
-    expect(engine.getCellValue(adr('A1', 0)).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'sheet1!A1'))
-    expect(engine.getCellValue(adr('A1', 1)).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'sheet1!A1'))
+    expect(engine.getCellValue(adr('A1', 0)).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
+    expect(engine.getCellValue(adr('A1', 1)).cellValue).toEqual(detailedErrorWithOrigin(ErrorType.NA, 'Sheet1!A1'))
   })
 
   it('Should work with function calls.', () => {

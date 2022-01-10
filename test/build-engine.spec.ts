@@ -28,7 +28,7 @@ describe('Building engine from arrays', () => {
   it('#buildFromSheet adds default sheet Sheet1', () => {
     const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
-    expect(engine.getAllSheetsDimensions()).toEqual({'Sheet1': { cells: {'height': 0, 'width': 0}} })
+    expect(engine.getAllSheetsDimensions()).toEqual({'Sheet1': {'height': 0, 'width': 0}})
   })
 
   it('#buildFromSheet adds default sheet Sheet1, in different languages', () => {

@@ -312,10 +312,10 @@ describe('#getAllSheetsDimensions', () => {
     })
 
     expect(engine.getAllSheetsDimensions()).toEqual({
-      'Sheet1': { cells: {width: 0, height: 0} },
-      'Sheet2': { cells: {width: 1, height: 1} },
-      'Foo': { cells: {width: 0, height: 0} },
-      'Bar': { cells:{width: 2, height: 2} },
+      'Sheet1': {width: 0, height: 0},
+      'Sheet2': {width: 1, height: 1},
+      'Foo': {width: 0, height: 0},
+      'Bar': {width: 2, height: 2},
     })
   })
 })
