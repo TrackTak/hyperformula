@@ -245,6 +245,7 @@ export class RemoveSheetUndoEntry extends BaseUndoEntry {
     public readonly sheetName: string,
     public readonly sheetId: number,
     public readonly oldSheetContent: ClipboardCell[][],
+    public readonly oldSheetNames: string[],
     public readonly scopedNamedExpressions: [InternalNamedExpression, ClipboardCell][],
     public readonly version: number,
   ) {

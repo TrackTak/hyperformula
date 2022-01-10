@@ -218,8 +218,9 @@ export class CrudOperations {
     this.clipboardOperations.abortCut()
     const originalName = this.sheetMapping.fetchDisplayName(sheetId)
     const oldSheetContent = this.operations.getSheetClipboardCells(sheetId)
+    const oldSheetNames = this.sheetMapping.sheetNames()
     const {version, scopedNamedExpressions} = this.operations.removeSheet(sheetId)
-    this.undoRedo.saveOperation(new RemoveSheetUndoEntry(originalName, sheetId, oldSheetContent, scopedNamedExpressions, version))
+    this.undoRedo.saveOperation(new RemoveSheetUndoEntry(originalName, sheetId, oldSheetContent, oldSheetNames, scopedNamedExpressions, version))
   }
 
   public renameSheet(sheetId: number, newName: string): Maybe<string> {
