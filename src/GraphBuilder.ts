@@ -86,8 +86,8 @@ export class SimpleStrategy implements GraphBuilderStrategy {
       const sheetId = this.dependencyGraph.getSheetId(sheetName)
       const sheet = sheets[sheetName]
 
-      for (let i = 0; i < sheet.length; ++i) {
-        const row = sheet[i]
+      for (let i = 0; i < sheet.cells.length; ++i) {
+        const row = sheet.cells[i]
         for (let j = 0; j < row.length; ++j) {
           const cellContent = row[j]
           const address = simpleCellAddress(sheetId, j, i)

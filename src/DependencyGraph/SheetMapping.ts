@@ -15,7 +15,7 @@ class Sheet {
   constructor(
     public readonly id: number,
     public displayName: string,
-    public readonly sheetMetadata: any
+    public sheetMetadata: any
   ) {
   }
 
@@ -32,6 +32,12 @@ export class SheetMapping {
 
   constructor(private languages: TranslationPackage) {
     this.sheetNamePrefix = languages.getUITranslation(UIElement.NEW_SHEET_PREFIX)
+  }
+
+  public setSheetMetadata(sheetId: number, sheetMetadata: any) {
+    const sheet = this.fetchSheetById(sheetId)
+
+    sheet.sheetMetadata = sheetMetadata
   }
 
   public addSheet(newSheetDisplayName: string = `${this.sheetNamePrefix}${this.lastSheetId + 2}`, sheetMetadata?: any): number {

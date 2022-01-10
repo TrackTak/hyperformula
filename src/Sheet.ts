@@ -6,17 +6,17 @@
 import {DataRawCellContent} from './CellContentParser'
 import {InvalidArgumentsError} from './errors'
 
-export interface GenericSheet<T> {
-  cells: T[][],
-  sheetMetadata?: any,
+export interface GenericSheet<Cell, SheetMetadata> {
+  cells: Cell[][],
+  sheetMetadata?: SheetMetadata,
 }
 
-export type GenericSheets<T> = Record<string, GenericSheet<T>>
+export type GenericSheets<Cell, SheetMetadata> = Record<string, GenericSheet<Cell, SheetMetadata>>
 
 /**
  * Object with Two-dimenstional array representation of cells
  */
-export type Sheet = GenericSheet<DataRawCellContent>
+export type Sheet = GenericSheet<DataRawCellContent, any>
 
 export type Sheets = Record<string, Sheet>
 
