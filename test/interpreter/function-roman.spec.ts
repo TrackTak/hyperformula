@@ -4,22 +4,22 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function ROMAN', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=ROMAN()' }, { cellValue: '=ROMAN(1, 1, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should properly truncate values and use defaults', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=ROMAN(499)' }],
       [{ cellValue: '=ROMAN(499, TRUE())' }],
       [{ cellValue: '=ROMAN(499, FALSE())' }],
       [{ cellValue: '=ROMAN(499.9)' }],
       [{ cellValue: '=ROMAN(499, 1.1)' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual('CDXCIX')
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual('CDXCIX')
     expect(engine.getCellValue(adr('A3')).cellValue).toEqual('ID')
@@ -28,13 +28,13 @@ describe('Function ROMAN', () => {
   })
 
   it('should throw correct error if arguments are out of bounds', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=ROMAN(0)' }],
       [{ cellValue: '=ROMAN(4000)' }],
       [{ cellValue: '=ROMAN(-1)' }],
       [{ cellValue: '=ROMAN(1,"a")' }],
       [{ cellValue: '=ROMAN(1,5)' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
     expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
@@ -43,28 +43,28 @@ describe('Function ROMAN', () => {
   })
 
   it('should output correct value for mode 0', () => {
-    const [engine] = HyperFormula.buildFromArray([input(0)])
-    expect(engine.getSheetValues(0)).toEqual([mode0.map(x => new CellData(x))])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input(0)]})
+    expect(engine.getSheetValues(0).cells).toEqual([mode0.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 1', () => {
-    const [engine] = HyperFormula.buildFromArray([input(1)])
-    expect(engine.getSheetValues(0)).toEqual([mode1.map(x => new CellData(x))])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input(1)]})
+    expect(engine.getSheetValues(0).cells).toEqual([mode1.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 2', () => {
-    const [engine] = HyperFormula.buildFromArray([input(2)])
-    expect(engine.getSheetValues(0)).toEqual([mode2.map(x => new CellData(x))])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input(2)]})
+    expect(engine.getSheetValues(0).cells).toEqual([mode2.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 3', () => {
-    const [engine] = HyperFormula.buildFromArray([input(3)])
-    expect(engine.getSheetValues(0)).toEqual([mode3.map(x => new CellData(x))])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input(3)]})
+    expect(engine.getSheetValues(0).cells).toEqual([mode3.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 4', () => {
-    const [engine] = HyperFormula.buildFromArray([input(4)])
-    expect(engine.getSheetValues(0)).toEqual([mode4.map(x => new CellData(x))])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input(4)]})
+    expect(engine.getSheetValues(0).cells).toEqual([mode4.map(x => new CellData(x))])
   })
 })
 

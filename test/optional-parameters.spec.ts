@@ -26,7 +26,7 @@ class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlu
 describe('Nonexistent metadata', () => {
   it('should work for function', () => {
     HyperFormula.getLanguage('enGB').extendFunctions({FOO: 'FOO'})
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=foo(1,2)' }],
       [{ cellValue: '=foo(,2)' }],
       [{ cellValue: '=foo( ,2)' }],
@@ -34,7 +34,7 @@ describe('Nonexistent metadata', () => {
       [{ cellValue: '=foo( , )' }],
       [{ cellValue: '=foo(1)' }],
       [{ cellValue: '=foo()' }],
-    ], {functionPlugins: [FooPlugin]})
+    ] }, {functionPlugins: [FooPlugin]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBe('1+2')
     expect(engine.getCellValue(adr('A2')).cellValue).toBe('+2')
@@ -46,19 +46,19 @@ describe('Nonexistent metadata', () => {
   })
 
   it('log fails with coerce to 0', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=LOG(10,)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 
   it('other function coerce EmptyValue', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=DATE(,1,1900)' }],
       [{ cellValue: '=SUM(,1)' }],
       [{ cellValue: '=CONCATENATE(,"abcd")' }]
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1901)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)

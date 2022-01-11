@@ -5,20 +5,20 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function HF.MULTIPLY', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=HF.MULTIPLY(1)' }, { cellValue: '=HF.MULTIPLY(1, 1, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value with correct defaults', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=HF.MULTIPLY(2,3)' }],
       [{ cellValue: '=HF.MULTIPLY(1,)' }],
       [{ cellValue: '=HF.MULTIPLY(,)' }]
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(6)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
@@ -26,11 +26,11 @@ describe('Function HF.MULTIPLY', () => {
   })
 
   it('should coerce to correct types', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=HF.MULTIPLY(TRUE(),1)' }],
       [{ cellValue: '=HF.MULTIPLY(B2,1)' }],
       [{ cellValue: '=HF.MULTIPLY("1",1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(0)
@@ -38,11 +38,11 @@ describe('Function HF.MULTIPLY', () => {
   })
 
   it('should throw correct error', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=HF.MULTIPLY("abcd",)' }],
       [{ cellValue: '=HF.MULTIPLY(NA(),)' }],
       [{ cellValue: '=HF.MULTIPLY(B3:C3,)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA))
@@ -50,7 +50,7 @@ describe('Function HF.MULTIPLY', () => {
   })
 
   it('passes subtypes', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=HF.MULTIPLY(B1,C1)' }, { cellValue: '1$' }, { cellValue: 1 }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=HF.MULTIPLY(B1,C1)' }, { cellValue: '1$' }, { cellValue: 1 }]]})
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
   })
 })

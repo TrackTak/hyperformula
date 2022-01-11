@@ -5,21 +5,21 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function BINOM.INV', () => {
   it('should return error for wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BINOM.INV(1, 2)' }],
       [{ cellValue: '=BINOM.INV(1, 2, 3, 4)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BINOM.INV("foo", 0.5, 3)' }],
       [{ cellValue: '=BINOM.INV(1, "baz", 3)' }],
       [{ cellValue: '=BINOM.INV(1, 0.5, "baz")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -50,13 +50,13 @@ describe('Function BINOM.INV', () => {
       cellValue: z
     })))
 
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
     const out = [[1, 1, 2, 2, 3, 4, 4, 5, 5, 5, 6, 6, 7, 8, 8, 9, 9]].map(x => x.map(z => ({
       cellValue: z
     })))
     
-    expect(engine.getSheetValues(0)).toEqual(out)
+    expect(engine.getSheetValues(0).cells).toEqual(out)
   })
 
   it('should work, different p-value', () => {
@@ -75,9 +75,9 @@ describe('Function BINOM.INV', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 4 }, { cellValue: 6 }, { cellValue: 7 }, { cellValue: 7}, {cellValue: 8 }, { cellValue: 8 }, { cellValue: 8 }, { cellValue: 9 }, { cellValue: 9 }, { cellValue: 10 }, { cellValue: 10 }]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 4 }, { cellValue: 6 }, { cellValue: 7 }, { cellValue: 7}, {cellValue: 8 }, { cellValue: 8 }, { cellValue: 8 }, { cellValue: 9 }, { cellValue: 9 }, { cellValue: 10 }, { cellValue: 10 }]])
   })
 
   it('should work, small number of trials', () => {
@@ -96,9 +96,9 @@ describe('Function BINOM.INV', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0}, {cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0}, {cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }]])
   })
 
   it('should work, another small number of trials', () => {
@@ -117,10 +117,10 @@ describe('Function BINOM.INV', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
     //both products #1 and #2 return 1 for '=BINOM.INV(1, 0.8, 0.2)', which is incorrect
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 1}, {cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 0 }, { cellValue: 0 }, { cellValue: 0 }, { cellValue: 1}, {cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }]])
   })
 
   it('should work, large number of trials', () => {
@@ -139,9 +139,9 @@ describe('Function BINOM.INV', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 760 }, { cellValue: 784 }, { cellValue: 789 }, { cellValue: 793}, {cellValue: 797 }, { cellValue: 800 }, { cellValue: 803 }, { cellValue: 807 }, { cellValue: 811 }, { cellValue: 816 }, { cellValue: 838 }]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 760 }, { cellValue: 784 }, { cellValue: 789 }, { cellValue: 793}, {cellValue: 797 }, { cellValue: 800 }, { cellValue: 803 }, { cellValue: 807 }, { cellValue: 811 }, { cellValue: 816 }, { cellValue: 838 }]])
   })
 
   it('truncation works', () => {
@@ -161,13 +161,13 @@ describe('Function BINOM.INV', () => {
     ].map(x => x.map(z => ({
       cellValue: z
     })))
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
-    expect(engine.getSheetValues(0)).toEqual([[{ cellValue: 760 }, { cellValue: 784 }, { cellValue: 789 }, { cellValue: 793}, {cellValue: 797 }, { cellValue: 800 }, { cellValue: 803 }, { cellValue: 807 }, { cellValue: 811 }, { cellValue: 816 }, { cellValue: 838 }]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 760 }, { cellValue: 784 }, { cellValue: 789 }, { cellValue: 793}, {cellValue: 797 }, { cellValue: 800 }, { cellValue: 803 }, { cellValue: 807 }, { cellValue: 811 }, { cellValue: 816 }, { cellValue: 838 }]])
   })
 
   it('checks bounds', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=BINOM.INV(0, 0.5, 0.5)' }],
       [{ cellValue: '=BINOM.INV(-0.001, 0.5, 0.5)' }],
       [{ cellValue: '=BINOM.INV(10, 0, 0.5)' }],
@@ -176,7 +176,7 @@ describe('Function BINOM.INV', () => {
       [{ cellValue: '=BINOM.INV(10, 1.001, 0.5)' }],
       [{ cellValue: '=BINOM.INV(10, 0.5, 0)' }],
       [{ cellValue: '=BINOM.INV(10, 0.5, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
     //product #1 returns 0 for the following test

@@ -65,7 +65,7 @@ import {
   Unparser,
 } from './parser'
 import {Serialization, SerializedNamedExpression} from './Serialization'
-import {Sheet, SheetDimensions, Sheets} from './Sheet'
+import {GenericSheet, GenericSheets, Sheet, SheetDimensions, Sheets} from './Sheet'
 import {Statistics, StatType} from './statistics'
 
 /**
@@ -741,7 +741,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetValues<CellMetadata>(sheetId: number): CellData<CellValue, CellMetadata>[][] {
+  public getSheetValues<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<CellData<CellValue, CellMetadata>, SheetMetadata> {
     validateArgToType(sheetId, 'number', 'sheetId')
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getSheetValues(sheetId)
@@ -774,7 +774,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetFormulas<CellMetadata>(sheetId: number): CellData<string | undefined, CellMetadata>[][] {
+  public getSheetFormulas<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<CellData<string | undefined, CellMetadata>, SheetMetadata> {
     validateArgToType(sheetId, 'number', 'sheetId')
     return this._serialization.getSheetFormulas(sheetId)
   }
@@ -807,7 +807,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetSerialized<CellMetadata>(sheetId: number): GenericDataRawCellContent<CellMetadata>[][] {
+  public getSheetSerialized<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<GenericDataRawCellContent<CellMetadata>, SheetMetadata> {
     validateArgToType(sheetId, 'number', 'sheetId')
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getSheetSerialized(sheetId)
@@ -887,7 +887,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getAllSheetsValues<CellMetadata>(): Record<string, CellData<CellValue, CellMetadata>[][]> {
+  public getAllSheetsValues<SheetMetadata, CellMetadata>(): GenericSheets<CellData<CellValue, CellMetadata>, SheetMetadata> {
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getAllSheetsValues()
   }
@@ -906,7 +906,7 @@ export class HyperFormula implements TypedEmitter {
    * ```
    * @category Sheets
    */
-  public getAllSheetsFormulas<CellMetadata>(): Record<string, CellData<string | undefined, CellMetadata>[][]> {
+  public getAllSheetsFormulas<SheetMetadata, CellMetadata>(): GenericSheets<CellData<string | undefined, CellMetadata>, SheetMetadata> {
     return this._serialization.getAllSheetsFormulas()
   }
 
@@ -927,7 +927,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getAllSheetsSerialized(): Record<string, DataRawCellContent[][]> {
+  public getAllSheetsSerialized<SheetMetadata>(): GenericSheets<DataRawCellContent, SheetMetadata> {
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getAllSheetsSerialized()
   }
@@ -957,7 +957,7 @@ export class HyperFormula implements TypedEmitter {
     const newConfig = this._config.mergeConfig(newParams)
 
     const configNewLanguage = this._config.mergeConfig({language: newParams.language})
-    const serializedSheets = this._serialization.withNewConfig(configNewLanguage, this._namedExpressions).getAllSheetsSerialized()
+    const serializedSheets= this._serialization.withNewConfig(configNewLanguage, this._namedExpressions).getAllSheetsSerialized()
     const serializedNamedExpressions = this._serialization.getAllNamedExpressionsSerialized()
 
     const [newEngine, evaluatorPromise] = BuildEngineFactory.rebuildWithConfig(newConfig, serializedSheets, serializedNamedExpressions, this._stats)
@@ -2532,14 +2532,27 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public addSheet(sheetName?: string): string {
+  public addSheet<SheetMetadata>(sheetName?: string, sheetMetadata?: SheetMetadata): string {
     if (sheetName !== undefined) {
       validateArgToType(sheetName, 'string', 'sheetName')
     }
-    const addedSheetName = this._crudOperations.addSheet(sheetName)
+    const addedSheetName = this._crudOperations.addSheet(sheetName, sheetMetadata)
     this._emitter.emit(Events.SheetAdded, addedSheetName)
     return addedSheetName
   }
+
+  /**
+   * @category Sheets
+   */
+  public getSheetMetadata<SheetMetadata>(sheetId: number): SheetMetadata {
+    if (sheetId !== undefined) {
+      validateArgToType(sheetId, 'number', 'sheetId')
+    }
+    const sheet = this.sheetMapping.fetchSheetById(sheetId)
+    
+    return sheet.sheetMetadata
+  }
+
 
   /**
    * Returns information whether it is possible to remove sheet for the engine.
@@ -2751,6 +2764,15 @@ export class HyperFormula implements TypedEmitter {
     validateArgToType(sheetId, 'number', 'sheetId')
     this._crudOperations.setSheetContent(sheetId, values)
     return this.recomputeIfDependencyGraphNeedsIt()
+  }
+
+  /**
+   * @category Sheets
+   */
+  public setSheetMetadata<SheetMetadata>(sheetId: number, sheetMetadata: SheetMetadata): void {
+    validateArgToType(sheetId, 'number', 'sheetId')
+
+    this.sheetMapping.setSheetMetadata(sheetId, sheetMetadata)
   }
 
   /**

@@ -576,9 +576,9 @@ describe('ColumnIndex - lazy cruds', () => {
 
 describe('Arrays', () => {
   it('should update column index with array values', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=-A1:B1' }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     expectColumnIndexToMatchSheet([
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: -1 }, { cellValue: -2 }]
@@ -586,9 +586,9 @@ describe('Arrays', () => {
   })
 
   it('should remove values from index when REF', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=-A1:B1' }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.setCellContents(adr('D1'), [[{ cellValue: 'foo' }]])
 
@@ -598,9 +598,9 @@ describe('Arrays', () => {
   })
 
   it('should remove values from index when replacing array with scalar', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=-A1:B1' }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.setCellContents(adr('C1'), [[{ cellValue: 'foo' }]])
 
@@ -610,9 +610,9 @@ describe('Arrays', () => {
   })
 
   it('should remove values when replacing array with smaller one', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=-A1:B1' }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.setCellContents(adr('C1'), [[{ cellValue: '=2*A1:A1' }]])
 
@@ -622,9 +622,9 @@ describe('Arrays', () => {
   })
 
   it('shoud remove values when replacing array with parsing error', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=-A1:B1' }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.setCellContents(adr('C1'), [[{ cellValue: '=SUM(' }]])
 
@@ -634,9 +634,9 @@ describe('Arrays', () => {
   })
 
   it('should update index when replacing array with another one', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=-A1:B1' }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.setCellContents(adr('C1'), [[{ cellValue: '=2*A1:B1' }]])
 
@@ -646,12 +646,12 @@ describe('Arrays', () => {
   })
 
   it('should move array values when adding rows above array', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=-B3:B4' }],
       [{ cellValue: null }, { cellValue: 'foo' }],
       [{ cellValue: null }, { cellValue: 1 }],
       [{ cellValue: null }, { cellValue: 2 }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.addRows(0, [0, 1])
 
@@ -665,12 +665,12 @@ describe('Arrays', () => {
   })
 
   it('should not move array values when adding rows', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=-B3:B4' }],
       [{ cellValue: null }, { cellValue: 'foo' }],
       [{ cellValue: -2 }, { cellValue: 1 }],
       [{ cellValue: -1 }, { cellValue: 2 }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.addRows(0, [1, 1])
 
@@ -684,12 +684,12 @@ describe('Arrays', () => {
   })
 
   it('should move array values when removing rows above array', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [],
       [{ cellValue: '=-B3:B4' }],
       [{ cellValue: null }, { cellValue: 1 }],
       [{ cellValue: null }, { cellValue: 2 }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.removeRows(0, [0, 1])
 
@@ -701,13 +701,13 @@ describe('Arrays', () => {
   })
 
   it('should not move array values when removing rows', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=-B4:B5' }],
       [{ cellValue: null }],
       [{ cellValue: null }, { cellValue: 'foo' }],
       [{ cellValue:-2 }, { cellValue:1 }],
       [{ cellValue:-1 }, { cellValue:2 }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.removeRows(0, [1, 1])
 
@@ -720,11 +720,11 @@ describe('Arrays', () => {
   })
 
   it('should remove array values from index when removing row with left corner', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=-B2:B3' }],
       [{ cellValue: null }, { cellValue: 1 }],
       [{ cellValue: null }, { cellValue: 2 }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.removeRows(0, [0, 1])
 
@@ -735,11 +735,11 @@ describe('Arrays', () => {
   })
 
   it('should remove array values from index when REF after removing rows', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=-B2:B3' }],
       [{ cellValue: null }, { cellValue: 1 }],
       [{ cellValue: 3 }, { cellValue: 2 }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.removeRows(0, [1, 1])
 
@@ -750,10 +750,10 @@ describe('Arrays', () => {
   })
 
   it('should move array values when adding columns before array', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=-C2:D2' }],
       [{ cellValue: null }, { cellValue: 'foo' }, { cellValue: 1 }, { cellValue: 2}]
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.addColumns(0, [0, 1])
 
@@ -764,10 +764,10 @@ describe('Arrays', () => {
   })
 
   it('should not move array values when adding columns', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue:'=-C2:E2'}, { cellValue:null}, { cellValue: null}, { cellValue:-3}, { cellValue:-2}, { cellValue:-1}],
       [{ cellValue: null }, { cellValue: 'foo' }, { cellValue: 1 }, { cellValue: 2}, {cellValue: 3 }]
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.addColumns(0, [1, 1])
 
@@ -778,10 +778,10 @@ describe('Arrays', () => {
   })
 
   it('should move array values when removing columns before array', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: null }, { cellValue: '=-C2:D2' }],
       [{ cellValue: null }, { cellValue: null }, { cellValue: 1 }, { cellValue: 2}]
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.removeColumns(0, [0, 1])
 
@@ -792,10 +792,10 @@ describe('Arrays', () => {
   })
 
   it('should not move array values when removing columns', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue:'=-D2:E2'}, { cellValue:null}, { cellValue: null}, { cellValue:-2}, { cellValue:-1}],
       [{ cellValue:-2}, { cellValue:'foo'}, { cellValue:null}, { cellValue:1}, { cellValue:2}]
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.removeColumns(0, [1, 1])
 
@@ -806,10 +806,10 @@ describe('Arrays', () => {
   })
 
   it('should remove array values from index when removing column with left corner', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=-B2:C2' }],
       [{ cellValue: null }, { cellValue: 1 }, { cellValue: 2 }],
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.removeColumns(0, [0, 1])
 
@@ -820,10 +820,10 @@ describe('Arrays', () => {
   })
 
   it('should remove array values from index when REF after removing columns', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=-B2:C2' }, { cellValue: null }, { cellValue: 1 }],
       [{ cellValue: 2 }, { cellValue: null }, { cellValue: 3 }]
-    ], {useArrayArithmetic: true, useColumnIndex: true})
+    ] }, {useArrayArithmetic: true, useColumnIndex: true})
 
     engine.removeColumns(0, [1, 1])
 

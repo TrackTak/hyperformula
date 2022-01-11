@@ -7,9 +7,9 @@ import {adr} from '../testUtils'
 describe('Function VERSION', () => {
   describe('getting version', () => {
     it('GPL license key', () => {
-      const [engine] = HyperFormula.buildFromArray([
+      const [engine] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: '=VERSION()' }],
-      ], {
+      ] }, {
         licenseKey: 'gpl-v3',
       })
 
@@ -17,9 +17,9 @@ describe('Function VERSION', () => {
     })
 
     it('missing license key', () => {
-      const [engine] = HyperFormula.buildFromArray([
+      const [engine] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: '=VERSION()' }],
-      ], {
+      ] }, {
         licenseKey: '',
       })
 
@@ -27,9 +27,9 @@ describe('Function VERSION', () => {
     })
 
     it('invalid license key', () => {
-      const [engine] = HyperFormula.buildFromArray([
+      const [engine] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: '=VERSION()' }],
-      ], {
+      ] }, {
         licenseKey: '11111-11111-11111-11111-11111',
       })
 
@@ -37,9 +37,9 @@ describe('Function VERSION', () => {
     })
 
     it('expired license key', () => {
-      const [engine] = HyperFormula.buildFromArray([
+      const [engine] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: '=VERSION()' }],
-      ], {
+      ] }, {
         licenseKey: '80584-cc272-2e7c4-06f16-4db00',
       })
 
@@ -47,9 +47,9 @@ describe('Function VERSION', () => {
     })
 
     it('correct license key', () => {
-      const [engine] = HyperFormula.buildFromArray([
+      const [engine] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: '=VERSION()' }],
-      ], {
+      ] }, {
         licenseKey: 'internal-use-in-handsontable',
       })
 
@@ -72,9 +72,9 @@ describe('Function VERSION', () => {
 
     it('should not allow registering VERSION formula', () => {
       expect(() => {
-        HyperFormula.buildFromArray([
+        HyperFormula.buildFromArray({ cells: [
           [{ cellValue: '=VERSION()' }],
-        ], {
+        ] }, {
           licenseKey: 'gpl-v3',
           functionPlugins: [VersionExtra]
         })
@@ -86,9 +86,9 @@ describe('Function VERSION', () => {
         HyperFormula.unregisterFunction('VERSION')
       }).toThrow(ProtectedFunctionError.cannotUnregisterFunctionWithId('VERSION'))
 
-      const [engine] = HyperFormula.buildFromArray([
+      const [engine] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: '=VERSION()' }],
-      ], {
+      ] }, {
         licenseKey: 'gpl-v3',
       })
 

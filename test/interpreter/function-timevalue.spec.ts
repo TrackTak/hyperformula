@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function TIMEVALUE', () => {
   it('with wrong arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=TIMEVALUE("foo")' }, { cellValue: '=TIMEVALUE(1)' }, { cellValue: '=TIMEVALUE(1, 2)' }, { cellValue: '=TIMEVALUE()'}]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=TIMEVALUE("foo")' }, { cellValue: '=TIMEVALUE(1)' }, { cellValue: '=TIMEVALUE(1, 2)' }, { cellValue: '=TIMEVALUE()'}]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.IncorrectDateTime))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.IncorrectDateTime))
@@ -14,7 +14,7 @@ describe('Function TIMEVALUE', () => {
   })
 
   it('with string arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=TIMEVALUE("3:00pm")' }, { cellValue: '=TIMEVALUE("15:00")' }, { cellValue: '=TIMEVALUE("21:00:00")' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=TIMEVALUE("3:00pm")' }, { cellValue: '=TIMEVALUE("15:00")' }, { cellValue: '=TIMEVALUE("21:00:00")' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0.625)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_TIME)
@@ -23,23 +23,23 @@ describe('Function TIMEVALUE', () => {
   })
 
   it('ignores date', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=TIMEVALUE("3:00pm")' }, { cellValue: '=TIMEVALUE("31/12/2018 3:00pm")' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=TIMEVALUE("3:00pm")' }, { cellValue: '=TIMEVALUE("31/12/2018 3:00pm")' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0.625)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual(0.625)
   })
 
   it('rollover', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=TIMEVALUE("24:00")' }, { cellValue: '=TIMEVALUE("31/12/2018 24:00")' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=TIMEVALUE("24:00")' }, { cellValue: '=TIMEVALUE("31/12/2018 24:00")' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual(0)
   })
 
   it('propagate errors', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=TIMEVALUE(4/0)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })

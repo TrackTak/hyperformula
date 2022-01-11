@@ -3,13 +3,13 @@ import {adr} from '../testUtils'
 
 describe('Clear sheet - checking if its possible', () => {
   it('no if theres no such sheet', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(engine.isItPossibleToClearSheet(1)).toEqual(false)
   })
 
   it('yes otherwise', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(engine.isItPossibleToClearSheet(0)).toEqual(true)
   })
@@ -17,7 +17,7 @@ describe('Clear sheet - checking if its possible', () => {
 
 describe('Clear sheet content', () => {
   it('should throw error when trying to clear not existing sheet', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(() => {
       engine.clearSheet(1)
@@ -25,9 +25,9 @@ describe('Clear sheet content', () => {
   })
 
   it('should clear sheet content', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: 'foo' }],
-    ])
+    ]})
 
     engine.clearSheet(0)
 
@@ -37,13 +37,13 @@ describe('Clear sheet content', () => {
 
   it('should recalculate and return changes', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [
+      Sheet1: { cells:  [
         [{ cellValue: '1' }],
-      ],
-      Sheet2: [
+      ]},
+      Sheet2: { cells:  [
         [{ cellValue: '=Sheet1!A1' }],
         [{ cellValue: '=SUM(1, Sheet1!A1)' }],
-      ],
+      ]},
     })
 
     const [changes] = engine.clearSheet(0)
@@ -56,14 +56,14 @@ describe('Clear sheet content', () => {
 
   it('should clear sheet with matrix', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [
+      Sheet1: { cells:  [
         [{ cellValue: '1' }, { cellValue: '2' }],
         [{ cellValue: '=TRANSPOSE(A1:B1)' }],
-      ],
-      Sheet2: [
+      ]},
+      Sheet2: { cells:  [
         [{ cellValue: '=Sheet1!A2' }],
         [{ cellValue: '=Sheet1!A3' }],
-      ],
+      ]},
     })
 
     const [changes] = engine.clearSheet(0)
@@ -76,12 +76,12 @@ describe('Clear sheet content', () => {
 
   it('should clear sheet and dont break edge between cells', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [
+      Sheet1: { cells:  [
         [{ cellValue: '1' }],
-      ],
-      Sheet2: [
+      ]},
+      Sheet2: { cells:  [
         [{ cellValue: '=Sheet1!A1' }],
-      ],
+      ]},
     })
 
     engine.clearSheet(0)
@@ -92,12 +92,12 @@ describe('Clear sheet content', () => {
 
   it('should clear sheet and dont break edge between cells, case with range', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [
+      Sheet1: { cells:  [
         [{ cellValue: '1' }],
-      ],
-      Sheet2: [
+      ]},
+      Sheet2: { cells:  [
         [{ cellValue: '=SUM(Sheet1!A1:B1)' }],
-      ],
+      ]},
     })
 
     // eslint-disable-next-line

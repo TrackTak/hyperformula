@@ -3,20 +3,20 @@ import {adr, rowEnd, rowStart} from './testUtils'
 
 describe('Row ranges', () => {
   it('should work', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }],
       [{ cellValue: '2' }],
       [{ cellValue: '=SUM(1:2)' }]
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A3')).cellValue).toEqual(3)
   })
 
   it('should create correct edges for infinite range when building graph', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUM(3:4)' }],
       [{ cellValue: '=SUM(C3:D4)' }],
-    ])
+    ]})
 
     const rowRange = engine.rangeMapping.getRange(rowStart(3), rowEnd(4))!
 
@@ -32,10 +32,10 @@ describe('Row ranges', () => {
   })
 
   it('should create correct edges for infinite range', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUM(3:5)' }],
       [{ cellValue: '=SUM(4:7)' }],
-    ])
+    ]})
 
     engine.setCellContents(adr('B1'), { cellValue: '=SUM(Z4:Z8)' })
 

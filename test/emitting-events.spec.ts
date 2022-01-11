@@ -19,8 +19,8 @@ describe('Events', () => {
 
   it('sheetRemoved works', function() {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [[{ cellValue: '=Sheet2!A1' }]],
-      Sheet2: [[{ cellValue: '42' }]],
+      Sheet1: { cells:  [[{ cellValue: '=Sheet2!A1' }]]},
+      Sheet2: { cells:  [[{ cellValue: '42' }]]},
     })
     const handler = jasmine.createSpy()
 
@@ -33,8 +33,8 @@ describe('Events', () => {
 
   it('sheetRemoved name contains actual display name', function() {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [[{ cellValue: '=Sheet2!A1' }]],
-      Sheet2: [[{ cellValue: '42' }]],
+      Sheet1: { cells:  [[{ cellValue: '=Sheet2!A1' }]]},
+      Sheet2: { cells:  [[{ cellValue: '42' }]]},
     })
     const handler = jasmine.createSpy()
 
@@ -46,7 +46,7 @@ describe('Events', () => {
   })
 
   it('sheetRenamed works', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
     const handler = jasmine.createSpy()
 
     engine.on(Events.SheetRenamed, handler)
@@ -57,7 +57,7 @@ describe('Events', () => {
   })
 
   it('sheetRenamed is not triggered when sheet didnt change', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
     const handler = jasmine.createSpy()
 
     engine.on(Events.SheetRenamed, handler)
@@ -151,9 +151,9 @@ describe('Events', () => {
   })
 
   it('valuesUpdated works', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '42' }]
-    ])
+    ]})
     const handler = jasmine.createSpy()
 
     engine.on(Events.ValuesUpdated, handler)
@@ -166,9 +166,9 @@ describe('Events', () => {
   it('asyncValuesUpdated works', async() => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=ASYNC_FOO()' }]
-    ])
+    ]})
     const handler = jasmine.createSpy()
 
     engine.on(Events.AsyncValuesUpdated, handler)
@@ -181,9 +181,9 @@ describe('Events', () => {
 
 
   it('valuesUpdated may sometimes be triggered even if nothing changed', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '42' }]
-    ])
+    ]})
     const handler = jasmine.createSpy()
 
     engine.on(Events.ValuesUpdated, handler)
@@ -196,9 +196,9 @@ describe('Events', () => {
   it('suspension and resuming of evaluation', async() => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
-    const [engine, promise] = HyperFormula.buildFromArray([
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '42' }, { cellValue: '=ASYNC_FOO()' }]
-    ])
+    ]})
     const handlerUpdated = jasmine.createSpy()
     const handlerSuspended = jasmine.createSpy()
     const handlerResumed = jasmine.createSpy()
@@ -237,9 +237,9 @@ describe('Events', () => {
   it('batching', async() => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
-    const [engine, promise] = HyperFormula.buildFromArray([
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '42' }]
-    ])
+    ]})
 
     await promise
 

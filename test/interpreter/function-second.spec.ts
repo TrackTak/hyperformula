@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function SECOND', () => {
   it('with wrong arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=SECOND("foo")' }, { cellValue: '=SECOND("12/30/2018")' }, { cellValue: '=SECOND(1, 2)' }, { cellValue: '=SECOND()'}]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=SECOND("foo")' }, { cellValue: '=SECOND("12/30/2018")' }, { cellValue: '=SECOND(1, 2)' }, { cellValue: '=SECOND()'}]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -14,7 +14,7 @@ describe('Function SECOND', () => {
   })
 
   it('with numerical arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=SECOND(0.5123456)' }, { cellValue: '=SECOND(0)' }, { cellValue: '=SECOND(0.999999)' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=SECOND(0.5123456)' }, { cellValue: '=SECOND(0)' }, { cellValue: '=SECOND(0.999999)' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(47)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual(0)
@@ -22,7 +22,7 @@ describe('Function SECOND', () => {
   })
 
   it('with string arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=SECOND("14:42:59")' }, { cellValue: '=SECOND("01/01/1900 03:01:02am")' }, { cellValue: '=SECOND("31/12/2018")' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=SECOND("14:42:59")' }, { cellValue: '=SECOND("01/01/1900 03:01:02am")' }, { cellValue: '=SECOND("31/12/2018")' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(59)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual(2)
@@ -30,17 +30,17 @@ describe('Function SECOND', () => {
   })
 
   it('use datenumber coercion for 1st argument', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SECOND(TRUE())' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
   })
 
   it('propagate errors', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SECOND(4/0)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })

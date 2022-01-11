@@ -4,16 +4,16 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function COMBIN', () => {
   it('checks number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=COMBIN(1)' }, { cellValue: '=COMBIN(1, 2, 3)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=COMBIN(0,0)' }],
       [{ cellValue: '=COMBIN(1,0)' }],
       [{ cellValue: '=COMBIN(4,2)' }],
@@ -24,7 +24,7 @@ describe('Function COMBIN', () => {
       [{ cellValue: '=COMBIN(100,99)' }],
       [{ cellValue: '=COMBIN(100,8)' }],
       [{ cellValue: '=COMBIN(1029,512)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
     expect(engine.getCellValue(adr('A2')).cellValue).toBe(1)
@@ -39,21 +39,21 @@ describe('Function COMBIN', () => {
   })
 
   it('truncates argument', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=COMBIN(9.9,6.6)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBe(84)
   })
 
   it('checks bounds', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=COMBIN(1.1, 1.2)' }],
       [{ cellValue: '=COMBIN(1, 2)' }],
       [{ cellValue: '=COMBIN(2, -1)' }],
       [{ cellValue: '=COMBIN(-1, -1)' }],
       [{ cellValue: '=COMBIN(1030, 0)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.WrongOrder))
     expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.WrongOrder))
@@ -64,17 +64,17 @@ describe('Function COMBIN', () => {
   })
 
   it('uses coercion', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=COMBIN(TRUE(),"0")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
   })
 
   it('propagates error', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=COMBIN(NA(), NA())' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA))
   })

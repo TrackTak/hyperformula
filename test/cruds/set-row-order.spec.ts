@@ -2,12 +2,12 @@ import {CellData, DataRawCellContent, HyperFormula} from '../../src'
 import {AlwaysSparse} from '../../src/DependencyGraph/AddressMapping/ChooseAddressMappingPolicy'
 import {adr} from '../testUtils'
 
-const mapToCellData = (values: any[][]) => values.map(x => x.map(z => new CellData(z)))
+const mapToCellData = (values: any[][]) => ({ cells: values.map(x => x.map(z => new CellData(z))) })
 const mapFromCellData = (cellData: (DataRawCellContent | CellData<any>)[][]) => cellData.map(x => x.map(z => z.cellValue))
 
 describe('swapping rows - checking if it is possible', () => {
   it('should validate numbers for negative rows', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
     expect(engine.isItPossibleToSwapRowIndexes(0, [[-1, 0]])).toEqual(false)
     expect(() =>
       engine.swapRowIndexes(0, [[-1, 0]])
@@ -15,7 +15,7 @@ describe('swapping rows - checking if it is possible', () => {
   })
 
   it('should validate sources for noninteger values', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
     expect(engine.isItPossibleToSwapRowIndexes(0, [[1, 1], [0.5, 0]])).toEqual(false)
     expect(() =>
       engine.swapRowIndexes(0, [[1, 1], [0.5, 0]])
@@ -68,7 +68,7 @@ describe('swapping rows should correctly work', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 'abcd', 3], [3, 5, true]]))
     expect(engine.isItPossibleToSwapRowIndexes(0, [[0, 1], [1, 0]])).toEqual(true)
     engine.swapRowIndexes(0, [[0, 1], [1, 0]])
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[3, 5, true], [1, 'abcd', 3]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[3, 5, true], [1, 'abcd', 3]])
   })
 
   it('should return number of changed cells', () => {
@@ -82,14 +82,14 @@ describe('swapping rows should correctly work', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2, 3], [4, 5, 6, 7, 8]]), {chooseAddressMappingPolicy: new AlwaysSparse()})
     expect(engine.isItPossibleToSwapRowIndexes(0, [[0, 1], [1, 0]])).toEqual(true)
     engine.swapRowIndexes(0, [[0, 1], [1, 0]])
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[4, 5, 6, 7, 8], [1, 2, 3]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[4, 5, 6, 7, 8], [1, 2, 3]])
   })
 
   it('should work with more complicated permutations', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
     expect(engine.isItPossibleToSwapRowIndexes(0, [[0, 1], [1, 2], [2, 0]])).toEqual(true)
     engine.swapRowIndexes(0, [[0, 1], [1, 2], [2, 0]])
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6]])
   })
 
   it('should not move values unnecessarily', () => {
@@ -102,15 +102,15 @@ describe('swapping rows should correctly work', () => {
   it('should work with external references', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2, 3], [4, 5, 6], [7, 8, 9], ['=A1', '=SUM(A2:A3)']]))
     engine.swapRowIndexes(0, [[0, 1], [1, 2], [2, 0]])
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], ['=A1', '=SUM(A2:A3)']])
-    expect(mapFromCellData(engine.getSheetValues(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 5]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], ['=A1', '=SUM(A2:A3)']])
+    expect(mapFromCellData(engine.getSheetValues(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 5]])
   })
 
   it('should work with internal references', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([['=A2', '=SUM(B2:B3)', 3], ['=A10', '=SUM(B10:B15)', 6], ['=SUM(C1:C10)', 8, 9]]))
     expect(engine.isItPossibleToSwapRowIndexes(0, [[0, 1], [1, 2], [2, 0]])).toEqual(true)
     engine.swapRowIndexes(0, [[0, 1], [1, 2], [2, 0]])
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([['=SUM(#REF!)', 8, 9], ['=A3', '=SUM(B3:B4)', 3], ['=A11', '=SUM(B11:B16)', 6]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([['=SUM(#REF!)', 8, 9], ['=A3', '=SUM(B3:B4)', 3], ['=A11', '=SUM(B11:B16)', 6]])
   })
 })
 
@@ -119,21 +119,21 @@ describe('swapping rows working with undo', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
     engine.swapRowIndexes(0, [[0, 1], [1, 2], [2, 0]])
     engine.undo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
   })
 
   it('should work with external references', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2, 3], [4, 5, 6], [7, 8, 9], ['=A1', '=SUM(A2:A3)']]))
     engine.swapRowIndexes(0, [[0, 1], [1, 2], [2, 0]])
     engine.undo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9], ['=A1', '=SUM(A2:A3)']])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9], ['=A1', '=SUM(A2:A3)']])
   })
 
   it('should work with internal references', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([['=A2', '=SUM(B2:B3)', 3], ['=A10', '=SUM(B10:B15)', 6], ['=SUM(C1:C10)', 8, 9]]))
     engine.swapRowIndexes(0, [[0, 1], [1, 2], [2, 0]])
     engine.undo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([['=A2', '=SUM(B2:B3)', 3], ['=A10', '=SUM(B10:B15)', 6], ['=SUM(C1:C10)', 8, 9]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([['=A2', '=SUM(B2:B3)', 3], ['=A10', '=SUM(B10:B15)', 6], ['=SUM(C1:C10)', 8, 9]])
   })
 })
 
@@ -144,7 +144,7 @@ describe('swapping rows working with redo', () => {
     engine.undo()
     expect(engine.isItPossibleToSwapRowIndexes(0, [[0, 1], [1, 2], [2, 0]])).toEqual(true)
     engine.redo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6]])
   })
 
   it('should work with external references', () => {
@@ -153,8 +153,8 @@ describe('swapping rows working with redo', () => {
     engine.undo()
     expect(engine.isItPossibleToSwapRowIndexes(0, [[0, 1], [1, 2], [2, 0]])).toEqual(true)
     engine.redo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], ['=A1', '=SUM(A2:A3)']])
-    expect(mapFromCellData(engine.getSheetValues(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 5]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], ['=A1', '=SUM(A2:A3)']])
+    expect(mapFromCellData(engine.getSheetValues(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 5]])
   })
 
   it('should work with internal references', () => {
@@ -163,7 +163,7 @@ describe('swapping rows working with redo', () => {
     engine.undo()
     expect(engine.isItPossibleToSwapRowIndexes(0, [[0, 1], [1, 2], [2, 0]])).toEqual(true)
     engine.redo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([['=SUM(#REF!)', 8, 9], ['=A3', '=SUM(B3:B4)', 3], ['=A11', '=SUM(B11:B16)', 6]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([['=SUM(#REF!)', 8, 9], ['=A3', '=SUM(B3:B4)', 3], ['=A11', '=SUM(B11:B16)', 6]])
   })
 
   it('clears redo stack', () => {
@@ -240,7 +240,7 @@ describe('reorder base case', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 'abcd', 3], [3, 5, true]]))
     expect(engine.isItPossibleToSetRowOrder(0, [1, 0])).toEqual(true)
     engine.setRowOrder(0, [1, 0])
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[3, 5, true], [1, 'abcd', 3]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[3, 5, true], [1, 'abcd', 3]])
   })
 
   it('should return number of changed cells', () => {
@@ -254,14 +254,14 @@ describe('reorder base case', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2, 3], [4, 5, 6, 7, 8]]), {chooseAddressMappingPolicy: new AlwaysSparse()})
     expect(engine.isItPossibleToSetRowOrder(0, [1, 0])).toEqual(true)
     engine.setRowOrder(0, [1, 0])
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[4, 5, 6, 7, 8], [1, 2, 3]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[4, 5, 6, 7, 8], [1, 2, 3]])
   })
 
   it('should work with more complicated permutations', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
     expect(engine.isItPossibleToSetRowOrder(0, [1, 2, 0])).toEqual(true)
     engine.setRowOrder(0, [1, 2, 0])
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6]])
   })
 
   it('should not move values unnecessarily', () => {
@@ -274,15 +274,15 @@ describe('reorder base case', () => {
   it('should work with external references', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2, 3], [4, 5, 6], [7, 8, 9], ['=A1', '=SUM(A2:A3)']]))
     engine.setRowOrder(0, [1, 2, 0, 3])
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], ['=A1', '=SUM(A2:A3)']])
-    expect(mapFromCellData(engine.getSheetValues(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 5]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], ['=A1', '=SUM(A2:A3)']])
+    expect(mapFromCellData(engine.getSheetValues(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 5]])
   })
 
   it('should work with internal references', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([['=A2', '=SUM(B2:B3)', 3], ['=A10', '=SUM(B10:B15)', 6], ['=SUM(C1:C10)', 8, 9]]))
     expect(engine.isItPossibleToSetRowOrder(0, fillValues([1, 2, 0], 15))).toEqual(true)
     engine.setRowOrder(0, fillValues([1, 2, 0], 15))
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([['=SUM(#REF!)', 8, 9], ['=A3', '=SUM(B3:B4)', 3], ['=A11', '=SUM(B11:B16)', 6]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([['=SUM(#REF!)', 8, 9], ['=A3', '=SUM(B3:B4)', 3], ['=A11', '=SUM(B11:B16)', 6]])
   })
 })
 
@@ -291,21 +291,21 @@ describe('reorder working with undo', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
     engine.setRowOrder(0, [1, 2, 0])
     engine.undo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
   })
 
   it('should work with external references', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2, 3], [4, 5, 6], [7, 8, 9], ['=A1', '=SUM(A2:A3)']]))
     engine.setRowOrder(0, [1, 2, 0, 3])
     engine.undo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9], ['=A1', '=SUM(A2:A3)']])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9], ['=A1', '=SUM(A2:A3)']])
   })
 
   it('should work with internal references', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([['=A2', '=SUM(B2:B3)', 3], ['=A10', '=SUM(B10:B15)', 6], ['=SUM(C1:C10)', 8, 9]]))
     engine.setRowOrder(0, fillValues([1, 2, 0], 15))
     engine.undo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([['=A2', '=SUM(B2:B3)', 3], ['=A10', '=SUM(B10:B15)', 6], ['=SUM(C1:C10)', 8, 9]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([['=A2', '=SUM(B2:B3)', 3], ['=A10', '=SUM(B10:B15)', 6], ['=SUM(C1:C10)', 8, 9]])
   })
 })
 
@@ -316,7 +316,7 @@ describe('reorder working with redo', () => {
     engine.undo()
     expect(engine.isItPossibleToSetRowOrder(0, [1, 2, 0])).toEqual(true)
     engine.redo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6]])
   })
 
   it('should work with external references', () => {
@@ -325,8 +325,8 @@ describe('reorder working with redo', () => {
     engine.undo()
     expect(engine.isItPossibleToSetRowOrder(0, [1, 2, 0, 3])).toEqual(true)
     engine.redo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], ['=A1', '=SUM(A2:A3)']])
-    expect(mapFromCellData(engine.getSheetValues(0))).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 5]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], ['=A1', '=SUM(A2:A3)']])
+    expect(mapFromCellData(engine.getSheetValues(0).cells)).toEqual([[7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 5]])
   })
 
   it('should work with internal references', () => {
@@ -335,7 +335,7 @@ describe('reorder working with redo', () => {
     engine.undo()
     expect(engine.isItPossibleToSetRowOrder(0, fillValues([1, 2, 0], 16))).toEqual(true)
     engine.redo()
-    expect(mapFromCellData(engine.getSheetSerialized(0))).toEqual([['=SUM(#REF!)', 8, 9], ['=A3', '=SUM(B3:B4)', 3], ['=A11', '=SUM(B11:B16)', 6]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([['=SUM(#REF!)', 8, 9], ['=A3', '=SUM(B3:B4)', 3], ['=A11', '=SUM(B11:B16)', 6]])
   })
 
   it('clears redo stack', () => {

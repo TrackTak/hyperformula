@@ -5,13 +5,13 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function FALSE', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=FALSE()' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=FALSE()' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(false)
   })
 
   it('is 0-arity', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=FALSE(1)' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=FALSE(1)' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })

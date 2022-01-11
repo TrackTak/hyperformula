@@ -8,7 +8,7 @@ import {DataRawCellContent} from '../../CellContentParser'
 import {NoSheetWithIdError} from '../../errors'
 import {CellData, DataInterpreterValue, EmptyValue} from '../../interpreter/InterpreterValue'
 import {Maybe} from '../../Maybe'
-import {Sheet, SheetBoundaries} from '../../Sheet'
+import {SheetBoundaries} from '../../Sheet'
 import {ColumnsSpan, RowsSpan} from '../../Span'
 import {ArrayVertex, ValueCellVertex} from '../index'
 import {CellVertex} from '../Vertex'
@@ -61,7 +61,7 @@ export class AddressMapping {
     this.mapping.set(sheetId, strategy)
   }
 
-  public autoAddSheet(sheetId: number, sheet: Sheet, sheetBoundaries: SheetBoundaries) {
+  public autoAddSheet(sheetId: number, sheetBoundaries: SheetBoundaries) {
     const {height, width, fill} = sheetBoundaries
     const strategyConstructor = this.policy.call(fill)
     this.addSheet(sheetId, new strategyConstructor(width, height))

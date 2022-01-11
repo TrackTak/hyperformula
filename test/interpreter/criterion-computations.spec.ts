@@ -3,111 +3,111 @@ import {adr} from '../testUtils'
 
 describe('Criterions - operators computations', () => {
   it('usage of greater than operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '0' }, { cellValue: '3' }],
       [{ cellValue: '1' }, { cellValue: '5' }],
       [{ cellValue: '2' }, { cellValue: '7' }],
       [{ cellValue: '=SUMIF(A1:A3, ">1", B1:B3)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(7)
   })
 
   it('usage of greater than or equal operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '0' }, { cellValue: '3' }],
       [{ cellValue: '1' }, { cellValue: '5' }],
       [{ cellValue: '2' }, { cellValue: '7' }],
       [{ cellValue: '=SUMIF(A1:A3, ">=1", B1:B3)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(12)
   })
 
   it('usage of less than operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '0' }, { cellValue: '3' }],
       [{ cellValue: '1' }, { cellValue: '5' }],
       [{ cellValue: '2' }, { cellValue: '7' }],
       [{ cellValue: '=SUMIF(A1:A2, "<1", B1:B2)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
   })
 
   it('usage of less than or equal operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '0' }, { cellValue: '3' }],
       [{ cellValue: '1' }, { cellValue: '5' }],
       [{ cellValue: '2' }, { cellValue: '7' }],
       [{ cellValue: '=SUMIF(A1:A3, "<=1", B1:B3)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(8)
   })
 
   it('usage of equal operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '0' }, { cellValue: '3' }],
       [{ cellValue: '1' }, { cellValue: '5' }],
       [{ cellValue: '2' }, { cellValue: '7' }],
       [{ cellValue: '=SUMIF(A1:A3, "=1", B1:B3)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(5)
   })
 
   it('usage of not equal operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '0' }, { cellValue: '3' }],
       [{ cellValue: '1' }, { cellValue: '5' }],
       [{ cellValue: '2' }, { cellValue: '7' }],
       [{ cellValue: '=SUMIF(A1:A3, "<>1", B1:B3)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(10)
   })
 
   it('empty values #1', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '' }],
       [{ cellValue: '2' }, { cellValue: '8' }],
       [{ cellValue: '3' }, { cellValue: '9' }],
       [{ cellValue: '=SUMIF(B1:B3, "=", A1:A3)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(0)
   })
 
   it('empty values #2', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: '' }],
       [{ cellValue: '2' }, { cellValue: '8' }],
       [{ cellValue: '3' }, { cellValue: '9' }],
       [{ cellValue: '=SUMIF(B1:B3, "<>", A1:A3)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(6)
   })
 
   it('empty values #3', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '1' }, { cellValue: ' ' }],
       [{ cellValue: '2' }, { cellValue: '1' }],
       [{ cellValue: '3' }, { cellValue: 'TRUE' }],
       [{ cellValue: '=SUMIF(B1:B3, "=0", A1:A3)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(0)
   })
 
   it('empty values #4', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '' }],
       [{ cellValue: '8' }],
       [{ cellValue: '9' }],
       [{ cellValue: '=COUNTIF(A1:A3, "=")' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A4')).cellValue).toEqual(0)
   })
@@ -171,7 +171,7 @@ describe('big test', () => {
       cellValue: z
     })))
 
-    const [engine] = HyperFormula.buildFromArray(formulas, {useRegularExpressions: true, precisionRounding: 13})
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas }, {useRegularExpressions: true, precisionRounding: 13})
 
     expect(engine.getCellValue(adr('B51')).cellValue).toEqual(304.5)
     expect(engine.getCellValue(adr('G51')).cellValue).toEqual(304.5)
@@ -274,7 +274,7 @@ describe('big test', () => {
       cellValue: z
     })))
     
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     engine.addNamedExpression('TRUE', '=TRUE()', undefined)
     engine.addNamedExpression('FALSE', '=FALSE()', undefined)
     engine.setCellContents(adr('A1'), formulas)

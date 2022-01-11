@@ -1,10 +1,10 @@
-import {ErrorType, HyperFormula} from '../../src'
+import {DataRawCellContent, ErrorType, HyperFormula} from '../../src'
 import {ConfigParams} from '../../src/Config'
 import {ErrorMessage} from '../../src/error-message'
 import {Sheet} from '../../src/Sheet'
 import {adr, detailedError} from '../testUtils'
 
-const sharedExamples = (builder: (sheet: Sheet, config?: Partial<ConfigParams>) => HyperFormula) => {
+const sharedExamples = (builder: (sheet: DataRawCellContent[][], config?: Partial<ConfigParams>) => HyperFormula) => {
   describe('VLOOKUP - args validation', () => {
     it('not enough parameters', () => {
       const engine = builder([
@@ -73,11 +73,11 @@ const sharedExamples = (builder: (sheet: Sheet, config?: Partial<ConfigParams>) 
     })
 
     it('should propagate errors properly', () => {
-      const [engine] = HyperFormula.buildFromArray([
+      const [engine] = HyperFormula.buildFromArray({ cells: [
         [{ cellValue: '=VLOOKUP(1/0, B1:B1, 1)' }],
         [{ cellValue: '=VLOOKUP(1, B1:B1, 1/0)' }],
         [{ cellValue: '=VLOOKUP(1, A10:A11, 1, NA())' }]
-      ])
+      ]})
 
       expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
       expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
@@ -291,8 +291,8 @@ const sharedExamples = (builder: (sheet: Sheet, config?: Partial<ConfigParams>) 
 
 describe('ColumnIndex strategy', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sharedExamples((sheet: Sheet, config: any = {}) => {
-    return HyperFormula.buildFromArray(sheet, {
+  sharedExamples((cells: DataRawCellContent[][], config: any = {}) => {
+    return HyperFormula.buildFromArray({ cells }, {
       useColumnIndex: true,
       ...config,
     })[0]
@@ -301,15 +301,15 @@ describe('ColumnIndex strategy', () => {
 
 describe('BinarySearchStrategy', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sharedExamples((sheet: Sheet, config: any = {}) => {
-    return HyperFormula.buildFromArray(sheet, {
+  sharedExamples((cells: DataRawCellContent[][], config: any = {}) => {
+    return HyperFormula.buildFromArray({ cells }, {
       useColumnIndex: false,
       ...config,
     })[0]
   })
 
   it('should calculate indexes properly when using binary search', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=VLOOKUP(4, A5:A10, 1, TRUE())' }],
       [],
       [],
@@ -319,13 +319,13 @@ describe('BinarySearchStrategy', () => {
       [{ cellValue: '3' }],
       [{ cellValue: '4' }],
       [{ cellValue: '5' }],
-    ], {useColumnIndex: false})
+    ] }, {useColumnIndex: false})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(4)
   })
 
   it('should calculate indexes properly when using naive approach', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=VLOOKUP(4, A5:A10, 1, FALSE())' }],
       [],
       [],
@@ -335,89 +335,89 @@ describe('BinarySearchStrategy', () => {
       [{ cellValue: '3' }],
       [{ cellValue: '4' }],
       [{ cellValue: '5' }],
-    ], {useColumnIndex: false})
+    ] }, {useColumnIndex: false})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(4)
   })
 
   it('should coerce null to zero when using naive approach', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=VLOOKUP(, A2:A4, 1, FALSE())' }],
       [{ cellValue: 1 }],
       [{ cellValue: 3 }],
       [{ cellValue: 0 }],
-    ], {useColumnIndex: false})
+    ] }, {useColumnIndex: false})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
   })
 
   it('should work on column ranges', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=VLOOKUP(2,B:C,2)' }, { cellValue: 1 }, { cellValue: 'a' }],
       [{ cellValue: null }, { cellValue: 2 }, { cellValue: 'b' }],
       [{ cellValue: null }, { cellValue: 3 }, { cellValue: 'c' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual('b')
   })
 
   it('works for strings, is not case sensitive', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 'a' }, { cellValue: '1' }],
       [{ cellValue: 'b' }, { cellValue: '2' }],
       [{ cellValue: 'c' }, { cellValue: '3' }],
       [{ cellValue: 'A' }, { cellValue: '4' }],
       [{ cellValue: 'B' }, { cellValue: '5' }],
       [{ cellValue: '=VLOOKUP("A", A1:B5, 2, FALSE())' }]
-    ], {caseSensitive: false})
+    ] }, {caseSensitive: false})
 
     expect(engine.getCellValue(adr('A6')).cellValue).toEqual(1)
   })
 
   it('works for strings, is not case sensitive even if config defines case sensitivity', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 'a' }, { cellValue: '1' }],
       [{ cellValue: 'b' }, { cellValue: '2' }],
       [{ cellValue: 'c' }, { cellValue: '3' }],
       [{ cellValue: 'A' }, { cellValue: '4' }],
       [{ cellValue: 'B' }, { cellValue: '5' }],
       [{ cellValue: '=VLOOKUP("A", A1:B5, 2, FALSE())' }]
-    ], {caseSensitive: true})
+    ] }, {caseSensitive: true})
 
     expect(engine.getCellValue(adr('A6')).cellValue).toEqual(1)
   })
 
   it('should find value in sorted range', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 'a' }, { cellValue: '1' }],
       [{ cellValue: 'B' }, { cellValue: '2' }],
       [{ cellValue: 'c' }, { cellValue: '3' }],
       [{ cellValue: 'd' }, { cellValue: '4' }],
       [{ cellValue: 'e' }, { cellValue: '5' }],
       [{ cellValue: '=VLOOKUP("b", A1:B5, 2)' }],
-    ], {caseSensitive: false})
+    ] }, {caseSensitive: false})
     expect(engine.getCellValue(adr('A6')).cellValue).toEqual(2)
   })
 
   it('should properly report no match', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=VLOOKUP("0", A2:A5, 1)' }],
       [{ cellValue: 1 }],
       [{ cellValue: 2 }],
       [{ cellValue: 3 }],
       [{ cellValue: '\'1' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.ValueNotFound))
   })
 
   it('should properly report approximate matching', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=VLOOKUP("2", A2:A5, 1)' }],
       [{ cellValue: 1 }],
       [{ cellValue: 2 }],
       [{ cellValue: 3 }],
       [{ cellValue: '\'1' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual('1')
   })

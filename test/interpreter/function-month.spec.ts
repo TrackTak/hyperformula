@@ -5,7 +5,7 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function MONTH', () => {
   it('with wrong arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=MONTH("foo")' }, { cellValue: '=MONTH("12/30/2018")' }, { cellValue: '=MONTH(1, 2)' }, { cellValue: '=MONTH()'}]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=MONTH("foo")' }, { cellValue: '=MONTH("12/30/2018")' }, { cellValue: '=MONTH(1, 2)' }, { cellValue: '=MONTH()'}]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
@@ -14,7 +14,7 @@ describe('Function MONTH', () => {
   })
 
   it('with numerical arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=MONTH(0)' }, { cellValue: '=MONTH(2)' }, { cellValue: '=MONTH(43465)' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=MONTH(0)' }, { cellValue: '=MONTH(2)' }, { cellValue: '=MONTH(43465)' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(12)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
@@ -22,7 +22,7 @@ describe('Function MONTH', () => {
   })
 
   it('with string arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([[{ cellValue: '=MONTH("31/12/1899")' }, { cellValue: '=MONTH("01/01/1900")' }, { cellValue: '=MONTH("31/12/2018")' }]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=MONTH("31/12/1899")' }, { cellValue: '=MONTH("01/01/1900")' }, { cellValue: '=MONTH("31/12/2018")' }]]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(12)
     expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
@@ -30,25 +30,25 @@ describe('Function MONTH', () => {
   })
 
   it('use datenumber coercion for 1st argument', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=MONTH(TRUE())' }],
       [{ cellValue: '=MONTH(1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(12)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(12)
   })
 
   it('propagate errors', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=MONTH(4/0)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('test for days in month, start of month', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=MONTH(DATE(2021,1,1))' }],
       [{ cellValue: '=MONTH(DATE(2021,2,1))' }],
       [{ cellValue: '=MONTH(DATE(2021,3,1))' }],
@@ -61,7 +61,7 @@ describe('Function MONTH', () => {
       [{ cellValue: '=MONTH(DATE(2021,10,1))' }],
       [{ cellValue: '=MONTH(DATE(2021,11,1))' }],
       [{ cellValue: '=MONTH(DATE(2021,12,1))' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
@@ -78,7 +78,7 @@ describe('Function MONTH', () => {
   })
 
   it('test for days in month, end of month', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=MONTH(DATE(2021,1,31))' }],
       [{ cellValue: '=MONTH(DATE(2021,2,28))' }],
       [{ cellValue: '=MONTH(DATE(2021,3,31))' }],
@@ -91,7 +91,7 @@ describe('Function MONTH', () => {
       [{ cellValue: '=MONTH(DATE(2021,10,31))' }],
       [{ cellValue: '=MONTH(DATE(2021,11,30))' }],
       [{ cellValue: '=MONTH(DATE(2021,12,31))' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
@@ -108,7 +108,7 @@ describe('Function MONTH', () => {
   })
 
   it('test for days in month, end of month+1', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=MONTH(DATE(2021,1,31)+1)' }],
       [{ cellValue: '=MONTH(DATE(2021,2,28)+1)' }],
       [{ cellValue: '=MONTH(DATE(2021,3,31)+1)' }],
@@ -121,7 +121,7 @@ describe('Function MONTH', () => {
       [{ cellValue: '=MONTH(DATE(2021,10,31)+1)' }],
       [{ cellValue: '=MONTH(DATE(2021,11,30)+1)' }],
       [{ cellValue: '=MONTH(DATE(2021,12,31)+1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(3)
@@ -138,7 +138,7 @@ describe('Function MONTH', () => {
   })
 
   it('test for days in month, start of month, leap year', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=MONTH(DATE(2020,1,1))' }],
       [{ cellValue: '=MONTH(DATE(2020,2,1))' }],
       [{ cellValue: '=MONTH(DATE(2020,3,1))' }],
@@ -151,7 +151,7 @@ describe('Function MONTH', () => {
       [{ cellValue: '=MONTH(DATE(2020,10,1))' }],
       [{ cellValue: '=MONTH(DATE(2020,11,1))' }],
       [{ cellValue: '=MONTH(DATE(2020,12,1))' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
@@ -168,7 +168,7 @@ describe('Function MONTH', () => {
   })
 
   it('test for days in month, end of month, leap year', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=MONTH(DATE(2020,1,31))' }],
       [{ cellValue: '=MONTH(DATE(2020,2,29))' }],
       [{ cellValue: '=MONTH(DATE(2020,3,31))' }],
@@ -181,7 +181,7 @@ describe('Function MONTH', () => {
       [{ cellValue: '=MONTH(DATE(2020,10,31))' }],
       [{ cellValue: '=MONTH(DATE(2020,11,30))' }],
       [{ cellValue: '=MONTH(DATE(2020,12,31))' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
@@ -198,7 +198,7 @@ describe('Function MONTH', () => {
   })
 
   it('test for days in month, end of month+1, leap year', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=MONTH(DATE(2020,1,31)+1)' }],
       [{ cellValue: '=MONTH(DATE(2020,2,29)+1)' }],
       [{ cellValue: '=MONTH(DATE(2020,3,31)+1)' }],
@@ -211,7 +211,7 @@ describe('Function MONTH', () => {
       [{ cellValue: '=MONTH(DATE(2020,10,31)+1)' }],
       [{ cellValue: '=MONTH(DATE(2020,11,30)+1)' }],
       [{ cellValue: '=MONTH(DATE(2020,12,31)+1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
     expect(engine.getCellValue(adr('A2')).cellValue).toEqual(3)

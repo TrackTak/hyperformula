@@ -16,9 +16,9 @@ describe('Interpreter - function NOW', () => {
   })
 
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=NOW()' }],
-    ])
+    ]})
     const t1 = engine.getCellValue(adr('A1')).cellValue as number
     expect(t1).toBeCloseTo(31275.1565856481)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_DATETIME)
@@ -28,44 +28,44 @@ describe('Interpreter - function NOW', () => {
   })
 
   it('works #2', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=YEAR(NOW())' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1985)
   })
 
   it('works #3', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=MONTH(NOW())' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(8)
   })
 
   it('works #4', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=DAY(NOW())' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(16)
   })
 
   it('works #5', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=HOUR(NOW())' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(3)
   })
 
   it('works #6', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=MINUTE(NOW())' }],
-    ])
+    ]})
     expect(engine.getCellValue(adr('A1')).cellValue).toEqual(45)
   })
 
   it('validates number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=NOW(42)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })

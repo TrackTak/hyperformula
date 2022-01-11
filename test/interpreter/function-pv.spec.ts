@@ -5,19 +5,19 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function PV', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=PV(1,1)' }, { cellValue: '=PV(1, 1, 1, 1, 1, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
     expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should calculate the correct value with correct arguments and defaults', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=PV(2%, 24, 100)' }, { cellValue: '=PV(2%, 24, 100, 400)' }, { cellValue: '=PV(2%, 24, 100, 400, 1)' }],
       [{ cellValue: '=PV(-99%, 24, 100)' }, { cellValue: '=PV(-1, 24, 100, 400)' }, { cellValue: '=PV(-2, 24, 100, 400, 1)' }],
-    ])
+    ]})
 
     expect(engine.getCellValue(adr('A1')).cellValue).toBeCloseTo(-1891.39256, 6)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)

@@ -10,7 +10,7 @@ describe('EmptyValue tests', () => {
       cellValue: z
     })))
 
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
 
     expect(engine.getCellValue(adr('C1')).cellValue).toEqual(true)  // EQUAL
     expect(engine.getCellValue(adr('D1')).cellValue).toEqual(false) // GT
@@ -36,7 +36,7 @@ describe('EmptyValue tests', () => {
       cellValue: z
     })))
 
-    const [engine] = HyperFormula.buildFromArray(formulas)
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas })
     expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false) // EQUAL
     expect(engine.getCellValue(adr('D1')).cellValue).toEqual(true) // GT
     expect(engine.getCellValue(adr('E1')).cellValue).toEqual(false) // LT
