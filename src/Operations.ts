@@ -220,7 +220,7 @@ export class Operations {
     return columnsRemovals
   }
 
-  public removeSheet(sheetId: number) {
+  public removeSheet(sheetId: number, decrementLastSheetId = true) {
     this.dependencyGraph.removeSheet(sheetId)
 
     let version: number
@@ -230,7 +230,7 @@ export class Operations {
       version = this.lazilyTransformingAstService.addTransformation(transformation)
     })
 
-    this.sheetMapping.removeSheet(sheetId)
+    this.sheetMapping.removeSheet(sheetId, decrementLastSheetId)
     this.columnSearch.removeSheet(sheetId)
     const scopedNamedExpressions = this.namedExpressions.getAllNamedExpressionsForScope(sheetId).map(
       (namedexpression) => this.removeNamedExpression(namedexpression.normalizeExpressionName(), sheetId)
@@ -238,9 +238,9 @@ export class Operations {
     return {version: version!, scopedNamedExpressions}
   }
 
-  public removeSheetByName(sheetName: string) {
+  public removeSheetByName(sheetName: string, decrementLastSheetId: boolean) {
     const sheetId = this.sheetMapping.fetch(sheetName)
-    return this.removeSheet(sheetId)
+    return this.removeSheet(sheetId, decrementLastSheetId)
   }
 
   public clearSheet(sheetId: number) {
@@ -248,14 +248,14 @@ export class Operations {
     this.columnSearch.removeSheet(sheetId)
   }
 
-  public addSheet(name?: string, sheetMetadata?: any) {
-    const sheetId = this.sheetMapping.addSheet(name, sheetMetadata)
+  public addSheet(name?: string, sheetMetadata?: any, sheetId?: number) {
+    const newSheetId = this.sheetMapping.addSheet(name, sheetMetadata, sheetId)
     const sheet: Sheet = {
       cells: [],
       sheetMetadata
     }
-    this.dependencyGraph.addressMapping.autoAddSheet(sheetId, findBoundaries(sheet.cells))
-    return this.sheetMapping.fetchDisplayName(sheetId)
+    this.dependencyGraph.addressMapping.autoAddSheet(newSheetId, findBoundaries(sheet.cells))
+    return this.sheetMapping.fetchDisplayName(newSheetId)
   }
 
   public renameSheet(sheetId: number, newName: string) {

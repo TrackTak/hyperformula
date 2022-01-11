@@ -208,7 +208,8 @@ export class CrudOperations {
     }
     this.undoRedo.clearRedoStack()
     const addedSheetName = this.operations.addSheet(name, sheetMetadata)
-    this.undoRedo.saveOperation(new AddSheetUndoEntry(addedSheetName, sheetMetadata))
+    const sheetId = this.sheetMapping.fetch(addedSheetName)
+    this.undoRedo.saveOperation(new AddSheetUndoEntry(addedSheetName, sheetId, sheetMetadata))
     return addedSheetName
   }
 
@@ -218,8 +219,9 @@ export class CrudOperations {
     this.clipboardOperations.abortCut()
     const sheet = this.sheetMapping.fetchSheetById(sheetId)
     const oldSheetContent = this.operations.getSheetClipboardCells(sheetId)
+    const oldSheetNames = this.sheetMapping.sheetNames()
     const {version, scopedNamedExpressions} = this.operations.removeSheet(sheetId)
-    this.undoRedo.saveOperation(new RemoveSheetUndoEntry(sheet.displayName, sheetId, sheet.sheetMetadata, oldSheetContent, scopedNamedExpressions, version))
+    this.undoRedo.saveOperation(new RemoveSheetUndoEntry(sheet.displayName, sheetId, sheet.sheetMetadata, oldSheetContent, oldSheetNames, scopedNamedExpressions, version))
   }
 
   public renameSheet(sheetId: number, newName: string): Maybe<string> {

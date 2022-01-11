@@ -40,21 +40,29 @@ export class SheetMapping {
     sheet.sheetMetadata = sheetMetadata
   }
 
-  public addSheet(newSheetDisplayName: string = `${this.sheetNamePrefix}${this.lastSheetId + 2}`, sheetMetadata?: any): number {
+  public addSheet(newSheetDisplayName: string = `${this.sheetNamePrefix}${this.lastSheetId + 2}`, sheetMetadata?: any, sheetId?: number): number {
     const newSheetCanonicalName = canonicalize(newSheetDisplayName)
     if (this.mappingFromCanonicalName.has(newSheetCanonicalName)) {
       throw new SheetNameAlreadyTakenError(newSheetDisplayName)
     }
 
-    this.lastSheetId++
-    const sheet = new Sheet(this.lastSheetId, newSheetDisplayName, sheetMetadata)
+
+    let sheet: Sheet
+    if (sheetId !== undefined) {
+      sheet = new Sheet(sheetId, newSheetDisplayName, sheetMetadata)
+    } else {
+      this.lastSheetId++
+
+      sheet = new Sheet(this.lastSheetId, newSheetDisplayName, sheetMetadata)  
+    }
+
     this.store(sheet)
     return sheet.id
   }
 
-  public removeSheet(sheetId: number) {
+  public removeSheet(sheetId: number, decrementLastSheetId: boolean) {
     const sheet = this.fetchSheetById(sheetId)
-    if (sheetId == this.lastSheetId) {
+    if (sheetId == this.lastSheetId && decrementLastSheetId) {
       --this.lastSheetId
     }
     this.mappingFromCanonicalName.delete(sheet.canonicalName)

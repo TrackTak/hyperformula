@@ -401,6 +401,17 @@ describe('Undo - removing sheet', () => {
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: []})[0])
   })
 
+  it('works for adding then removing', () => {
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+
+    engine.addSheet()
+    engine.removeSheet(0)
+
+    engine.undo()
+
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromSheets({ Sheet1: { cells: [] }, Sheet2: { cells: [] } })[0])
+  })
+
   it('works with restoring simple values', () => {
     const sheet = [
       [{ cellValue: '1' }],

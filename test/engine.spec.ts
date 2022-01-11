@@ -432,8 +432,8 @@ describe('#getAllSheetsSerialized', () => {
     })
 
     expect(engine.getAllSheetsSerialized()).toEqual({
-      'Foo': { cells: [[{ cellValue: 1 }]], sheetMetadata: { test: 'value' } },
-      'Sheet1': { cells: [[{ cellValue: '=A()' }]]},
+      'Foo': { cells: [[{ cellValue: 1 }]]},
+      'Sheet1': { cells: [[{ cellValue: '=A()' }]], sheetMetadata: { test: 'value' }},
       'Err1': { cells: [[{ cellValue: '=A1' }]]},
       'Err2': { cells: [[{ cellValue: '234.23141234.2314' }]]},
       'Err3': { cells: [[{ cellValue: '#DIV/0!' }]]},
