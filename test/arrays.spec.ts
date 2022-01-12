@@ -389,7 +389,7 @@ describe('vectorization', () => {
   })
 })
 
-describe('build from array', () => {
+describe.only('build from array', () => {
   it('should create engine with array', () => {
     const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=-A1:B2' }],
@@ -520,6 +520,18 @@ describe('build from array', () => {
     ] }, {useArrayArithmetic: true})
 
     expect(engine.dependencyGraph.getAndClearContentChanges().isEmpty()).toEqual(true)
+  })
+
+  it.only('should not have SPILL error when cell values are empty', () => {
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '={1,2}' }, { cellValue: null, metadata: {test: 'value'} }],
+    ] }, {useArrayArithmetic: true})
+
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('B1'))).toEqual({
+      cellValue: 2,
+      metadata: {test: 'value'}
+    })
   })
 })
 
