@@ -37,6 +37,7 @@ export interface ClipboardCellValue {
 
 export interface ClipboardCellEmpty {
   type: ClipboardCellType.EMPTY,
+  metadata: Maybe<any>,
 }
 
 export interface ClipboardCellFormula {

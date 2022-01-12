@@ -415,7 +415,7 @@ export class Operations {
       const globalNamedExpression = this.namedExpressions.workbookNamedExpressionOrPlaceholder(expressionName)
       this.dependencyGraph.exchangeNode(namedExpression.address, globalNamedExpression.address)
     } else {
-      this.dependencyGraph.setCellEmpty(namedExpression.address)
+      this.dependencyGraph.setCellEmpty(namedExpression.address, undefined)
     }
     return [
       namedExpression,
@@ -473,7 +473,7 @@ export class Operations {
         break
       }
       case ClipboardCellType.EMPTY: {
-        this.setCellEmpty(address)
+        this.setCellEmpty(address, clipboardCell.metadata)
         break
       }
       case ClipboardCellType.PARSING_ERROR: {
@@ -485,12 +485,11 @@ export class Operations {
 
   public getOldContent(address: SimpleCellAddress): [SimpleCellAddress, ClipboardCell] {
     const vertex = this.dependencyGraph.getCell(address)
+    const metadata = vertex?.metadata
 
     if (vertex === undefined || vertex instanceof EmptyCellVertex) {
-      return [address, {type: ClipboardCellType.EMPTY}]
+      return [address, {type: ClipboardCellType.EMPTY, metadata }]
     } 
-
-    const metadata = vertex?.metadata
 
     if (vertex instanceof ValueCellVertex) {
       return [address, {type: ClipboardCellType.VALUE, ...vertex.getValues()}]
@@ -509,12 +508,11 @@ export class Operations {
 
   public getClipboardCell(address: SimpleCellAddress): ClipboardCell {
     const vertex = this.dependencyGraph.getCell(address)
+    const metadata = vertex?.metadata
 
     if (vertex === undefined || vertex instanceof EmptyCellVertex) {
-      return {type: ClipboardCellType.EMPTY}
+      return {type: ClipboardCellType.EMPTY, metadata}
     } 
-
-    const metadata = vertex?.metadata
 
     if (vertex instanceof ValueCellVertex) {
       return {type: ClipboardCellType.VALUE, ...vertex.getValues()}
@@ -522,7 +520,7 @@ export class Operations {
       const val = vertex.getArrayCellValue(address)
 
       if (val.cellValue === EmptyValue) {
-        return {type: ClipboardCellType.EMPTY}
+        return {type: ClipboardCellType.EMPTY, metadata}
       }
 
       return {type: ClipboardCellType.VALUE, parsedValue: val.cellValue, rawValue: vertex.getArrayCellRawValue(address).cellValue, metadata}
@@ -637,16 +635,16 @@ export class Operations {
     this.changes.addChange(new CellData(value.parsedValue, value.metadata), address)
   }
 
-  public setCellEmpty(address: SimpleCellAddress) {
+  public setCellEmpty(address: SimpleCellAddress, metadata: Maybe<any>) {
     if (this.dependencyGraph.isArrayInternalCell(address)) {
       return
     }
     const oldValue = this.dependencyGraph.getCellValue(address)
-    const arrayChanges = this.dependencyGraph.setCellEmpty(address)
+    const arrayChanges = this.dependencyGraph.setCellEmpty(address, metadata)
     this.columnSearch.remove(getRawValue(oldValue.cellValue), address)
     this.columnSearch.applyChanges(arrayChanges.getChanges())
     this.changes.addAll(arrayChanges)
-    this.changes.addChange(new CellData(EmptyValue), address)
+    this.changes.addChange(new CellData(EmptyValue, metadata), address)
   }
 
   public setFormulaToCellFromCache(formulaHash: string, address: SimpleCellAddress, metadata: Maybe<any>) {
@@ -703,8 +701,8 @@ export class Operations {
 
         this.setFormulaToCell(address, size, asyncPromises, rawCellContent.metadata, parserResult, true)
       }
-    } else if (parsedCellContent instanceof CellContent.Empty) {
-      this.setCellEmpty(address)
+    } else if (parsedCellContent instanceof CellContent.Empty || parsedCellContent instanceof CellContent.OnlyMetadata) {
+      this.setCellEmpty(address, rawCellContent.metadata)
     } else {
       this.setValueToCell({parsedValue: parsedCellContent.value, rawValue: rawCellContent.cellValue, metadata: rawCellContent.metadata}, address)
     }
@@ -894,7 +892,7 @@ export class Operations {
       
       this.dependencyGraph.setFormulaToCell(address, ast, absolutizeDependencies(dependencies, address), ArraySize.scalar(), asyncPromises, undefined, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
     } else if (cellValue instanceof CellContent.Empty) {
-      this.setCellEmpty(address)
+      this.setCellEmpty(address, undefined)
     } else {
       this.setValueToCell({parsedValue: cellValue.value, rawValue: expression, metadata: undefined}, address)
     }
@@ -966,7 +964,7 @@ export class Operations {
         
         this.dependencyGraph.setFormulaToCell(expression.address, ast, absolutizeDependencies(dependencies, expression.address), ArraySize.scalar(), asyncPromises, undefined, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
       } else if (sourceVertex instanceof EmptyCellVertex) {
-        this.setCellEmpty(expression.address)
+        this.setCellEmpty(expression.address, undefined)
       } else if (sourceVertex instanceof ValueCellVertex) {
         this.setValueToCell(sourceVertex.getValues(), expression.address)
       }

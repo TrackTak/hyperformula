@@ -1218,7 +1218,7 @@ describe('Redo - setting cell content', () => {
 
     engine.redo()
 
-    expect(engine.getCellValue(adr('A1'))).toEqual({ cellValue: '', metadata: { test: 'value' }})
+    expect(engine.getCellValue(adr('A1'))).toEqual({ cellValue: null, metadata: { test: 'value' }})
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromSheets(snapshot)[0])
   })
 

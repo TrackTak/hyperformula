@@ -7,11 +7,12 @@ import {SimpleCellAddress} from '../Cell'
 import {CellData, EmptyValue, EmptyValueType} from '../interpreter/InterpreterValue'
 
 /**
- * Represents singleton vertex bound to all empty cells
+ * Represents vertex bound to all empty cells
  */
 export class EmptyCellVertex {
   constructor(
     public address: SimpleCellAddress, //might be outdated!
+    public metadata?: any
   ) {
   }
 
@@ -19,6 +20,6 @@ export class EmptyCellVertex {
    * Retrieves cell value bound to that singleton
    */
   public getCellValue(): CellData<EmptyValueType> {
-    return new CellData(EmptyValue)
+    return new CellData(EmptyValue, this.metadata)
   }
 }

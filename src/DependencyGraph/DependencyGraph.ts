@@ -143,7 +143,7 @@ export class DependencyGraph {
     return this.getAndClearContentChanges()
   }
 
-  public setCellEmpty(address: SimpleCellAddress): ContentChanges {
+  public setCellEmpty(address: SimpleCellAddress, metadata: Maybe<any>): ContentChanges {
     const vertex = this.shrinkPossibleArrayAndGetCell(address)
 
     if (vertex === undefined) {
@@ -151,7 +151,7 @@ export class DependencyGraph {
     }
 
     if (this.graph.adjacentNodes(vertex).size > 0) {
-      const emptyVertex = new EmptyCellVertex(address)
+      const emptyVertex = new EmptyCellVertex(address, metadata)
 
       this.exchangeGraphNode(vertex, emptyVertex)
 
@@ -162,6 +162,15 @@ export class DependencyGraph {
         return this.getAndClearContentChanges()
       }
       this.graph.markNodeAsSpecialRecentlyChanged(emptyVertex)
+      this.addressMapping.setCell(address, emptyVertex)
+
+      return this.getAndClearContentChanges()
+    }
+
+    if (metadata !== undefined) {
+      const emptyVertex = new EmptyCellVertex(address, metadata)
+
+      this.exchangeGraphNode(vertex, emptyVertex)
       this.addressMapping.setCell(address, emptyVertex)
 
       return this.getAndClearContentChanges()
@@ -360,7 +369,7 @@ export class DependencyGraph {
       if (vertex instanceof ArrayVertex) {
         arrays.add(vertex)
       } else {
-        this.setCellEmpty(address)
+        this.setCellEmpty(address, undefined)
       }
     }
 
@@ -1223,12 +1232,12 @@ export class DependencyGraph {
       dependencies.delete(vertex)
       
       if (this.graph.hasNode(vertex) && this.graph.adjacentNodesCount(vertex) === 0) {
-        if (vertex instanceof RangeVertex || vertex instanceof EmptyCellVertex) {
+        if (vertex instanceof RangeVertex || (vertex instanceof EmptyCellVertex && vertex.metadata === undefined)) {
           this.graph.removeNode(vertex).forEach((candidate) => dependencies.add(candidate))
         }
         if (vertex instanceof RangeVertex) {
           this.rangeMapping.removeRange(vertex)
-        } else if (vertex instanceof EmptyCellVertex) {
+        } else if (vertex instanceof EmptyCellVertex && vertex.metadata === undefined) {
           this.addressMapping.removeCell(vertex.address)
         }
       }

@@ -11,7 +11,7 @@ export class ParsingErrorVertex {
   constructor(
     public readonly errors: ParsingError[],
     public readonly rawInput: string,
-    public readonly metadata?: any
+    public metadata?: any
   ) {
   }
 

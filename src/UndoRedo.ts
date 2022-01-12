@@ -547,7 +547,7 @@ export class UndoRedo {
       const address = cellContentData.address
       const [oldContentAddress, oldContent] = cellContentData.oldContent
       if (!equalSimpleCellAddress(address, oldContentAddress)) {
-        this.operations.setCellEmpty(address)
+        this.operations.setCellEmpty(address, oldContent.metadata)
       }
       this.operations.restoreCell(oldContentAddress, oldContent)
     }

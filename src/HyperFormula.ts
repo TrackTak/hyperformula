@@ -18,7 +18,7 @@ import {
   isSimpleCellAddress,
   SimpleCellAddress
 } from './Cell'
-import {CellContent, CellContentParser, DataRawCellContent, InputCell, RawCellContent} from './CellContentParser'
+import {CellContent, CellContentParser, DataRawCellContent, GenericDataRawCellContent, InputCell, RawCellContent} from './CellContentParser'
 import {CellValue} from './CellValue'
 import {Config, ConfigParams, getDefaultConfig} from './Config'
 import { ContentChanges } from './ContentChanges'
@@ -709,7 +709,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public getCellSerialized<CellMetadata>(cellAddress: SimpleCellAddress): InputCell<CellMetadata> {
+  public getCellSerialized<CellMetadata>(cellAddress: SimpleCellAddress): GenericDataRawCellContent<CellMetadata> {
     if (!isSimpleCellAddress(cellAddress)) {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
@@ -807,7 +807,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetSerialized<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<InputCell<CellMetadata>, SheetMetadata> {
+  public getSheetSerialized<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<GenericDataRawCellContent<CellMetadata>, SheetMetadata> {
     validateArgToType(sheetId, 'number', 'sheetId')
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getSheetSerialized(sheetId)
@@ -2417,7 +2417,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Ranges
    */
-  public getRangeSerialized<CellMetadata>(source: SimpleCellRange): InputCell<CellMetadata>[][] {
+  public getRangeSerialized<CellMetadata>(source: SimpleCellRange): GenericDataRawCellContent<CellMetadata>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2451,7 +2451,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Ranges
    */
-  public getFillRangeData<CellMetadata>(source: SimpleCellRange, target: SimpleCellRange, offsetsFromTarget: boolean = false): InputCell<CellMetadata>[][] {
+  public getFillRangeData<CellMetadata>(source: SimpleCellRange, target: SimpleCellRange, offsetsFromTarget: boolean = false): GenericDataRawCellContent<CellMetadata>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -4107,11 +4107,11 @@ export class HyperFormula implements TypedEmitter {
     
     const newPromise = new Promise<CellValue | CellValue[][]>((resolve, reject) => {
       promise?.then((value) => {
-        resolve(this._exporter.exportScalarOrRange(new CellData(value)).cellValue)
+        resolve(this._exporter.exportScalarOrRange(value))
       }).catch(reject)
     })
 
-    return [this._exporter.exportScalarOrRange(new CellData(interpreterValue)).cellValue, newPromise]
+    return [this._exporter.exportScalarOrRange(interpreterValue), newPromise]
   }
 
   /**

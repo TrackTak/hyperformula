@@ -56,7 +56,13 @@ export class Serialization {
   public getCellFormula(address: SimpleCellAddress, targetAddress?: SimpleCellAddress): CellData<string | undefined> {
     const cell = this.dependencyGraph.getCell(address)
 
-    if (!cell || cell instanceof EmptyCellVertex) return new CellData(undefined)
+    if (!cell) {
+      return new CellData(undefined)
+    }
+
+    if (cell instanceof EmptyCellVertex) {
+      return new CellData(undefined, cell.metadata)
+    }
 
     return new CellData(this.parseCellFormula(cell, address, targetAddress), cell.metadata)
   }
@@ -64,7 +70,7 @@ export class Serialization {
   public getCellSerialized(address: SimpleCellAddress, targetAddress?: SimpleCellAddress): DataRawCellContent {
     const cellFormula = this.getCellFormula(address, targetAddress)
 
-    return cellFormula.cellValue !== undefined ? cellFormula.toRawContent() : this.getRawValue(address)
+    return cellFormula.cellValue === undefined && cellFormula.metadata === undefined ? this.getRawValue(address) : cellFormula.toRawContent()
   }
 
   public getCellValue(address: SimpleCellAddress): CellData<CellValue> {
