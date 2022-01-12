@@ -94,8 +94,8 @@ export class Exporter implements ChangeExporter<ExportedChange> {
     return new CellData(this.parseExportedValue(cell.cellValue), cell.metadata)
   }
 
-  public exportScalarOrRange(cell: DataInterpreterValue): CellData<CellValue | CellValue[][]> {
-    return new CellData(this.parseExportedScalarOrRange(cell.cellValue), cell.metadata)
+  public exportScalarOrRange(cellValue: InterpreterValue): CellValue | CellValue[][] {
+    return this.parseExportedScalarOrRange(cellValue)
   }
 
   private parseExportedValue(value: InterpreterValue) {
