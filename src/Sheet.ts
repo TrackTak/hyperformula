@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import {DataRawCellContent} from './CellContentParser'
+import {DataRawCellContent, InputCell} from './CellContentParser'
 import {InvalidArgumentsError} from './errors'
 
 export interface GenericSheet<Cell, SheetMetadata> {
@@ -19,6 +19,10 @@ export type GenericSheets<Cell, SheetMetadata> = Record<string, GenericSheet<Cel
 export type Sheet = GenericSheet<DataRawCellContent, any>
 
 export type Sheets = Record<string, Sheet>
+
+export type InputSheet<CellMetadata, SheetMetadata> = GenericSheet<InputCell<CellMetadata>, SheetMetadata>
+
+export type InputSheets<CellMetadata, SheetMetadata> = Record<string, InputSheet<CellMetadata, SheetMetadata>>
 
 /**
  * Represents size of a sheet
@@ -37,7 +41,7 @@ export interface SheetBoundaries {
   fill: number,
 }
 
-export function validateAsSheet(sheet: Sheet): void {
+export function validateAsSheet(sheet: InputSheet<any, any>): void {
   if (typeof sheet !== 'object' || sheet === null) {
     throw new InvalidArgumentsError('a sheet object.')
   }
@@ -45,7 +49,7 @@ export function validateAsSheet(sheet: Sheet): void {
   validateAsSheetContent(sheet.cells)
 }
 
-export function validateAsSheetContent(cells: DataRawCellContent[][]): void {
+export function validateAsSheetContent(cells: InputCell<any>[][]): void {
   if (!Array.isArray(cells)) {
     throw new InvalidArgumentsError('an array of arrays.')
   }
@@ -61,7 +65,7 @@ export function validateAsSheetContent(cells: DataRawCellContent[][]): void {
  *
  * @param cells - two-dimmensional array sheet representation
  */
-export function findBoundaries(cells: DataRawCellContent[][]): SheetBoundaries {
+export function findBoundaries(cells: (InputCell<any> | DataRawCellContent)[][]): SheetBoundaries {
   let width = 0
   let height = 0
   let cellsCount = 0
@@ -70,7 +74,7 @@ export function findBoundaries(cells: DataRawCellContent[][]): SheetBoundaries {
     let currentRowWidth = 0
     for (let currentCol = 0; currentCol < cells[currentRow].length; currentCol++) {
       const currentValue = cells[currentRow][currentCol]
-      if ((currentValue.cellValue === undefined || currentValue.cellValue === null) && !currentValue.metadata) {
+      if ((currentValue?.cellValue === undefined || currentValue.cellValue === null) && !currentValue?.metadata) {
         continue
       }
       currentRowWidth = currentCol + 1

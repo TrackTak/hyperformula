@@ -18,7 +18,7 @@ import {
   isSimpleCellAddress,
   SimpleCellAddress
 } from './Cell'
-import {CellContent, CellContentParser, DataRawCellContent, GenericDataRawCellContent, RawCellContent} from './CellContentParser'
+import {CellContent, CellContentParser, DataRawCellContent, InputCell, RawCellContent} from './CellContentParser'
 import {CellValue} from './CellValue'
 import {Config, ConfigParams, getDefaultConfig} from './Config'
 import { ContentChanges } from './ContentChanges'
@@ -65,7 +65,7 @@ import {
   Unparser,
 } from './parser'
 import {Serialization, SerializedNamedExpression} from './Serialization'
-import {GenericSheet, GenericSheets, Sheet, SheetDimensions, Sheets} from './Sheet'
+import {GenericSheet, GenericSheets, InputSheet, SheetDimensions, InputSheets} from './Sheet'
 import {Statistics, StatType} from './statistics'
 
 /**
@@ -259,7 +259,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Factories
    */
-  public static buildFromArray(sheet: Sheet, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
+  public static buildFromArray<SheetMetadata, CellMetadata>(sheet: InputSheet<CellMetadata, SheetMetadata>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
     const [engine, evaluatorPromise] = BuildEngineFactory.buildFromSheet(sheet, configInput, namedExpressions)
     const hyperFormula = this.buildFromEngineState(engine)
 
@@ -302,7 +302,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Factories
    */
-  public static buildFromSheets(sheets: Sheets, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
+  public static buildFromSheets<SheetMetadata, CellMetadata>(sheets: InputSheets<CellMetadata, SheetMetadata>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
     const [engine, evaluatorPromise]  = BuildEngineFactory.buildFromSheets(sheets, configInput, namedExpressions)
     const hyperFormula = this.buildFromEngineState(engine)
 
@@ -709,7 +709,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public getCellSerialized<CellMetadata>(cellAddress: SimpleCellAddress): GenericDataRawCellContent<CellMetadata> {
+  public getCellSerialized<CellMetadata>(cellAddress: SimpleCellAddress): InputCell<CellMetadata> {
     if (!isSimpleCellAddress(cellAddress)) {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
@@ -807,7 +807,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetSerialized<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<GenericDataRawCellContent<CellMetadata>, SheetMetadata> {
+  public getSheetSerialized<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<InputCell<CellMetadata>, SheetMetadata> {
     validateArgToType(sheetId, 'number', 'sheetId')
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getSheetSerialized(sheetId)
@@ -1206,7 +1206,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public setCellContents<CellMetadata>(topLeftCornerAddress: SimpleCellAddress, cellContents: GenericDataRawCellContent<CellMetadata>[][] | GenericDataRawCellContent<CellMetadata>, clearRedoStack = true): [ExportedChange[], Promise<ExportedChange[]>] {
+  public setCellContents<CellMetadata>(topLeftCornerAddress: SimpleCellAddress, cellContents: InputCell<CellMetadata>[][] | InputCell<CellMetadata>, clearRedoStack = true): [ExportedChange[], Promise<ExportedChange[]>] {
     this._crudOperations.setCellContents(topLeftCornerAddress, cellContents, clearRedoStack)
     return this.recomputeIfDependencyGraphNeedsIt()
   }
@@ -2417,7 +2417,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Ranges
    */
-  public getRangeSerialized<CellMetadata>(source: SimpleCellRange): GenericDataRawCellContent<CellMetadata>[][] {
+  public getRangeSerialized<CellMetadata>(source: SimpleCellRange): InputCell<CellMetadata>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2451,7 +2451,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Ranges
    */
-  public getFillRangeData<CellMetadata>(source: SimpleCellRange, target: SimpleCellRange, offsetsFromTarget: boolean = false): GenericDataRawCellContent<CellMetadata>[][] {
+  public getFillRangeData<CellMetadata>(source: SimpleCellRange, target: SimpleCellRange, offsetsFromTarget: boolean = false): InputCell<CellMetadata>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2723,7 +2723,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public isItPossibleToReplaceSheetContent<CellMetadata>(sheetId: number, values: GenericDataRawCellContent<CellMetadata>[][]): boolean {
+  public isItPossibleToReplaceSheetContent<CellMetadata>(sheetId: number, values: InputCell<CellMetadata>[][]): boolean {
     validateArgToType(sheetId, 'number', 'sheetId')
     try {
       this._crudOperations.ensureScopeIdIsValid(sheetId)
@@ -2760,7 +2760,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public setSheetContent<CellMetadata>(sheetId: number, values: GenericDataRawCellContent<CellMetadata>[][]): [ExportedChange[], Promise<ExportedChange[]>] {
+  public setSheetContent<CellMetadata>(sheetId: number, values: InputCell<CellMetadata>[][]): [ExportedChange[], Promise<ExportedChange[]>] {
     validateArgToType(sheetId, 'number', 'sheetId')
     this._crudOperations.setSheetContent(sheetId, values)
     return this.recomputeIfDependencyGraphNeedsIt()

@@ -26,6 +26,8 @@
 
  export type DataRawCellContent = GenericDataRawCellContent<any>
 
+ export type InputCell<CellMetadata> = Maybe<GenericDataRawCellContent<CellMetadata>>
+
  export type GenericDataRawCellContent<CellMetadata> = {
   cellValue?: RawCellContent,
   metadata?: CellMetadata,
@@ -126,7 +128,11 @@
      private readonly numberLiteralsHelper: NumberLiteralHelper) {
    }
  
-   public parse(content: DataRawCellContent): CellContent.Type {
+   public parse(content: DataRawCellContent | InputCell<any>): CellContent.Type {
+    if (content === undefined || content === null) {
+      return CellContent.Empty.getSingletonInstance()
+    }
+
     if (!isCellData(content)) {
       throw new UnableToParseError(content)
     }

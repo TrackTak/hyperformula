@@ -8,7 +8,7 @@ import {absolutizeDependencies, filterDependenciesOutOfScope} from './absolutize
 import {ArraySize, ArraySizePredictor} from './ArraySize'
 import {AsyncPromise, AsyncPromiseFetcher } from './AsyncPromise'
 import {equalSimpleCellAddress, invalidSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
-import {CellContent, CellContentParser, RawCellContent, DataRawCellContent} from './CellContentParser'
+import {CellContent, CellContentParser, RawCellContent, DataRawCellContent, InputCell} from './CellContentParser'
 import {ClipboardCell, ClipboardCellType} from './ClipboardOperations'
 import {Config} from './Config'
 import {ContentChanges} from './ContentChanges'
@@ -563,20 +563,30 @@ export class Operations {
     return result
   }
 
-  public setCellContent(address: SimpleCellAddress, newCellContent: DataRawCellContent): [SimpleCellAddress, ClipboardCell] {
+  public setCellContent(address: SimpleCellAddress, newCellContent: (DataRawCellContent | InputCell<any>)): [SimpleCellAddress, ClipboardCell] {
     const parsedCellContent = this.cellContentParser.parse(newCellContent)
     
-    return this.setParsedCellContent(newCellContent, parsedCellContent, address)
+    return this.setParsedCellContent(newCellContent ?? { cellValue: undefined }, parsedCellContent, address)
   }
 
-  public setSheetContent(sheetId: number, newSheetContent: DataRawCellContent[][]) {
+  public setSheetContent(sheetId: number, newSheetContent: (DataRawCellContent | InputCell<any>)[][]): DataRawCellContent[][] {
+    const convertedNewSheetContent: DataRawCellContent[][] = []
+
     this.clearSheet(sheetId)
     for (let i = 0; i < newSheetContent.length; i++) {
+      convertedNewSheetContent[i] = []
+      
       for (let j = 0; j < newSheetContent[i].length; j++) {
+        const value = newSheetContent[i][j]
         const address = simpleCellAddress(sheetId, j, i)
-        this.setCellContent(address, newSheetContent[i][j])
+
+        convertedNewSheetContent[i][j] = value ?? { cellValue: undefined }
+
+        this.setCellContent(address, value)
       }
     }
+
+    return convertedNewSheetContent
   }
 
   public setParsingErrorToCell(rawInput: string, errors: ParsingError[], address: SimpleCellAddress, metadata: Maybe<any>) {

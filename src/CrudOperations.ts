@@ -6,7 +6,7 @@
 import { CellData } from '.'
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {invalidSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
-import {CellContent, CellContentParser, DataRawCellContent, RawCellContent} from './CellContentParser'
+import {CellContent, CellContentParser, DataRawCellContent, InputCell, RawCellContent} from './CellContentParser'
 import {ClipboardCell, ClipboardOperations} from './ClipboardOperations'
 import {Config} from './Config'
 import {ContentChanges} from './ContentChanges'
@@ -243,7 +243,7 @@ export class CrudOperations {
     this.undoRedo.saveOperation(new ClearSheetUndoEntry(sheetId, oldSheetContent))
   }
 
-  public setCellContents(topLeftCornerAddress: SimpleCellAddress, cellContents: DataRawCellContent[][] | DataRawCellContent, clearRedoStack = true): void {
+  public setCellContents(topLeftCornerAddress: SimpleCellAddress, cellContents: InputCell<any>[][] | InputCell<any>, clearRedoStack = true): void {
     if (!(cellContents instanceof Array)) {
       cellContents = [[cellContents]]
     } else {
@@ -272,14 +272,14 @@ export class CrudOperations {
         const newContent = cellContents[i][j]
         this.clipboardOperations.abortCut()
         const oldContent = this.operations.setCellContent(address, newContent)
-        oldContents.push({address, newContent, oldContent})
+        oldContents.push({address, newContent: newContent ?? { cellValue: undefined }, oldContent})
       }
     }
 
     this.undoRedo.saveOperation(new SetCellContentsUndoEntry(oldContents))
   }
 
-  public setSheetContent(sheetId: number, values: DataRawCellContent[][]): void {
+  public setSheetContent(sheetId: number, values: InputCell<any>[][]): void {
     this.ensureScopeIdIsValid(sheetId)
     this.ensureItIsPossibleToChangeSheetContents(sheetId, values)
 
@@ -287,8 +287,8 @@ export class CrudOperations {
     this.undoRedo.clearRedoStack()
     this.clipboardOperations.abortCut()
     const oldSheetContent = this.operations.getSheetClipboardCells(sheetId)
-    this.operations.setSheetContent(sheetId, values)
-    this.undoRedo.saveOperation(new SetSheetContentUndoEntry(sheetId, oldSheetContent, values))
+    const convertedValues = this.operations.setSheetContent(sheetId, values)
+    this.undoRedo.saveOperation(new SetSheetContentUndoEntry(sheetId, oldSheetContent, convertedValues))
   }
 
   public setRowOrder(sheetId: number, rowMapping: [number, number][]): void {
@@ -572,7 +572,7 @@ export class CrudOperations {
     }
   }
 
-  public ensureItIsPossibleToChangeCellContents(inputAddress: SimpleCellAddress, content: DataRawCellContent[][]) {
+  public ensureItIsPossibleToChangeCellContents(inputAddress: SimpleCellAddress, content: InputCell<any>[][]) {
     const boundaries = findBoundaries(content)
     const targetRange = AbsoluteCellRange.spanFrom(inputAddress, boundaries.width, boundaries.height)
     this.ensureRangeInSizeLimits(targetRange)
@@ -581,7 +581,7 @@ export class CrudOperations {
     }
   }
 
-  public ensureItIsPossibleToChangeSheetContents(sheetId: number, content: DataRawCellContent[][]) {
+  public ensureItIsPossibleToChangeSheetContents(sheetId: number, content: InputCell<any>[][]) {
     const boundaries = findBoundaries(content)
     const targetRange = AbsoluteCellRange.spanFrom(simpleCellAddress(sheetId, 0, 0), boundaries.width, boundaries.height)
     this.ensureRangeInSizeLimits(targetRange)

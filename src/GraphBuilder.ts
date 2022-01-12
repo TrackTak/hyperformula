@@ -13,6 +13,7 @@ import {CellDependency} from './CellDependency'
 import {
   ArrayVertex,
   DependencyGraph,
+  EmptyCellVertex,
   FormulaCellVertex,
   ParsingErrorVertex,
   ValueCellVertex,
@@ -21,7 +22,7 @@ import {
 import {getRawValue} from './interpreter/InterpreterValue'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import {ParserWithCaching} from './parser'
-import {Sheets} from './Sheet'
+import {InputSheets, Sheets} from './Sheet'
 import {Statistics, StatType} from './statistics'
 
 export type Dependencies = Map<Vertex, CellDependency[]>
@@ -50,7 +51,7 @@ export class GraphBuilder {
   /**
    * Builds graph.
    */
-  public buildGraph(sheets: Sheets, stats: Statistics) {
+  public buildGraph(sheets: InputSheets<any, any>, stats: Statistics) {
     const dependencies = stats.measure(StatType.COLLECT_DEPENDENCIES, () => this.buildStrategy.run(sheets))
     this.dependencyGraph.getAndClearContentChanges()
     stats.measure(StatType.PROCESS_DEPENDENCIES, () => this.processDependencies(dependencies))
@@ -64,7 +65,7 @@ export class GraphBuilder {
 }
 
 export interface GraphBuilderStrategy {
-  run(sheets: Sheets): Dependencies,
+  run(sheets: Sheets | InputSheets<any, any>): Dependencies,
 }
 
 export class SimpleStrategy implements GraphBuilderStrategy {
@@ -150,6 +151,10 @@ export class SimpleStrategy implements GraphBuilderStrategy {
       }
     } else if (parsedCellContent instanceof CellContent.Empty) {
       return null
+    } else if (parsedCellContent instanceof CellContent.OnlyMetadata) {
+      const vertex = new EmptyCellVertex(address, rawCellContent.metadata)
+
+      this.dependencyGraph.addVertex(address, vertex)
     } else {
       this.shrinkArrayIfNeeded(address)
       const vertex = new ValueCellVertex(parsedCellContent.value, rawCellContent.cellValue, rawCellContent.metadata)
