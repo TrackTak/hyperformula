@@ -1,4 +1,4 @@
-import {CellData, EvaluationSuspendedError, ExportedCellChange, HyperFormula} from '../src'
+import {EvaluationSuspendedError, ExportedCellChange, HyperFormula} from '../src'
 import {AbsoluteCellRange} from '../src/AbsoluteCellRange'
 import {CellType} from '../src/Cell'
 import AsyncTestPlugin from './helpers/AsyncTestPlugin'
@@ -134,7 +134,7 @@ describe('Evaluation suspension', () => {
 
     expect(engine.getCellValue(adr('C1')).cellValue).toBe(2)
     expect(engine.getCellValue(adr('D1')).cellValue).toBe(1)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('C1'), new CellData(2)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('C1'), 2))
   })
 
   it('#isEvaluationSuspended when evaluation is suspended', () => {

@@ -460,7 +460,7 @@ describe('moving ranges', () => {
     const range = engine.rangeMapping.fetchRange(adr('A1'), adr('A2'))
 
     expect(source).toBeInstanceOf(EmptyCellVertex)
-    expect(source.getCellValue().cellValue).toBe(EmptyValue)
+    expect(source.getCellValue()).toBe(EmptyValue)
     expect(engine.graph.nodesCount()).toBe(
       +2 // formulas
       + 1 // A2

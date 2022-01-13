@@ -1,4 +1,4 @@
-import {CellData, ExportedCellChange, HyperFormula} from '../../src'
+import {ExportedCellChange, HyperFormula} from '../../src'
 import {AbsoluteCellRange} from '../../src/AbsoluteCellRange'
 import {Config} from '../../src/Config'
 import {ArrayVertex, FormulaCellVertex} from '../../src/DependencyGraph'
@@ -195,7 +195,7 @@ describe('Adding column - reevaluation', () => {
     const [changes] = engine.addColumns(0, [1, 1])
 
     expect(changes.length).toBe(1)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('D1'), new CellData(3)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('D1'), 3))
   })
 })
 

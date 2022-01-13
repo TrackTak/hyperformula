@@ -1,4 +1,4 @@
-import {CellData, ExportedCellChange, HyperFormula, NothingToPasteError} from '../../src'
+import {ExportedCellChange, HyperFormula, NothingToPasteError} from '../../src'
 import {AbsoluteCellRange} from '../../src/AbsoluteCellRange'
 import {ErrorType, simpleCellAddress} from '../../src/Cell'
 import {Config} from '../../src/Config'
@@ -82,7 +82,7 @@ describe('Copy - paste integration', () => {
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     const [changes] = engine.paste(adr('A2'))
 
-    expectArrayWithSameContent([new ExportedCellChange(adr('A2'), new CellData(null))], changes)
+    expectArrayWithSameContent([new ExportedCellChange(adr('A2'), null)], changes)
   })
 
   it('should work for single number', () => {
@@ -322,8 +322,8 @@ describe('Copy - paste integration', () => {
     const [changes] = engine.paste(adr('A2'))
 
     expectArrayWithSameContent([
-      new ExportedCellChange(adr('A2'), new CellData(1)),
-      new ExportedCellChange(adr('B2'), new CellData(1)),
+      new ExportedCellChange(adr('A2'), 1),
+      new ExportedCellChange(adr('B2'), 1),
     ], changes)
   })
 

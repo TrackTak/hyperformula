@@ -14,7 +14,7 @@ describe('GraphBuilder', () => {
 
     const vertex = engine.addressMapping.fetchCell(adr('A1'))
     expect(vertex).toBeInstanceOf(ValueCellVertex)
-    expect(vertex.getCellValue().cellValue).toBe(42)
+    expect(vertex.getCellValue()).toBe(42)
   })
 
   it('build sheet with simple string cell', () => {
@@ -24,7 +24,7 @@ describe('GraphBuilder', () => {
 
     const vertex = engine.addressMapping.fetchCell(adr('A1'))
     expect(vertex).toBeInstanceOf(ValueCellVertex)
-    expect(vertex.getCellValue().cellValue).toBe('foo')
+    expect(vertex.getCellValue()).toBe('foo')
   })
 
   it('building for cell with null should give empty vertex', () => {

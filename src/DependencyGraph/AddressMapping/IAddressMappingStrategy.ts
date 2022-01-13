@@ -4,6 +4,7 @@
  */
 
 import {SheetCellAddress, SimpleCellAddress} from '../../Cell'
+import { CellMetadata } from '../../interpreter/InterpreterValue'
 import {Maybe} from '../../Maybe'
 import {ColumnsSpan, RowsSpan} from '../../Span'
 import {CellVertex} from '../Vertex'
@@ -21,6 +22,8 @@ export interface IAddressMappingStrategy {
    */
   getCell(address: SheetCellAddress): Maybe<CellVertex>,
 
+  getCellMetadata(address: SheetCellAddress): CellMetadata,
+
   /**
    * Set vertex for given address
    *
@@ -29,7 +32,11 @@ export interface IAddressMappingStrategy {
    */
   setCell(address: SheetCellAddress, newVertex: CellVertex): void,
 
+  setCellMetadata(address: SheetCellAddress, cellMetadata: CellMetadata): void,
+
   removeCell(address: SimpleCellAddress): void,
+
+  removeCellMetadata(address: SimpleCellAddress): void,
 
   /**
    * Returns whether the address is present or not
@@ -37,6 +44,8 @@ export interface IAddressMappingStrategy {
    * @param address - address
    */
   has(address: SheetCellAddress): boolean,
+
+  hasMetadata(address: SheetCellAddress): boolean,
 
   /**
    * Returns height of stored sheet

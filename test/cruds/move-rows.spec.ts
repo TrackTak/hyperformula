@@ -1,4 +1,4 @@
-import {CellData, ExportedCellChange, HyperFormula, InvalidArgumentsError} from '../../src'
+import {ExportedCellChange, HyperFormula, InvalidArgumentsError} from '../../src'
 import {ErrorType} from '../../src/Cell'
 import {CellAddress} from '../../src/parser'
 import {
@@ -208,7 +208,7 @@ describe('Move rows', () => {
     const [changes] = engine.moveRows(0, 1, 1, 3)
 
     expect(changes.length).toEqual(1)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('B3'), new CellData(0)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('B3'), 0))
   })
 
   it('should return #CYCLE when moving formula onto referred range', () => {

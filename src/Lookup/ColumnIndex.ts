@@ -86,7 +86,7 @@ export class ColumnIndex implements ColumnSearchStrategy {
   public applyChanges(contentChanges: CellValueChange[]) {
     for (const change of contentChanges) {
       if (change.oldValue !== undefined) {
-        this.change(getRawValue(change.oldValue.cellValue), getRawValue(change.value.cellValue), change.address)
+        this.change(getRawValue(change.oldValue), getRawValue(change.value), change.address)
       }
     }
   }

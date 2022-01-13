@@ -4,6 +4,7 @@
  */
 
 import {SheetCellAddress, simpleCellAddress, SimpleCellAddress} from '../../Cell'
+import { CellMetadata } from '../../interpreter/InterpreterValue'
 import {Maybe} from '../../Maybe'
 import {ColumnsSpan, RowsSpan} from '../../Span'
 import {CellVertex} from '../Vertex'
@@ -21,6 +22,7 @@ export class DenseStrategy implements IAddressMappingStrategy {
    * It is created when building the mapping and the size of it is fixed.
    */
   private readonly mapping: CellVertex[][]
+  private readonly metadataMapping: CellMetadata[][]
 
   /**
    * @param width - width of the stored sheet
@@ -28,14 +30,26 @@ export class DenseStrategy implements IAddressMappingStrategy {
    */
   constructor(private width: number, private height: number) {
     this.mapping = new Array(height)
+    this.metadataMapping = new Array(height)
+
     for (let i = 0; i < height; i++) {
       this.mapping[i] = new Array(width)
+      this.metadataMapping[i] = new Array(width)
     }
   }
 
   /** @inheritDoc */
   public getCell(address: SheetCellAddress): Maybe<CellVertex> {
-    return this.getCellVertex(address.col, address.row)
+    const cell = this.getCellVertex(address.col, address.row)
+
+    return cell
+  }
+
+  /** @inheritDoc */
+  public getCellMetadata(address: SheetCellAddress): CellMetadata {
+    const metadata = this.metadataMapping[address.row]?.[address.col]
+
+    return metadata
   }
 
   /** @inheritDoc */
@@ -44,10 +58,27 @@ export class DenseStrategy implements IAddressMappingStrategy {
     this.height = Math.max(this.height, address.row + 1)
 
     const rowMapping = this.mapping[address.row]
+
     if (!rowMapping) {
       this.mapping[address.row] = new Array(this.width)
     }
+
     this.mapping[address.row][address.col] = newVertex
+  }
+
+
+  /** @inheritDoc */
+  public setCellMetadata(address: SheetCellAddress, cellMetadata: CellMetadata) {
+    this.width = Math.max(this.width, address.col + 1)
+    this.height = Math.max(this.height, address.row + 1)
+
+    const rowMetadataMapping = this.metadataMapping[address.row]
+
+    if (!rowMetadataMapping) {
+      this.metadataMapping[address.row] = new Array(this.width)
+    }
+
+    this.metadataMapping[address.row][address.col] = cellMetadata
   }
 
   /** @inheritDoc */
@@ -59,6 +90,15 @@ export class DenseStrategy implements IAddressMappingStrategy {
     return !!row[address.col]
   }
 
+  /** @inheritDoc */
+  public hasMetadata(address: SheetCellAddress): boolean {
+    const row = this.metadataMapping[address.row]
+    if (!row) {
+      return false
+    }
+    return !!row[address.col]
+  }
+    
   /** @inheritDoc */
   public getHeight(): number {
     return this.height
@@ -75,24 +115,38 @@ export class DenseStrategy implements IAddressMappingStrategy {
     }
   }
 
-  public addRows(row: number, numberOfRows: number): void {
-    const newRows = []
-    for (let i = 0; i < numberOfRows; i++) {
-      newRows.push(new Array(this.width))
+  public removeCellMetadata(address: SimpleCellAddress): void {
+    if (this.metadataMapping[address.row] !== undefined) {
+      delete this.metadataMapping[address.row][address.col]
     }
-    this.mapping.splice(row, 0, ...newRows)
+  }
+
+  public addRows(row: number, numberOfRows: number): void {
+    this.modifyMappings((mapping) => {
+      const newRows: any[] = []
+
+      for (let i = 0; i < numberOfRows; i++) {
+        newRows.push(new Array(this.width))
+      }
+      
+      mapping.splice(row, 0, ...newRows)
+    })
     this.height += numberOfRows
   }
 
   public addColumns(column: number, numberOfColumns: number): void {
     for (let i = 0; i < this.height; i++) {
-      this.mapping[i].splice(column, 0, ...new Array(numberOfColumns))
+      this.modifyMappings((mapping) => {
+        mapping[i].splice(column, 0, ...new Array(numberOfColumns))      
+      })
     }
     this.width += numberOfColumns
   }
 
   public removeRows(removedRows: RowsSpan): void {
-    this.mapping.splice(removedRows.rowStart, removedRows.numberOfRows)
+    this.modifyMappings((mapping) => {
+      mapping.splice(removedRows.rowStart, removedRows.numberOfRows)
+    })
     const rightmostRowRemoved = Math.min(this.height - 1, removedRows.rowEnd)
     const numberOfRowsRemoved = Math.max(0, rightmostRowRemoved - removedRows.rowStart + 1)
     this.height = Math.max(0, this.height - numberOfRowsRemoved)
@@ -100,7 +154,9 @@ export class DenseStrategy implements IAddressMappingStrategy {
 
   public removeColumns(removedColumns: ColumnsSpan): void {
     for (let i = 0; i < this.height; i++) {
-      this.mapping[i].splice(removedColumns.columnStart, removedColumns.numberOfColumns)
+      this.modifyMappings((mapping) => {
+        mapping[i].splice(removedColumns.columnStart, removedColumns.numberOfColumns)
+      })
     }
     const rightmostColumnRemoved = Math.min(this.width - 1, removedColumns.columnEnd)
     const numberOfColumnsRemoved = Math.max(0, rightmostColumnRemoved - removedColumns.columnStart + 1)
@@ -193,5 +249,10 @@ export class DenseStrategy implements IAddressMappingStrategy {
 
   private getCellVertex(x: number, y: number): Maybe<CellVertex> {
     return this.mapping[y]?.[x]
+  }
+
+  private modifyMappings(callback: (mapping: (CellVertex | CellMetadata)[][]) => void) {
+    callback(this.mapping)
+    callback(this.metadataMapping)
   }
 }

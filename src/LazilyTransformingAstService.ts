@@ -6,7 +6,6 @@
 import {SimpleCellAddress} from './Cell'
 import {CombinedTransformer} from './dependencyTransformers/CombinedTransformer'
 import {FormulaTransformer} from './dependencyTransformers/Transformer'
-import { Maybe } from './Maybe'
 import {Ast, ParserWithCaching} from './parser'
 import {StatType} from './statistics'
 import {Statistics} from './statistics/Statistics'
@@ -51,13 +50,13 @@ export class LazilyTransformingAstService {
     return this.version()
   }
 
-  public applyTransformations(ast: Ast, address: SimpleCellAddress, metadata: Maybe<any>, version: number): [Ast, SimpleCellAddress, number] {
+  public applyTransformations(ast: Ast, address: SimpleCellAddress, version: number): [Ast, SimpleCellAddress, number] {
     this.stats.start(StatType.TRANSFORM_ASTS_POSTPONED)
 
     for (let v = version; v < this.transformations.length; v++) {
       const transformation = this.transformations[v]
       if (transformation.isIrreversible()) {
-        this.undoRedo!.storeDataForVersion(v, address, this.parser!.computeHashFromAst(ast), metadata)
+        this.undoRedo!.storeDataForVersion(v, address, this.parser!.computeHashFromAst(ast))
         this.parser!.rememberNewAst(ast)
       }
 

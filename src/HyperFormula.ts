@@ -4407,7 +4407,7 @@ export class HyperFormula implements TypedEmitter {
   }
 
   private extractTemporaryFormula(formulaString: string, sheetId: number = 1, stripWhitespaces = true): { ast?: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[] } {
-    const parsedCellContent = this._cellContentParser.parse(new CellData(formulaString))
+    const parsedCellContent = this._cellContentParser.parse({ cellValue: formulaString })
     
     const address = {sheet: sheetId, col: 0, row: 0}
     if (!(parsedCellContent instanceof CellContent.Formula)) {

@@ -1,4 +1,4 @@
-import {CellData, ExportedCellChange, HyperFormula} from '../../src'
+import {ExportedCellChange, HyperFormula} from '../../src'
 import {AbsoluteCellRange} from '../../src/AbsoluteCellRange'
 import {ArrayVertex, RangeVertex} from '../../src/DependencyGraph'
 import {ColumnIndex} from '../../src/Lookup/ColumnIndex'
@@ -487,7 +487,7 @@ describe('Removing columns - reevaluation', () => {
     const [changes] = engine.removeColumns(0, [0, 1])
 
     expect(changes.length).toBe(1)
-    expect(changes).toEqual([new ExportedCellChange(adr('B1'), new CellData(2))])
+    expect(changes).toEqual([new ExportedCellChange(adr('B1'), 2)])
   })
 })
 

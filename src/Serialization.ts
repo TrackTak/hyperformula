@@ -55,28 +55,25 @@ export class Serialization {
 
   public getCellFormula(address: SimpleCellAddress, targetAddress?: SimpleCellAddress): CellData<string | undefined> {
     const cell = this.dependencyGraph.getCell(address)
+    const cellMetadata = this.dependencyGraph.getCellMetadata(address)
 
-    if (!cell) {
-      return new CellData(undefined)
+    if (!cell || cell instanceof EmptyCellVertex) {
+      return new CellData(undefined, cellMetadata)
     }
 
-    if (cell instanceof EmptyCellVertex) {
-      return new CellData(undefined, cell.metadata)
-    }
-
-    return new CellData(this.parseCellFormula(cell, address, targetAddress), cell.metadata)
+    return new CellData(this.parseCellFormula(cell, address, targetAddress), cellMetadata)
   }
 
   public getCellSerialized(address: SimpleCellAddress, targetAddress?: SimpleCellAddress): DataRawCellContent {
     const cellFormula = this.getCellFormula(address, targetAddress)
 
-    return cellFormula.cellValue === undefined && cellFormula.metadata === undefined ? this.getRawValue(address) : cellFormula.toRawContent()
+    return cellFormula.cellValue === undefined ? this.getRawValue(address) : cellFormula.toRawContent()
   }
 
   public getCellValue(address: SimpleCellAddress): CellData<CellValue> {
     const cell = this.dependencyGraph.getScalarValue(address)
 
-    return this.exporter.exportValue(cell)
+    return new CellData(this.exporter.exportValue(cell.cellValue), cell.metadata)
   }
 
   public getRawValue(address: SimpleCellAddress): DataRawCellContent {

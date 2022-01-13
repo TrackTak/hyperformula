@@ -476,7 +476,7 @@ describe('changing cell content', () => {
     const [changes] = engine.setCellContents(adr('A1'), { cellValue: '2' })
 
     expect(changes.length).toBe(1)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), new CellData(2)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), 2))
   })
 
   it('returns cell data change if has metadata', () => {
@@ -489,7 +489,7 @@ describe('changing cell content', () => {
     const [changes] = engine.setCellContents(adr('A1'), { cellValue: '2', metadata: { test: 'value'}})
 
     expect(changes.length).toBe(1)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), new CellData(2, { test: 'value'})))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), 2))
   })
 
   it('returns cell value change if has no metadata', () => {
@@ -502,7 +502,7 @@ describe('changing cell content', () => {
     const [changes] = engine.setCellContents(adr('A1'), { cellValue: '2' })
 
     expect(changes.length).toBe(1)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), new CellData(2)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), 2))
   })
 
   it('returns dependent formula value change', () => {
@@ -515,8 +515,8 @@ describe('changing cell content', () => {
     const [changes] = engine.setCellContents(adr('A1'), { cellValue: '2' })
 
     expect(changes.length).toBe(2)
-    expect(changes[0]).toMatchObject(new ExportedCellChange(adr('A1'), new CellData(2)))
-    expect(changes[1]).toMatchObject(new ExportedCellChange(adr('B1'), new CellData(2)))
+    expect(changes[0]).toMatchObject(new ExportedCellChange(adr('A1'), 2))
+    expect(changes[1]).toMatchObject(new ExportedCellChange(adr('B1'), 2))
   })
 
   it('returns dependent matrix value changes', () => {
@@ -530,7 +530,7 @@ describe('changing cell content', () => {
     const [changes] = engine.setCellContents(adr('A1'), { cellValue: '2' })
 
     expect(changes.length).toBe(5)
-    expectArrayWithSameContent(changes.map((change) => change.newValue), [{ cellValue: 2 }, { cellValue: 10 }, { cellValue: 12 }, { cellValue: 18}, {cellValue: 22 }])
+    expectArrayWithSameContent(changes.map((change) => change.newValue), [2, 10, 12, 18, 22])
   })
 
   it('update empty cell to parsing error ', () => {
@@ -691,7 +691,7 @@ describe('change multiple cells contents', () => {
     const [changes] = engine.setCellContents(adr('A1'), [[{ cellValue: '7' }, { cellValue: '8' }], [{ cellValue: '7' }, { cellValue: '8' }]])
 
     expect(changes.length).toEqual(4)
-    expectArrayWithSameContent(changes.map((change) => change.newValue), [{ cellValue: 7 }, { cellValue: 8 }, { cellValue: 9 }, { cellValue: 10}])
+    expectArrayWithSameContent(changes.map((change) => change.newValue), [7, 8, 9, 10])
   })
 
   it('returns changes of multiple values dependent formulas', () => {
@@ -706,7 +706,7 @@ describe('change multiple cells contents', () => {
     const [changes] = engine.setCellContents(adr('A1'), [[{ cellValue: '7' }, { cellValue: '8' }], [{ cellValue: '9' }, { cellValue: '10' }]])
 
     expect(changes.length).toEqual(6)
-    expectArrayWithSameContent(changes.map((change) => change.newValue), [{ cellValue: 7 }, { cellValue: 8 }, { cellValue: 9 }, { cellValue: 10}, {cellValue: 15 }, { cellValue: 18 }])
+    expectArrayWithSameContent(changes.map((change) => change.newValue), [7, 8, 9, 10, 15, 18])
   })
 
   it('should throw when trying to set cell contents outside sheet limits', () => {
@@ -1114,8 +1114,8 @@ describe('arrays', () => {
     const [changes] = engine.setCellContents(adr('A2'), [[{ cellValue: '=-A1:B1' }]])
 
     expect(changes.length).toEqual(2)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), new CellData(-1)))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), new CellData(-2)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), -1))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), -2))
   })
 
   it('should return changed content when replacing array left corner', () => {
@@ -1127,8 +1127,8 @@ describe('arrays', () => {
     const [changes] = engine.setCellContents(adr('A2'), [[{ cellValue: 'foo' }]])
 
     expect(changes.length).toEqual(2)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), new CellData('foo')))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), new CellData(null)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), 'foo'))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), null))
   })
 
   it('should return changed content when replacing any array cell with simple value', () => {
@@ -1140,9 +1140,9 @@ describe('arrays', () => {
     const [changes] = engine.setCellContents(adr('B2'), [[{ cellValue: 'foo' }]])
 
     expect(changes.length).toEqual(3)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), new CellData(noSpace())))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), new CellData('foo')))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('C2'), new CellData(null)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), noSpace()))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), 'foo'))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('C2'), null))
   })
 
   it('should return changed content when replacing any array cell with parsing error', () => {
@@ -1154,9 +1154,9 @@ describe('arrays', () => {
     const [changes] = engine.setCellContents(adr('B2'), [[{ cellValue: '=SUM(' }]])
 
     expect(changes.length).toEqual(3)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), new CellData(noSpace())))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), new CellData(detailedError(ErrorType.ERROR, ErrorMessage.ParseError))))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('C2'), new CellData(null)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), noSpace()))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), detailedError(ErrorType.ERROR, ErrorMessage.ParseError)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('C2'), null))
   })
 
   it('should return changed content when clearing array left corner', () => {
@@ -1168,8 +1168,8 @@ describe('arrays', () => {
     const [changes] = engine.setCellContents(adr('A2'), { cellValue: null })
 
     expect(changes.length).toEqual(2)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), new CellData(null)))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), new CellData(null)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), null))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), null))
   })
 
   it('should return no changes when trying to clear array cell', () => {
@@ -1192,9 +1192,9 @@ describe('arrays', () => {
     const [changes] = engine.setCellContents(adr('A2'), [[{ cellValue: '=+A1:B1' }]])
 
     expect(changes.length).toEqual(3)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), new CellData(1)))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), new CellData(2)))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('C2'), new CellData(null)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), 1))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), 2))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('C2'), null))
   })
 
   it('should return changed content when replacing array to smaller one even if values are same', () => {
@@ -1206,9 +1206,9 @@ describe('arrays', () => {
     const [changes] = engine.setCellContents(adr('A2'), [[{ cellValue: '=-A1:B1' }]])
 
     expect(changes.length).toEqual(3)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), new CellData(-1)))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), new CellData(-2)))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('C2'), new CellData(null)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A2'), -1))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('B2'), -2))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('C2'), null))
   })
 
   it('should return REF in changes', () => {
@@ -1218,9 +1218,9 @@ describe('arrays', () => {
 
     const [changes] = engine.setCellContents(adr('E1'), [[{ cellValue: 'foo' }]])
 
-    expect(changes).toContainEqual(new ExportedCellChange(adr('D1'), new CellData(noSpace())))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('E1'), new CellData('foo')))
-    expect(changes).toContainEqual(new ExportedCellChange(adr('F1'), new CellData(null)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('D1'), noSpace()))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('E1'), 'foo'))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('F1'), null))
   })
 
   it('should undo REF', () => {

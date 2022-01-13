@@ -4,6 +4,7 @@
  */
 
 import {SheetCellAddress, simpleCellAddress, SimpleCellAddress} from '../../Cell'
+import { CellMetadata } from '../../interpreter/InterpreterValue'
 import {Maybe} from '../../Maybe'
 import {ColumnsSpan, RowsSpan} from '../../Span'
 import {CellVertex} from '../Vertex'
@@ -22,13 +23,23 @@ export class SparseStrategy implements IAddressMappingStrategy {
    * Key of map in second level is row number.
    */
   private mapping: Map<number, Map<number, CellVertex>> = new Map()
+  private metadataMapping: Map<number, Map<number, CellMetadata>> = new Map()
 
   constructor(private width: number, private height: number) {
   }
 
   /** @inheritDoc */
   public getCell(address: SheetCellAddress): Maybe<CellVertex> {
-    return this.mapping.get(address.col)?.get(address.row)
+    const cell = this.mapping.get(address.col)?.get(address.row)
+
+    return cell
+  }
+
+  /** @inheritDoc */
+  public getCellMetadata(address: SheetCellAddress): CellMetadata {
+    const metadata = this.metadataMapping.get(address.col)?.get(address.row)
+
+    return metadata
   }
 
   /** @inheritDoc */
@@ -36,17 +47,44 @@ export class SparseStrategy implements IAddressMappingStrategy {
     this.width = Math.max(this.width, address.col + 1)
     this.height = Math.max(this.height, address.row + 1)
 
-    let colMapping = this.mapping.get(address.col)
-    if (!colMapping) {
-      colMapping = new Map()
-      this.mapping.set(address.col, colMapping)
+    let colCellMapping = this.mapping.get(address.col)
+
+    if (!colCellMapping) {
+      colCellMapping = new Map()
+
+      this.mapping.set(address.col, colCellMapping)
     }
-    colMapping.set(address.row, newVertex)
+
+    colCellMapping.set(address.row, newVertex)
+  }
+
+  /** @inheritDoc */
+  public setCellMetadata(address: SheetCellAddress, cellMetadata: CellMetadata) {
+    if (cellMetadata === undefined) {
+      return
+    }
+
+    this.width = Math.max(this.width, address.col + 1)
+    this.height = Math.max(this.height, address.row + 1)
+
+    let colCellMapping = this.metadataMapping.get(address.col)
+
+    if (!colCellMapping) {
+      colCellMapping = new Map()
+
+      this.metadataMapping.set(address.col, colCellMapping)
+    }
+    colCellMapping.set(address.row, cellMetadata)
   }
 
   /** @inheritDoc */
   public has(address: SheetCellAddress): boolean {
     return !!this.mapping.get(address.col)?.get(address.row)
+  }
+
+  /** @inheritDoc */
+  public hasMetadata(address: SheetCellAddress): boolean {
+    return !!this.metadataMapping.get(address.col)?.get(address.row)
   }
 
   /** @inheritDoc */
@@ -63,50 +101,64 @@ export class SparseStrategy implements IAddressMappingStrategy {
     this.mapping.get(address.col)?.delete(address.row)
   }
 
+  public removeCellMetadata(address: SimpleCellAddress): void {
+    this.metadataMapping.get(address.col)?.delete(address.row)
+  }
+
   public addRows(row: number, numberOfRows: number): void {
-    this.mapping.forEach((rowMapping: Map<number, CellVertex>) => {
-      const tmpMapping = new Map()
-      rowMapping.forEach((vertex: CellVertex, rowNumber: number) => {
-        if (rowNumber >= row) {
-          tmpMapping.set(rowNumber + numberOfRows, vertex)
-          rowMapping.delete(rowNumber)
-        }
-      })
-      tmpMapping.forEach((vertex: CellVertex, rowNumber: number) => {
-        rowMapping.set(rowNumber, vertex)
+    this.modifyMappings((mapping) => {
+      mapping.forEach((rowMapping) => {
+        const tmpMapping = new Map<number, CellVertex | CellMetadata>()
+
+        rowMapping.forEach((value, rowNumber) => {
+          if (rowNumber >= row) {
+            tmpMapping.set(rowNumber + numberOfRows, value)
+            rowMapping.delete(rowNumber)
+          }
+        })
+        tmpMapping.forEach((value, rowNumber) => {
+          rowMapping.set(rowNumber, value)
+        })
       })
     })
     this.height += numberOfRows
   }
 
   public addColumns(column: number, numberOfColumns: number): void {
-    const tmpMapping = new Map()
-    this.mapping.forEach((rowMapping: Map<number, CellVertex>, colNumber: number) => {
-      if (colNumber >= column) {
-        tmpMapping.set(colNumber + numberOfColumns, rowMapping)
-        this.mapping.delete(colNumber)
-      }
+    this.modifyMappings((mapping) => {
+      const tmpMapping = new Map<number, Map<number, CellVertex | CellMetadata>>()
+
+      mapping.forEach((rowMapping, colNumber) => {
+        if (colNumber >= column) {
+          tmpMapping.set(colNumber + numberOfColumns, rowMapping)
+          mapping.delete(colNumber)
+        }
+      })
+      tmpMapping.forEach((rowMapping, colNumber) => {
+        mapping.set(colNumber, rowMapping)
+      })
     })
-    tmpMapping.forEach((rowMapping: Map<number, CellVertex>, colNumber: number) => {
-      this.mapping.set(colNumber, rowMapping)
-    })
+
     this.width += numberOfColumns
   }
 
   public removeRows(removedRows: RowsSpan): void {
-    this.mapping.forEach((rowMapping: Map<number, CellVertex>) => {
-      const tmpMapping = new Map()
-      rowMapping.forEach((vertex: CellVertex, rowNumber: number) => {
-        if (rowNumber >= removedRows.rowStart) {
-          rowMapping.delete(rowNumber)
-          if (rowNumber > removedRows.rowEnd) {
-            tmpMapping.set(rowNumber - removedRows.numberOfRows, vertex)
+    this.modifyMappings((mapping) => {
+      mapping.forEach((rowMapping) => {
+        const tmpMapping = new Map<number, CellVertex | CellMetadata>()
+
+        rowMapping.forEach((value, rowNumber) => {
+          if (rowNumber >= removedRows.rowStart) {
+            rowMapping.delete(rowNumber)
+            if (rowNumber > removedRows.rowEnd) {
+              tmpMapping.set(rowNumber - removedRows.numberOfRows, value)
+            }
           }
-        }
-      })
-      tmpMapping.forEach((vertex: CellVertex, rowNumber: number) => {
-        rowMapping.set(rowNumber, vertex)
-      })
+        })
+        tmpMapping.forEach((value, rowNumber) => {
+          rowMapping.set(rowNumber, value)
+        })
+      })  
     })
     const rightmostRowRemoved = Math.min(this.height - 1, removedRows.rowEnd)
     const numberOfRowsRemoved = Math.max(0, rightmostRowRemoved - removedRows.rowStart + 1)
@@ -114,18 +166,22 @@ export class SparseStrategy implements IAddressMappingStrategy {
   }
 
   public removeColumns(removedColumns: ColumnsSpan): void {
-    const tmpMapping = new Map()
-    this.mapping.forEach((rowMapping: Map<number, CellVertex>, colNumber: number) => {
-      if (colNumber >= removedColumns.columnStart) {
-        this.mapping.delete(colNumber)
-        if (colNumber > removedColumns.columnEnd) {
-          tmpMapping.set(colNumber - removedColumns.numberOfColumns, rowMapping)
+    this.modifyMappings((mapping) => {
+      const tmpMapping = new Map<number, Map<number, CellVertex | CellMetadata>>()
+
+      mapping.forEach((rowMapping, colNumber) => {
+        if (colNumber >= removedColumns.columnStart) {
+          mapping.delete(colNumber)
+          if (colNumber > removedColumns.columnEnd) {
+            tmpMapping.set(colNumber - removedColumns.numberOfColumns, rowMapping)
+          }
         }
-      }
+      })
+      tmpMapping.forEach((rowMapping, colNumber) => {
+        mapping.set(colNumber, rowMapping)
+      })
     })
-    tmpMapping.forEach((rowMapping: Map<number, CellVertex>, colNumber: number) => {
-      this.mapping.set(colNumber, rowMapping)
-    })
+    
     const rightmostColumnRemoved = Math.min(this.width - 1, removedColumns.columnEnd)
     const numberOfColumnsRemoved = Math.max(0, rightmostColumnRemoved - removedColumns.columnStart + 1)
     this.width = Math.max(0, this.width - numberOfColumnsRemoved)
@@ -211,5 +267,10 @@ export class SparseStrategy implements IAddressMappingStrategy {
         }
       }
     }
+  }
+
+  private modifyMappings(callback: (mapping: Map<number, Map<number, CellVertex | CellMetadata>>) => void) {
+    callback(this.mapping)
+    callback(this.metadataMapping)
   }
 }

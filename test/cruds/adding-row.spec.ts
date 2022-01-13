@@ -1,4 +1,4 @@
-import {CellData, ExportedCellChange, HyperFormula, SheetSizeLimitExceededError} from '../../src'
+import {ExportedCellChange, HyperFormula, SheetSizeLimitExceededError} from '../../src'
 import {AbsoluteCellRange} from '../../src/AbsoluteCellRange'
 import {Config} from '../../src/Config'
 import {ArrayVertex, FormulaCellVertex} from '../../src/DependencyGraph'
@@ -203,7 +203,7 @@ describe('Adding row - reevaluation', () => {
     const [changes] = engine.addRows(0, [1, 1])
 
     expect(changes.length).toBe(1)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('B3'), new CellData(1)))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('B3'), 1))
   })
 })
 

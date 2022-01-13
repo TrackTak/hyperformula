@@ -5,16 +5,13 @@
 
 import { RawCellContent } from '..'
 import {CellError} from '../Cell'
-import {CellData, ExtendedNumber} from '../interpreter/InterpreterValue'
-import { Maybe } from '../Maybe'
+import {ExtendedNumber} from '../interpreter/InterpreterValue'
 
 export type ValueCellVertexValue = ExtendedNumber | boolean | string | CellError
-export type DataValueCellVertexValue = CellData<ValueCellVertexValue>
 
 export interface RawAndParsedValue {
   parsedValue: ValueCellVertexValue,
   rawValue: RawCellContent,
-  metadata: Maybe<any>,
 }
 
 /**
@@ -22,27 +19,26 @@ export interface RawAndParsedValue {
  */
 export class ValueCellVertex {
   /** Static cell value. */
-  constructor(private parsedValue: ValueCellVertexValue, private rawValue: RawCellContent, public metadata?: any) {
+  constructor(private parsedValue: ValueCellVertexValue, private rawValue: RawCellContent) {
   }
 
   public getValues(): RawAndParsedValue {
-    return {parsedValue: this.parsedValue, rawValue: this.rawValue, metadata: this.metadata}
+    return {parsedValue: this.parsedValue, rawValue: this.rawValue}
   }
 
-  public setValues(values: RawAndParsedValue, metadata: Maybe<any>) {
+  public setValues(values: RawAndParsedValue) {
     this.parsedValue = values.parsedValue
     this.rawValue = values.rawValue
-    this.metadata = metadata
   }
 
   /**
    * Returns cell value stored in vertex
    */
-  public getCellValue(): DataValueCellVertexValue {
-    return new CellData(this.parsedValue, this.metadata)
+  public getCellValue(): ValueCellVertexValue {
+    return this.parsedValue
   }
 
-  public setCellValue(_cellValue: DataValueCellVertexValue): never {
+  public setCellValue(_cellValue: ValueCellVertexValue): never {
     throw 'SetCellValue is deprecated for ValueCellVertex'
   }
 }

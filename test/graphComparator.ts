@@ -80,9 +80,9 @@ export class EngineComparator {
 
           deepStrictEqual(actualVertexAddress, expectedVertexAddress, `Different addresses in formulas. expected: ${actualVertexAddress}, actual: ${expectedVertexAddress}`)
           deepStrictEqual(actualFormula, expectedFormula, 'Different AST in formulas')
-          deepStrictEqual(this.normalizeCellValue(actualVertex.getCellValue().cellValue), this.normalizeCellValue(expectedVertex.getCellValue().cellValue), `Different values of formulas. expected: ${expectedVertex.getCellValue().cellValue.toString()}, actual: ${actualVertex.getCellValue().cellValue.toString()}`)
+          deepStrictEqual(this.normalizeCellValue(actualVertex.getCellValue()), this.normalizeCellValue(expectedVertex.getCellValue()), `Different values of formulas. expected: ${expectedVertex.getCellValue().toString()}, actual: ${actualVertex.getCellValue().toString()}`)
         } else if (expectedVertex instanceof ValueCellVertex && actualVertex instanceof ValueCellVertex) {
-          deepStrictEqual(actualVertex.getCellValue().cellValue, expectedVertex.getCellValue().cellValue, `Different values. expected: ${expectedVertex.getCellValue().cellValue.toString()}, actual: ${actualVertex.getCellValue().cellValue.toString()}`)
+          deepStrictEqual(actualVertex.getCellValue(), expectedVertex.getCellValue(), `Different values. expected: ${expectedVertex.getCellValue().toString()}, actual: ${actualVertex.getCellValue().toString()}`)
         } else if (expectedVertex instanceof EmptyCellVertex && actualVertex instanceof EmptyCellVertex) {
           continue
         } else if (expectedVertex instanceof ParsingErrorVertex && actualVertex instanceof ParsingErrorVertex) {

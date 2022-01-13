@@ -1,4 +1,4 @@
-import {CellData, ExportedCellChange, HyperFormula} from '../../src'
+import {ExportedCellChange, HyperFormula} from '../../src'
 import {adr, expectArrayWithSameContent} from '../testUtils'
 
 describe('Replace sheet content - checking if its possible', () => {
@@ -52,8 +52,8 @@ describe('Replace sheet content', () => {
     const [changes] = engine.setSheetContent(0, [[{ cellValue: '3' }, { cellValue: '4' }]])
 
     expectArrayWithSameContent(changes, [
-      new ExportedCellChange(adr('A1'), new CellData(3)),
-      new ExportedCellChange(adr('B1'), new CellData(4)),
+      new ExportedCellChange(adr('A1'), 3),
+      new ExportedCellChange(adr('B1'), 4),
     ])
   })
 
@@ -69,10 +69,10 @@ describe('Replace sheet content', () => {
     expect(changes.length).toEqual(4)
 
     expectArrayWithSameContent(changes, [
-      new ExportedCellChange(adr('A1'), new CellData(3)),
-      new ExportedCellChange(adr('B1'), new CellData(4)),
-      new ExportedCellChange(adr('A2'), new CellData(null)),
-      new ExportedCellChange(adr('B2'), new CellData(null)),
+      new ExportedCellChange(adr('A1'), 3),
+      new ExportedCellChange(adr('B1'), 4),
+      new ExportedCellChange(adr('A2'), null),
+      new ExportedCellChange(adr('B2'), null),
     ])
   })
 

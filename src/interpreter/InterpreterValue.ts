@@ -4,6 +4,7 @@
  */
 
 import {CellError} from '../Cell'
+import { Maybe } from '../Maybe'
 import {SimpleRangeValue} from './SimpleRangeValue'
 
 export const EmptyValue = Symbol('Empty value')
@@ -35,10 +36,12 @@ export function getRawValue<T>(num: RichNumber | T): number | T {
   }
 }
 
-export class CellData<CellValue, CellMetadata = any> {
+export type CellMetadata = Maybe<Object>
+
+export class CellData<CellValue, CellMetadataType = CellMetadata> {
   public metadata?: CellMetadata
 
-  constructor(public cellValue: CellValue, metadata?: CellMetadata) {
+  constructor(public cellValue: CellValue, metadata?: CellMetadataType) {
     if (metadata !== undefined) {
       this.metadata = metadata
     }

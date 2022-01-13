@@ -16,6 +16,7 @@ import {ErrorMessage} from '../error-message'
 import {FunctionRegistry} from '../interpreter/FunctionRegistry'
 import {
   CellData,
+  CellMetadata,
   DataInternalScalarValue,
   DataInterpreterValue,
   EmptyValue,
@@ -86,8 +87,8 @@ export class DependencyGraph {
     )
   }
 
-  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: Maybe<AsyncPromise[]>, metadata: Maybe<any>, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean, markNodeAsSpecialRecentlyChanged = true): ContentChanges {
-    const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version(), asyncPromises, metadata)
+  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: Maybe<AsyncPromise[]>, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean, markNodeAsSpecialRecentlyChanged = true): ContentChanges {
+    const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version(), asyncPromises)
 
     this.exchangeOrAddFormulaVertex(newVertex)
     this.processCellPrecedents(precedents, newVertex)
@@ -128,11 +129,11 @@ export class DependencyGraph {
       this.arrayMapping.removeArray(vertex.getRange())
     }
     if (vertex instanceof ValueCellVertex) {      
-      vertex.setValues(value, value.metadata)
+      vertex.setValues(value)
 
       this.graph.markNodeAsSpecialRecentlyChanged(vertex)
     } else {
-      const newVertex = new ValueCellVertex(value.parsedValue, value.rawValue, value.metadata)
+      const newVertex = new ValueCellVertex(value.parsedValue, value.rawValue)
       this.exchangeOrAddGraphNode(vertex, newVertex)
       this.addressMapping.setCell(address, newVertex)
       this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
@@ -143,7 +144,7 @@ export class DependencyGraph {
     return this.getAndClearContentChanges()
   }
 
-  public setCellEmpty(address: SimpleCellAddress, metadata: Maybe<any>): ContentChanges {
+  public setCellEmpty(address: SimpleCellAddress): ContentChanges {
     const vertex = this.shrinkPossibleArrayAndGetCell(address)
 
     if (vertex === undefined) {
@@ -151,7 +152,7 @@ export class DependencyGraph {
     }
 
     if (this.graph.adjacentNodes(vertex).size > 0) {
-      const emptyVertex = new EmptyCellVertex(address, metadata)
+      const emptyVertex = new EmptyCellVertex(address)
 
       this.exchangeGraphNode(vertex, emptyVertex)
 
@@ -162,15 +163,6 @@ export class DependencyGraph {
         return this.getAndClearContentChanges()
       }
       this.graph.markNodeAsSpecialRecentlyChanged(emptyVertex)
-      this.addressMapping.setCell(address, emptyVertex)
-
-      return this.getAndClearContentChanges()
-    }
-
-    if (metadata !== undefined) {
-      const emptyVertex = new EmptyCellVertex(address, metadata)
-
-      this.exchangeGraphNode(vertex, emptyVertex)
       this.addressMapping.setCell(address, emptyVertex)
 
       return this.getAndClearContentChanges()
@@ -279,6 +271,7 @@ export class DependencyGraph {
 
   public fetchCellOrCreateEmpty(address: SimpleCellAddress): CellVertex {
     let vertex = this.addressMapping.getCell(address)
+
     if (vertex === undefined) {
       vertex = new EmptyCellVertex(address)
       
@@ -341,6 +334,7 @@ export class DependencyGraph {
       }
       this.removeVertex(vertex)
       this.addressMapping.removeCell(adr)
+      this.addressMapping.removeCellMetadata(adr)
     }
 
     this.stats.measure(StatType.ADJUSTING_ARRAY_MAPPING, () => {
@@ -369,8 +363,9 @@ export class DependencyGraph {
       if (vertex instanceof ArrayVertex) {
         arrays.add(vertex)
       } else {
-        this.setCellEmpty(address, undefined)
+        this.setCellEmpty(address)
       }
+      this.addressMapping.removeCellMetadata(address)
     }
 
     for (const array of arrays.values()) {
@@ -480,6 +475,7 @@ export class DependencyGraph {
     }
     for (const address of range.addresses(this)) {
       const vertexUnderAddress = this.addressMapping.getCell(address)
+
       if (vertexUnderAddress !== undefined && !(vertexUnderAddress instanceof EmptyCellVertex) && vertexUnderAddress !== arrayVertex) {
         return false
       }
@@ -493,7 +489,11 @@ export class DependencyGraph {
       let sourceVertex = this.addressMapping.getCell(sourceAddress)
       const targetVertex = this.addressMapping.getCell(targetAddress)
 
+      const sourceMetadata = this.addressMapping.getCellMetadata(sourceAddress)
+
       this.addressMapping.removeCell(sourceAddress)
+      this.addressMapping.removeCellMetadata(sourceAddress)
+      this.addressMapping.setCellMetadata(targetAddress, sourceMetadata)
 
       if (sourceVertex !== undefined) {
         this.graph.markNodeAsSpecialRecentlyChanged(sourceVertex)
@@ -540,6 +540,7 @@ export class DependencyGraph {
       }
     }
 
+    
     this.rangeMapping.moveRangesInsideSourceRange(sourceRange, toRight, toBottom, toSheet)
   }
 
@@ -569,6 +570,10 @@ export class DependencyGraph {
   public addVertex(address: SimpleCellAddress, vertex: CellVertex): void {
     this.graph.addNode(vertex)
     this.addressMapping.setCell(address, vertex)
+  }
+
+  public addCellMetadata(address: SimpleCellAddress, cellMetadata: CellMetadata): void {
+    this.addressMapping.setCellMetadata(address, cellMetadata)
   }
 
   public addArrayVertex(address: SimpleCellAddress, vertex: ArrayVertex): void {
@@ -604,6 +609,10 @@ export class DependencyGraph {
     return this.addressMapping.getCell(address)
   }
 
+  public getCellMetadata(address: SimpleCellAddress): CellMetadata {
+    return this.addressMapping.getCellMetadata(address)
+  }
+
   public getCellValue(address: SimpleCellAddress): DataInterpreterValue {
     return this.addressMapping.getCellValue(address)
   }
@@ -619,7 +628,7 @@ export class DependencyGraph {
       cell.cellValue = new CellError(ErrorType.VALUE, ErrorMessage.ScalarExpected)
     }
 
-    return cell as DataInternalScalarValue
+    return new CellData(cell.cellValue, cell.metadata)
   }
 
   public existsEdge(fromNode: Vertex, toNode: Vertex): boolean {
@@ -893,13 +902,13 @@ export class DependencyGraph {
       const oldValue = vertex.getArrayCellValue(address)
       if (this.getCell(address) === vertex) {
         if (vertex.isLeftCorner(address)) {
-          this.changes.addChange(new CellData(new CellError(ErrorType.REF), vertex.metadata), address, oldValue)
+          this.changes.addChange(new CellError(ErrorType.REF), address, oldValue)
         } else {
           this.addressMapping.removeCell(address)
-          this.changes.addChange(new CellData(EmptyValue, vertex.metadata), address, oldValue)
+          this.changes.addChange(EmptyValue, address, oldValue)
         }
       } else {
-        this.changes.addChange(new CellData(EmptyValue, vertex.metadata), address, oldValue)
+        this.changes.addChange(EmptyValue, address, oldValue)
       }
     }
   }
@@ -1114,7 +1123,7 @@ export class DependencyGraph {
           const value = array.getArrayCellValue(destination)
 
           this.addressMapping.moveCell(source, destination)
-          this.changes.addChange(new CellData(EmptyValue), source, value)
+          this.changes.addChange(EmptyValue, source, value)
         }
       }
     }
@@ -1150,7 +1159,7 @@ export class DependencyGraph {
           const value = array.getArrayCellValue(destination)
           
           this.addressMapping.moveCell(source, destination)
-          this.changes.addChange(new CellData(EmptyValue), source, value)
+          this.changes.addChange(EmptyValue, source, value)
         }
       }
     }
@@ -1232,12 +1241,12 @@ export class DependencyGraph {
       dependencies.delete(vertex)
       
       if (this.graph.hasNode(vertex) && this.graph.adjacentNodesCount(vertex) === 0) {
-        if (vertex instanceof RangeVertex || (vertex instanceof EmptyCellVertex && vertex.metadata === undefined)) {
+        if (vertex instanceof RangeVertex || (vertex instanceof EmptyCellVertex)) {
           this.graph.removeNode(vertex).forEach((candidate) => dependencies.add(candidate))
         }
         if (vertex instanceof RangeVertex) {
           this.rangeMapping.removeRange(vertex)
-        } else if (vertex instanceof EmptyCellVertex && vertex.metadata === undefined) {
+        } else if (vertex instanceof EmptyCellVertex) {
           this.addressMapping.removeCell(vertex.address)
         }
       }

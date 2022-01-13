@@ -19,7 +19,7 @@ import {ArrayVertex, DependencyGraph, RangeVertex, Vertex} from './DependencyGra
 import {FormulaVertex} from './DependencyGraph/FormulaCellVertex'
 import {Interpreter} from './interpreter/Interpreter'
 import {InterpreterState} from './interpreter/InterpreterState'
-import {CellData, DataInterpreterValue, EmptyValue, getRawValue, InterpreterValue} from './interpreter/InterpreterValue'
+import {EmptyValue, getRawValue, InterpreterValue} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
@@ -110,8 +110,8 @@ export class Evaluator {
         this.recomputeFormulaVertexValue(newVertex, false)
 
         const newCellValue = newVertex.getCellValue()
-        const currentRawValue = getRawValue(currentValue?.cellValue)
-        const newRawValue = getRawValue(newCellValue.cellValue)
+        const currentRawValue = getRawValue(currentValue)
+        const newRawValue = getRawValue(newCellValue)
 
         changes.addChange(newCellValue, address)
 
@@ -143,10 +143,10 @@ export class Evaluator {
               asyncVertices.push(vertex)
             }
 
-            if (newCellValue.cellValue !== currentValue?.cellValue) {
+            if (newCellValue !== currentValue) {
               const address = vertex.getAddress(this.lazilyTransformingAstService)
-              const currentRawValue = getRawValue(currentValue?.cellValue)
-              const newRawValue = getRawValue(newCellValue.cellValue)
+              const currentRawValue = getRawValue(currentValue)
+              const newRawValue = getRawValue(newCellValue)
 
               changes.addChange(newCellValue, address)
 
@@ -166,11 +166,11 @@ export class Evaluator {
             vertex.clearCache()
           } else if (vertex instanceof FormulaVertex) {
             const address = vertex.getAddress(this.lazilyTransformingAstService)
-            const rawValue = getRawValue(vertex.valueOrUndef()?.cellValue)
+            const rawValue = getRawValue(vertex.valueOrUndef())
 
             this.columnSearch.remove(rawValue, address)
             const error = new CellError(ErrorType.CYCLE, undefined, vertex)
-            const value = new CellData(error, vertex.metadata)
+            const value = error
 
             vertex.setCellValue(value)
             changes.addChange(value, address)
@@ -225,7 +225,7 @@ export class Evaluator {
   private recomputeFormulas(cycled: Vertex[], sorted: Vertex[]): Promise<ContentChanges> {
     cycled.forEach((vertex: Vertex) => {
       if (vertex instanceof FormulaVertex) {
-        vertex.setCellValue(new CellData(new CellError(ErrorType.CYCLE, undefined, vertex), vertex.metadata))
+        vertex.setCellValue(new CellError(ErrorType.CYCLE, undefined, vertex))
       }
     })
 
@@ -235,7 +235,7 @@ export class Evaluator {
       if (vertex instanceof FormulaVertex) {
         const newCellValue = this.recomputeFormulaVertexValue(vertex, true)
         const address = vertex.getAddress(this.lazilyTransformingAstService)
-        const rawValue = getRawValue(newCellValue.cellValue)
+        const rawValue = getRawValue(newCellValue)
 
         this.columnSearch.add(rawValue, address)
 
@@ -251,7 +251,7 @@ export class Evaluator {
     return this.recomputeAsyncFunctions(asyncVertices)
   }
 
-  private recomputeFormulaVertexValue(vertex: FormulaVertex, recalculateAsyncPromises: boolean): DataInterpreterValue {
+  private recomputeFormulaVertexValue(vertex: FormulaVertex, recalculateAsyncPromises: boolean): InterpreterValue {
     const address = vertex.getAddress(this.lazilyTransformingAstService)
     if (vertex instanceof ArrayVertex && (vertex.array.size.isRef || !this.dependencyGraph.isThereSpaceForArray(vertex))) {
       return vertex.setNoSpace()
@@ -263,7 +263,7 @@ export class Evaluator {
       const formula = vertex.getFormula(this.lazilyTransformingAstService)
       const newCellValue = this.evaluateAstToCellValue(formula, new InterpreterState(address, this.config.useArrayArithmetic, vertex))
       
-      return vertex.setCellValue(new CellData(newCellValue, vertex.metadata))
+      return vertex.setCellValue(newCellValue)
     }
   }
 

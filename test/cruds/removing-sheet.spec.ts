@@ -1,4 +1,4 @@
-import {CellData, ExportedCellChange, HyperFormula, NoSheetWithIdError} from '../../src'
+import {ExportedCellChange, HyperFormula, NoSheetWithIdError} from '../../src'
 import {AbsoluteCellRange} from '../../src/AbsoluteCellRange'
 import {ErrorType} from '../../src/Cell'
 import {ArrayVertex} from '../../src/DependencyGraph'
@@ -203,7 +203,7 @@ describe('remove sheet - adjust formula dependencies', () => {
     const [changes] = engine.removeSheet(1)
 
     expect(changes.length).toBe(1)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), new CellData(detailedErrorWithOrigin(ErrorType.REF, 'Sheet1!A1'))))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), detailedErrorWithOrigin(ErrorType.REF, 'Sheet1!A1')))
   })
 })
 

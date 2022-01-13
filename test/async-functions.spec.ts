@@ -1,4 +1,4 @@
-import {CellData, CellError, EvaluationSuspendedError, ExportedCellChange, ExportedNamedExpressionChange, HyperFormula, SimpleRangeValue} from '../src'
+import {CellError, EvaluationSuspendedError, ExportedCellChange, ExportedNamedExpressionChange, HyperFormula, SimpleRangeValue} from '../src'
 import {ArraySize} from '../src/ArraySize'
 import {ErrorType} from '../src/Cell'
 import {Config} from '../src/Config'
@@ -172,7 +172,7 @@ describe('async functions', () => {
 
       const changes = await promise
 
-      expect(changes).toEqual([new ExportedCellChange(adr('B1'), new CellData(1)), new ExportedCellChange(adr('D1'), new CellData(6)), new ExportedCellChange(adr('C1'), new CellData(2))])
+      expect(changes).toEqual([new ExportedCellChange(adr('B1'), 1), new ExportedCellChange(adr('D1'), 6), new ExportedCellChange(adr('C1'), 2)])
     })
 
     it('asyncValuesUpdated fires once per public async action', async() => {
@@ -183,14 +183,14 @@ describe('async functions', () => {
 
       await engine.setSheetContent(0, [[{ cellValue: '=ASYNC_FOO()' }]])[1]
 
-      expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), new CellData(1))])
+      expect(handler).toHaveBeenCalledWith([new ExportedCellChange(adr('A1'), 1)])
 
       const changes = await engine.setSheetContent(0, [[{ cellValue: '=ASYNC_FOO()' }, { cellValue: '=ASYNC_FOO()' }, { cellValue: '=ASYNC_FOO()' }]])[1]
 
       await engine.setCellContents(adr('D1'), { cellValue: 'test' })[1]
 
       expect(handler).toHaveBeenCalledTimes(2)
-      expect(changes).toEqual([new ExportedCellChange(adr('A1'), new CellData(1)), new ExportedCellChange(adr('B1'), new CellData(1)), new ExportedCellChange(adr('C1'), new CellData(1))])
+      expect(changes).toEqual([new ExportedCellChange(adr('A1'), 1), new ExportedCellChange(adr('B1'), 1), new ExportedCellChange(adr('C1'), 1)])
     })
   })
 
@@ -323,7 +323,7 @@ describe('async functions', () => {
     const asyncChanges = await promise
 
     expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: 1 }]])
-    expect(asyncChanges).toEqual([new ExportedCellChange(adr('B1'), new CellData(1))])
+    expect(asyncChanges).toEqual([new ExportedCellChange(adr('B1'), 1)])
   })
 
   describe('undo', () => {

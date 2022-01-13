@@ -4,13 +4,13 @@
  */
 
 import {addressKey, SimpleCellAddress} from './Cell'
-import {DataInterpreterValue} from './interpreter/InterpreterValue'
+import {InterpreterValue} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 
 export interface CellValueChange {
   address: SimpleCellAddress,
-  value: DataInterpreterValue,
-  oldValue?: DataInterpreterValue,
+  value: InterpreterValue,
+  oldValue?: InterpreterValue,
 }
 
 export interface ChangeExporter<T> {
@@ -33,7 +33,7 @@ export class ContentChanges {
     return this
   }
 
-  public addChange(newValue: DataInterpreterValue, address: SimpleCellAddress, oldValue?: DataInterpreterValue): void {
+  public addChange(newValue: InterpreterValue, address: SimpleCellAddress, oldValue?: InterpreterValue): void {
     this.addInterpreterValue(newValue, address, oldValue)
   }
 
@@ -59,7 +59,7 @@ export class ContentChanges {
   }
 
   private add(address: SimpleCellAddress, change: CellValueChange) {
-    const value = change.value.cellValue
+    const value = change.value
     if (value instanceof SimpleRangeValue) {
       for (const cellAddress of value.effectiveAddressesFromData(address)) {
         this.changes.delete(`${cellAddress.sheet},${cellAddress.col},${cellAddress.row}`)
@@ -68,7 +68,7 @@ export class ContentChanges {
     this.changes.set(addressKey((address)), change)
   }
 
-  private addInterpreterValue(value: DataInterpreterValue, address: SimpleCellAddress, oldValue?: DataInterpreterValue) {
+  private addInterpreterValue(value: InterpreterValue, address: SimpleCellAddress, oldValue?: InterpreterValue) {
     this.add(address, {
       address,
       value,

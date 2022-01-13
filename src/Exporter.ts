@@ -8,7 +8,7 @@ import {CellValue, DetailedCellError} from './CellValue'
 import {Config} from './Config'
 import {CellValueChange, ChangeExporter} from './ContentChanges'
 import {ErrorMessage} from './error-message'
-import {CellData, DataInterpreterValue, EmptyValue, getRawValue, InterpreterValue, isExtendedNumber} from './interpreter/InterpreterValue'
+import {EmptyValue, getRawValue, InterpreterValue, isExtendedNumber} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {NamedExpressions} from './NamedExpressions'
@@ -22,7 +22,7 @@ export type ExportedChange = ExportedCellChange | ExportedNamedExpressionChange
 export class ExportedCellChange {
   constructor(
     public readonly address: SimpleCellAddress,
-    public readonly newValue: CellData<CellValue>,
+    public readonly newValue: CellValue
   ) {
   }
 
@@ -61,7 +61,7 @@ export class Exporter implements ChangeExporter<ExportedChange> {
   }
 
   public exportChange(change: CellValueChange): ExportedChange | ExportedChange[] {
-    const value = change.value.cellValue
+    const value = change.value
     const address = change.address
 
     if (address.sheet === NamedExpressions.SHEET_FOR_WORKBOOK_EXPRESSIONS) {
@@ -78,7 +78,7 @@ export class Exporter implements ChangeExporter<ExportedChange> {
       for (const [cellValue, cellAddress] of value.entriesFromTopLeftCorner(address)) {
         result.push(new ExportedCellChange(
           cellAddress,
-          this.exportValue(new CellData(cellValue, change.value.metadata))
+          this.exportValue(cellValue)
         ))
       }
       return result
@@ -90,8 +90,8 @@ export class Exporter implements ChangeExporter<ExportedChange> {
     }
   }
 
-  public exportValue(cell: DataInterpreterValue): CellData<CellValue> {
-    return new CellData(this.parseExportedValue(cell.cellValue), cell.metadata)
+  public exportValue(cellValue: InterpreterValue): CellValue {
+    return this.parseExportedValue(cellValue)
   }
 
   public exportScalarOrRange(cellValue: InterpreterValue): CellValue | CellValue[][] {

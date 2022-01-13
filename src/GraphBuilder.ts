@@ -108,11 +108,13 @@ export class SimpleStrategy implements GraphBuilderStrategy {
   }
 
   private setDependency(address: SimpleCellAddress, rawCellContent: DataRawCellContent, parsedCellContent: CellContent.Type): null | [Vertex, CellDependency[]] {    
+    this.dependencyGraph.addCellMetadata(address, rawCellContent.metadata)
+
     if (parsedCellContent instanceof CellContent.Formula) {
       const parseResult = this.stats.measure(StatType.PARSER, () => this.parser.parse(parsedCellContent.formula, address))
       if (parseResult.errors.length > 0) {
         this.shrinkArrayIfNeeded(address)
-        const vertex = new ParsingErrorVertex(parseResult.errors, parsedCellContent.formula, rawCellContent.metadata)
+        const vertex = new ParsingErrorVertex(parseResult.errors, parsedCellContent.formula)
 
         this.dependencyGraph.addVertex(address, vertex)
       } else {
@@ -122,7 +124,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
         const size = this.arraySizePredictor.checkArraySize(parseResult.ast, address)
 
         if (size.isScalar()) {
-          const vertex = new FormulaCellVertex(parseResult.ast, address, 0, asyncPromises, rawCellContent.metadata)
+          const vertex = new FormulaCellVertex(parseResult.ast, address, 0, asyncPromises)
 
           this.dependencyGraph.addVertex(address, vertex)
 
@@ -138,7 +140,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
 
           return [vertex, absolutizeDependencies(parseResult.dependencies, address)]
         } else {
-          const vertex = new ArrayVertex(parseResult.ast, address, new ArraySize(size.width, size.height), asyncPromises, rawCellContent.metadata)
+          const vertex = new ArrayVertex(parseResult.ast, address, new ArraySize(size.width, size.height), asyncPromises)
 
           this.dependencyGraph.addArrayVertex(address, vertex)
 
@@ -151,13 +153,9 @@ export class SimpleStrategy implements GraphBuilderStrategy {
       }
     } else if (parsedCellContent instanceof CellContent.Empty) {
       return null
-    } else if (parsedCellContent instanceof CellContent.OnlyMetadata) {
-      const vertex = new EmptyCellVertex(address, rawCellContent.metadata)
-
-      this.dependencyGraph.addVertex(address, vertex)
     } else {
       this.shrinkArrayIfNeeded(address)
-      const vertex = new ValueCellVertex(parsedCellContent.value, rawCellContent.cellValue, rawCellContent.metadata)
+      const vertex = new ValueCellVertex(parsedCellContent.value, rawCellContent.cellValue)
 
       this.columnIndex.add(getRawValue(parsedCellContent.value), address)
       this.dependencyGraph.addVertex(address, vertex)

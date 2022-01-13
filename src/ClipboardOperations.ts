@@ -10,7 +10,7 @@ import {Config} from './Config'
 import {DependencyGraph} from './DependencyGraph'
 import {ValueCellVertexValue} from './DependencyGraph/ValueCellVertex'
 import {InvalidArgumentsError, SheetSizeLimitExceededError} from './errors'
-import { Maybe } from './Maybe'
+import { CellMetadata } from './interpreter/InterpreterValue'
 import {Operations} from './Operations'
 import {ParsingError} from './parser/Ast'
 
@@ -32,25 +32,25 @@ export interface ClipboardCellValue {
   type: ClipboardCellType.VALUE,
   parsedValue: ValueCellVertexValue,
   rawValue: RawCellContent,
-  metadata: Maybe<any>,
+  cellMetadata: CellMetadata,
 }
 
 export interface ClipboardCellEmpty {
   type: ClipboardCellType.EMPTY,
-  metadata: Maybe<any>,
+  cellMetadata: CellMetadata,
 }
 
 export interface ClipboardCellFormula {
   type: ClipboardCellType.FORMULA,
   hash: string,
-  metadata: Maybe<any>,
+  cellMetadata: CellMetadata,
 }
 
 export interface ClipboardCellParsingError {
   type: ClipboardCellType.PARSING_ERROR,
   rawInput: string,
   errors: ParsingError[],
-  metadata: Maybe<any>,
+  cellMetadata: CellMetadata,
 }
 
 class Clipboard {

@@ -1,4 +1,4 @@
-import {CellData, ExportedCellChange, ExportedNamedExpressionChange, HyperFormula, NoSheetWithIdError} from '../src'
+import {ExportedCellChange, ExportedNamedExpressionChange, HyperFormula, NoSheetWithIdError} from '../src'
 import {AbsoluteCellRange} from '../src/AbsoluteCellRange'
 import {ErrorType} from '../src/Cell'
 import {Vertex} from '../src/DependencyGraph/Vertex'
@@ -500,7 +500,7 @@ describe('Named expressions - evaluation', () => {
 
     const valueAfterRecomputation = engine.getNamedExpressionValue('volatileExpression')
     expect(valueAfterRecomputation).not.toEqual(valueBeforeRecomputation)
-    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), new CellData('foo')))
+    expect(changes).toContainEqual(new ExportedCellChange(adr('A1'), 'foo'))
     expect(changes).toContainEqual(new ExportedNamedExpressionChange('volatileExpression', valueAfterRecomputation!))
   })
 

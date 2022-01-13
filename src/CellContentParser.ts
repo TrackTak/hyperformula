@@ -60,13 +60,6 @@
        return Empty.instance
      }
    }
-
-   export class OnlyMetadata {
-    public readonly value = ''
-
-    constructor() {
-    }
-  }
  
    export class Formula {
      constructor(public readonly formula: string) {
@@ -129,15 +122,15 @@
    }
  
    public parse(content: DataRawCellContent | InputCell<any>): CellContent.Type {
-    if (content === undefined || content === null) {
-      return CellContent.Empty.getSingletonInstance()
-    }
+      if (content === undefined || content === null) {
+        return CellContent.Empty.getSingletonInstance()
+      }
 
-    if (!isCellData(content)) {
-      throw new UnableToParseError(content)
-    }
+      if (!isCellData(content)) {
+        throw new UnableToParseError(content)
+      }
 
-     return this.parseRawCellContent(content.cellValue, content.metadata)
+      return this.parseRawCellContent(content.cellValue)
    }
 
    public isCurrency(text: string): boolean {
@@ -146,13 +139,9 @@
      return !!this.currencyMatcher(trimmedContent)
    }
 
-   private parseRawCellContent(content: RawCellContent, metadata?: any): CellContent.Type {
+   private parseRawCellContent(content: RawCellContent): CellContent.Type {
       if (content === undefined || content === null) {
-        if (metadata) {
-          return new CellContent.OnlyMetadata()
-        } else {
-          return CellContent.Empty.getSingletonInstance()
-        }
+        return CellContent.Empty.getSingletonInstance()
       } else if (typeof content === 'number') {
         if (isNumberOverflow(content)) {
           return new CellContent.Error(ErrorType.NUM, ErrorMessage.ValueLarge)

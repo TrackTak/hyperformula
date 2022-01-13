@@ -3,14 +3,14 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
+import { RawCellContent } from '..'
 import {AbsoluteCellRange} from '../AbsoluteCellRange'
 import {ArraySize} from '../ArraySize'
 import {ArrayValue, ErroredArray, IArray, NotComputedArray} from '../ArrayValue'
 import { AsyncPromise } from '../AsyncPromise'
 import {CellError, equalSimpleCellAddress, ErrorType, SimpleCellAddress} from '../Cell'
-import {DataRawCellContent} from '../CellContentParser'
 import {ErrorMessage} from '../error-message'
-import {CellData, DataInternalScalarValue, DataInterpreterValue, EmptyValue, getRawValue, InterpreterValue} from '../interpreter/InterpreterValue'
+import {EmptyValue, getRawValue, InternalScalarValue, InterpreterValue} from '../interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from '../LazilyTransformingAstService'
 import {Maybe} from '../Maybe'
 import {Ast} from '../parser'
@@ -24,7 +24,6 @@ export abstract class FormulaVertex {
     protected cellAddress: SimpleCellAddress,
     public version: number,
     protected asyncPromises?: AsyncPromise[],
-    public metadata?: any
   ) {
   }
 
@@ -64,11 +63,11 @@ export abstract class FormulaVertex {
     return 1
   }
 
-  static fromAst(formula: Ast, address: SimpleCellAddress, size: ArraySize, version: number, asyncPromises?: AsyncPromise[], metadata?: any) {
+  static fromAst(formula: Ast, address: SimpleCellAddress, size: ArraySize, version: number, asyncPromises?: AsyncPromise[]) {
     if (size.isScalar()) {
-      return new FormulaCellVertex(formula, address, version, asyncPromises, metadata)
+      return new FormulaCellVertex(formula, address, version, asyncPromises)
     } else {
-      return new ArrayVertex(formula, address, size, asyncPromises, metadata, version)
+      return new ArrayVertex(formula, address, size, asyncPromises, version)
     }
   }
 
@@ -82,7 +81,7 @@ export abstract class FormulaVertex {
 
   public ensureRecentData(updatingService: LazilyTransformingAstService) {
     if (this.version != updatingService.version()) {
-      const [newAst, newAddress, newVersion] = updatingService.applyTransformations(this.formula, this.cellAddress, this.metadata, this.version)
+      const [newAst, newAddress, newVersion] = updatingService.applyTransformations(this.formula, this.cellAddress, this.version)
       this.formula = newAst
       this.cellAddress = newAddress
       this.version = newVersion
@@ -113,14 +112,14 @@ export abstract class FormulaVertex {
   /**
    * Sets computed cell value stored in this vertex
    */
-  public abstract setCellValue(cellValue: DataInterpreterValue): DataInterpreterValue
+  public abstract setCellValue(cellValue: InterpreterValue): InterpreterValue
 
   /**
    * Returns cell value stored in vertex
    */
-  public abstract getCellValue(): DataInterpreterValue
+  public abstract getCellValue(): InterpreterValue
 
-  public abstract valueOrUndef(): CellData<Maybe<InterpreterValue>>
+  public abstract valueOrUndef(): Maybe<InterpreterValue>
 
   public abstract isComputed(): boolean
 }
@@ -128,8 +127,8 @@ export abstract class FormulaVertex {
 export class ArrayVertex extends FormulaVertex {
   array: IArray
 
-  constructor(formula: Ast, cellAddress: SimpleCellAddress, size: ArraySize, asyncPromises?: AsyncPromise[], metadata?: any, version: number = 0) {
-    super(formula, cellAddress, version, asyncPromises, metadata)
+  constructor(formula: Ast, cellAddress: SimpleCellAddress, size: ArraySize, asyncPromises?: AsyncPromise[], version: number = 0) {
+    super(formula, cellAddress, version, asyncPromises)
     if (size.isRef) {
       this.array = new ErroredArray(new CellError(ErrorType.REF, ErrorMessage.NoSpaceForArrayResult), ArraySize.error())
     } else {
@@ -153,52 +152,50 @@ export class ArrayVertex extends FormulaVertex {
     return this.cellAddress
   }
 
-  setCellValue(cell: DataInterpreterValue): DataInterpreterValue {
-    this.metadata = cell.metadata
-
-    if (cell.cellValue instanceof CellError) {
-      this.setErrorValue(cell.cellValue)
-      return cell
+  setCellValue(cellValue: InterpreterValue): InterpreterValue {
+    if (cellValue instanceof CellError) {
+      this.setErrorValue(cellValue)
+      return cellValue
     }
-    const array = ArrayValue.fromInterpreterValue(cell.cellValue)
+    const array = ArrayValue.fromInterpreterValue(cellValue)
     array.resize(this.array.size)
     this.array = array
     
-    return cell
+    return cellValue
   }
 
-  getCellValue(): DataInterpreterValue {
+  getCellValue(): InterpreterValue {
     if (this.array instanceof NotComputedArray) {
       throw Error('Array not computed yet.')
     }
-    return new CellData(this.array.simpleRangeValue(), this.metadata)
+    return this.array.simpleRangeValue()
   }
 
-  public valueOrUndef(): CellData<Maybe<InterpreterValue>> {
+  public valueOrUndef(): Maybe<InterpreterValue> {
     if (this.array instanceof NotComputedArray) {
-      return new CellData(undefined, this.metadata)
+      return undefined
     }
-    return new CellData(this.array.simpleRangeValue(), this.metadata)
+    return this.array.simpleRangeValue()
   }
 
-  getArrayCellValue(address: SimpleCellAddress): DataInternalScalarValue {
+  getArrayCellValue(address: SimpleCellAddress): InternalScalarValue {
     const col = address.col - this.cellAddress.col
     const row = address.row - this.cellAddress.row
 
     try {
-      return new CellData(this.array.get(col, row), this.metadata)
+      return this.array.get(col, row)
     } catch (e) {
-      return new CellData(new CellError(ErrorType.REF), this.metadata)
+      return new CellError(ErrorType.REF)
     }
   }
 
-  getArrayCellRawValue(address: SimpleCellAddress): DataRawCellContent {
+  getArrayCellRawValue(address: SimpleCellAddress): RawCellContent {
     const val = this.getArrayCellValue(address)
-    if (val.cellValue instanceof CellError || val.cellValue === EmptyValue) {
-      return new CellData(undefined, this.metadata).toRawContent()
+    if (val instanceof CellError || val === EmptyValue) {
+      return undefined
     }
       
-    return new CellData(getRawValue(val.cellValue), this.metadata).toRawContent()
+    return getRawValue(val)
   }
 
   setArrayCellValue(address: SimpleCellAddress, value: number): void {
@@ -209,7 +206,7 @@ export class ArrayVertex extends FormulaVertex {
     }
   }
 
-  setNoSpace(): DataInterpreterValue {
+  setNoSpace(): InterpreterValue {
     this.array = new ErroredArray(new CellError(ErrorType.SPILL, ErrorMessage.NoSpaceForArrayResult), ArraySize.error())
     return this.getCellValue()
   }
@@ -274,7 +271,7 @@ export class ArrayVertex extends FormulaVertex {
  */
 export class FormulaCellVertex extends FormulaVertex {
   /** Most recently computed value of this formula. */
-  private cachedCellValue: CellData<Maybe<InterpreterValue>> = new CellData(undefined)
+  private cachedCellValue: Maybe<InterpreterValue>
 
   constructor(
     /** Formula in AST format */
@@ -283,19 +280,18 @@ export class FormulaCellVertex extends FormulaVertex {
     address: SimpleCellAddress,
     version: number,
     asyncPromises?: AsyncPromise[],
-    metadata?: any
   ) {
-    super(formula, address, version, asyncPromises, metadata)
+    super(formula, address, version, asyncPromises)
   }
 
-  public valueOrUndef(): CellData<Maybe<InterpreterValue>> {
+  public valueOrUndef(): Maybe<InterpreterValue> {
     return this.cachedCellValue
   }
 
   /**
    * Sets computed cell value stored in this vertex
    */
-  public setCellValue(cellValue: DataInterpreterValue): DataInterpreterValue {
+  public setCellValue(cellValue: InterpreterValue): InterpreterValue {
     this.cachedCellValue = cellValue
 
     return cellValue
@@ -304,15 +300,15 @@ export class FormulaCellVertex extends FormulaVertex {
   /**
    * Returns cell value stored in vertex
    */
-  public getCellValue(): DataInterpreterValue {
-    if (this.cachedCellValue.cellValue !== undefined) {
-      return this.cachedCellValue as DataInterpreterValue
+  public getCellValue(): InterpreterValue {
+    if (this.cachedCellValue !== undefined) {
+      return this.cachedCellValue
     } else {
       throw Error('Value of the formula cell is not computed.')
     }
   }
 
   public isComputed() {
-    return (this.cachedCellValue.cellValue !== undefined)
+    return (this.cachedCellValue !== undefined)
   }
 }

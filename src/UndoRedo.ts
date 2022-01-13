@@ -8,6 +8,7 @@ import {DataRawCellContent, RawCellContent} from './CellContentParser'
 import {ClipboardCell} from './ClipboardOperations'
 import {Config} from './Config'
 import { Emitter } from './Emitter'
+import { CellMetadata } from './interpreter/InterpreterValue'
 import { Maybe } from './Maybe'
 import {InternalNamedExpression, NamedExpressionOptions} from './NamedExpressions'
 import {
@@ -418,7 +419,7 @@ export class BatchUndoEntry extends BaseUndoEntry {
 }
 
 export class UndoRedo {
-  public oldData: Map<number, [SimpleCellAddress, Maybe<any>, string][]> = new Map()
+  public oldData: Map<number, [SimpleCellAddress, string][]> = new Map()
   private undoStack: UndoEntry[] = []
   private redoStack: UndoEntry[] = []
   private readonly undoLimit: number
@@ -453,12 +454,12 @@ export class UndoRedo {
     this.batchUndoEntry = undefined
   }
 
-  public storeDataForVersion(version: number, address: SimpleCellAddress, astHash: string, metadata: Maybe<any>) {
+  public storeDataForVersion(version: number, address: SimpleCellAddress, astHash: string) {
     if (!this.oldData.has(version)) {
       this.oldData.set(version, [])
     }
     const currentOldData = this.oldData.get(version)!
-    currentOldData.push([address, metadata, astHash])
+    currentOldData.push([address, astHash])
   }
 
   public clearRedoStack() {
@@ -547,7 +548,8 @@ export class UndoRedo {
       const address = cellContentData.address
       const [oldContentAddress, oldContent] = cellContentData.oldContent
       if (!equalSimpleCellAddress(address, oldContentAddress)) {
-        this.operations.setCellEmpty(address, oldContent.metadata)
+        this.operations.restoreCellMetadata(address, oldContent.cellMetadata)
+        this.operations.setCellEmpty(address)
       }
       this.operations.restoreCell(oldContentAddress, oldContent)
     }
@@ -798,8 +800,9 @@ export class UndoRedo {
   private restoreOldDataFromVersion(version: number) {
     const oldDataToRestore = this.oldData.get(version) || []
     for (const entryToRestore of oldDataToRestore) {
-      const [address, metadata, hash] = entryToRestore
-      this.operations.setFormulaToCellFromCache(hash, address, metadata)
+      const [address, hash] = entryToRestore
+
+      this.operations.setFormulaToCellFromCache(hash, address)
     }
   }
 }
