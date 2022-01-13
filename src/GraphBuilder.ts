@@ -13,7 +13,6 @@ import {CellDependency} from './CellDependency'
 import {
   ArrayVertex,
   DependencyGraph,
-  EmptyCellVertex,
   FormulaCellVertex,
   ParsingErrorVertex,
   ValueCellVertex,
@@ -21,8 +20,9 @@ import {
 } from './DependencyGraph'
 import {getRawValue} from './interpreter/InterpreterValue'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
+import { Maybe } from './Maybe'
 import {ParserWithCaching} from './parser'
-import {InputSheets, Sheets} from './Sheet'
+import {InputSheets} from './Sheet'
 import {Statistics, StatType} from './statistics'
 
 export type Dependencies = Map<Vertex, CellDependency[]>
@@ -65,7 +65,7 @@ export class GraphBuilder {
 }
 
 export interface GraphBuilderStrategy {
-  run(sheets: Sheets | InputSheets<any, any>): Dependencies,
+  run(sheets: InputSheets<any, any>): Dependencies,
 }
 
 export class SimpleStrategy implements GraphBuilderStrategy {
@@ -80,7 +80,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
   ) {
   }
 
-  public run(sheets: Sheets): Dependencies {
+  public run(sheets: InputSheets<any, any>): Dependencies {
     const dependencies: Map<Vertex, CellDependency[]> = new Map()
 
     for (const sheetName in sheets) {
@@ -107,8 +107,8 @@ export class SimpleStrategy implements GraphBuilderStrategy {
     return dependencies
   }
 
-  private setDependency(address: SimpleCellAddress, rawCellContent: DataRawCellContent, parsedCellContent: CellContent.Type): null | [Vertex, CellDependency[]] {    
-    this.dependencyGraph.addCellMetadata(address, rawCellContent.metadata)
+  private setDependency(address: SimpleCellAddress, rawCellContent: Maybe<DataRawCellContent>, parsedCellContent: CellContent.Type): null | [Vertex, CellDependency[]] {    
+    this.dependencyGraph.addCellMetadata(address, rawCellContent?.metadata)
 
     if (parsedCellContent instanceof CellContent.Formula) {
       const parseResult = this.stats.measure(StatType.PARSER, () => this.parser.parse(parsedCellContent.formula, address))
@@ -155,7 +155,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
       return null
     } else {
       this.shrinkArrayIfNeeded(address)
-      const vertex = new ValueCellVertex(parsedCellContent.value, rawCellContent.cellValue)
+      const vertex = new ValueCellVertex(parsedCellContent.value, rawCellContent?.cellValue)
 
       this.columnIndex.add(getRawValue(parsedCellContent.value), address)
       this.dependencyGraph.addVertex(address, vertex)
