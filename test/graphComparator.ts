@@ -56,6 +56,14 @@ export class EngineComparator {
         const address = simpleCellAddress(sheet, x, y)
         const expectedVertex = this.expected.addressMapping.getCell(address)
         const actualVertex = this.actual.addressMapping.getCell(address)
+
+        const expectedMetadata = this.expected.addressMapping.getCellMetadata(address)
+        const actualMetadata = this.actual.addressMapping.getCellMetadata(address)
+
+        if (JSON.stringify(expectedMetadata) !== JSON.stringify(actualMetadata)) {
+          throw Error('Different metadata types')
+        }
+
         if (expectedVertex === undefined && actualVertex === undefined) {
           continue
         } else if (
