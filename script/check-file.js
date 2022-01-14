@@ -18,12 +18,14 @@ try {
         // differences of up to several seconds. Here the only day we check.
     assert(HyperFormula.buildDate.split(' ')[0] === htConfig.HT_BUILD_DATE.split(' ')[0])
 
-    const [engine] = HyperFormula.buildFromArray([
-        ['42', '=A1 + 2']
-    ], { gpuMode: 'cpu', licenseKey: 'gpl-v3' })
+    const [engine] = HyperFormula.buildFromArray({
+        cells: [
+            [{ cellValue: '42' }, { cellValue: '=A1 + 2' }]
+        ]
+    }, { gpuMode: 'cpu', licenseKey: 'gpl-v3' })
 
-    const valueA1 = engine.getCellValue({ sheet: 0, row: 0, col: 0 })
-    const valueB1 = engine.getCellValue({ sheet: 0, row: 0, col: 1 })
+    const valueA1 = engine.getCellValue({ sheet: 0, row: 0, col: 0 }).cellValue
+    const valueB1 = engine.getCellValue({ sheet: 0, row: 0, col: 1 }).cellValue
 
     // Check if the engine works.
     assert(valueA1 === 42)
