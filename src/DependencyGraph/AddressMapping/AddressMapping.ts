@@ -120,10 +120,10 @@ export class AddressMapping {
       throw Error('Sheet not initialized')
     }
 
-    if (cellMetadata) {
-      sheetMapping.setCellMetadata(address, cellMetadata)
-    } else {
+    if (!cellMetadata || Object.keys(cellMetadata).length === 0) {
       sheetMapping.removeCellMetadata(address)
+    } else {
+      sheetMapping.setCellMetadata(address, cellMetadata)
     }
   }
 

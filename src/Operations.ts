@@ -697,6 +697,10 @@ export class Operations {
 
     this.dependencyGraph.addCellMetadata(address, rawCellContent.metadata)
 
+    if (rawCellContent.cellValue === undefined) {
+      return oldContent
+    }
+
     if (parsedCellContent instanceof CellContent.Formula) {
       const parserResult = this.parser.parse(parsedCellContent.formula, address)
       const {ast, errors} = parserResult

@@ -111,9 +111,11 @@ describe('changing cell content', () => {
     const a1 = engine.addressMapping.fetchCell(adr('A1'))
     const b1 = engine.addressMapping.fetchCell(adr('B1'))
 
-    engine.setCellContents(adr('B1'), [[{ cellValue: undefined, metadata: {test: 'value'} }]])
+    engine.setCellContents(adr('B1'), [[{ cellValue: null, metadata: {test: 'value'} }]])
+    engine.setCellContents(adr('A1'), [[{ metadata: {test: 'value'} }]])
 
     expect(engine.getCellValue(adr('B1'))).toEqual(new CellData(null, { test: 'value'}))
+    expect(engine.getCellValue(adr('A1'))).toEqual(new CellData(1, { test: 'value'}))
     expect(engine.graph.existsEdge(a1, b1)).toBe(false)
   })
 
