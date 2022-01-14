@@ -12,8 +12,8 @@ import {sheet as columnRangesGenerator} from './sheets/column-ranges'
 
   const result: BenchmarkResult[] = []
   batch(result,
-    () => benchmark('Sheet A', sheetA, expectedValuesA(sheetA), {numberOfRuns: 10}),
-    () => benchmark('Sheet B', sheetB, expectedValuesB(sheetB), {numberOfRuns: 10}),
+    () => benchmark('Sheet A', sheetA, expectedValuesA(), {numberOfRuns: 10}),
+    () => benchmark('Sheet B', sheetB, expectedValuesB(), {numberOfRuns: 10}),
     () => benchmark('Sheet T', sheetT, expectedValuesT(sheetT), {numberOfRuns: 10}),
     () => benchmark('Column ranges', infiniteRanges, [{
       address: 'AX50',

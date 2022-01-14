@@ -4,7 +4,7 @@
  */
 
 import {CellError} from '../Cell'
-import {AsyncVertex} from '../DependencyGraph/FormulaCellVertex'
+import { Maybe } from '../Maybe'
 import {SimpleRangeValue} from './SimpleRangeValue'
 
 export const EmptyValue = Symbol('Empty value')
@@ -14,20 +14,49 @@ export type EmptyValueType = typeof EmptyValue
 export type InternalNoErrorScalarValue = RichNumber | RawNoErrorScalarValue
 
 export type InternalScalarValue = RichNumber | RawScalarValue
+export type DataInternalScalarValue = CellData<InternalScalarValue>
 export type AsyncInternalScalarValue = Promise<InternalScalarValue>
 
 export type InterpreterValue = RichNumber | RawInterpreterValue
+export type DataInterpreterValue = CellData<InterpreterValue>
 export type AsyncInterpreterValue = Promise<InterpreterValue>
 
 export type RawNoErrorScalarValue = number | string | boolean | EmptyValueType
 export type RawScalarValue = RawNoErrorScalarValue | CellError
+export type DataRawScalarValue = CellData<RawScalarValue>
+
 export type RawInterpreterValue = RawScalarValue | SimpleRangeValue
+export type DataRawInterpreterValue = CellData<RawInterpreterValue>
 
 export function getRawValue<T>(num: RichNumber | T): number | T {
   if (num instanceof RichNumber) {
     return num.val
   } else {
     return num
+  }
+}
+
+export type CellMetadata = Maybe<Object>
+
+export class CellData<CellValue, CellMetadataType = CellMetadata> {
+  public metadata?: CellMetadata
+
+  constructor(public cellValue: CellValue, metadata?: CellMetadataType) {
+    if (metadata !== undefined) {
+      this.metadata = metadata
+    }
+  }
+
+  public toRawContent() {
+    if (this.metadata !== undefined) {
+      return {
+        cellValue: this.cellValue,
+        metadata: this.metadata
+      }
+    }
+    return {
+      cellValue: this.cellValue
+    }
   }
 }
 
@@ -125,11 +154,3 @@ export function getTypeFormatOfExtendedNumber(num: ExtendedNumber): NumberTypeWi
     return {type: NumberType.NUMBER_RAW}
   }
 }
-
-export interface AsyncPromiseVertex {
-  getPromise?: () => AsyncInterpreterValue,
-  asyncVertex?: AsyncVertex,
-} 
-
-export type InterpreterTuple = [InterpreterValue, AsyncPromiseVertex]
-export type OptionalInterpreterTuple = [InterpreterValue, AsyncPromiseVertex?]

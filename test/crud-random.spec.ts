@@ -90,7 +90,7 @@ function randomSums(engine: HyperFormula, rectFormulas: Rectangle, rectValues: R
     if (outputLog) {
       console.log(`engine.setCellContents({sheet: 0, col: ${pts.x}, row: ${pts.y}}, '${formula}')`)
     }
-    engine.setCellContents({sheet: 0, col: pts.x, row: pts.y}, formula)
+    engine.setCellContents({sheet: 0, col: pts.x, row: pts.y}, { cellValue: formula })
     undoRedo(engine)
   })
 }
@@ -106,7 +106,7 @@ function randomVals(engine: HyperFormula, rectValues: Rectangle) {
     if (outputLog) {
       console.log(`engine.setCellContents({sheet: 0, col:${pts.x}, row:${pts.y}}, ${val})`)
     }
-    engine.setCellContents({sheet: 0, col: pts.x, row: pts.y}, val)
+    engine.setCellContents({sheet: 0, col: pts.x, row: pts.y}, { cellValue: val})
     undoRedo(engine)
   })
 }
@@ -201,7 +201,7 @@ function randomCleanup(engine: HyperFormula, rect: Rectangle) {
       if (outputLog) {
         console.log(`engine.setCellContents({sheet: 0, col:${pts.x}, row:${pts.y}}, null)`)
       }
-      engine.setCellContents({sheet: 0, col: pts.x, row: pts.y}, null)
+      engine.setCellContents({sheet: 0, col: pts.x, row: pts.y}, { cellValue: null })
       undoRedo(engine)
     }
   )
@@ -209,7 +209,7 @@ function randomCleanup(engine: HyperFormula, rect: Rectangle) {
 
 describe('large psuedo-random test', () => {
   it('growing rectangle + addRows + addColumns + removeRows + removeColumns should produce the same sheet as static sheet', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     let sideX = 3
     const n = 4
     let sideY = 3

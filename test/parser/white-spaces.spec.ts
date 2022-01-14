@@ -46,21 +46,21 @@ describe('tokenizeFormula', () => {
     const tokens = lexer.tokenizeFormula('= A1 + TRUE').tokens
 
     const tokenTypes = tokens.map(token => token.tokenType.name)
-    expectArrayWithSameContent(tokenTypes, ['EqualsOp', 'WhiteSpace', 'CellReference', 'WhiteSpace', 'PlusOp', 'WhiteSpace', 'NamedExpression'])
+    expectArrayWithSameContent(tokenTypes, ['EqualsOp', 'WhiteSpace', 'CellReference', 'WhiteSpace', 'PlusOp', 'WhiteSpace', 'NamedExpression' ])
   })
 
   it('should skip whitespace before function args separator', () => {
     const tokens = lexer.tokenizeFormula('=SUM(A1 , A2)').tokens
     const tokenTypes = tokens.map(token => token.tokenType.name)
 
-    expectArrayWithSameContent(tokenTypes, ['EqualsOp', 'ProcedureName', 'CellReference', 'ArrayColSep', 'WhiteSpace', 'CellReference', 'RParen'])
+    expectArrayWithSameContent(tokenTypes, ['EqualsOp', 'ProcedureName', 'CellReference', 'ArrayColSep', 'WhiteSpace', 'CellReference', 'RParen' ])
   })
 
   it('should not skip whitespace when there is empty argument ', () => {
     const tokens = lexer.tokenizeFormula('=PV(A1 ,   ,A2)').tokens
     const tokenTypes = tokens.map(token => token.tokenType.name)
 
-    expectArrayWithSameContent(tokenTypes, ['EqualsOp', 'ProcedureName', 'CellReference', 'ArrayColSep', 'WhiteSpace', 'ArgSeparator', 'CellReference', 'RParen'])
+    expectArrayWithSameContent(tokenTypes, ['EqualsOp', 'ProcedureName', 'CellReference', 'ArrayColSep', 'WhiteSpace', 'ArgSeparator', 'CellReference', 'RParen' ])
   })
 
   it('should treat space as whitespace', () => {

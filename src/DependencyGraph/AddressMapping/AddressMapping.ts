@@ -4,11 +4,11 @@
  */
 
 import {SimpleCellAddress} from '../../Cell'
-import {RawCellContent} from '../../CellContentParser'
+import {DataRawCellContent} from '../../CellContentParser'
 import {NoSheetWithIdError} from '../../errors'
-import {EmptyValue, InterpreterValue} from '../../interpreter/InterpreterValue'
+import {CellData, CellMetadata, DataInterpreterValue, EmptyValue} from '../../interpreter/InterpreterValue'
 import {Maybe} from '../../Maybe'
-import {Sheet, SheetBoundaries} from '../../Sheet'
+import {SheetBoundaries} from '../../Sheet'
 import {ColumnsSpan, RowsSpan} from '../../Span'
 import {ArrayVertex, ValueCellVertex} from '../index'
 import {CellVertex} from '../Vertex'
@@ -32,10 +32,19 @@ export class AddressMapping {
     return sheetMapping.getCell(address)
   }
 
+  /** @inheritDoc */
+  public getCellMetadata(address: SimpleCellAddress): CellMetadata {
+    const sheetMapping = this.mapping.get(address.sheet)
+    if (sheetMapping === undefined) {
+      throw new NoSheetWithIdError(address.sheet)
+    }
+    return sheetMapping.getCellMetadata(address)
+  }
+
   public fetchCell(address: SimpleCellAddress): CellVertex {
     const sheetMapping = this.mapping.get(address.sheet)
     if (sheetMapping === undefined) {
-      throw  new NoSheetWithIdError(address.sheet)
+      throw new NoSheetWithIdError(address.sheet)
     }
     const vertex = sheetMapping.getCell(address)
     if (!vertex) {
@@ -61,33 +70,38 @@ export class AddressMapping {
     this.mapping.set(sheetId, strategy)
   }
 
-  public autoAddSheet(sheetId: number, sheet: Sheet, sheetBoundaries: SheetBoundaries) {
+  public autoAddSheet(sheetId: number, sheetBoundaries: SheetBoundaries) {
     const {height, width, fill} = sheetBoundaries
     const strategyConstructor = this.policy.call(fill)
     this.addSheet(sheetId, new strategyConstructor(width, height))
   }
 
-  public getCellValue(address: SimpleCellAddress): InterpreterValue {
+  public getCellValue(address: SimpleCellAddress): DataInterpreterValue {
     const vertex = this.getCell(address)
+    const cellMetadata = this.getCellMetadata(address)
 
     if (vertex === undefined) {
-      return EmptyValue
+      return new CellData(EmptyValue, cellMetadata)
     } else if (vertex instanceof ArrayVertex) {
-      return vertex.getArrayCellValue(address)
-    } else {
-      return vertex.getCellValue()
+      return new CellData(vertex.getArrayCellValue(address), cellMetadata)
     }
+      
+    return new CellData(vertex.getCellValue(), cellMetadata)
   }
 
-  public getRawValue(address: SimpleCellAddress): RawCellContent {
+  public getRawValue(address: SimpleCellAddress): DataRawCellContent {
     const vertex = this.getCell(address)
+    const cellMetadata = this.getCellMetadata(address)
+
     if (vertex instanceof ValueCellVertex) {
-      return vertex.getValues().rawValue
+      const values = vertex.getValues()
+
+      return new CellData(values.rawValue, cellMetadata).toRawContent()
     } else if (vertex instanceof ArrayVertex) {
-      return vertex.getArrayCellRawValue(address)
-    } else {
-      return null
+      return new CellData(vertex.getArrayCellRawValue(address), cellMetadata).toRawContent()
     }
+
+    return new CellData(null, cellMetadata).toRawContent()
   }
 
   /** @inheritDoc */
@@ -97,6 +111,20 @@ export class AddressMapping {
       throw Error('Sheet not initialized')
     }
     sheetMapping.setCell(address, newVertex)
+  }
+
+  /** @inheritDoc */
+  public setCellMetadata(address: SimpleCellAddress, cellMetadata: CellMetadata) {
+    const sheetMapping = this.mapping.get(address.sheet)
+    if (!sheetMapping) {
+      throw Error('Sheet not initialized')
+    }
+
+    if (!cellMetadata || Object.keys(cellMetadata).length === 0) {
+      sheetMapping.removeCellMetadata(address)
+    } else {
+      sheetMapping.setCellMetadata(address, cellMetadata)
+    }
   }
 
   public moveCell(source: SimpleCellAddress, destination: SimpleCellAddress) {
@@ -114,8 +142,13 @@ export class AddressMapping {
     if (vertex === undefined) {
       throw new Error('Cannot move cell. No cell with such address.')
     }
+    const cellMetadata = sheetMapping.getCellMetadata(source)
+
     this.setCell(destination, vertex)
+    this.setCellMetadata(destination, cellMetadata)
+    
     this.removeCell(source)
+    this.removeCellMetadata(source)
   }
 
   public removeCell(address: SimpleCellAddress) {
@@ -124,6 +157,14 @@ export class AddressMapping {
       throw Error('Sheet not initialized')
     }
     sheetMapping.removeCell(address)
+  }
+
+  public removeCellMetadata(address: SimpleCellAddress) {
+    const sheetMapping = this.mapping.get(address.sheet)
+    if (!sheetMapping) {
+      throw Error('Sheet not initialized')
+    }
+    sheetMapping.removeCellMetadata(address)
   }
 
   /** @inheritDoc */

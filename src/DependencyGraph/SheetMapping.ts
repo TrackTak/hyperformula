@@ -15,6 +15,7 @@ class Sheet {
   constructor(
     public readonly id: number,
     public displayName: string,
+    public sheetMetadata: any
   ) {
   }
 
@@ -33,21 +34,35 @@ export class SheetMapping {
     this.sheetNamePrefix = languages.getUITranslation(UIElement.NEW_SHEET_PREFIX)
   }
 
-  public addSheet(newSheetDisplayName: string = `${this.sheetNamePrefix}${this.lastSheetId + 2}`): number {
+  public setSheetMetadata(sheetId: number, sheetMetadata: any) {
+    const sheet = this.fetchSheetById(sheetId)
+
+    sheet.sheetMetadata = sheetMetadata
+  }
+
+  public addSheet(newSheetDisplayName: string = `${this.sheetNamePrefix}${this.lastSheetId + 2}`, sheetMetadata?: any, sheetId?: number): number {
     const newSheetCanonicalName = canonicalize(newSheetDisplayName)
     if (this.mappingFromCanonicalName.has(newSheetCanonicalName)) {
       throw new SheetNameAlreadyTakenError(newSheetDisplayName)
     }
 
-    this.lastSheetId++
-    const sheet = new Sheet(this.lastSheetId, newSheetDisplayName)
+
+    let sheet: Sheet
+    if (sheetId !== undefined) {
+      sheet = new Sheet(sheetId, newSheetDisplayName, sheetMetadata)
+    } else {
+      this.lastSheetId++
+
+      sheet = new Sheet(this.lastSheetId, newSheetDisplayName, sheetMetadata)  
+    }
+
     this.store(sheet)
     return sheet.id
   }
 
-  public removeSheet(sheetId: number) {
+  public removeSheet(sheetId: number, decrementLastSheetId: boolean) {
     const sheet = this.fetchSheetById(sheetId)
-    if (sheetId == this.lastSheetId) {
+    if (sheetId == this.lastSheetId && decrementLastSheetId) {
       --this.lastSheetId
     }
     this.mappingFromCanonicalName.delete(sheet.canonicalName)
@@ -117,16 +132,16 @@ export class SheetMapping {
     return Array.from(this.mappingFromId.values()).map((s) => s.displayName)
   }
 
-  private store(sheet: Sheet): void {
-    this.mappingFromId.set(sheet.id, sheet)
-    this.mappingFromCanonicalName.set(sheet.canonicalName, sheet)
-  }
-
-  private fetchSheetById(sheetId: number): Sheet {
+  public fetchSheetById(sheetId: number): Sheet {
     const sheet = this.mappingFromId.get(sheetId)
     if (sheet === undefined) {
       throw new NoSheetWithIdError(sheetId)
     }
     return sheet
+  }
+
+  private store(sheet: Sheet): void {
+    this.mappingFromId.set(sheet.id, sheet)
+    this.mappingFromCanonicalName.set(sheet.canonicalName, sheet)
   }
 }

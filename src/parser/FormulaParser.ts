@@ -13,7 +13,6 @@
   OrMethodOpts,
   tokenMatcher
 } from 'chevrotain'
-
 import {CellError, ErrorType, simpleCellAddress, SimpleCellAddress} from '../Cell'
 import {ErrorMessage} from '../error-message'
 import {Maybe} from '../Maybe'
@@ -120,9 +119,7 @@ export interface FormulaParserResult {
  * A -> A1 | $A1 | A$1 | $A$1 <br/>
  * P -> SUM(..) <br/>
  */
-export class FormulaParser extends EmbeddedActionsParser {
-  private lexerConfig: ILexerConfig
-
+export class FormulaParser extends EmbeddedActionsParser {  
   /**
    * Address of the cell in which formula is located
    */
@@ -174,6 +171,7 @@ export class FormulaParser extends EmbeddedActionsParser {
     }
 
     const rParenToken = this.CONSUME(RParen) as IExtendedToken
+    
     if (rParenToken.leadingWhitespace) {
       if (argument.type === AstNodeType.EMPTY) {
         argument.startOffset = rParenToken.leadingWhitespace.startOffset
@@ -537,9 +535,8 @@ export class FormulaParser extends EmbeddedActionsParser {
     ])
   })
 
-  constructor(lexerConfig: ILexerConfig, sheetMapping: SheetMappingFn) {
+  constructor(private readonly lexerConfig: ILexerConfig, sheetMapping: SheetMappingFn) {
     super(lexerConfig.allTokens, {outputCst: false, maxLookahead: 7})
-    this.lexerConfig = lexerConfig
     this.sheetMapping = sheetMapping
     this.formulaAddress = simpleCellAddress(0, 0, 0)
     this.performSelfAnalysis()

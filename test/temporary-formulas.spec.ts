@@ -2,7 +2,7 @@ import {HyperFormula} from '../src'
 
 describe('Temporary formulas - normalization', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
     const normalizedFormula = engine.normalizeFormula('=SHEET1!A1+10')
 
@@ -10,7 +10,7 @@ describe('Temporary formulas - normalization', () => {
   })
 
   it('fail with a typo', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
     const normalizedFormula = engine.normalizeFormula('=SHET1!A1+10')
     const normalizedFormula2 = engine.normalizeFormula('=SUM(SHET1!A1:A100)')
@@ -20,7 +20,7 @@ describe('Temporary formulas - normalization', () => {
   })
 
   it('works with absolute addressing', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
     const normalizedFormula = engine.normalizeFormula('=3*$a$1')
 
@@ -38,7 +38,7 @@ describe('Temporary formulas - normalization', () => {
 
 describe('Temporary formulas - validation', () => {
   it('ok for formulas', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
     const formula = '=Sheet1!A1+10'
 
@@ -46,20 +46,20 @@ describe('Temporary formulas - validation', () => {
   })
 
   it('fail for simple values', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
     expect(engine.validateFormula('42')).toBe(false)
     expect(engine.validateFormula('some text')).toBe(false)
   })
 
   it('fail when not a formula', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
     expect(engine.validateFormula('=SOME SYNTAX ERRORS')).toBe(false)
   })
 
   it('ok when literal error', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
     expect(engine.validateFormula('=#N/A')).toBe(true)
   })
@@ -75,9 +75,9 @@ describe('Temporary formulas - validation', () => {
 
 describe('Temporary formulas - calculation', () => {
   it('basic usage', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['42'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '42' }],
+    ]})
 
     const [result] = engine.calculateFormula('=Sheet1!A1+10', 0)
 
@@ -86,8 +86,8 @@ describe('Temporary formulas - calculation', () => {
 
   it('formulas are executed in context of given sheet', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [['42']],
-      Sheet2: [['58']],
+      Sheet1: { cells:  [[{ cellValue: '42' }]] },
+      Sheet2: { cells:  [[{ cellValue: '58' }]] },
     })
 
     expect(engine.calculateFormula('=A1+10', 0)[0]).toEqual(52)
@@ -95,9 +95,9 @@ describe('Temporary formulas - calculation', () => {
   })
 
   it('when sheet name does not exist', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['42'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '42' }],
+    ]})
 
     expect(() => {
       engine.calculateFormula('=Sheet1!A1+10', 1)
@@ -105,18 +105,18 @@ describe('Temporary formulas - calculation', () => {
   })
 
   it('SUM with range args', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['3', '4']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '3' }, { cellValue: '4' }]
+    ]})
     expect(engine.calculateFormula('=SUM(A1:B2)', 0)[0]).toEqual(10)
   })
 
   it('non-scalars work', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['1', '2'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '1' }, { cellValue: '2' }],
+    ]})
 
     const [result] = engine.calculateFormula('=TRANSPOSE(A1:B2)', 0)
 
@@ -124,12 +124,12 @@ describe('Temporary formulas - calculation', () => {
   })
 
   it('more non-scalars', () => {
-    const [engine] = HyperFormula.buildFromArray([[0, 1]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: 0 }, { cellValue: 1 }]] })
     expect(engine.calculateFormula('=ARRAYFORMULA(ISEVEN(A1:B2*3))', 0)[0]).toEqual([[true, false], [true, true]])
   })
 
   it('passing something which is not a formula doesnt work', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
     expect(() => {
       engine.calculateFormula('{=TRANSPOSE(A1:B2)}', 0)

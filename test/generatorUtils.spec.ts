@@ -15,21 +15,21 @@ describe('split', () => {
   })
 
   it('works for one element case', () => {
-    const arr = [42]
+    const arr = [{ cellValue: 42 }]
 
     const result = split(arr[Symbol.iterator]())
 
-    expect(result.value).toBe(42)
-    expect(Array.from(result.rest)).toEqual([])
+    expect(result.value?.cellValue).toBe(42)
+    expect(Array.from(result.rest).map(x => x.cellValue)).toEqual([])
   })
 
   it('works for more elements case', () => {
-    const arr = [42, 43]
+    const arr = [{ cellValue: 42 }, { cellValue: 43 }]
 
     const result = split(arr[Symbol.iterator]())
 
-    expect(result.value).toBe(42)
-    expect(Array.from(result.rest)).toEqual([43])
+    expect(result.value?.cellValue).toBe(42)
+    expect(Array.from(result.rest).map(x => x.cellValue)).toEqual([43])
   })
 })
 
@@ -39,14 +39,14 @@ describe('first', () => {
   })
 
   it('works for one element case', () => {
-    const arr = [42]
+    const arr = [{ cellValue: 42 }]
 
-    expect(first(arr[Symbol.iterator]())).toEqual(42)
+    expect(first(arr[Symbol.iterator]())?.cellValue).toEqual(42)
   })
 
   it('works for more elements case', () => {
-    const arr = [42, 43]
+    const arr = [{ cellValue: 42 }, { cellValue: 43 }]
 
-    expect(first(arr[Symbol.iterator]())).toEqual(42)
+    expect(first(arr[Symbol.iterator]())?.cellValue).toEqual(42)
   })
 })

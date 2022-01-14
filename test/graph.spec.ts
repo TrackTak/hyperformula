@@ -308,34 +308,34 @@ describe('Graph#getTopologicallySortedSubgraphFrom', () => {
 
   it('does call if some previous vertex marked as changed', () => {
     const graph = new Graph<string>(dummyGetDependenciesQuery)
-    const nodes = ['foo', 'bar', 'baz']
+    const nodes = [{ cellValue: 'foo' }, { cellValue: 'bar' }, { cellValue: 'baz' }]
 
-    nodes.forEach((n) => graph.addNode(n))
-    graph.addEdge(nodes[0], nodes[2])
-    graph.addEdge(nodes[1], nodes[2])
+    nodes.forEach((n) => graph.addNode(n.cellValue))
+    graph.addEdge(nodes[0].cellValue, nodes[2].cellValue)
+    graph.addEdge(nodes[1].cellValue, nodes[2].cellValue)
 
-    const fn = jasmine.createSpy().and.callFake((node: string) => node === nodes[0])
+    const fn = jasmine.createSpy().and.callFake((node: string) => node === nodes[0].cellValue)
     const fn2 = jasmine.createSpy()
 
-    graph.getTopSortedWithSccSubgraphFrom([nodes[0], nodes[1]], fn, fn2)
+    graph.getTopSortedWithSccSubgraphFrom([nodes[0].cellValue, nodes[1].cellValue], fn, fn2)
 
     expect(fn).toHaveBeenCalledTimes(3)
-    expect(fn.calls.argsFor(2)).toContain(nodes[2])
+    expect(fn.calls.argsFor(2)).toContain(nodes[2].cellValue)
   })
 
   it('returns cycled vertices', () => {
     const graph = new Graph<string>(dummyGetDependenciesQuery)
-    const nodes = ['foo', 'c0', 'c1', 'c2']
+    const nodes = [{ cellValue: 'foo' }, { cellValue: 'c0' }, { cellValue: 'c1' }, { cellValue: 'c2'}]
 
-    nodes.forEach((n) => graph.addNode(n))
-    graph.addEdge(nodes[0], nodes[1])
-    graph.addEdge(nodes[1], nodes[2])
-    graph.addEdge(nodes[2], nodes[3])
-    graph.addEdge(nodes[3], nodes[1])
+    nodes.forEach((n) => graph.addNode(n.cellValue))
+    graph.addEdge(nodes[0].cellValue, nodes[1].cellValue)
+    graph.addEdge(nodes[1].cellValue, nodes[2].cellValue)
+    graph.addEdge(nodes[2].cellValue, nodes[3].cellValue)
+    graph.addEdge(nodes[3].cellValue, nodes[1].cellValue)
 
     const fn = jasmine.createSpy().and.returnValue(true)
     const fn2 = jasmine.createSpy()
-    const cycled = graph.getTopSortedWithSccSubgraphFrom([nodes[0]], fn, fn2).cycled
+    const cycled = graph.getTopSortedWithSccSubgraphFrom([nodes[0].cellValue], fn, fn2).cycled
 
     expect(fn).toHaveBeenCalledTimes(1)
     expect(cycled).toEqual(['c0', 'c1', 'c2'])
@@ -343,15 +343,15 @@ describe('Graph#getTopologicallySortedSubgraphFrom', () => {
 
   it('doesnt call first one of the given vertices if its on cycle', () => {
     const graph = new Graph<string>(dummyGetDependenciesQuery)
-    const nodes = ['c0', 'c1', 'c2']
-    nodes.forEach((n) => graph.addNode(n))
-    graph.addEdge(nodes[0], nodes[1])
-    graph.addEdge(nodes[1], nodes[2])
-    graph.addEdge(nodes[2], nodes[0])
+    const nodes = [{ cellValue: 'c0' }, { cellValue: 'c1' }, { cellValue: 'c2' }]
+    nodes.forEach((n) => graph.addNode(n.cellValue))
+    graph.addEdge(nodes[0].cellValue, nodes[1].cellValue)
+    graph.addEdge(nodes[1].cellValue, nodes[2].cellValue)
+    graph.addEdge(nodes[2].cellValue, nodes[0].cellValue)
 
     const fn = jasmine.createSpy().and.returnValue(true)
     const fn2 = jasmine.createSpy()
-    const cycled = graph.getTopSortedWithSccSubgraphFrom([nodes[0]], fn, fn2).cycled
+    const cycled = graph.getTopSortedWithSccSubgraphFrom([nodes[0].cellValue], fn, fn2).cycled
 
     expect(fn).not.toHaveBeenCalled()
     expect(cycled).toEqual(['c0', 'c1', 'c2'])
@@ -359,16 +359,16 @@ describe('Graph#getTopologicallySortedSubgraphFrom', () => {
 
   it('returns cycled vertices even if they were not tried to be computed', () => {
     const graph = new Graph<string>(dummyGetDependenciesQuery)
-    const nodes = ['foo', 'c0', 'c1', 'c2']
-    nodes.forEach((n) => graph.addNode(n))
-    graph.addEdge(nodes[0], nodes[1])
-    graph.addEdge(nodes[1], nodes[2])
-    graph.addEdge(nodes[2], nodes[3])
-    graph.addEdge(nodes[3], nodes[1])
+    const nodes = [{ cellValue: 'foo' }, { cellValue: 'c0' }, { cellValue: 'c1' }, { cellValue: 'c2'}]
+    nodes.forEach((n) => graph.addNode(n.cellValue))
+    graph.addEdge(nodes[0].cellValue, nodes[1].cellValue)
+    graph.addEdge(nodes[1].cellValue, nodes[2].cellValue)
+    graph.addEdge(nodes[2].cellValue, nodes[3].cellValue)
+    graph.addEdge(nodes[3].cellValue, nodes[1].cellValue)
 
     const fn = jasmine.createSpy().and.returnValue(true)
     const fn2 = jasmine.createSpy()
-    const cycled = graph.getTopSortedWithSccSubgraphFrom([nodes[0]], fn, fn2).cycled
+    const cycled = graph.getTopSortedWithSccSubgraphFrom([nodes[0].cellValue], fn, fn2).cycled
 
     expect(fn).toHaveBeenCalledTimes(1)
     expect(cycled).toEqual(['c0', 'c1', 'c2'])

@@ -60,29 +60,28 @@ describe('infer return types', () => {
   })
 
   it('numbers', () => {
-    const [engine] = HyperFormula.buildFromArray([['=INFERFOO()', '=INFERFOO(0)']])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=INFERFOO()' }, { cellValue: '=INFERFOO(0)' }]]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
     
-    expect(engine.getCellValue(adr('B1'))).toEqual(.02)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(.02)
     expect(engine.getCellValueDetailedType(adr('B1'))).toBe(CellValueDetailedType.NUMBER_PERCENT)
   })
 
   it('arrays', () => {
-    const [engine] = HyperFormula.buildFromArray([['=ARRAYINFERFOO()']])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=ARRAYINFERFOO()' }]]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2)
     expect(engine.getCellValueDetailedType(adr('A1'))).toBe(CellValueDetailedType.NUMBER_CURRENCY)
     
-    expect(engine.getCellValue(adr('B1'))).toEqual(.02)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(.02)
     expect(engine.getCellValueDetailedType(adr('B1'))).toBe(CellValueDetailedType.NUMBER_PERCENT)
   
-    expect(engine.getCellValue(adr('A2'))).toEqual(2)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(2)
     expect(engine.getCellValueDetailedType(adr('A2'))).toBe(CellValueDetailedType.NUMBER_RAW)
     
-    expect(engine.getCellValue(adr('B2'))).toEqual('\"2%\"')
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual('\"2%\"')
     expect(engine.getCellValueDetailedType(adr('B2'))).toBe(CellValueDetailedType.STRING)
-
   })
 })

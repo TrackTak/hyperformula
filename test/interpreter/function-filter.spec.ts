@@ -4,44 +4,44 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function FILTER', () => {
   it('validates input #1', () => {
-    const [engine] = HyperFormula.buildFromArray([['=FILTER(D2:E3, D2:E3)']])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=FILTER(D2:E3, D2:E3)' }]]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongDimension))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongDimension))
   })
 
   it('validates input #2', () => {
-    const [engine] = HyperFormula.buildFromArray([['=FILTER(D2:D3, D2:D3, D2:D4)']])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=FILTER(D2:D3, D2:D3, D2:D4)' }]]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EqualLength))
   })
 
   it('validates input #3', () => {
-    const [engine] = HyperFormula.buildFromArray([['=FILTER(1, FALSE())']])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=FILTER(1, FALSE())' }]]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EmptyRange))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.EmptyRange))
   })
 
   it('works #1', () => {
-    const [engine] = HyperFormula.buildFromArray([['=FILTER(A2:C2,A3:C3)'], [1, 2, 3], [true, false, true]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=FILTER(A2:C2,A3:C3)' }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: true }, { cellValue: false }, { cellValue: true }]]})
 
-    expect(engine.getSheetValues(0)).toEqual([[1, 3], [1, 2, 3], [true, false, true]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: 3 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: true }, { cellValue: false }, { cellValue: true }]])
   })
 
   it('works #2', () => {
-    const [engine] = HyperFormula.buildFromArray([['=FILTER(A2:C2,A3:C3,A4:C4)'], [1, 2, 3], [true, false, true], [true, true, false]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=FILTER(A2:C2,A3:C3,A4:C4)' }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: true }, { cellValue: false }, { cellValue: true}], [{ cellValue: true }, { cellValue: false }, { cellValue: true }]]})
 
-    expect(engine.getSheetValues(0)).toEqual([[1], [1, 2, 3], [true, false, true], [true, true, false]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: 3 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: true }, { cellValue: false }, { cellValue: true}], [{ cellValue: true }, { cellValue: false }, { cellValue: true }]])
   })
 
   it('works #3', () => {
-    const [engine] = HyperFormula.buildFromArray([['=FILTER(B1:B3,C1:C3)', 1, true], [undefined, 2, false], [undefined, 3, true]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=FILTER(B1:B3,C1:C3)' }, { cellValue: 1 }, { cellValue: true }], [{ cellValue: undefined }, { cellValue: 2 }, { cellValue: false }], [{ cellValue: undefined }, { cellValue: 3 }, { cellValue: true }]]})
 
-    expect(engine.getSheetValues(0)).toEqual([[1, 1, true], [3, 2, false], [null, 3, true]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: 1 }, { cellValue: true }], [{ cellValue: 3 }, { cellValue: 2 }, { cellValue: false }], [{ cellValue: null }, { cellValue: 3 }, { cellValue: true }]])
   })
 
   it('enables array arithmetic', () => {
-    const [engine] = HyperFormula.buildFromArray([['=FILTER(2*A2:C2,A3:C3)'], [1, 2, 3], [true, true, true]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=FILTER(2*A2:C2,A3:C3)' }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: true }, { cellValue: true }, { cellValue: true }]]})
 
-    expect(engine.getSheetValues(0)).toEqual([[2, 4, 6], [1, 2, 3], [true, true, true]])
+    expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 2 }, { cellValue: 4 }, { cellValue: 6 }], [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: 3 }], [{ cellValue: true }, { cellValue: true }, { cellValue: true }]])
   })
 })

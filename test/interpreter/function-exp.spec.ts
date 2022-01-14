@@ -5,47 +5,47 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function EXP', () => {
   it('happy path', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=EXP(0)', '=EXP(2)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=EXP(0)' }, { cellValue: '=EXP(2)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('B1'))).toBeCloseTo(7.38905609893065)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBeCloseTo(7.38905609893065)
   })
 
   it('given wrong argument type', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=EXP("foo")'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=EXP("foo")' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
   })
 
   it('use number coercion', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['="2"', '=EXP(A1)'],
-      ['=FALSE()', '=EXP(A2)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '="2"' }, { cellValue: '=EXP(A1)' }],
+      [{ cellValue: '=FALSE()' }, { cellValue: '=EXP(A2)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('B1'))).toBeCloseTo(7.38905609893065)
-    expect(engine.getCellValue(adr('B2'))).toEqual(1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toBeCloseTo(7.38905609893065)
+    expect(engine.getCellValue(adr('B2')).cellValue).toEqual(1)
   })
 
   it('given wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=EXP()'],
-      ['=EXP(1, 2)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=EXP()' }],
+      [{ cellValue: '=EXP(1, 2)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('errors propagation', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=EXP(4/0)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=EXP(4/0)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

@@ -5,15 +5,15 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function PI', () => {
   it('wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([['=PI(1)']])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=PI(1)' }]]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
   it('should return PI with proper precision', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=PI()'],
-    ], {smartRounding: false})
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=PI()' }],
+    ] }, {smartRounding: false})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(3.14159265358979)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(3.14159265358979)
   })
 })

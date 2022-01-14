@@ -20,18 +20,18 @@ class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlu
 describe('Plugins', () => {
   it('Extending with a plugin', () => {
     HyperFormula.getLanguage('enGB').extendFunctions({'FOO': 'FOO'})
-    const [engine] = HyperFormula.buildFromArray([
-      ['=foo()'],
-    ], {functionPlugins: [FooPlugin]})
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=foo()' }],
+    ] }, {functionPlugins: [FooPlugin]})
 
-    expect(engine.getCellValue(adr('A1'))).toBe(42)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(42)
   })
 
   it('cleanup', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=foo()'],
-    ], {functionPlugins: [FooPlugin]})
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=foo()' }],
+    ] }, {functionPlugins: [FooPlugin]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOO')))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.FunctionName('FOO')))
   })
 })

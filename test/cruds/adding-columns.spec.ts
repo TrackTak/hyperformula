@@ -15,19 +15,19 @@ import {
 
 describe('Adding column - checking if its possible', () => {
   it('no if starting column is negative', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(engine.isItPossibleToAddColumns(0, [-1, 1])).toEqual(false)
   })
 
   it('no if starting column is not an integer', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(engine.isItPossibleToAddColumns(0, [1.5, 1])).toEqual(false)
   })
 
   it('no if starting column is NaN/Infinity', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(engine.isItPossibleToAddColumns(0, [NaN, 1])).toEqual(false)
     expect(engine.isItPossibleToAddColumns(0, [Infinity, 1])).toEqual(false)
@@ -35,19 +35,19 @@ describe('Adding column - checking if its possible', () => {
   })
 
   it('no if number of columns is not positive', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
-    expect(engine.isItPossibleToAddColumns(0, [0, 0])).toEqual(false)
+    expect(engine.isItPossibleToAddColumns(0, [0, 0]))
   })
 
   it('no if number of columns is not an integer', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(engine.isItPossibleToAddColumns(0, [0, 1.5])).toEqual(false)
   })
 
   it('no if number of columns is NaN/Infinity', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(engine.isItPossibleToAddColumns(0, [0, NaN])).toEqual(false)
     expect(engine.isItPossibleToAddColumns(0, [0, Infinity])).toEqual(false)
@@ -55,7 +55,7 @@ describe('Adding column - checking if its possible', () => {
   })
 
   it('no if sheet does not exist', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(engine.isItPossibleToAddColumns(1, [0, 1])).toEqual(false)
     expect(engine.isItPossibleToAddColumns(1.5, [0, 1])).toEqual(false)
@@ -66,16 +66,16 @@ describe('Adding column - checking if its possible', () => {
   })
 
   it('no if adding column would exceed sheet size limit', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      Array(Config.defaultConfig.maxColumns - 1).fill('')
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      Array(Config.defaultConfig.maxColumns - 1).fill({ cellValue: ''})
+    ]})
 
-    expect(engine.isItPossibleToAddColumns(0, [0, 2])).toEqual(false)
+    expect(engine.isItPossibleToAddColumns(0, [0, 2])).toBe(false)
     expect(engine.isItPossibleToAddColumns(0, [0, 1], [5, 1])).toEqual(false)
   })
 
   it('yes otherwise', () => {
-    const [engine] = HyperFormula.buildFromArray([[]])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[]] })
 
     expect(engine.isItPossibleToAddColumns(0, [0, 1])).toEqual(true)
   })
@@ -83,82 +83,82 @@ describe('Adding column - checking if its possible', () => {
 
 describe('Adding column - matrix check', () => {
   it('should be possible to add a row crossing matrix', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', 'foo', 'bar'],
-      ['3', '4', '=TRANSPOSE(A1:B3)'],
-      ['5', '6'],
-    ], {chooseAddressMappingPolicy: new AlwaysDense()})
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: 'foo' }, { cellValue: 'bar'}],
+      [{ cellValue: '3' }, { cellValue: '4' }, { cellValue: '=TRANSPOSE(A1:B3)' }],
+      [{ cellValue: '5' }, { cellValue: '6' }],
+    ] }, {chooseAddressMappingPolicy: new AlwaysDense()})
 
     engine.addColumns(0, [3, 1])
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([
-      ['1', '2', 'foo', null, 'bar'],
-      ['3', '4', '=TRANSPOSE(A1:B3)'],
-      ['5', '6']
-    ])[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: 'foo' }, { cellValue: null}, {cellValue: 'bar' }],
+      [{ cellValue: '3' }, { cellValue: '4' }, { cellValue: '=TRANSPOSE(A1:B3)' }],
+      [{ cellValue: '5' }, { cellValue: '6' }]
+    ]})[0])
   })
 
   it('should adjust matrix address mapping when adding multiple columns', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', 'foo', 'bar'],
-      ['3', '4', '=TRANSPOSE(A1:B3)'],
-      ['5', '6'],
-    ], {chooseAddressMappingPolicy: new AlwaysDense()})
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: 'foo' }, { cellValue: 'bar'}],
+      [{ cellValue: '3' }, { cellValue: '4' }, { cellValue: '=TRANSPOSE(A1:B3)' }],
+      [{ cellValue: '5' }, { cellValue: '6' }],
+    ] }, {chooseAddressMappingPolicy: new AlwaysDense()})
 
     engine.addColumns(0, [3, 3])
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([
-      ['1', '2', 'foo', null, null, null, 'bar'],
-      ['3', '4', '=TRANSPOSE(A1:B3)'],
-      ['5', '6']
-    ])[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: 'foo' }, { cellValue: null}, {cellValue: null }, { cellValue: null }, { cellValue: 'bar' }],
+      [{ cellValue: '3' }, { cellValue: '4' }, { cellValue: '=TRANSPOSE(A1:B3)' }],
+      [{ cellValue: '5' }, { cellValue: '6' }]
+    ]})[0])
   })
 
   it('should be possible to add row right before matrix', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=TRANSPOSE(C1:D2)', undefined, '1', '2'],
-      [undefined, undefined, '3', '4'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=TRANSPOSE(C1:D2)' }, { cellValue: undefined }, { cellValue: '1' }, { cellValue: '2'}],
+      [{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '3' }, { cellValue: '4'}],
+    ]})
 
     engine.addColumns(0, [0, 1])
 
-    expect(engine.getCellValue(adr('A1'))).toBe(null)
-    expect(engine.getCellValue(adr('B1'))).toEqual(1)
-    expect(engine.getCellValue(adr('C1'))).toEqual(3)
-    expect(engine.getCellValue(adr('D1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(1)
   })
 
   it('should be possible to add row right after matrix', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=TRANSPOSE(C1:D2)', undefined, '1', '2'],
-      [undefined, undefined, '3', '4'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=TRANSPOSE(C1:D2)' }, { cellValue: undefined }, { cellValue: '1' }, { cellValue: '2'}],
+      [{ cellValue: undefined }, { cellValue: undefined }, { cellValue: '3' }, { cellValue: '4'}],
+    ]})
 
     engine.addColumns(0, [2, 1])
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
-    expect(engine.getCellValue(adr('B1'))).toEqual(3)
-    expect(engine.getCellValue(adr('C1'))).toBe(null)
-    expect(engine.getCellValue(adr('D1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('C1')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(1)
   })
 })
 
 describe('Adding column - reevaluation', () => {
   it('reevaluates cells', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', /* new col */ '2', '=COUNTBLANK(A1:B1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=COUNTBLANK(A1:B1)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('C1'))).toEqual(0)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(0)
     engine.addColumns(0, [1, 1])
-    expect(engine.getCellValue(adr('D1'))).toEqual(1)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(1)
   })
 
   it('dont reevaluate everything', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', /* new col */ '2', '=COUNTBLANK(A1:B1)'],
-      ['=SUM(A1:A1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=COUNTBLANK(A1:B1)' }],
+      [{ cellValue: '=SUM(A1:A1)' }],
+    ]})
     const c1 = engine.addressMapping.getCell(adr('C1'))
     const a2 = engine.addressMapping.getCell(adr('A2'))
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -173,9 +173,9 @@ describe('Adding column - reevaluation', () => {
   })
 
   it('reevaluates cells which are dependent on structure changes', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', /* */ '2', '=COLUMNS(A1:B1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=COLUMNS(A1:B1)' }],
+    ]})
     const c1 = engine.addressMapping.getCell(adr('C1'))
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const c1setCellValueSpy = spyOn(c1 as any, 'setCellValue')
@@ -187,10 +187,10 @@ describe('Adding column - reevaluation', () => {
   })
 
   it('returns changed values', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      /* */
-      ['1', '2', '=COLUMNS(A1:B1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=COLUMNS(A1:B1)' }],
+    ]})
 
     const [changes] = engine.addColumns(0, [1, 1])
 
@@ -201,9 +201,9 @@ describe('Adding column - reevaluation', () => {
 
 describe('Adding column - FormulaCellVertex#address update', () => {
   it('updates addresses in formulas', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', /* new col */ '=A1'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '=A1' }],
+    ]})
 
     engine.addColumns(0, [1, 1])
 
@@ -215,9 +215,9 @@ describe('Adding column - FormulaCellVertex#address update', () => {
 
 describe('Adding column - address mapping', () => {
   it('verify sheet dimensions', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', /* new col */ '=A1'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '=A1' }],
+    ]})
 
     engine.addColumns(0, [1, 1])
 
@@ -231,12 +231,12 @@ describe('Adding column - address mapping', () => {
 describe('different sheet', () => {
   it('adding row in different sheet but same row as formula should not update formula address', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [
-        ['1'],
-      ],
-      Sheet2: [
-        ['=Sheet1!A1'],
-      ],
+      Sheet1: { cells:  [
+        [{ cellValue: '1' }],
+      ]},
+      Sheet2: { cells:  [
+        [{ cellValue: '=Sheet1!A1' }],
+      ]},
     })
 
     engine.addColumns(0, [0, 1])
@@ -251,9 +251,9 @@ describe('different sheet', () => {
 
 describe('Adding column - sheet dimensions', () => {
   it('should do nothing when adding column outside effective sheet', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+    ]})
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recalcSpy = spyOn(engine.evaluator as any, 'partialRun')
@@ -268,9 +268,9 @@ describe('Adding column - sheet dimensions', () => {
   })
 
   it('should throw error when trying to expand sheet beyond limits', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      Array(Config.defaultConfig.maxColumns - 1).fill('')
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      Array(Config.defaultConfig.maxColumns - 1).fill({ cellValue: '' })
+    ]})
 
     expect(() => {
       engine.addColumns(0, [0, 2])
@@ -284,9 +284,9 @@ describe('Adding column - sheet dimensions', () => {
 
 describe('Adding column - column index', () => {
   it('should update column index when adding row', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '=VLOOKUP(1, A1:A1, 1, TRUE())'],
-    ], {useColumnIndex: true})
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '=VLOOKUP(1, A1:A1, 1, TRUE())' }],
+    ] }, {useColumnIndex: true})
     const index = (engine.columnSearch as ColumnIndex)
 
     expectArrayWithSameContent([0], index.getValueIndex(0, 0, 1).index)
@@ -300,65 +300,65 @@ describe('Adding column - column index', () => {
 
 describe('Adding column - arrays', () => {
   it('should be possible to add column before array', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=-A3:C4', null, null, 'foo'],
-    ], {useArrayArithmetic: true})
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=-A3:C4' }, { cellValue: null }, { cellValue: null }, { cellValue: 'foo'}],
+    ] }, {useArrayArithmetic: true})
 
     engine.addColumns(0, [0, 1])
 
-    const expected = HyperFormula.buildFromArray([
-      [null, '=-B3:D4', null, null, 'foo'],
-    ], {useArrayArithmetic: true})[0]
+    const expected = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: null }, { cellValue: '=-B3:D4' }, { cellValue: null }, { cellValue: null}, {cellValue: 'foo' }],
+    ] }, {useArrayArithmetic: true})[0]
 
     expectEngineToBeTheSameAs(engine, expected)
   })
 
   it('adding column across array should not change array', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [null, null, null, '=-A1:C1', null, null, 'foo']
-    ], {useArrayArithmetic: true})
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: null }, { cellValue: null }, { cellValue: null }, { cellValue: '=-A1:C1'}, {cellValue: null }, { cellValue: null }, { cellValue: 'foo' }]
+    ] }, {useArrayArithmetic: true})
 
     engine.addColumns(0, [4, 1])
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([
-      [null, null, null, '=-A1:C1', null, null, null, 'foo']
-    ], {useArrayArithmetic: true})[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: null }, { cellValue: null }, { cellValue: null }, { cellValue: '=-A1:C1'}, {cellValue: null }, { cellValue: null }, { cellValue: null }, { cellValue: 'foo' }]
+    ] }, {useArrayArithmetic: true})[0])
   })
 
   it('adding column should expand dependent array', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [1, 2, '=TRANSPOSE(A1:B2)'],
-      [3, 4],
-    ], {useArrayArithmetic: true})
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=TRANSPOSE(A1:B2)' }],
+      [{ cellValue: 3 }, { cellValue: 4 }],
+    ] }, {useArrayArithmetic: true})
 
     engine.addColumns(0, [1, 1])
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([
-      [1, null, 2, '=TRANSPOSE(A1:C2)'],
-      [3, null, 4],
-    ], {useArrayArithmetic: true})[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 1 }, { cellValue: null }, { cellValue: 2 }, { cellValue: '=TRANSPOSE(A1:C2)'}],
+      [{ cellValue: 3 }, { cellValue: null }, { cellValue: 4 }],
+    ] }, {useArrayArithmetic: true})[0])
   })
 
   it('undo add column with dependent array', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [1, 2, '=TRANSPOSE(A1:B2)'],
-      [3, 4],
-    ], {useArrayArithmetic: true})
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=TRANSPOSE(A1:B2)' }],
+      [{ cellValue: 3 }, { cellValue: 4 }],
+    ] }, {useArrayArithmetic: true})
 
     engine.addColumns(0, [1, 1])
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([
-      [1, 2, '=TRANSPOSE(A1:B2)'],
-      [3, 4],
-    ], {useArrayArithmetic: true})[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=TRANSPOSE(A1:B2)' }],
+      [{ cellValue: 3 }, { cellValue: 4 }],
+    ] }, {useArrayArithmetic: true})[0])
   })
 
   it('ArrayVertex#formula should be updated', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [1, 2, '=TRANSPOSE(A1:B2)'],
-      [3, 4],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=TRANSPOSE(A1:B2)' }],
+      [{ cellValue: 3 }, { cellValue: 4 }],
+    ]})
 
     engine.addColumns(0, [1, 1])
 
@@ -367,13 +367,13 @@ describe('Adding column - arrays', () => {
 
   it('ArrayVertex#formula should be updated when different sheets', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      Sheet1: [
-        ['1', '2'],
-        ['3', '4'],
-      ],
-      Sheet2: [
-        ['=TRANSPOSE(Sheet1!A1:B2)'],
-      ],
+      Sheet1: { cells:  [
+        [{ cellValue: '1' }, { cellValue: '2' }],
+        [{ cellValue: '3' }, { cellValue: '4' }],
+      ]},
+      Sheet2: { cells:  [
+        [{ cellValue: '=TRANSPOSE(Sheet1!A1:B2)' }],
+      ]},
     })
 
     engine.addColumns(0, [1, 1])
@@ -382,10 +382,10 @@ describe('Adding column - arrays', () => {
   })
 
   it('ArrayVertex#address should be updated', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [1, 2, '=TRANSPOSE(A1:B2)'],
-      [3, 4],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 1 }, { cellValue: 2 }, { cellValue: '=TRANSPOSE(A1:B2)' }],
+      [{ cellValue: 3 }, { cellValue: 4 }],
+    ]})
 
     engine.addColumns(0, [1, 1])
 

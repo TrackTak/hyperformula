@@ -6,7 +6,6 @@
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {SimpleCellAddress} from './Cell'
 import {Config} from './Config'
-import { FormulaVertex } from './DependencyGraph/FormulaCellVertex'
 import {FunctionRegistry} from './interpreter/FunctionRegistry'
 import {InterpreterState} from './interpreter/InterpreterState'
 import {ArgumentTypes} from './interpreter/plugin/FunctionPlugin'
@@ -55,8 +54,8 @@ export class ArraySizePredictor {
   ) {
   }
 
-  public checkArraySize(ast: Ast, formulaAddress: SimpleCellAddress, formulaVertex?: FormulaVertex): ArraySize {
-    return this.checkArraySizeForAst(ast, {formulaAddress, formulaVertex, arraysFlag: this.config.useArrayArithmetic})
+  public checkArraySize(ast: Ast, formulaAddress: SimpleCellAddress): ArraySize {
+    return this.checkArraySizeForAst(ast, {formulaAddress, arraysFlag: this.config.useArrayArithmetic})
   }
 
   public checkArraySizeForAst(ast: Ast, state: InterpreterState): ArraySize {

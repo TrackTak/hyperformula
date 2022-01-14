@@ -5,69 +5,69 @@ import {adr, detailedError} from '../testUtils'
 
 describe('AVERAGE', () => {
   it('AVERAGE with empty args', () => {
-    const [engine] = HyperFormula.buildFromArray([['=AVERAGE()']])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=AVERAGE()' }]]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('AVERAGE with args', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=AVERAGE(1, B1)', '4']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=AVERAGE(1, B1)' }, { cellValue: '4' }]
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(2.5)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(2.5)
   })
 
   it('AVERAGE with range', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2'],
-      ['4'],
-      ['=AVERAGE(A1:A3)']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '4' }],
+      [{ cellValue: '=AVERAGE(A1:A3)' }]
+    ]})
 
-    expect(engine.getCellValue(adr('A4'))).toBeCloseTo(2.333333333)
+    expect(engine.getCellValue(adr('A4')).cellValue).toBeCloseTo(2.333333333)
   })
 
   it('AVERAGE ignores all nonnumeric arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['42'],
-      ['foo'],
-      [null],
-      ['=TRUE()'],
-      ['=AVERAGE(A1:A4)']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '42' }],
+      [{ cellValue: 'foo' }],
+      [{ cellValue: null }],
+      [{ cellValue: '=TRUE()' }],
+      [{ cellValue: '=AVERAGE(A1:A4)' }]
+    ]})
 
-    expect(engine.getCellValue(adr('A5'))).toEqual(42)
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual(42)
   })
 
   it('error when no meaningful arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['foo'],
-      [null],
-      ['=AVERAGE(A1:A2)']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 'foo' }],
+      [{ cellValue: null }],
+      [{ cellValue: '=AVERAGE(A1:A2)' }]
+    ]})
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 
   it('over a range value', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['3', '4'],
-      ['=AVERAGE(MMULT(A1:B2, A1:B2))'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '3' }, { cellValue: '4' }],
+      [{ cellValue: '=AVERAGE(MMULT(A1:B2, A1:B2))' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A3'))).toEqual(13.5)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(13.5)
   })
 
   it('does propagate errors', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '=4/0'],
-      ['=FOOBAR()', '4'],
-      ['=AVERAGE(A1:B2)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '=4/0' }],
+      [{ cellValue: '=FOOBAR()' }, { cellValue: '4' }],
+      [{ cellValue: '=AVERAGE(A1:B2)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO))
   })
 })

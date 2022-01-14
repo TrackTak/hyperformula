@@ -26,43 +26,43 @@ class FooPlugin extends FunctionPlugin implements FunctionPluginTypecheck<FooPlu
 describe('Nonexistent metadata', () => {
   it('should work for function', () => {
     HyperFormula.getLanguage('enGB').extendFunctions({FOO: 'FOO'})
-    const [engine] = HyperFormula.buildFromArray([
-      ['=foo(1,2)'],
-      ['=foo(,2)'],
-      ['=foo( ,2)'],
-      ['=foo(1,)'],
-      ['=foo( , )'],
-      ['=foo(1)'],
-      ['=foo()'],
-    ], {functionPlugins: [FooPlugin]})
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=foo(1,2)' }],
+      [{ cellValue: '=foo(,2)' }],
+      [{ cellValue: '=foo( ,2)' }],
+      [{ cellValue: '=foo(1,)' }],
+      [{ cellValue: '=foo( , )' }],
+      [{ cellValue: '=foo(1)' }],
+      [{ cellValue: '=foo()' }],
+    ] }, {functionPlugins: [FooPlugin]})
 
-    expect(engine.getCellValue(adr('A1'))).toBe('1+2')
-    expect(engine.getCellValue(adr('A2'))).toBe('+2')
-    expect(engine.getCellValue(adr('A3'))).toBe('+2')
-    expect(engine.getCellValue(adr('A4'))).toBe('1+')
-    expect(engine.getCellValue(adr('A5'))).toBe('+')
-    expect(engine.getCellValue(adr('A6'))).toBe('1+default2')
-    expect(engine.getCellValue(adr('A7'))).toBe('default1+default2')
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe('1+2')
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe('+2')
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe('+2')
+    expect(engine.getCellValue(adr('A4')).cellValue).toBe('1+')
+    expect(engine.getCellValue(adr('A5')).cellValue).toBe('+')
+    expect(engine.getCellValue(adr('A6')).cellValue).toBe('1+default2')
+    expect(engine.getCellValue(adr('A7')).cellValue).toBe('default1+default2')
   })
 
   it('log fails with coerce to 0', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=LOG(10,)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=LOG(10,)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
   })
 
   it('other function coerce EmptyValue', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=DATE(,1,1900)'],
-      ['=SUM(,1)'],
-      ['=CONCATENATE(,"abcd")']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=DATE(,1,1900)' }],
+      [{ cellValue: '=SUM(,1)' }],
+      [{ cellValue: '=CONCATENATE(,"abcd")' }]
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1901)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual('abcd')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1901)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('abcd')
   })
 
 })

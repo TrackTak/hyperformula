@@ -4,34 +4,34 @@ import {adr} from '../testUtils'
 
 describe('Set matrix empty', () => {
   it('should set matrix empty', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['=TRANSPOSE(A1:B1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '=TRANSPOSE(A1:B1)' }],
+    ]})
     const dependencyGraph = engine.dependencyGraph
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const matrixVertex = dependencyGraph.arrayMapping.getArray(AbsoluteCellRange.spanFrom(adr('A2'), 1, 2))!
 
     dependencyGraph.setArrayEmpty(matrixVertex)
 
-    expect(engine.getCellValue(adr('A2'))).toBe(null)
-    expect(engine.getCellValue(adr('A3'))).toBe(null)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(null)
     expect(dependencyGraph.arrayMapping.arrayMapping.size).toEqual(0)
   })
 
   it('should adjust edges between matrix cells and formula', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '=A1+A2'],
-      ['=TRANSPOSE(A1:B1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=A1+A2' }],
+      [{ cellValue: '=TRANSPOSE(A1:B1)' }],
+    ]})
     const dependencyGraph = engine.dependencyGraph
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const matrixVertex = dependencyGraph.arrayMapping.getArray(AbsoluteCellRange.spanFrom(adr('A2'), 1, 2))!
 
     dependencyGraph.setArrayEmpty(matrixVertex)
 
-    expect(engine.getCellValue(adr('A2'))).toBe(null)
-    expect(engine.getCellValue(adr('A3'))).toBe(null)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(null)
     expect(dependencyGraph.arrayMapping.arrayMapping.size).toEqual(0)
 
     const formula = dependencyGraph.fetchCell(adr('C1'))
@@ -45,18 +45,18 @@ describe('Set matrix empty', () => {
   })
 
   it('should adjust edges between matrix cells and formula matrix', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '=TRANSPOSE(A1:B1)'],
-      ['=TRANSPOSE(A1:B1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=TRANSPOSE(A1:B1)' }],
+      [{ cellValue: '=TRANSPOSE(A1:B1)' }],
+    ]})
     const dependencyGraph = engine.dependencyGraph
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const matrixVertex = dependencyGraph.arrayMapping.getArray(AbsoluteCellRange.spanFrom(adr('A2'), 1, 2))!
 
     dependencyGraph.setArrayEmpty(matrixVertex)
 
-    expect(engine.getCellValue(adr('A2'))).toBe(null)
-    expect(engine.getCellValue(adr('A3'))).toBe(null)
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('A3')).cellValue).toBe(null)
     expect(dependencyGraph.arrayMapping.arrayMapping.size).toEqual(1)
 
     const formulaMatrix = dependencyGraph.fetchCell(adr('C1'))
@@ -66,10 +66,10 @@ describe('Set matrix empty', () => {
   })
 
   it('should adjust edges between matrix cells and range', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '=SUM(A2:A3)'],
-      ['=TRANSPOSE(A1:B1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=SUM(A2:A3)' }],
+      [{ cellValue: '=TRANSPOSE(A1:B1)' }],
+    ]})
     const dependencyGraph = engine.dependencyGraph
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const matrixVertex = dependencyGraph.arrayMapping.getArray(AbsoluteCellRange.spanFrom(adr('A2'), 1, 2))!
@@ -92,10 +92,10 @@ describe('Set matrix empty', () => {
   })
 
   it('should adjust edges between matrix cells and range crossing matrix', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '=SUM(A1:A2)'],
-      ['=TRANSPOSE(A1:B1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=SUM(A1:A2)' }],
+      [{ cellValue: '=TRANSPOSE(A1:B1)' }],
+    ]})
     const dependencyGraph = engine.dependencyGraph
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const matrixVertex = dependencyGraph.arrayMapping.getArray(AbsoluteCellRange.spanFrom(adr('A2'), 1, 2))!
@@ -116,6 +116,6 @@ describe('Set matrix empty', () => {
     expect(dependencyGraph.existsEdge(a1, rangeVertex)).toBe(true)
     expect(dependencyGraph.existsEdge(a2, rangeVertex)).toBe(true)
     expect(a3).toBe(undefined)
-    expect(engine.getCellValue(adr('A1'))).toBe(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toBe(1)
   })
 })

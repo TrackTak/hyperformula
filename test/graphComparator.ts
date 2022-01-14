@@ -12,7 +12,7 @@ import {
   Vertex,
 } from '../src/DependencyGraph'
 import {InterpreterValue} from '../src/interpreter/InterpreterValue'
-import {simpleCellAddressToString} from '../src/parser'
+import {AstNodeType, simpleCellAddressToString} from '../src/parser'
 
 export class EngineComparator {
 
@@ -56,6 +56,14 @@ export class EngineComparator {
         const address = simpleCellAddress(sheet, x, y)
         const expectedVertex = this.expected.addressMapping.getCell(address)
         const actualVertex = this.actual.addressMapping.getCell(address)
+
+        const expectedMetadata = this.expected.addressMapping.getCellMetadata(address)
+        const actualMetadata = this.actual.addressMapping.getCellMetadata(address)
+
+        if (JSON.stringify(expectedMetadata) !== JSON.stringify(actualMetadata)) {
+          throw Error('Different metadata types')
+        }
+
         if (expectedVertex === undefined && actualVertex === undefined) {
           continue
         } else if (
@@ -64,8 +72,22 @@ export class EngineComparator {
         ) {
           const actualVertexAddress = actualVertex.getAddress(this.actual.dependencyGraph.lazilyTransformingAstService)
           const expectedVertexAddress = expectedVertex.getAddress(this.expected.dependencyGraph.lazilyTransformingAstService)
+
+          const actualFormula = actualVertex.getFormula(this.actual.lazilyTransformingAstService)
+          const expectedFormula = expectedVertex.getFormula(this.expected.lazilyTransformingAstService)
+
+          // Delete the asyncPromises as they have unique ids on them
+          // that change each time a new one is instantiated
+          if (actualFormula.type === AstNodeType.FUNCTION_CALL) {
+            delete actualFormula.asyncPromise
+          }
+
+          if (expectedFormula.type === AstNodeType.FUNCTION_CALL) {
+            delete expectedFormula.asyncPromise
+          }
+
           deepStrictEqual(actualVertexAddress, expectedVertexAddress, `Different addresses in formulas. expected: ${actualVertexAddress}, actual: ${expectedVertexAddress}`)
-          deepStrictEqual(actualVertex.getFormula(this.actual.lazilyTransformingAstService), expectedVertex.getFormula(this.expected.lazilyTransformingAstService), 'Different AST in formulas')
+          deepStrictEqual(actualFormula, expectedFormula, 'Different AST in formulas')
           deepStrictEqual(this.normalizeCellValue(actualVertex.getCellValue()), this.normalizeCellValue(expectedVertex.getCellValue()), `Different values of formulas. expected: ${expectedVertex.getCellValue().toString()}, actual: ${actualVertex.getCellValue().toString()}`)
         } else if (expectedVertex instanceof ValueCellVertex && actualVertex instanceof ValueCellVertex) {
           deepStrictEqual(actualVertex.getCellValue(), expectedVertex.getCellValue(), `Different values. expected: ${expectedVertex.getCellValue().toString()}, actual: ${actualVertex.getCellValue().toString()}`)

@@ -3,9 +3,10 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
+import { CellData } from '.'
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {invalidSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
-import {CellContent, CellContentParser, RawCellContent} from './CellContentParser'
+import {CellContent, CellContentParser, DataRawCellContent, InputCell, RawCellContent} from './CellContentParser'
 import {ClipboardCell, ClipboardOperations} from './ClipboardOperations'
 import {Config} from './Config'
 import {ContentChanges} from './ContentChanges'
@@ -37,7 +38,7 @@ import {
 } from './NamedExpressions'
 import {AddColumnsCommand, AddRowsCommand, Operations, RemoveColumnsCommand, RemoveRowsCommand} from './Operations'
 import {ParserWithCaching} from './parser'
-import {findBoundaries, validateAsSheet} from './Sheet'
+import {findBoundaries, validateAsSheetContent} from './Sheet'
 import {ColumnsSpan, RowsSpan} from './Span'
 import {
   AddColumnsUndoEntry,
@@ -201,13 +202,14 @@ export class CrudOperations {
     this.clipboardOperations.clear()
   }
 
-  public addSheet(name?: string): string {
+  public addSheet(name?: string, sheetMetadata?: any): string {
     if (name !== undefined) {
       this.ensureItIsPossibleToAddSheet(name)
     }
     this.undoRedo.clearRedoStack()
-    const addedSheetName = this.operations.addSheet(name)
-    this.undoRedo.saveOperation(new AddSheetUndoEntry(addedSheetName))
+    const addedSheetName = this.operations.addSheet(name, sheetMetadata)
+    const sheetId = this.sheetMapping.fetch(addedSheetName)
+    this.undoRedo.saveOperation(new AddSheetUndoEntry(addedSheetName, sheetId, sheetMetadata))
     return addedSheetName
   }
 
@@ -215,10 +217,11 @@ export class CrudOperations {
     this.ensureScopeIdIsValid(sheetId)
     this.undoRedo.clearRedoStack()
     this.clipboardOperations.abortCut()
-    const originalName = this.sheetMapping.fetchDisplayName(sheetId)
+    const sheet = this.sheetMapping.fetchSheetById(sheetId)
     const oldSheetContent = this.operations.getSheetClipboardCells(sheetId)
+    const oldSheetNames = this.sheetMapping.sheetNames()
     const {version, scopedNamedExpressions} = this.operations.removeSheet(sheetId)
-    this.undoRedo.saveOperation(new RemoveSheetUndoEntry(originalName, sheetId, oldSheetContent, scopedNamedExpressions, version))
+    this.undoRedo.saveOperation(new RemoveSheetUndoEntry(sheet.displayName, sheetId, sheet.sheetMetadata, oldSheetContent, oldSheetNames, scopedNamedExpressions, version))
   }
 
   public renameSheet(sheetId: number, newName: string): Maybe<string> {
@@ -240,7 +243,7 @@ export class CrudOperations {
     this.undoRedo.saveOperation(new ClearSheetUndoEntry(sheetId, oldSheetContent))
   }
 
-  public setCellContents(topLeftCornerAddress: SimpleCellAddress, cellContents: RawCellContent[][] | RawCellContent): void {
+  public setCellContents(topLeftCornerAddress: SimpleCellAddress, cellContents: InputCell<any>[][] | InputCell<any>, clearRedoStack = true): void {
     if (!(cellContents instanceof Array)) {
       cellContents = [[cellContents]]
     } else {
@@ -253,9 +256,11 @@ export class CrudOperations {
 
     this.ensureItIsPossibleToChangeCellContents(topLeftCornerAddress, cellContents)
 
-    this.undoRedo.clearRedoStack()
+    if (clearRedoStack) {
+      this.undoRedo.clearRedoStack()
+    }
 
-    const oldContents: { address: SimpleCellAddress, newContent: RawCellContent, oldContent: [SimpleCellAddress, ClipboardCell] }[] = []
+    const oldContents: { address: SimpleCellAddress, newContent: DataRawCellContent, oldContent: [SimpleCellAddress, ClipboardCell] }[] = []
 
     for (let i = 0; i < cellContents.length; i++) {
       for (let j = 0; j < cellContents[i].length; j++) {
@@ -267,23 +272,23 @@ export class CrudOperations {
         const newContent = cellContents[i][j]
         this.clipboardOperations.abortCut()
         const oldContent = this.operations.setCellContent(address, newContent)
-        oldContents.push({address, newContent, oldContent})
+        oldContents.push({address, newContent: newContent ?? { cellValue: undefined }, oldContent})
       }
     }
 
     this.undoRedo.saveOperation(new SetCellContentsUndoEntry(oldContents))
   }
 
-  public setSheetContent(sheetId: number, values: RawCellContent[][]): void {
+  public setSheetContent(sheetId: number, values: InputCell<any>[][]): void {
     this.ensureScopeIdIsValid(sheetId)
     this.ensureItIsPossibleToChangeSheetContents(sheetId, values)
 
-    validateAsSheet(values)
+    validateAsSheetContent(values)
     this.undoRedo.clearRedoStack()
     this.clipboardOperations.abortCut()
     const oldSheetContent = this.operations.getSheetClipboardCells(sheetId)
-    this.operations.setSheetContent(sheetId, values)
-    this.undoRedo.saveOperation(new SetSheetContentUndoEntry(sheetId, oldSheetContent, values))
+    const convertedValues = this.operations.setSheetContent(sheetId, values)
+    this.undoRedo.saveOperation(new SetSheetContentUndoEntry(sheetId, oldSheetContent, convertedValues))
   }
 
   public setRowOrder(sheetId: number, rowMapping: [number, number][]): void {
@@ -567,7 +572,7 @@ export class CrudOperations {
     }
   }
 
-  public ensureItIsPossibleToChangeCellContents(inputAddress: SimpleCellAddress, content: RawCellContent[][]) {
+  public ensureItIsPossibleToChangeCellContents(inputAddress: SimpleCellAddress, content: InputCell<any>[][]) {
     const boundaries = findBoundaries(content)
     const targetRange = AbsoluteCellRange.spanFrom(inputAddress, boundaries.width, boundaries.height)
     this.ensureRangeInSizeLimits(targetRange)
@@ -576,7 +581,7 @@ export class CrudOperations {
     }
   }
 
-  public ensureItIsPossibleToChangeSheetContents(sheetId: number, content: RawCellContent[][]) {
+  public ensureItIsPossibleToChangeSheetContents(sheetId: number, content: InputCell<any>[][]) {
     const boundaries = findBoundaries(content)
     const targetRange = AbsoluteCellRange.spanFrom(simpleCellAddress(sheetId, 0, 0), boundaries.width, boundaries.height)
     this.ensureRangeInSizeLimits(targetRange)
@@ -634,7 +639,7 @@ export class CrudOperations {
   }
 
   private ensureNamedExpressionIsValid(expression: RawCellContent): void {
-    const parsedExpression = this.cellContentParser.parse(expression)
+    const parsedExpression = this.cellContentParser.parse({ cellValue: expression })
     if (parsedExpression instanceof CellContent.Formula) {
       const parsingResult = this.parser.parse(parsedExpression.formula, simpleCellAddress(-1, 0, 0))
       if (doesContainRelativeReferences(parsingResult.ast)) {

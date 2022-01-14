@@ -6,429 +6,440 @@ import {adr, detailedError, expectEngineToBeTheSameAs} from './testUtils'
 describe('Undo - removing rows', () => {
   it('works for empty row', () => {
     const sheet = [
-      ['1'],
-      [null], // remove
-      ['3'],
+      [{ cellValue: '1' }],
+      [{ cellValue: null }], // remove
+      [{ cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeRows(0, [1, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works for simple values', () => {
     const sheet = [
-      ['1'],
-      ['2'], // remove
-      ['3'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }], // remove
+      [{ cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeRows(0, [1, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works with formula in removed row', () => {
     const sheet = [
-      ['1'],
-      ['=SUM(A1)'], // remove
-      ['3'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '=SUM(A1)' }], // remove
+      [{ cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeRows(0, [1, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('restores dependent cell formulas', () => {
     const sheet = [
-      ['=A2'],
-      ['42'], // remove
-      ['3'],
+      [{ cellValue: '=A2' }],
+      [{ cellValue: '42' }], // remove
+      [{ cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeRows(0, [1, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('formulas are built correctly when there was a pause in computation', () => {
     const sheet = [
-      ['=A2'],
-      ['42'], // remove
-      ['3'],
+      [{ cellValue: '=A2' }],
+      [{ cellValue: '42' }], // remove
+      [{ cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.suspendEvaluation()
     engine.removeRows(0, [1, 1])
 
     engine.undo()
     engine.resumeEvaluation()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('restores ranges when removing rows', () => {
     const sheet = [
-      ['=SUM(A2:A3)'],
-      ['2'], // remove
-      ['3'], // remove
+      [{ cellValue: '=SUM(A2:A3)' }],
+      [{ cellValue: '2' }], // remove
+      [{ cellValue: '3' }], // remove
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeRows(0, [1, 2])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('dummy operation should also be undoable', () => {
     const sheet = [
-      ['1']
+      [{ cellValue: '1' }]
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeRows(0, [1000, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works for more removal segments', () => {
     const sheet = [
-      ['1'],
-      ['2'],
-      ['3'],
-      ['4'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '3' }],
+      [{ cellValue: '4' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeRows(0, [1, 1], [3, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 })
 
 describe('Undo - adding rows', () => {
   it('works', () => {
     const sheet = [
-      ['1'], // add after that
-      ['3'],
+      [{ cellValue: '1' }], // add after that
+      [{ cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.addRows(0, [1, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('dummy operation should also be undoable', () => {
     const sheet = [
-      ['1']
+      [{ cellValue: '1' }]
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.addRows(0, [1000, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works for more addition segments', () => {
     const sheet = [
-      ['1'],
-      ['2'],
-      ['3'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.addRows(0, [1, 1], [2, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 })
 
 describe('Undo - moving rows', () => {
   it('works', () => {
     const sheet = [
-      [0], [1], [2], [3], [4], [5], [6], [7],
+      [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.moveRows(0, 1, 3, 7)
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works in both directions', () => {
     const sheet = [
-      [0], [1], [2], [3], [4], [5], [6], [7],
+      [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }], [{ cellValue: 0 }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.moveRows(0, 4, 3, 2)
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('should restore range', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [1, null],
-      [2, '=SUM(A1:A2)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 1 }, { cellValue: null }],
+      [{ cellValue: 2 }, { cellValue: '=SUM(A1:A2)' }],
+    ]})
     engine.moveRows(0, 1, 1, 3)
     engine.undo()
 
-    expect(engine.getCellFormula(adr('B2'))).toEqual('=SUM(A1:A2)')
+    expect(engine.getCellFormula(adr('B2')).cellValue).toEqual('=SUM(A1:A2)')
   })
 
   it('should restore range when moving other way', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [1, null],
-      [2, '=SUM(A1:A2)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 1 }, { cellValue: null }],
+      [{ cellValue: 2 }, { cellValue: '=SUM(A1:A2)' }],
+    ]})
 
     engine.moveRows(0, 2, 1, 1)
     engine.undo()
 
-    expect(engine.getCellFormula(adr('B2'))).toEqual('=SUM(A1:A2)')
+    expect(engine.getCellFormula(adr('B2')).cellValue).toEqual('=SUM(A1:A2)')
   })
 })
 
 describe('Undo - moving columns', () => {
   it('works', () => {
     const sheet = [
-      [0, 1, 2, 3, 4, 5, 6, 7],
+      [{ cellValue: 0 }, { cellValue: 1 }, { cellValue: 2 }, { cellValue: 3}, {cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }, { cellValue: 7 }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.moveColumns(0, 1, 3, 7)
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works in both directions', () => {
     const sheet = [
-      [0, 1, 2, 3, 4, 5, 6, 7],
+      [{ cellValue: 0 }, { cellValue: 1 }, { cellValue: 2 }, { cellValue: 3}, {cellValue: 4 }, { cellValue: 5 }, { cellValue: 6 }, { cellValue: 7 }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.moveColumns(0, 4, 3, 2)
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('should restore range', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [1, 2],
-      [null, '=SUM(A1:B1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 1 }, { cellValue: 2 }],
+      [{ cellValue: null }, { cellValue: '=SUM(A1:B1)' }],
+    ]})
     engine.moveColumns(0, 1, 1, 3)
     engine.undo()
 
-    expect(engine.getCellFormula(adr('B2'))).toEqual('=SUM(A1:B1)')
+    expect(engine.getCellFormula(adr('B2')).cellValue).toEqual('=SUM(A1:B1)')
   })
 
   it('should restore range when moving to left', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [1, 2],
-      [null, '=SUM(A1:B1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 1 }, { cellValue: 2 }],
+      [{ cellValue: null }, { cellValue: '=SUM(A1:B1)' }],
+    ]})
 
     engine.moveColumns(0, 2, 1, 1)
     engine.undo()
 
-    expect(engine.getCellFormula(adr('B2'))).toEqual('=SUM(A1:B1)')
+    expect(engine.getCellFormula(adr('B2')).cellValue).toEqual('=SUM(A1:B1)')
   })
 })
 
 describe('Undo - adding columns', () => {
   it('works', () => {
     const sheet = [
-      ['1', /* */ '3'],
+      [{ cellValue: '1' }, { cellValue: '3'}],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.addColumns(0, [1, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('dummy operation should also be undoable', () => {
     const sheet = [
-      ['1']
+      [{ cellValue: '1' }]
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.addColumns(0, [1000, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works for more addition segments', () => {
     const sheet = [
-      ['1', '2', '3'],
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.addColumns(0, [1, 1], [2, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 })
 
 describe('Undo - removing columns', () => {
   it('works for empty column', () => {
     const sheet = [
-      ['1', null, '3'],
+      [{ cellValue: '1' }, { cellValue: null }, { cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeColumns(0, [1, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works for simple values', () => {
     const sheet = [
-      ['1', '2', '3'],
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeColumns(0, [1, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works with formula in removed columns', () => {
     const sheet = [
-      ['1', '=SUM(A1)', '3'],
+      [{ cellValue: '1' }, { cellValue: '=SUM(A1)' }, { cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeColumns(0, [1, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('restores dependent cell formulas', () => {
     const sheet = [
-      ['=A2', '42', '3'],
+      [{ cellValue: '=A2' }, { cellValue: '42' }, { cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeColumns(0, [1, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('formulas are built correctly when there was a pause in computation', () => {
     const sheet = [
-      ['=A2', '42', '3'],
+      [{ cellValue: '=A2' }, { cellValue: '42' }, { cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.suspendEvaluation()
     engine.removeColumns(0, [1, 1])
 
     engine.undo()
     engine.resumeEvaluation()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('restores ranges when removing columns', () => {
     const sheet = [
-      ['=SUM(B1:C1)', '2', '3'],
+      [{ cellValue: '=SUM(B1:C1)' }, { cellValue: '2' }, { cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeColumns(0, [1, 2])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('dummy operation should also be undoable', () => {
     const sheet = [
-      ['1']
+      [{ cellValue: '1' }]
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeColumns(0, [1000, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works for more removal segments', () => {
     const sheet = [
-      ['1', '2', '3', '4'],
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }, { cellValue: '4'}],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeColumns(0, [1, 1], [3, 1])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 })
 
 describe('Undo - removing sheet', () => {
   it('works for empty sheet', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     engine.removeSheet(0)
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([])[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: []})[0])
+  })
+
+  it('works for adding then removing', () => {
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+
+    engine.addSheet()
+    engine.removeSheet(0)
+
+    engine.undo()
+
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromSheets({ Sheet1: { cells: [] }, Sheet2: { cells: [] } })[0])
   })
 
   it('works with restoring simple values', () => {
     const sheet = [
-      ['1'],
+      [{ cellValue: '1' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeSheet(0)
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works with restoring formulas', () => {
     const sheet = [
-      ['=42'],
+      [{ cellValue: '=42' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeSheet(0)
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('restores dependent cell formulas', () => {
     const sheets = {
-      Sheet1: [['=Sheet2!A1']],
-      Sheet2: [['42']],
+      Sheet1: { cells:  [[{ cellValue: '=Sheet2!A1' }]] },
+      Sheet2: { cells:  [[{ cellValue: '42' }]] },
     }
     const [engine] = HyperFormula.buildFromSheets(sheets)
     engine.removeSheet(1)
@@ -440,8 +451,8 @@ describe('Undo - removing sheet', () => {
 
   it('formulas are built correctly when there was a pause in computation', () => {
     const sheets = {
-      Sheet1: [['=Sheet2!A1']],
-      Sheet2: [['42']],
+      Sheet1: { cells:  [[{ cellValue: '=Sheet2!A1' }]] },
+      Sheet2: { cells:  [[{ cellValue: '42' }]] },
     }
     const [engine] = HyperFormula.buildFromSheets(sheets)
     engine.suspendEvaluation()
@@ -456,18 +467,18 @@ describe('Undo - removing sheet', () => {
 
 describe('Undo - renaming sheet', () => {
   it('undo previous operation if name not changes', () => {
-    const [engine] = HyperFormula.buildFromSheets({'Sheet1': [[1]]})
-    engine.setCellContents(adr('A1'), [[2]])
+    const [engine] = HyperFormula.buildFromSheets({'Sheet1': { cells: [[{ cellValue: 1 }]] } })
+    engine.setCellContents(adr('A1'), [[{ cellValue: 2 }]])
     engine.renameSheet(0, 'Sheet1')
 
     engine.undo()
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(1)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(1)
     expect(engine.getSheetName(0)).toEqual('Sheet1')
   })
 
   it('undo rename sheet', () => {
-    const [engine] = HyperFormula.buildFromSheets({'Sheet1': [[1]]})
+    const [engine] = HyperFormula.buildFromSheets({'Sheet1': { cells: [[{ cellValue: 1 }]] }})
     engine.renameSheet(0, 'Foo')
 
     engine.undo()
@@ -479,185 +490,209 @@ describe('Undo - renaming sheet', () => {
 describe('Undo - setting cell content', () => {
   it('works for simple values', () => {
     const sheet = [
-      ['3'],
+      [{ cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
-    engine.setCellContents(adr('A1'), '100')
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
+    engine.setCellContents(adr('A1'), { cellValue: '100' })
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works for empty values', () => {
     const sheet = [
-      [null],
+      [{ cellValue: null }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
-    engine.setCellContents(adr('A1'), '100')
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
+    engine.setCellContents(adr('A1'), { cellValue: '100' })
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
+  })
+
+  it('works for empty values with metadata', () => {
+    const sheet = [
+      [{ cellValue: null }],
+    ]
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
+    engine.setCellContents(adr('A1'), { cellValue: null, metadata: {test: '3'}})
+
+    engine.undo()
+
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works for formula values', () => {
     const sheet = [
-      ['=42'],
+      [{ cellValue: '=42' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
-    engine.setCellContents(adr('A1'), '100')
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
+    engine.setCellContents(adr('A1'), { cellValue: '100' })
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
+  })
+
+  it('works for formula values with metadata', () => {
+    const sheet = [
+      [{ cellValue: '=42' }],
+    ]
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
+    engine.setCellContents(adr('A1'), { cellValue: '100', metadata: {test: '3'}})
+
+    engine.undo()
+
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('setting multiple cell contents is one operation', () => {
     const sheet = [
-      ['3', '4'],
+      [{ cellValue: '3' }, { cellValue: '4' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
-    engine.setCellContents(adr('A1'), [['5', '6']])
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
+    engine.setCellContents(adr('A1'), [[{ cellValue: '5' }, { cellValue: '6' }]])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 })
 
 describe('Undo - adding sheet', () => {
   it('works for basic case', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     engine.addSheet('SomeSheet')
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([])[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: []})[0])
   })
 })
 
 describe('Undo - clearing sheet', () => {
   it('works for empty sheet', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     engine.clearSheet(0)
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray([])[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: []})[0])
   })
 
   it('works with restoring simple values', () => {
     const sheet = [
-      ['1'],
+      [{ cellValue: '1' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.clearSheet(0)
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('works with restoring formulas', () => {
     const sheet = [
-      ['=42'],
+      [{ cellValue: '=42' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.clearSheet(0)
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 })
 
 describe('Undo - setting sheet contents', () => {
   it('works for basic case', () => {
-    const sheet = [['13']]
-    const [engine] = HyperFormula.buildFromArray(sheet)
-    engine.setSheetContent(0, [['42']])
+    const sheet = [[{ cellValue: '13' }]]
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
+    engine.setSheetContent(0, [[{ cellValue: '42' }]])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('also clears sheet when undoing', () => {
     const sheet = [
-      ['1'],
+      [{ cellValue: '1' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
-    engine.setSheetContent(0, [['42', '43']])
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
+    engine.setSheetContent(0, [[{ cellValue: '42' }, { cellValue: '43' }]])
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 })
 
 describe('Undo - moving cells', () => {
   it('works for simple case', () => {
     const sheet = [
-      ['foo'],
-      [null],
+      [{ cellValue: 'foo' }],
+      [{ cellValue: null }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1), adr('A2'))
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('restores data', () => {
     const sheet = [
-      ['foo'],
-      ['42'],
+      [{ cellValue: 'foo' }],
+      [{ cellValue: '42' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1), adr('A2'))
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('restores dependent cell formulas', () => {
     const sheet = [
-      ['=A2'],
-      ['42'],
+      [{ cellValue: '=A2' }],
+      [{ cellValue: '42' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1), adr('A2'))
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('formulas are built correctly when there was a pause in computation', () => {
     const sheet = [
-      ['=A2'],
-      ['3'],
+      [{ cellValue: '=A2' }],
+      [{ cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.suspendEvaluation()
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1), adr('A2'))
 
     engine.undo()
     engine.resumeEvaluation()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('removed added global named expression', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      'Sheet1': [],
-      'Sheet2': []
+      'Sheet1': { cells: [] },
+      'Sheet2': { cells: [] }
     })
     engine.addNamedExpression('foo', 'bar', 0)
-    engine.setCellContents(adr('A1'), '=foo')
+    engine.setCellContents(adr('A1'), { cellValue: '=foo' })
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1), adr('A1', 1))
 
     engine.undo()
@@ -667,8 +702,8 @@ describe('Undo - moving cells', () => {
 
   it('remove global named expression even if it was added after formula', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      'Sheet1': [['=foo']],
-      'Sheet2': []
+      'Sheet1': { cells: [[{ cellValue: '=foo' }]] },
+      'Sheet2': { cells: [] }
     })
     engine.addNamedExpression('foo', 'bar', 0)
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1), adr('A1', 1))
@@ -683,24 +718,24 @@ describe('Undo - moving cells', () => {
 describe('Undo - cut-paste', () => {
   it('works for static content', () => {
     const sheet = [
-      ['foo'],
-      ['bar'],
+      [{ cellValue: 'foo' }],
+      [{ cellValue: 'bar' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('A2'))
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('undoing doesnt roll back clipboard', () => {
     const sheet = [
-      ['foo'],
-      ['bar'],
+      [{ cellValue: 'foo' }],
+      [{ cellValue: 'bar' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('A2'))
     engine.undo()
@@ -710,11 +745,11 @@ describe('Undo - cut-paste', () => {
 
   it('removed added global named expression', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      'Sheet1': [],
-      'Sheet2': []
+      'Sheet1': { cells: [] },
+      'Sheet2': { cells: [] }
     })
     engine.addNamedExpression('foo', 'bar', 0)
-    engine.setCellContents(adr('A1'), '=foo')
+    engine.setCellContents(adr('A1'), { cellValue: '=foo' })
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('A1', 1))
 
@@ -728,25 +763,25 @@ describe('Undo - cut-paste', () => {
 describe('Undo - copy-paste', () => {
   it('works', () => {
     const sheet = [
-      ['foo'],
-      ['bar'],
+      [{ cellValue: 'foo' }],
+      [{ cellValue: 'bar' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('A2'))
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('removed added global named expression', () => {
     const [engine] = HyperFormula.buildFromSheets({
-      'Sheet1': [],
-      'Sheet2': []
+      'Sheet1': { cells: [] },
+      'Sheet2': { cells: [] }
     })
     engine.addNamedExpression('foo', 'bar', 0)
-    engine.setCellContents(adr('A1'), '=foo')
+    engine.setCellContents(adr('A1'), { cellValue: '=foo' })
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('A1', 1))
 
@@ -759,24 +794,24 @@ describe('Undo - copy-paste', () => {
 
 describe('Undo - add named expression', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=foo']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=foo' }]
+    ]})
 
     engine.addNamedExpression('foo', 'foo')
 
     engine.undo()
 
     expect(engine.listNamedExpressions().length).toEqual(0)
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.NamedExpressionName('foo')))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.NamedExpressionName('foo')))
   })
 })
 
 describe('Undo - remove named expression', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=foo']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=foo' }]
+    ]})
 
     engine.addNamedExpression('foo', 'foo')
     engine.removeNamedExpression('foo')
@@ -784,15 +819,15 @@ describe('Undo - remove named expression', () => {
     engine.undo()
 
     expect(engine.listNamedExpressions().length).toEqual(1)
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
   })
 })
 
 describe('Undo - change named expression', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=foo']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=foo' }]
+    ]})
 
     engine.addNamedExpression('foo', 'foo')
     engine.changeNamedExpression('foo', 'bar')
@@ -800,7 +835,7 @@ describe('Undo - change named expression', () => {
     engine.undo()
 
     expect(engine.listNamedExpressions().length).toEqual(1)
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
   })
 })
 
@@ -814,56 +849,56 @@ describe('Undo', () => {
   })
 
   it('undo recomputes and return changes', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['3', '=A1'],
-    ])
-    engine.setCellContents(adr('A1'), '100')
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '3' }, { cellValue: '=A1' }],
+    ]})
+    engine.setCellContents(adr('A1'), { cellValue: '100' })
 
     const [changes] = engine.undo()
 
-    expect(engine.getCellValue(adr('B1'))).toEqual(3)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(3)
     expect(changes.length).toBe(2)
   })
 
   it('operations in batch mode are one undo', () => {
     const sheet = [
-      ['1', '2'],
+      [{ cellValue: '1' }, { cellValue: '2' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.batch(() => {
-      engine.setCellContents(adr('A1'), '10')
-      engine.setCellContents(adr('A2'), '20')
+      engine.setCellContents(adr('A1'), { cellValue: '10' })
+      engine.setCellContents(adr('A2'), { cellValue: '20' })
     })
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
     expect(engine.isThereSomethingToUndo()).toBe(false)
   })
 
   it('operations in batch mode are undone in correct order', () => {
     const sheet = [
-      ['1'],
+      [{ cellValue: '1' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.batch(() => {
-      engine.setCellContents(adr('A1'), '10')
+      engine.setCellContents(adr('A1'), { cellValue: '10' })
       engine.removeRows(0, [0, 1])
     })
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 
   it('keeps elements within limit', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-    ], {undoLimit: 3})
-    engine.setCellContents(adr('A1'), '2')
-    engine.setCellContents(adr('A1'), '3')
-    engine.setCellContents(adr('A1'), '4')
-    engine.setCellContents(adr('A1'), '5')
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+    ] }, {undoLimit: 3})
+    engine.setCellContents(adr('A1'), { cellValue: '2' })
+    engine.setCellContents(adr('A1'), { cellValue: '3' })
+    engine.setCellContents(adr('A1'), { cellValue: '4' })
+    engine.setCellContents(adr('A1'), { cellValue: '5' })
 
     engine.undo()
     engine.undo()
@@ -873,42 +908,42 @@ describe('Undo', () => {
   })
 
   it('undo limit works with infinity', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-    ], {undoLimit: Infinity})
-    engine.setCellContents(adr('A1'), '2')
-    engine.setCellContents(adr('A1'), '3')
-    engine.setCellContents(adr('A1'), '4')
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+    ] }, {undoLimit: Infinity})
+    engine.setCellContents(adr('A1'), { cellValue: '2' })
+    engine.setCellContents(adr('A1'), { cellValue: '3' })
+    engine.setCellContents(adr('A1'), { cellValue: '4' })
 
     expect(engine.isThereSomethingToUndo()).toBe(true)
   })
 
   it('restore AST after irreversible operation', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('E1'), '=SUM(A1:C1)')
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('E1'), { cellValue: '=SUM(A1:C1)' })
     engine.addColumns(0, [3, 1])
     engine.removeColumns(0, [0, 1])
 
     expect(() => engine.undo()).not.toThrowError()
-    expect(engine.getCellFormula(adr('F1'))).toEqual('=SUM(A1:C1)')
+    expect(engine.getCellFormula(adr('F1')).cellValue).toEqual('=SUM(A1:C1)')
   })
 })
 
 describe('UndoRedo', () => {
   it('redo operation is pushed back on undo stack (undo-redo-undo)', () => {
     const sheet = [
-      ['1'],
-      ['2', '=A1'], // remove
-      ['3'],
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }, { cellValue: '=A1' }], // remove
+      [{ cellValue: '3' }],
     ]
-    const [engine] = HyperFormula.buildFromArray(sheet)
+    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
     engine.removeRows(0, [1, 1])
     engine.undo()
     engine.redo()
 
     engine.undo()
 
-    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray(sheet)[0])
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromArray({ cells: sheet })[0])
   })
 })
 
@@ -920,7 +955,7 @@ describe('UndoRedo - #isThereSomethingToUndo', () => {
   })
 
   it('when there is some operation to undo', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     engine.removeRows(0, [1, 1])
 
     expect(engine.isThereSomethingToUndo()).toBe(true)
@@ -935,7 +970,7 @@ describe('UndoRedo - #isThereSomethingToRedo', () => {
   })
 
   it('when there is some operation to redo', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     engine.removeRows(0, [1, 1])
     engine.undo()
 
@@ -945,11 +980,11 @@ describe('UndoRedo - #isThereSomethingToRedo', () => {
 
 describe('Redo - removing rows', () => {
   it('works for empty row', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      [null], // remove
-      ['3'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+      [{ cellValue: null }], // remove
+      [{ cellValue: '3' }],
+    ]})
     engine.removeRows(0, [1, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -960,11 +995,11 @@ describe('Redo - removing rows', () => {
   })
 
   it('works for other values', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2', '=A1'], // remove
-      ['3'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }, { cellValue: '=A1' }], // remove
+      [{ cellValue: '3' }],
+    ]})
     engine.removeRows(0, [1, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -975,12 +1010,12 @@ describe('Redo - removing rows', () => {
   })
 
   it('works for more removal segments', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2'],
-      ['3'],
-      ['4'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '3' }],
+      [{ cellValue: '4' }],
+    ]})
     engine.removeRows(0, [1, 1], [3, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -991,9 +1026,9 @@ describe('Redo - removing rows', () => {
   })
 
   it('dummy operation should also be redoable', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }]
+    ]})
     engine.removeRows(0, [1000, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1004,8 +1039,8 @@ describe('Redo - removing rows', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.removeRows(0, [1000, 1])
@@ -1016,10 +1051,10 @@ describe('Redo - removing rows', () => {
 
 describe('Redo - adding rows', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'], // add after that
-      ['3'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }], // add after that
+      [{ cellValue: '3' }],
+    ]})
     engine.addRows(0, [1, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1030,9 +1065,9 @@ describe('Redo - adding rows', () => {
   })
 
   it('dummy operation should also be redoable', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+    ]})
     engine.addRows(0, [1000, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1043,11 +1078,11 @@ describe('Redo - adding rows', () => {
   })
 
   it('works for more addition segments', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2'],
-      ['3'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '3' }],
+    ]})
     engine.addRows(0, [1, 1], [2, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1058,8 +1093,8 @@ describe('Redo - adding rows', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.addRows(0, [1000, 1])
@@ -1070,11 +1105,11 @@ describe('Redo - adding rows', () => {
 
 describe('Redo - moving rows', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-      ['2'],
-      ['3'], // move first row before this one
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+      [{ cellValue: '2' }],
+      [{ cellValue: '3' }], // move first row before this one
+    ]})
     engine.moveRows(0, 0, 1, 2)
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1085,8 +1120,8 @@ describe('Redo - moving rows', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.moveRows(0, 0, 1, 2)
@@ -1097,9 +1132,9 @@ describe('Redo - moving rows', () => {
 
 describe('Redo - moving columns', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '3'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }],
+    ]})
     engine.moveColumns(0, 0, 1, 2)
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1110,8 +1145,8 @@ describe('Redo - moving columns', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.moveColumns(0, 0, 1, 2)
@@ -1122,10 +1157,10 @@ describe('Redo - moving columns', () => {
 
 describe('Redo - moving cells', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['42'],
-      ['45'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '42' }],
+      [{ cellValue: '45' }],
+    ]})
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1), adr('A2'))
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1136,8 +1171,8 @@ describe('Redo - moving cells', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1), adr('A2'))
@@ -1148,10 +1183,10 @@ describe('Redo - moving cells', () => {
 
 describe('Redo - setting cell content', () => {
   it('works for simple values', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['3'],
-    ])
-    engine.setCellContents(adr('A1'), '100')
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '3' }],
+    ]})
+    engine.setCellContents(adr('A1'), { cellValue: '100' })
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
 
@@ -1161,10 +1196,10 @@ describe('Redo - setting cell content', () => {
   })
 
   it('works for empty values', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['3'],
-    ])
-    engine.setCellContents(adr('A1'), null)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '3' }],
+    ]})
+    engine.setCellContents(adr('A1'), { cellValue: null })
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
 
@@ -1173,11 +1208,26 @@ describe('Redo - setting cell content', () => {
     expectEngineToBeTheSameAs(engine, HyperFormula.buildFromSheets(snapshot)[0])
   })
 
-  it('works for formula values', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['3'],
-    ])
-    engine.setCellContents(adr('A1'), '=42')
+  it('works for empty values with metadata', () => {
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '3' }],
+    ]})
+    engine.setCellContents(adr('A1'), { cellValue: null, metadata: { test: 'value' }})
+    const snapshot = engine.getAllSheetsSerialized()
+    engine.undo()
+
+    engine.redo()
+
+    expect(engine.getCellValue(adr('A1'))).toEqual({ cellValue: null, metadata: { test: 'value' }})
+    expectEngineToBeTheSameAs(engine, HyperFormula.buildFromSheets(snapshot)[0])
+  })
+
+  it('works for formula values with metadata', () => {
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '3' }],
+    ]})
+    engine.setCellContents(adr('A1'), { cellValue: '=42', metadata: { test: 'value' }})
+
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
 
@@ -1187,10 +1237,10 @@ describe('Redo - setting cell content', () => {
   })
 
   it('setting multiple cell contents is one operation', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['3', '4'],
-    ])
-    engine.setCellContents(adr('A1'), [['5', '6']])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '3' }, { cellValue: '4' }],
+    ]})
+    engine.setCellContents(adr('A1'), [[{ cellValue: '5' }, { cellValue: '6' }]])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
 
@@ -1200,11 +1250,11 @@ describe('Redo - setting cell content', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
-    engine.setCellContents(adr('A1'), 78)
+    engine.setCellContents(adr('A1'), { cellValue: 78 })
 
     expect(engine.isThereSomethingToRedo()).toBe(false)
   })
@@ -1212,9 +1262,9 @@ describe('Redo - setting cell content', () => {
 
 describe('Redo - removing sheet', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }]
+    ]})
     engine.removeSheet(0)
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1225,8 +1275,8 @@ describe('Redo - removing sheet', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.removeSheet(0)
@@ -1237,7 +1287,7 @@ describe('Redo - removing sheet', () => {
 
 describe('Redo - adding sheet', () => {
   it('works for basic case', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     engine.addSheet('SomeSheet')
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1249,7 +1299,7 @@ describe('Redo - adding sheet', () => {
   })
 
   it('works for automatic naming', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     engine.addSheet()
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1261,8 +1311,8 @@ describe('Redo - adding sheet', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.addSheet()
@@ -1273,7 +1323,7 @@ describe('Redo - adding sheet', () => {
 
 describe('Redo - renaming sheet', () => {
   it('redo rename sheet', () => {
-    const [engine] = HyperFormula.buildFromSheets({'Sheet1': [[1]]})
+    const [engine] = HyperFormula.buildFromSheets({'Sheet1': { cells: [[{ cellValue: 1 }]] }})
     engine.renameSheet(0, 'Foo')
     engine.undo()
 
@@ -1283,8 +1333,8 @@ describe('Redo - renaming sheet', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.renameSheet(0, 'Foo')
@@ -1295,9 +1345,9 @@ describe('Redo - renaming sheet', () => {
 
 describe('Redo - clearing sheet', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }]
+    ]})
     engine.clearSheet(0)
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1308,8 +1358,8 @@ describe('Redo - clearing sheet', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.clearSheet(0)
@@ -1320,9 +1370,9 @@ describe('Redo - clearing sheet', () => {
 
 describe('Redo - adding columns', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '3'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '3' }],
+    ]})
     engine.addColumns(0, [1, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1333,9 +1383,9 @@ describe('Redo - adding columns', () => {
   })
 
   it('dummy operation should also be redoable', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+    ]})
     engine.addColumns(0, [1000, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1346,9 +1396,9 @@ describe('Redo - adding columns', () => {
   })
 
   it('works for more addition segments', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '3'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }],
+    ]})
     engine.addColumns(0, [1, 1], [2, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1359,8 +1409,8 @@ describe('Redo - adding columns', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.addColumns(0, [1000, 1])
@@ -1371,9 +1421,9 @@ describe('Redo - adding columns', () => {
 
 describe('Redo - removing column', () => {
   it('works for empty column', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', null, '3'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: null }, { cellValue: '3' }],
+    ]})
     engine.removeColumns(0, [1, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1384,10 +1434,10 @@ describe('Redo - removing column', () => {
   })
 
   it('works for other values', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-      ['=B1']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }],
+      [{ cellValue: '=B1' }]
+    ]})
     engine.removeColumns(0, [0, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1398,9 +1448,9 @@ describe('Redo - removing column', () => {
   })
 
   it('works for more removal segments', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '3', '4'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '3' }, { cellValue: '4'}],
+    ]})
     engine.removeColumns(0, [1, 1], [3, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1411,9 +1461,9 @@ describe('Redo - removing column', () => {
   })
 
   it('dummy operation should also be redoable', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }]
+    ]})
     engine.removeColumns(0, [1000, 1])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1424,8 +1474,8 @@ describe('Redo - removing column', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.removeColumns(0, [1000, 1])
@@ -1436,10 +1486,10 @@ describe('Redo - removing column', () => {
 
 describe('Redo - cut-paste', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['foo'],
-      ['bar'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 'foo' }],
+      [{ cellValue: 'bar' }],
+    ]})
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
     engine.paste(adr('A2'))
     const snapshot = engine.getAllSheetsSerialized()
@@ -1451,8 +1501,8 @@ describe('Redo - cut-paste', () => {
   })
 
   it('cut does not clear redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
@@ -1461,8 +1511,8 @@ describe('Redo - cut-paste', () => {
   })
 
   it('cut-paste clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.cut(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
@@ -1474,10 +1524,10 @@ describe('Redo - cut-paste', () => {
 
 describe('Redo - copy-paste', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['foo', 'baz'],
-      ['bar', 'faz'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 'foo' }, { cellValue: 'baz' }],
+      [{ cellValue: 'bar' }, { cellValue: 'faz' }],
+    ]})
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 2, 2))
     engine.paste(adr('C3'))
     const snapshot = engine.getAllSheetsSerialized()
@@ -1489,8 +1539,8 @@ describe('Redo - copy-paste', () => {
   })
 
   it('copy does not clear redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
@@ -1499,8 +1549,8 @@ describe('Redo - copy-paste', () => {
   })
 
   it('copy-paste clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.copy(AbsoluteCellRange.spanFrom(adr('A1'), 1, 1))
@@ -1512,8 +1562,8 @@ describe('Redo - copy-paste', () => {
 
 describe('Redo - setting sheet contents', () => {
   it('works for basic case', () => {
-    const [engine] = HyperFormula.buildFromArray([['13']])
-    engine.setSheetContent(0, [['42']])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '13' }]] })
+    engine.setSheetContent(0, [[{ cellValue: '42' }]])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
 
@@ -1523,8 +1573,8 @@ describe('Redo - setting sheet contents', () => {
   })
 
   it('also clears sheet when redoing', () => {
-    const [engine] = HyperFormula.buildFromArray([['13', '14']])
-    engine.setSheetContent(0, [['42']])
+    const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '13' }, { cellValue: '14' }]] })
+    engine.setSheetContent(0, [[{ cellValue: '42' }]])
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
 
@@ -1534,11 +1584,11 @@ describe('Redo - setting sheet contents', () => {
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
-    engine.setSheetContent(0, [['42']])
+    engine.setSheetContent(0, [[{ cellValue: '42' }]])
 
     expect(engine.isThereSomethingToRedo()).toBe(false)
   })
@@ -1546,9 +1596,9 @@ describe('Redo - setting sheet contents', () => {
 
 describe('Redo - add named expression', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=foo']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=foo' }]
+    ]})
 
     engine.addNamedExpression('foo', 'foo')
     engine.undo()
@@ -1556,12 +1606,12 @@ describe('Redo - add named expression', () => {
     engine.redo()
 
     expect(engine.listNamedExpressions().length).toEqual(1)
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
-    engine.setCellContents(adr('A1'), 42)
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.addNamedExpression('foo', 'foo')
@@ -1572,9 +1622,9 @@ describe('Redo - add named expression', () => {
 
 describe('Redo - remove named expression', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=foo']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=foo' }]
+    ]})
 
     engine.addNamedExpression('foo', 'foo')
     engine.removeNamedExpression('foo')
@@ -1583,13 +1633,13 @@ describe('Redo - remove named expression', () => {
     engine.redo()
 
     expect(engine.listNamedExpressions().length).toEqual(0)
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.NamedExpressionName('foo')))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NAME, ErrorMessage.NamedExpressionName('foo')))
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     engine.addNamedExpression('foo', 'foo')
-    engine.setCellContents(adr('A1'), 42)
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.removeNamedExpression('foo')
@@ -1600,9 +1650,9 @@ describe('Redo - remove named expression', () => {
 
 describe('Redo - change named expression', () => {
   it('works', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=foo']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=foo' }]
+    ]})
 
     engine.addNamedExpression('foo', 'foo')
     engine.changeNamedExpression('foo', 'bar')
@@ -1611,13 +1661,13 @@ describe('Redo - change named expression', () => {
     engine.redo()
 
     expect(engine.listNamedExpressions().length).toEqual(1)
-    expect(engine.getCellValue(adr('A1'))).toEqual('bar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('bar')
   })
 
   it('clears redo stack', () => {
-    const [engine] = HyperFormula.buildFromArray([])
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     engine.addNamedExpression('foo', 'foo')
-    engine.setCellContents(adr('A1'), 42)
+    engine.setCellContents(adr('A1'), { cellValue: 42 })
     engine.undo()
 
     engine.changeNamedExpression('foo', 'foo')
@@ -1628,12 +1678,12 @@ describe('Redo - change named expression', () => {
 
 describe('Redo - batch mode', () => {
   it('multiple batched operations are one redo', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }],
+    ]})
     engine.batch(() => {
-      engine.setCellContents(adr('A1'), '10')
-      engine.setCellContents(adr('A2'), '20')
+      engine.setCellContents(adr('A1'), { cellValue: '10' })
+      engine.setCellContents(adr('A2'), { cellValue: '20' })
     })
     const snapshot = engine.getAllSheetsSerialized()
     engine.undo()
@@ -1645,11 +1695,11 @@ describe('Redo - batch mode', () => {
   })
 
   it('operations in batch mode are re-done in correct order', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }],
+    ]})
     engine.batch(() => {
-      engine.setCellContents(adr('A1'), '10')
+      engine.setCellContents(adr('A1'), { cellValue: '10' })
       engine.removeRows(0, [0, 1])
     })
     const snapshot = engine.getAllSheetsSerialized()
@@ -1671,15 +1721,15 @@ describe('Redo', () => {
   })
 
   it('redo recomputes and return changes', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['3', '=A1'],
-    ])
-    engine.setCellContents(adr('A1'), '100')
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '3' }, { cellValue: '=A1' }],
+    ]})
+    engine.setCellContents(adr('A1'), { cellValue: '100' })
     engine.undo()
 
     const [changes] = engine.redo()
 
-    expect(engine.getCellValue(adr('B1'))).toEqual(100)
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqual(100)
     expect(changes.length).toBe(2)
   })
 })

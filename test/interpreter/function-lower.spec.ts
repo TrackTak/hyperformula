@@ -4,38 +4,38 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function LOWER', () => {
   it('should take one argument', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=LOWER()'],
-      ['=LOWER("foo", "bar")'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=LOWER()' }],
+      [{ cellValue: '=LOWER("foo", "bar")' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should convert text to lowercase', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=LOWER("")'],
-      ['=LOWER(B1)'],
-      ['=LOWER("foo")'],
-      ['=LOWER("FOO")'],
-      ['=LOWER("BaR")'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=LOWER("")' }],
+      [{ cellValue: '=LOWER(B1)' }],
+      [{ cellValue: '=LOWER("foo")' }],
+      [{ cellValue: '=LOWER("FOO")' }],
+      [{ cellValue: '=LOWER("BaR")' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('')
-    expect(engine.getCellValue(adr('A2'))).toEqual('')
-    expect(engine.getCellValue(adr('A3'))).toEqual('foo')
-    expect(engine.getCellValue(adr('A4'))).toEqual('foo')
-    expect(engine.getCellValue(adr('A5'))).toEqual('bar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual('bar')
   })
 
   it('should coerce', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=LOWER(TRUE())'],
-      ['=LOWER(0)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=LOWER(TRUE())' }],
+      [{ cellValue: '=LOWER(0)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual('true')
-    expect(engine.getCellValue(adr('A2'))).toEqual('0')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('true')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('0')
   })
 })

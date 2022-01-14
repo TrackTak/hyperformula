@@ -1,4 +1,5 @@
 import {AbsoluteCellRange} from '../src/AbsoluteCellRange'
+import { AsyncPromiseFetcher } from '../src/AsyncPromise'
 import {SimpleCellAddress} from '../src/Cell'
 import {Config} from '../src/Config'
 import {DependencyGraph} from '../src/DependencyGraph'
@@ -14,7 +15,8 @@ describe('generateCellsFromRange', () => {
   const functionRegistry = new FunctionRegistry(config)
   const stats = new Statistics()
   const lazilyTransformingAstService = new LazilyTransformingAstService(stats)
-  const dependencyGraph = DependencyGraph.buildEmpty(lazilyTransformingAstService, config, functionRegistry, new NamedExpressions(), stats)
+  const asyncPromiseFetcher = new AsyncPromiseFetcher(config, functionRegistry)
+  const dependencyGraph = DependencyGraph.buildEmpty(lazilyTransformingAstService, config, functionRegistry, new NamedExpressions(), stats, asyncPromiseFetcher)
   const generateCellsFromRange = (range: AbsoluteCellRange): SimpleCellAddress[] => {
     return Array.from(range.addresses(dependencyGraph))
   }

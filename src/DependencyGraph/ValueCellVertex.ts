@@ -3,8 +3,8 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
+import { RawCellContent } from '..'
 import {CellError} from '../Cell'
-import {RawCellContent} from '../CellContentParser'
 import {ExtendedNumber} from '../interpreter/InterpreterValue'
 
 export type ValueCellVertexValue = ExtendedNumber | boolean | string | CellError

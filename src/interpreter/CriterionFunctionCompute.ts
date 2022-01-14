@@ -147,7 +147,7 @@ export class Condition {
 
 function* getRangeValues(dependencyGraph: DependencyGraph, cellRange: AbsoluteCellRange): IterableIterator<RawScalarValue> {
   for (const cellFromRange of cellRange.addresses(dependencyGraph)) {
-    yield getRawValue(dependencyGraph.getScalarValue(cellFromRange))
+    yield getRawValue(dependencyGraph.getScalarValue(cellFromRange).cellValue)
   }
 }
 

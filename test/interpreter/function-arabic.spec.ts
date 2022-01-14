@@ -4,83 +4,83 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function ARABIC', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=ARABIC()', '=ARABIC(1, 1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=ARABIC()' }, { cellValue: '=ARABIC(1, 1)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should properly sanitize input', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=ARABIC(" XD ")'],
-      ['=ARABIC("xd")'],
-      ['=ARABIC(" xD ")'],
-    ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(490)
-    expect(engine.getCellValue(adr('A2'))).toEqual(490)
-    expect(engine.getCellValue(adr('A3'))).toEqual(490)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=ARABIC(" XD ")' }],
+      [{ cellValue: '=ARABIC("xd")' }],
+      [{ cellValue: '=ARABIC(" xD ")' }],
+    ]})
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(490)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(490)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(490)
   })
 
   it('should detect incorrect numerals', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=ARABIC("IMM")'],
-      ['=ARABIC("MMMM")'],
-      ['=ARABIC("IXC")'],
-      ['=ARABIC("--I")'],
-      ['=ARABIC("-")'],
-      ['=ARABIC("Ma")'],
-      ['=ARABIC("M M")'],
-    ])
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A5'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A6'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
-    expect(engine.getCellValue(adr('A7'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=ARABIC("IMM")' }],
+      [{ cellValue: '=ARABIC("MMMM")' }],
+      [{ cellValue: '=ARABIC("IXC")' }],
+      [{ cellValue: '=ARABIC("--I")' }],
+      [{ cellValue: '=ARABIC("-")' }],
+      [{ cellValue: '=ARABIC("Ma")' }],
+      [{ cellValue: '=ARABIC("M M")' }],
+    ]})
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A6')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
+    expect(engine.getCellValue(adr('A7')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.InvalidRoman))
   })
 
   it('works for border cases', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=ARABIC("MMMIMIDCCCICILXXXIXIVIII")'],
-      ['=ARABIC("-I")'],
-      ['=ARABIC(" ")'],
-    ])
-    expect(engine.getCellValue(adr('A1'))).toEqual(4992)
-    expect(engine.getCellValue(adr('A2'))).toEqual(-1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(0)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=ARABIC("MMMIMIDCCCICILXXXIXIVIII")' }],
+      [{ cellValue: '=ARABIC("-I")' }],
+      [{ cellValue: '=ARABIC(" ")' }],
+    ]})
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(4992)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(-1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(0)
   })
 
   it('should output correct value for roman numerals from mode 0', () => {
     const [input, output] = inputOutput(0)
-    const [engine] = HyperFormula.buildFromArray([input])
-    expect(engine.getSheetValues(0)).toEqual([output])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input]})
+    expect(engine.getSheetValues(0).cells).toEqual([output])
   })
 
   it('should output correct value for roman numerals from mode 1', () => {
     const [input, output] = inputOutput(1)
-    const [engine] = HyperFormula.buildFromArray([input])
-    expect(engine.getSheetValues(0)).toEqual([output])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input]})
+    expect(engine.getSheetValues(0).cells).toEqual([output])
   })
 
   it('should output correct value for roman numerals from mode 2', () => {
     const [input, output] = inputOutput(2)
-    const [engine] = HyperFormula.buildFromArray([input])
-    expect(engine.getSheetValues(0)).toEqual([output])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input]})
+    expect(engine.getSheetValues(0).cells).toEqual([output])
   })
 
   it('should output correct value for roman numerals from mode 3', () => {
     const [input, output] = inputOutput(0)
-    const [engine] = HyperFormula.buildFromArray([input])
-    expect(engine.getSheetValues(0)).toEqual([output])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input]})
+    expect(engine.getSheetValues(0).cells).toEqual([output])
   })
 
   it('should output correct value for roman numerals from mode 4', () => {
     const [input, output] = inputOutput(4)
-    const [engine] = HyperFormula.buildFromArray([input])
-    expect(engine.getSheetValues(0)).toEqual([output])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input]})
+    expect(engine.getSheetValues(0).cells).toEqual([output])
   })
 })
 
@@ -89,8 +89,8 @@ function inputOutput(mode: number) {
   const input = []
   const output = []
   for (let i = 0; i < arr.length; i++) {
-    input.push(`=ARABIC("${arr[i]}")`)
-    output.push(i + 1)
+    input.push({ cellValue: `=ARABIC("${arr[i]}")` })
+    output.push({ cellValue: i + 1 })
   }
   return [input, output]
 }

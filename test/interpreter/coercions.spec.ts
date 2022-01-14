@@ -149,166 +149,166 @@ describe('#coerceScalarToString', () => {
 
 describe('check if type coercions are applied', () => {
   it('boolean to int, true vs null', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [true, null, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1', '=+A1', '=-A1', '=A1%']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(1) //ADD
-    expect(engine.getCellValue(adr('D1'))).toEqual(1) //SUB
-    expect(engine.getCellValue(adr('E1'))).toEqual(0) //MULT
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO)) // DIV
-    expect(engine.getCellValue(adr('G1'))).toEqual(1) // EXP
-    expect(engine.getCellValue(adr('H1'))).toEqual(true) // UNARY PLUS
-    expect(engine.getCellValue(adr('I1'))).toEqual(-1) // UNARY MINUS
-    expect(engine.getCellValue(adr('J1'))).toEqual(0.01) // PERCENTAGE
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: true }, { cellValue: null }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }, { cellValue: '=+A1' }, { cellValue: '=-A1' }, { cellValue: '=A1%' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(1) //ADD
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(1) //SUB
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(0) //MULT
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO)) // DIV
+    expect(engine.getCellValue(adr('G1')).cellValue).toEqual(1) // EXP
+    expect(engine.getCellValue(adr('H1')).cellValue).toEqual(true) // UNARY PLUS
+    expect(engine.getCellValue(adr('I1')).cellValue).toEqual(-1) // UNARY MINUS
+    expect(engine.getCellValue(adr('J1')).cellValue).toEqual(0.01) // PERCENTAGE
   })
 
   it('boolean to int, null vs true', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [null, true, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1', '=+A1', '=-A1', '=A1%']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(1) //ADD
-    expect(engine.getCellValue(adr('D1'))).toEqual(-1) //SUB
-    expect(engine.getCellValue(adr('E1'))).toEqual(0) //MULT
-    expect(engine.getCellValue(adr('F1'))).toEqual(0) // DIV
-    expect(engine.getCellValue(adr('G1'))).toEqual(0) // EXP
-    expect(engine.getCellValue(adr('H1'))).toBe(null) // UNARY PLUS
-    expect(engine.getCellValue(adr('I1'))).toEqual(0) // UNARY MINUS
-    expect(engine.getCellValue(adr('J1'))).toEqual(0) // PERCENTAGE
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: null }, { cellValue: true }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }, { cellValue: '=+A1' }, { cellValue: '=-A1' }, { cellValue: '=A1%' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(1) //ADD
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(-1) //SUB
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(0) //MULT
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(0) // DIV
+    expect(engine.getCellValue(adr('G1')).cellValue).toEqual(0) // EXP
+    expect(engine.getCellValue(adr('H1')).cellValue).toBe(null) // UNARY PLUS
+    expect(engine.getCellValue(adr('I1')).cellValue).toEqual(0) // UNARY MINUS
+    expect(engine.getCellValue(adr('J1')).cellValue).toEqual(0) // PERCENTAGE
   })
 
   it('boolean to int, true vs true', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [true, true, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(2) //ADD
-    expect(engine.getCellValue(adr('D1'))).toEqual(0) //SUB
-    expect(engine.getCellValue(adr('E1'))).toEqual(1) //MULT
-    expect(engine.getCellValue(adr('F1'))).toEqual(1) // DIV
-    expect(engine.getCellValue(adr('G1'))).toEqual(1) // EXP
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: true }, { cellValue: true }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(2) //ADD
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(0) //SUB
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(1) //MULT
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(1) // DIV
+    expect(engine.getCellValue(adr('G1')).cellValue).toEqual(1) // EXP
   })
 
   it('boolean to int, true vs false', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [true, false, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(1) //ADD
-    expect(engine.getCellValue(adr('D1'))).toEqual(1) //SUB
-    expect(engine.getCellValue(adr('E1'))).toEqual(0) //MULT
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO)) // DIV
-    expect(engine.getCellValue(adr('G1'))).toEqual(1) // EXP
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: true }, { cellValue: false }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(1) //ADD
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(1) //SUB
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(0) //MULT
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO)) // DIV
+    expect(engine.getCellValue(adr('G1')).cellValue).toEqual(1) // EXP
   })
 
   it('boolean to int, false vs true', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [false, true, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(1) //ADD
-    expect(engine.getCellValue(adr('D1'))).toEqual(-1) //SUB
-    expect(engine.getCellValue(adr('E1'))).toEqual(0) //MULT
-    expect(engine.getCellValue(adr('F1'))).toEqual(0) // DIV
-    expect(engine.getCellValue(adr('G1'))).toEqual(0) // EXP
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: false }, { cellValue: true }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(1) //ADD
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(-1) //SUB
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(0) //MULT
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(0) // DIV
+    expect(engine.getCellValue(adr('G1')).cellValue).toEqual(0) // EXP
   })
 
   it('boolean to int, false vs false', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [false, false, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1', '=+A1', '=-A1', '=A1%']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(0) //ADD
-    expect(engine.getCellValue(adr('D1'))).toEqual(0) //SUB
-    expect(engine.getCellValue(adr('E1'))).toEqual(0) //MULT
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO)) // DIV
-    expect(engine.getCellValue(adr('G1'))).toEqual(1) // EXP
-    expect(engine.getCellValue(adr('H1'))).toEqual(false) // UNARY PLUS
-    expect(engine.getCellValue(adr('I1'))).toEqual(0) // UNARY MINUS
-    expect(engine.getCellValue(adr('J1'))).toEqual(0) // PERCENTAGE
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: false }, { cellValue: false }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }, { cellValue: '=+A1' }, { cellValue: '=-A1' }, { cellValue: '=A1%' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(0) //ADD
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(0) //SUB
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(0) //MULT
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO)) // DIV
+    expect(engine.getCellValue(adr('G1')).cellValue).toEqual(1) // EXP
+    expect(engine.getCellValue(adr('H1')).cellValue).toEqual(false) // UNARY PLUS
+    expect(engine.getCellValue(adr('I1')).cellValue).toEqual(0) // UNARY MINUS
+    expect(engine.getCellValue(adr('J1')).cellValue).toEqual(0) // PERCENTAGE
   })
 
   it('boolean to int, null vs false', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [null, false, '=A1+B1', '=A1-B1', '=A1*B1', '=A1/B1', '=A1^B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(0) //ADD
-    expect(engine.getCellValue(adr('D1'))).toEqual(0) //SUB
-    expect(engine.getCellValue(adr('E1'))).toEqual(0) //MULT
-    expect(engine.getCellValue(adr('F1'))).toEqualError(detailedError(ErrorType.DIV_BY_ZERO)) // DIV
-    expect(engine.getCellValue(adr('G1'))).toEqual(1) // EXP
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: null }, { cellValue: false }, { cellValue: '=A1+B1' }, { cellValue: '=A1-B1'}, {cellValue: '=A1*B1' }, { cellValue: '=A1/B1' }, { cellValue: '=A1^B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(0) //ADD
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(0) //SUB
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(0) //MULT
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqualError(detailedError(ErrorType.DIV_BY_ZERO)) // DIV
+    expect(engine.getCellValue(adr('G1')).cellValue).toEqual(1) // EXP
   })
   it('order operations, \'\' vs null', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['', null, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(false)
-    expect(engine.getCellValue(adr('D1'))).toEqual(false)
-    expect(engine.getCellValue(adr('E1'))).toEqual(true)
-    expect(engine.getCellValue(adr('F1'))).toEqual(true)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '' }, { cellValue: null }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(true)
   })
   it('order operations, string vs boolean', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['string', false, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(false)
-    expect(engine.getCellValue(adr('D1'))).toEqual(true)
-    expect(engine.getCellValue(adr('E1'))).toEqual(false)
-    expect(engine.getCellValue(adr('F1'))).toEqual(true)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 'string' }, { cellValue: false }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(true)
   })
   it('order operations, null vs false', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [null, false, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(false)
-    expect(engine.getCellValue(adr('D1'))).toEqual(false)
-    expect(engine.getCellValue(adr('E1'))).toEqual(true)
-    expect(engine.getCellValue(adr('F1'))).toEqual(true)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: null }, { cellValue: false }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(true)
   })
   it('order operations, null vs 1', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [null, 1, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(false)
-    expect(engine.getCellValue(adr('D1'))).toEqual(true)
-    expect(engine.getCellValue(adr('E1'))).toEqual(false)
-    expect(engine.getCellValue(adr('F1'))).toEqual(true)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: null }, { cellValue: 1 }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(true)
   })
 
   it('order operations, -1 vs null', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [-1, null, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(false)
-    expect(engine.getCellValue(adr('D1'))).toEqual(true)
-    expect(engine.getCellValue(adr('E1'))).toEqual(false)
-    expect(engine.getCellValue(adr('F1'))).toEqual(true)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: -1}, { cellValue: null}, { cellValue: '=A1>B1'}, { cellValue: '=A1<B1'}, { cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(true)
   })
 
   it('order operations, 0 vs null', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [0, null, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(false)
-    expect(engine.getCellValue(adr('D1'))).toEqual(false)
-    expect(engine.getCellValue(adr('E1'))).toEqual(true)
-    expect(engine.getCellValue(adr('F1'))).toEqual(true)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 0 }, { cellValue: null }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(true)
   })
 
   it('order operations, 0 vs false', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [0, false, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1', '=A1=B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(false)
-    expect(engine.getCellValue(adr('D1'))).toEqual(true)
-    expect(engine.getCellValue(adr('E1'))).toEqual(false)
-    expect(engine.getCellValue(adr('F1'))).toEqual(true)
-    expect(engine.getCellValue(adr('G1'))).toEqual(false)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 0 }, { cellValue: false }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }, { cellValue: '=A1=B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('G1')).cellValue).toEqual(false)
   })
 
   it('order operations, 1 vs true', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [1, true, '=A1>B1', '=A1<B1', '=A1>=B1', '=A1<=B1', '=A1=B1']
-    ])
-    expect(engine.getCellValue(adr('C1'))).toEqual(false)
-    expect(engine.getCellValue(adr('D1'))).toEqual(true)
-    expect(engine.getCellValue(adr('E1'))).toEqual(false)
-    expect(engine.getCellValue(adr('F1'))).toEqual(true)
-    expect(engine.getCellValue(adr('G1'))).toEqual(false)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: 1 }, { cellValue: true }, { cellValue: '=A1>B1' }, { cellValue: '=A1<B1'}, {cellValue: '=A1>=B1' }, { cellValue: '=A1<=B1' }, { cellValue: '=A1=B1' }]
+    ]})
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('D1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(false)
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(true)
+    expect(engine.getCellValue(adr('G1')).cellValue).toEqual(false)
   })
 })

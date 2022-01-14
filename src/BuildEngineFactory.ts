@@ -4,12 +4,15 @@
  */
 
 import {ArraySizePredictor} from './ArraySize'
+import {AsyncPromiseFetcher} from './AsyncPromise'
 import {CellContentParser} from './CellContentParser'
 import {ClipboardOperations} from './ClipboardOperations'
 import {Config, ConfigParams} from './Config'
+import { ContentChanges } from './ContentChanges'
 import {CrudOperations} from './CrudOperations'
 import {DateTimeHelper} from './DateTimeHelper'
 import {DependencyGraph} from './DependencyGraph'
+import { Emitter } from './Emitter'
 import {SheetSizeLimitExceededError} from './errors'
 import {Evaluator} from './Evaluator'
 import {Exporter} from './Exporter'
@@ -25,7 +28,7 @@ import {NumberLiteralHelper} from './NumberLiteralHelper'
 import {Operations} from './Operations'
 import {buildLexerConfig, ParserWithCaching, Unparser} from './parser'
 import {Serialization, SerializedNamedExpression} from './Serialization'
-import {findBoundaries, Sheet, Sheets, validateAsSheet} from './Sheet'
+import {findBoundaries, InputSheet, InputSheets, validateAsSheet} from './Sheet'
 import {EmptyStatistics, Statistics, StatType} from './statistics'
 import {UndoRedo} from './UndoRedo'
 
@@ -44,35 +47,38 @@ export type EngineState = {
   namedExpressions: NamedExpressions,
   serialization: Serialization,
   functionRegistry: FunctionRegistry,
+  eventEmitter: Emitter,
 }
 
 export class BuildEngineFactory {
-  public static buildFromSheets(sheets: Sheets, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, Promise<void>] {
+  public static buildFromSheets(sheets: InputSheets<any, any>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, Promise<ContentChanges>] {
     const config = new Config(configInput)
     return this.buildEngine(config, sheets, namedExpressions)
   }
 
-  public static buildFromSheet(sheet: Sheet, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, Promise<void>] {
+  public static buildFromSheet(sheet: InputSheet<any, any>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, Promise<ContentChanges>] {
     const config = new Config(configInput)
     const newsheetprefix = config.translationPackage.getUITranslation(UIElement.NEW_SHEET_PREFIX) + '1'
     return this.buildEngine(config, {[newsheetprefix]: sheet}, namedExpressions)
   }
 
-  public static buildEmpty(configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, Promise<void>] {
+  public static buildEmpty(configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, Promise<ContentChanges>] {
     return this.buildEngine(new Config(configInput), {}, namedExpressions)
   }
 
-  public static rebuildWithConfig(config: Config, sheets: Sheets, namedExpressions: SerializedNamedExpression[], stats: Statistics): [EngineState, Promise<void>] {
+  public static rebuildWithConfig(config: Config, sheets: InputSheets<any, any>, namedExpressions: SerializedNamedExpression[], stats: Statistics): [EngineState, Promise<ContentChanges>] {
     return this.buildEngine(config, sheets, namedExpressions, stats)
   }
 
-  private static buildEngine(config: Config, sheets: Sheets = {}, inputNamedExpressions: SerializedNamedExpression[] = [], stats: Statistics = config.useStats ? new Statistics() : new EmptyStatistics()): [EngineState, Promise<void>] {
+  private static buildEngine(config: Config, sheets: InputSheets<any, any> = {}, inputNamedExpressions: SerializedNamedExpression[] = [], stats: Statistics = config.useStats ? new Statistics() : new EmptyStatistics()): [EngineState, Promise<ContentChanges>] {
     stats.start(StatType.BUILD_ENGINE_TOTAL)
 
+    const eventEmitter = new Emitter()
     const namedExpressions = new NamedExpressions()
     const functionRegistry = new FunctionRegistry(config)
+    const asyncPromiseFetcher = new AsyncPromiseFetcher(config, functionRegistry)
     const lazilyTransformingAstService = new LazilyTransformingAstService(stats)
-    const dependencyGraph = DependencyGraph.buildEmpty(lazilyTransformingAstService, config, functionRegistry, namedExpressions, stats)
+    const dependencyGraph = DependencyGraph.buildEmpty(lazilyTransformingAstService, config, functionRegistry, namedExpressions, stats, asyncPromiseFetcher)
     const columnSearch = buildColumnSearchStrategy(dependencyGraph, config, stats)
     const sheetMapping = dependencyGraph.sheetMapping
     const addressMapping = dependencyGraph.addressMapping
@@ -81,12 +87,12 @@ export class BuildEngineFactory {
       if (Object.prototype.hasOwnProperty.call(sheets, sheetName)) {
         const sheet = sheets[sheetName]
         validateAsSheet(sheet)
-        const boundaries = findBoundaries(sheet)
+        const boundaries = findBoundaries(sheet.cells)
         if (boundaries.height > config.maxRows || boundaries.width > config.maxColumns) {
           throw new SheetSizeLimitExceededError()
         }
-        const sheetId = sheetMapping.addSheet(sheetName)
-        addressMapping.autoAddSheet(sheetId, sheet, boundaries)
+        const sheetId = sheetMapping.addSheet(sheetName, sheet.sheetMetadata)
+        addressMapping.autoAddSheet(sheetId, boundaries)
       }
     }
 
@@ -99,8 +105,8 @@ export class BuildEngineFactory {
     const cellContentParser = new CellContentParser(config, dateTimeHelper, numberLiteralHelper)
 
     const arraySizePredictor = new ArraySizePredictor(config, functionRegistry)
-    const operations = new Operations(config, dependencyGraph, columnSearch, cellContentParser, parser, stats, lazilyTransformingAstService, namedExpressions, arraySizePredictor)
-    const undoRedo = new UndoRedo(config, operations)
+    const operations = new Operations(config, dependencyGraph, columnSearch, cellContentParser, parser, stats, lazilyTransformingAstService, namedExpressions, arraySizePredictor, asyncPromiseFetcher)
+    const undoRedo = new UndoRedo(config, operations, eventEmitter)
     lazilyTransformingAstService.undoRedo = undoRedo
     const clipboardOperations = new ClipboardOperations(config, dependencyGraph, operations)
     const crudOperations = new CrudOperations(config, operations, undoRedo, clipboardOperations, dependencyGraph, columnSearch, parser, cellContentParser, lazilyTransformingAstService, namedExpressions)
@@ -110,12 +116,12 @@ export class BuildEngineFactory {
     })
 
     const exporter = new Exporter(config, namedExpressions, sheetMapping.fetchDisplayName, lazilyTransformingAstService)
-    const serialization = new Serialization(dependencyGraph, unparser, exporter)
+    const serialization = new Serialization(dependencyGraph, unparser, exporter, sheetMapping)
 
     const interpreter = new Interpreter(config, dependencyGraph, columnSearch, stats, arithmeticHelper, functionRegistry, namedExpressions, serialization, arraySizePredictor, dateTimeHelper, cellContentParser)
 
     stats.measure(StatType.GRAPH_BUILD, () => {
-      const graphBuilder = new GraphBuilder(dependencyGraph, columnSearch, parser, cellContentParser, stats, arraySizePredictor)
+      const graphBuilder = new GraphBuilder(dependencyGraph, columnSearch, parser, cellContentParser, stats, arraySizePredictor, asyncPromiseFetcher)
       graphBuilder.buildGraph(sheets, stats)
     })
 
@@ -140,6 +146,7 @@ export class BuildEngineFactory {
       namedExpressions,
       serialization,
       functionRegistry,
+      eventEmitter
     }, evaluatorPromise]
   }
 }

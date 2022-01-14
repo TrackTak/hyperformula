@@ -6,8 +6,9 @@
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {absolutizeDependencies, filterDependenciesOutOfScope} from './absolutizeDependencies'
 import {ArraySize, ArraySizePredictor} from './ArraySize'
+import {AsyncPromise, AsyncPromiseFetcher } from './AsyncPromise'
 import {equalSimpleCellAddress, invalidSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
-import {CellContent, CellContentParser, RawCellContent} from './CellContentParser'
+import {CellContent, CellContentParser, RawCellContent, DataRawCellContent, InputCell} from './CellContentParser'
 import {ClipboardCell, ClipboardCellType} from './ClipboardOperations'
 import {Config} from './Config'
 import {ContentChanges} from './ContentChanges'
@@ -41,9 +42,10 @@ import {
   SourceLocationHasArrayError,
   TargetLocationHasArrayError
 } from './errors'
-import {EmptyValue, getRawValue} from './interpreter/InterpreterValue'
+import {CellData, CellMetadata, EmptyValue, getRawValue} from './interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
+import { Maybe } from './Maybe'
 import {
   doesContainRelativeReferences,
   InternalNamedExpression,
@@ -169,6 +171,7 @@ export class Operations {
     private readonly lazilyTransformingAstService: LazilyTransformingAstService,
     private readonly namedExpressions: NamedExpressions,
     private readonly arraySizePredictor: ArraySizePredictor,
+    private readonly asyncPromiseFetcher: AsyncPromiseFetcher
   ) {
     this.allocateNamedExpressionAddressSpace()
     this.maxColumns = config.maxColumns
@@ -217,7 +220,7 @@ export class Operations {
     return columnsRemovals
   }
 
-  public removeSheet(sheetId: number) {
+  public removeSheet(sheetId: number, decrementLastSheetId = true) {
     this.dependencyGraph.removeSheet(sheetId)
 
     let version: number
@@ -227,7 +230,7 @@ export class Operations {
       version = this.lazilyTransformingAstService.addTransformation(transformation)
     })
 
-    this.sheetMapping.removeSheet(sheetId)
+    this.sheetMapping.removeSheet(sheetId, decrementLastSheetId)
     this.columnSearch.removeSheet(sheetId)
     const scopedNamedExpressions = this.namedExpressions.getAllNamedExpressionsForScope(sheetId).map(
       (namedexpression) => this.removeNamedExpression(namedexpression.normalizeExpressionName(), sheetId)
@@ -235,9 +238,9 @@ export class Operations {
     return {version: version!, scopedNamedExpressions}
   }
 
-  public removeSheetByName(sheetName: string) {
+  public removeSheetByName(sheetName: string, decrementLastSheetId: boolean) {
     const sheetId = this.sheetMapping.fetch(sheetName)
-    return this.removeSheet(sheetId)
+    return this.removeSheet(sheetId, decrementLastSheetId)
   }
 
   public clearSheet(sheetId: number) {
@@ -245,11 +248,14 @@ export class Operations {
     this.columnSearch.removeSheet(sheetId)
   }
 
-  public addSheet(name?: string) {
-    const sheetId = this.sheetMapping.addSheet(name)
-    const sheet: Sheet = []
-    this.dependencyGraph.addressMapping.autoAddSheet(sheetId, sheet, findBoundaries(sheet))
-    return this.sheetMapping.fetchDisplayName(sheetId)
+  public addSheet(name?: string, sheetMetadata?: any, sheetId?: number) {
+    const newSheetId = this.sheetMapping.addSheet(name, sheetMetadata, sheetId)
+    const sheet: Sheet = {
+      cells: [],
+      sheetMetadata
+    }
+    this.dependencyGraph.addressMapping.autoAddSheet(newSheetId, findBoundaries(sheet.cells))
+    return this.sheetMapping.fetchDisplayName(newSheetId)
   }
 
   public renameSheet(sheetId: number, newName: string) {
@@ -456,7 +462,13 @@ export class Operations {
     return addedNamedExpressions
   }
 
+  public restoreCellMetadata(address: SimpleCellAddress, cellMetadata: CellMetadata) {
+    this.addressMapping.setCellMetadata(address, cellMetadata)
+  }
+
   public restoreCell(address: SimpleCellAddress, clipboardCell: ClipboardCell) {
+    this.restoreCellMetadata(address, clipboardCell.cellMetadata)
+    
     switch (clipboardCell.type) {
       case ClipboardCellType.VALUE: {
         this.setValueToCell(clipboardCell, address)
@@ -479,18 +491,22 @@ export class Operations {
 
   public getOldContent(address: SimpleCellAddress): [SimpleCellAddress, ClipboardCell] {
     const vertex = this.dependencyGraph.getCell(address)
+    const cellMetadata = this.dependencyGraph.getCellMetadata(address)
 
     if (vertex === undefined || vertex instanceof EmptyCellVertex) {
-      return [address, {type: ClipboardCellType.EMPTY}]
-    } else if (vertex instanceof ValueCellVertex) {
-      return [address, {type: ClipboardCellType.VALUE, ...vertex.getValues()}]
+      return [address, {type: ClipboardCellType.EMPTY, cellMetadata }]
+    } 
+
+    if (vertex instanceof ValueCellVertex) {
+      return [address, {type: ClipboardCellType.VALUE, ...vertex.getValues(), cellMetadata}]
     } else if (vertex instanceof FormulaVertex) {
       return [vertex.getAddress(this.lazilyTransformingAstService), {
         type: ClipboardCellType.FORMULA,
-        hash: this.parser.computeHashFromAst(vertex.getFormula(this.lazilyTransformingAstService))
+        hash: this.parser.computeHashFromAst(vertex.getFormula(this.lazilyTransformingAstService)),
+        cellMetadata
       }]
     } else if (vertex instanceof ParsingErrorVertex) {
-      return [address, {type: ClipboardCellType.PARSING_ERROR, rawInput: vertex.rawInput, errors: vertex.errors}]
+      return [address, {type: ClipboardCellType.PARSING_ERROR, rawInput: vertex.rawInput, errors: vertex.errors, cellMetadata}]
     }
 
     throw Error('Trying to copy unsupported type')
@@ -498,24 +514,30 @@ export class Operations {
 
   public getClipboardCell(address: SimpleCellAddress): ClipboardCell {
     const vertex = this.dependencyGraph.getCell(address)
+    const cellMetadata = this.dependencyGraph.getCellMetadata(address)
 
     if (vertex === undefined || vertex instanceof EmptyCellVertex) {
-      return {type: ClipboardCellType.EMPTY}
-    } else if (vertex instanceof ValueCellVertex) {
-      return {type: ClipboardCellType.VALUE, ...vertex.getValues()}
+      return {type: ClipboardCellType.EMPTY, cellMetadata}
+    } 
+
+    if (vertex instanceof ValueCellVertex) {
+      return {type: ClipboardCellType.VALUE, ...vertex.getValues(), cellMetadata}
     } else if (vertex instanceof ArrayVertex) {
       const val = vertex.getArrayCellValue(address)
+
       if (val === EmptyValue) {
-        return {type: ClipboardCellType.EMPTY}
+        return {type: ClipboardCellType.EMPTY, cellMetadata}
       }
-      return {type: ClipboardCellType.VALUE, parsedValue: val, rawValue: vertex.getArrayCellRawValue(address)}
+
+      return {type: ClipboardCellType.VALUE, parsedValue: val, rawValue: vertex.getArrayCellRawValue(address), cellMetadata}
     } else if (vertex instanceof FormulaCellVertex) {
       return {
         type: ClipboardCellType.FORMULA,
-        hash: this.parser.computeHashFromAst(vertex.getFormula(this.lazilyTransformingAstService))
+        hash: this.parser.computeHashFromAst(vertex.getFormula(this.lazilyTransformingAstService)),
+        cellMetadata
       }
     } else if (vertex instanceof ParsingErrorVertex) {
-      return {type: ClipboardCellType.PARSING_ERROR, rawInput: vertex.rawInput, errors: vertex.errors}
+      return {type: ClipboardCellType.PARSING_ERROR, rawInput: vertex.rawInput, errors: vertex.errors, cellMetadata}
     }
 
     throw Error('Trying to copy unsupported type')
@@ -545,66 +567,67 @@ export class Operations {
     return result
   }
 
-  public setCellContent(address: SimpleCellAddress, newCellContent: RawCellContent): [SimpleCellAddress, ClipboardCell] {
+  public setCellContent(address: SimpleCellAddress, newCellContent: (DataRawCellContent | InputCell<any>)): [SimpleCellAddress, ClipboardCell] {
     const parsedCellContent = this.cellContentParser.parse(newCellContent)
-    const oldContent = this.getOldContent(address)
-
-    if (parsedCellContent instanceof CellContent.Formula) {
-      const parserResult = this.parser.parse(parsedCellContent.formula, address)
-      const {ast, errors} = parserResult
-      if (errors.length > 0) {
-        this.setParsingErrorToCell(parsedCellContent.formula, errors, address)
-      } else {
-        const size = this.arraySizePredictor.checkArraySize(ast, address)
-
-        this.setFormulaToCell(address, size, true, parserResult)
-      }
-    } else if (parsedCellContent instanceof CellContent.Empty) {
-      this.setCellEmpty(address)
-    } else {
-      this.setValueToCell({parsedValue: parsedCellContent.value, rawValue: newCellContent}, address)
-    }
-
-    return oldContent
+    
+    return this.setParsedCellContent(newCellContent ?? { cellValue: undefined }, parsedCellContent, address)
   }
 
-  public setSheetContent(sheetId: number, newSheetContent: RawCellContent[][]) {
+  public setSheetContent(sheetId: number, newSheetContent: (DataRawCellContent | InputCell<any>)[][]): DataRawCellContent[][] {
+    const convertedNewSheetContent: DataRawCellContent[][] = []
+
     this.clearSheet(sheetId)
     for (let i = 0; i < newSheetContent.length; i++) {
+      convertedNewSheetContent[i] = []
+      
       for (let j = 0; j < newSheetContent[i].length; j++) {
+        const value = newSheetContent[i][j]
         const address = simpleCellAddress(sheetId, j, i)
-        this.setCellContent(address, newSheetContent[i][j])
+
+        convertedNewSheetContent[i][j] = value ?? { cellValue: undefined }
+
+        this.setCellContent(address, value)
       }
     }
+
+    return convertedNewSheetContent
   }
 
   public setParsingErrorToCell(rawInput: string, errors: ParsingError[], address: SimpleCellAddress) {
     const oldValue = this.dependencyGraph.getCellValue(address)
     const vertex = new ParsingErrorVertex(errors, rawInput)
     const arrayChanges = this.dependencyGraph.setParsingErrorToCell(address, vertex)
-    this.columnSearch.remove(getRawValue(oldValue), address)
+    
+    this.columnSearch.remove(getRawValue(oldValue.cellValue), address)
     this.columnSearch.applyChanges(arrayChanges.getChanges())
     this.changes.addAll(arrayChanges)
     this.changes.addChange(vertex.getCellValue(), address)
   }
 
-  public setAsyncFormulaToCell(address: SimpleCellAddress, ast: Ast, formulaVertex: FormulaVertex) {
+  public setAsyncFormulaToCell(address: SimpleCellAddress, ast: Ast) {
+    const cell = this.dependencyGraph.getCell(address)
+
+    if (!(cell instanceof FormulaVertex)) {
+      throw new Error('async cell must be an instance of FormulaVertex')
+    }
+
     const parserResult = this.parser.fetchCachedResultForAst(ast)
-    const size = this.arraySizePredictor.checkArraySize(ast, address, formulaVertex)
+    const size = this.arraySizePredictor.checkArraySize(ast, address)
+    const asyncPromises = cell.getAsyncPromises()
 
-    this.setFormulaToCell(address, size, true, parserResult)
-  }
+    this.setFormulaToCell(address, size, asyncPromises, parserResult, false)
+  }  
 
-  public setFormulaToCell(address: SimpleCellAddress, size: ArraySize, markNodeAsSpecialRecentlyChanged: boolean, {
+  public setFormulaToCell(address: SimpleCellAddress, size: ArraySize, asyncPromises: Maybe<AsyncPromise[]>, {
     ast,
     hasVolatileFunction,
     hasStructuralChangeFunction,
     hasAsyncFunction,
     dependencies
-  }: ParsingResult) {
+  }: ParsingResult, markNodeAsSpecialRecentlyChanged: boolean) {
     const oldValue = this.dependencyGraph.getCellValue(address)
-    const arrayChanges = this.dependencyGraph.setFormulaToCell(address, ast, absolutizeDependencies(dependencies, address), size, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, markNodeAsSpecialRecentlyChanged)
-    this.columnSearch.remove(getRawValue(oldValue), address)
+    const arrayChanges = this.dependencyGraph.setFormulaToCell(address, ast, absolutizeDependencies(dependencies, address), size, asyncPromises, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, markNodeAsSpecialRecentlyChanged)
+    this.columnSearch.remove(getRawValue(oldValue.cellValue), address)
     this.columnSearch.applyChanges(arrayChanges.getChanges())
     this.changes.addAll(arrayChanges)
   }
@@ -612,7 +635,7 @@ export class Operations {
   public setValueToCell(value: RawAndParsedValue, address: SimpleCellAddress) {
     const oldValue = this.dependencyGraph.getCellValue(address)
     const arrayChanges = this.dependencyGraph.setValueToCell(address, value)
-    this.columnSearch.change(getRawValue(oldValue), getRawValue(value.parsedValue), address)
+    this.columnSearch.change(getRawValue(oldValue.cellValue), getRawValue(value.parsedValue), address)
     this.columnSearch.applyChanges(arrayChanges.getChanges().filter(change => !equalSimpleCellAddress(change.address, address)))
     this.changes.addAll(arrayChanges)
     this.changes.addChange(value.parsedValue, address)
@@ -624,7 +647,7 @@ export class Operations {
     }
     const oldValue = this.dependencyGraph.getCellValue(address)
     const arrayChanges = this.dependencyGraph.setCellEmpty(address)
-    this.columnSearch.remove(getRawValue(oldValue), address)
+    this.columnSearch.remove(getRawValue(oldValue.cellValue), address)
     this.columnSearch.applyChanges(arrayChanges.getChanges())
     this.changes.addAll(arrayChanges)
     this.changes.addChange(EmptyValue, address)
@@ -643,7 +666,9 @@ export class Operations {
     this.parser.rememberNewAst(cleanedAst)
     const cleanedDependencies = filterDependenciesOutOfScope(absoluteDependencies)
     const size = this.arraySizePredictor.checkArraySize(ast, address)
-    this.dependencyGraph.setFormulaToCell(address, cleanedAst, cleanedDependencies, size, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
+    const asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(ast, address)
+
+    this.dependencyGraph.setFormulaToCell(address, cleanedAst, cleanedDependencies, size, asyncPromises, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
   }
 
   /**
@@ -665,6 +690,36 @@ export class Operations {
 
   public forceApplyPostponedTransformations(): void {
     this.dependencyGraph.forceApplyPostponedTransformations()
+  }
+
+  private setParsedCellContent(rawCellContent: DataRawCellContent, parsedCellContent: CellContent.Type, address: SimpleCellAddress): [SimpleCellAddress, ClipboardCell] {
+    const oldContent = this.getOldContent(address)
+
+    this.dependencyGraph.addCellMetadata(address, rawCellContent.metadata)
+
+    if (rawCellContent.cellValue === undefined) {
+      return oldContent
+    }
+
+    if (parsedCellContent instanceof CellContent.Formula) {
+      const parserResult = this.parser.parse(parsedCellContent.formula, address)
+      const {ast, errors} = parserResult
+
+      if (errors.length > 0) {
+        this.setParsingErrorToCell(parsedCellContent.formula, errors, address)
+      } else {
+        const size = this.arraySizePredictor.checkArraySize(ast, address)
+        const asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(ast, address)
+
+        this.setFormulaToCell(address, size, asyncPromises, parserResult, true)
+      }
+    } else if (parsedCellContent instanceof CellContent.Empty) {
+      this.setCellEmpty(address)
+    } else {
+      this.setValueToCell({parsedValue: parsedCellContent.value, rawValue: rawCellContent.cellValue }, address)
+    }
+
+    return oldContent
   }
 
   /**
@@ -772,6 +827,7 @@ export class Operations {
       const ast = arrayVertex.getFormula(this.lazilyTransformingAstService)
       const address = arrayVertex.getAddress(this.lazilyTransformingAstService)
       const hash = this.parser.computeHashFromAst(ast)
+
       this.setFormulaToCellFromCache(hash, address)
     }
   }
@@ -836,18 +892,21 @@ export class Operations {
   }
 
   private storeNamedExpressionInCell(address: SimpleCellAddress, expression: RawCellContent) {
-    const parsedCellContent = this.cellContentParser.parse(expression)
-    if (parsedCellContent instanceof CellContent.Formula) {
-      const parsingResult = this.parser.parse(parsedCellContent.formula, simpleCellAddress(-1, 0, 0))
+    const cellValue = this.cellContentParser.parse({ cellValue: expression })
+
+    if (cellValue instanceof CellContent.Formula) {
+      const parsingResult = this.parser.parse(cellValue.formula, simpleCellAddress(-1, 0, 0))
       if (doesContainRelativeReferences(parsingResult.ast)) {
         throw new NoRelativeAddressesAllowedError()
       }
       const {ast, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, dependencies} = parsingResult
-      this.dependencyGraph.setFormulaToCell(address, ast, absolutizeDependencies(dependencies, address), ArraySize.scalar(), hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
-    } else if (parsedCellContent instanceof CellContent.Empty) {
+      const asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(ast, address)
+      
+      this.dependencyGraph.setFormulaToCell(address, ast, absolutizeDependencies(dependencies, address), ArraySize.scalar(), asyncPromises, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
+    } else if (cellValue instanceof CellContent.Empty) {
       this.setCellEmpty(address)
     } else {
-      this.setValueToCell({parsedValue: parsedCellContent.value, rawValue: expression}, address)
+      this.setValueToCell({parsedValue: cellValue.value, rawValue: expression}, address)
     }
   }
 
@@ -913,7 +972,9 @@ export class Operations {
       if (sourceVertex instanceof FormulaCellVertex) {
         const parsingResult = this.parser.fetchCachedResultForAst(sourceVertex.getFormula(this.lazilyTransformingAstService))
         const {ast, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, dependencies} = parsingResult
-        this.dependencyGraph.setFormulaToCell(expression.address, ast, absolutizeDependencies(dependencies, expression.address), ArraySize.scalar(), hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
+        const asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(ast, expression.address)
+        
+        this.dependencyGraph.setFormulaToCell(expression.address, ast, absolutizeDependencies(dependencies, expression.address), ArraySize.scalar(), asyncPromises, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
       } else if (sourceVertex instanceof EmptyCellVertex) {
         this.setCellEmpty(expression.address)
       } else if (sourceVertex instanceof ValueCellVertex) {

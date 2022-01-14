@@ -1,4 +1,4 @@
-import {CellValue, ConfigParams, HyperFormula, Sheet} from '../../src'
+import {CellValue, ConfigParams, DataRawCellContent, HyperFormula, Sheet} from '../../src'
 import {Maybe} from '../../src/Maybe'
 import {
   average,
@@ -39,19 +39,19 @@ export interface BenchmarkResult {
   statistics: Stats,
 }
 
-export function benchmark(name: string, sheet: Sheet, expectedValues: ExpectedValue[], config: Partial<Config> = defaultConfig): Maybe<BenchmarkResult> {
-  const runEngine = (engineConfig?: Partial<ConfigParams>) => HyperFormula.buildFromArray(sheet, engineConfig)
+export function benchmark(name: string, cells: DataRawCellContent[][], expectedValues: ExpectedValue[], config: Partial<Config> = defaultConfig): Maybe<BenchmarkResult> {
+  const runEngine = (engineConfig?: Partial<ConfigParams>) => HyperFormula.buildFromArray({ cells }, engineConfig)[0]
   return benchmarkBuild(name, runEngine, expectedValues, config)
 }
 
-export function benchmarkCruds(name: string, sheet: Sheet, cruds: (engine: HyperFormula) => void,
+export function benchmarkCruds(name: string, cells: DataRawCellContent[][], cruds: (engine: HyperFormula) => void,
                                expectedValues: ExpectedValue[], userConfig: Partial<Config> = defaultConfig): Maybe<BenchmarkResult> {
   console.info(`=== Benchmark - ${name} === `)
 
   const config = Object.assign({}, defaultConfig, userConfig)
   const engineConfig = Object.assign({}, config.engineConfig, defaultEngineConfig)
 
-  const [engine] = HyperFormula.buildFromArray(sheet, engineConfig)
+  const [engine] = HyperFormula.buildFromArray({ cells }, engineConfig)
 
   const statistics = measureCruds(engine, name, cruds)
 
@@ -129,7 +129,7 @@ function validate(engine: HyperFormula, expectedValues: ExpectedValue[]) {
     let expectedValue = expectedValues[i].value
 
     const address = engine.simpleCellAddressFromString(expectedValues[i].address, 0)!
-    let actualValue = engine.getCellValue(address)
+    let actualValue = engine.getCellValue(address).cellValue
 
     if (typeof expectedValue === 'number' && typeof actualValue === 'number') {
       expectedValue = expectedValue.toPrecision(8)

@@ -6,26 +6,26 @@ describe('should properly build', () => {
     const [engine] = HyperFormula.buildEmpty()
     engine.addSheet()
     engine.setSheetContent(0, [
-      ['=MAX(B1:B2)', '=MAX(A1:A2)'],
-      ['=MAX(B1:B2)', '=MAX(A1:A2)'],
+      [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
+      [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
     ])
-    expect(engine.getSheetValues(0)).toEqual(
+    expect(engine.getSheetValues(0).cells).toEqual(
       [
-        [detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'), detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1')],
-        [detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A2'), detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B2')],
+        [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1') }],
+        [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A2')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B2') }],
       ]
     )
   })
 
   it('and for this', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=MAX(B1:B2)', '=MAX(A1:A2)'],
-      ['=MAX(B1:B2)', '=MAX(A1:A2)'],
-    ])
-    expect(engine.getSheetValues(0)).toEqual(
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
+      [{ cellValue: '=MAX(B1:B2)' }, { cellValue: '=MAX(A1:A2)' }],
+    ]})
+    expect(engine.getSheetValues(0).cells).toEqual(
       [
-        [detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1'), detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1')],
-        [detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A2'), detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B2')],
+        [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A1')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B1') }],
+        [{ cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!A2')}, { cellValue: detailedErrorWithOrigin(ErrorType.CYCLE, 'Sheet1!B2') }],
       ]
     )
   })

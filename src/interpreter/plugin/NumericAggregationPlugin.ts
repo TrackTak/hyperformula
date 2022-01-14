@@ -674,7 +674,7 @@ export class NumericAggregationPlugin extends FunctionPlugin implements Function
         rangeResult.push(cachedValue)
       } else {
         for (const cellFromRange of smallerRangeVertex.range.addresses(this.dependencyGraph)) {
-          const val = coercionFunction(this.dependencyGraph.getScalarValue(cellFromRange))
+          const val = coercionFunction(this.dependencyGraph.getScalarValue(cellFromRange).cellValue)
           if (val instanceof CellError) {
             rangeResult.push(val)
           } else if (val !== undefined) {
@@ -687,7 +687,7 @@ export class NumericAggregationPlugin extends FunctionPlugin implements Function
       actualRange = range
     }
     for (const cellFromRange of actualRange.addresses(this.dependencyGraph)) {
-      const val = coercionFunction(this.dependencyGraph.getScalarValue(cellFromRange))
+      const val = coercionFunction(this.dependencyGraph.getScalarValue(cellFromRange).cellValue)
       if (val instanceof CellError) {
         rangeResult.push(val)
       } else if (val !== undefined) {

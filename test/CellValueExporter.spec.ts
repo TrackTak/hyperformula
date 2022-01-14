@@ -53,6 +53,7 @@ describe('detailed error', () => {
     const cellValueExporter = new Exporter(config, namedExpressionsMock, sheetIndexMock, lazilyTransforminService)
 
     const error = cellValueExporter.exportValue(new CellError(ErrorType.VALUE)) as DetailedCellError
+
     expect(error).toEqualError(detailedError(ErrorType.VALUE))
     expect(error.value).toEqual('#VALUE!')
   })
@@ -63,6 +64,7 @@ describe('detailed error', () => {
     const cellValueExporter = new Exporter(config, namedExpressionsMock, sheetIndexMock, lazilyTransforminService)
 
     const error = cellValueExporter.exportValue(new CellError(ErrorType.VALUE)) as DetailedCellError
+    
     expect(error).toEqualError(detailedError(ErrorType.VALUE, undefined, config))
     expect(error.value).toEqual('#ARG!')
   })

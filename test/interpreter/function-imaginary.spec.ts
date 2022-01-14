@@ -4,32 +4,32 @@ import {adr, detailedError} from '../testUtils'
 
 describe('Function IMAGINARY', () => {
   it('should return error for wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=IMAGINARY()'],
-      ['=IMAGINARY(1, 2)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=IMAGINARY()' }],
+      [{ cellValue: '=IMAGINARY(1, 2)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should return error for arguments of wrong type', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=IMAGINARY("foo")'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=IMAGINARY("foo")' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ComplexNumberExpected))
   })
 
   it('should work', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=IMAGINARY(0)'],
-      ['=IMAGINARY("i")'],
-      ['=IMAGINARY("-3+4i")'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=IMAGINARY(0)' }],
+      [{ cellValue: '=IMAGINARY("i")' }],
+      [{ cellValue: '=IMAGINARY("-3+4i")' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqual(0)
-    expect(engine.getCellValue(adr('A2'))).toEqual(1)
-    expect(engine.getCellValue(adr('A3'))).toEqual(4)
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual(4)
   })
 })

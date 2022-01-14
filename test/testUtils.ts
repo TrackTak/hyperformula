@@ -1,4 +1,4 @@
-import {CellValue, DetailedCellError, ErrorType, HyperFormula, Sheet, SheetDimensions} from '../src'
+import {CellValue, DataRawCellContent, DetailedCellError, ErrorType, HyperFormula, SheetDimensions} from '../src'
 import {AbsoluteCellRange, AbsoluteColumnRange, AbsoluteRowRange} from '../src/AbsoluteCellRange'
 import {CellError, SimpleCellAddress, simpleCellAddress} from '../src/Cell'
 import {Config} from '../src/Config'
@@ -99,7 +99,7 @@ export const expectToBeCloseForComplex = (engine: HyperFormula, cell: string, ex
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   const coerce = (arg: CellValue): complex => engine.evaluator.interpreter.arithmeticHelper.coerceScalarToComplex(arg)
-  const actualVal: complex = coerce(engine.getCellValue(adr(cell)))
+  const actualVal: complex = coerce(engine.getCellValue(adr(cell)).cellValue)
   const expectedVal: complex = coerce(expected)
   expect(expectedVal[0]).toBeCloseTo(actualVal[0], precision)
   expect(expectedVal[1]).toBeCloseTo(actualVal[1], precision)
@@ -170,20 +170,24 @@ export const expectEngineToBeTheSameAs = (actual: HyperFormula, expected: HyperF
 }
 
 export function dateNumberToString(dateNumber: CellValue, config: Config): string | DetailedCellError {
-  if (dateNumber instanceof DetailedCellError) {
-    return dateNumber
+  const value = dateNumber
+
+  if (value instanceof DetailedCellError) {
+    return value
   }
   const dateTimeHelper = new DateTimeHelper(config)
-  const dateString = defaultStringifyDateTime(dateTimeHelper.numberToSimpleDateTime(dateNumber as number), config.dateFormats[0])
+  const dateString = defaultStringifyDateTime(dateTimeHelper.numberToSimpleDateTime(value as number), config.dateFormats[0])
   return dateString ?? ''
 }
 
 export function timeNumberToString(timeNumber: CellValue, config: Config): string | DetailedCellError {
-  if (timeNumber instanceof DetailedCellError) {
-    return timeNumber
+  const value = timeNumber
+
+  if (value instanceof DetailedCellError) {
+    return value
   }
   const dateTimeHelper = new DateTimeHelper(config)
-  const timeString = defaultStringifyDateTime(dateTimeHelper.numberToSimpleDateTime(timeNumber as number), 'hh:mm:ss.sss')
+  const timeString = defaultStringifyDateTime(dateTimeHelper.numberToSimpleDateTime(value as number), 'hh:mm:ss.sss')
   return timeString ?? ''
 }
 
@@ -198,6 +202,7 @@ export function expectVerticesOfTypes(engine: HyperFormula, types: any[][], shee
     for (let col = 0; col < types[row].length; ++col) {
       const expectedType = types[row][col]
       const cell = engine.dependencyGraph.getCell(simpleCellAddress(sheet, col, row))
+
       if (expectedType === undefined) {
         expect(cell === undefined).toBe(true)
       } else {
@@ -235,11 +240,12 @@ function normalizeSheet(sheet: any[][], dimensions: SheetDimensions): any[][] {
   })
 }
 
-export function expectColumnIndexToMatchSheet(expected: Sheet, engine: HyperFormula, sheetId: number = 0) {
+export function expectColumnIndexToMatchSheet(expected: DataRawCellContent[][], engine: HyperFormula, sheetId: number = 0) {
   const columnIndex = engine.columnSearch as ColumnIndex
   expect(columnIndex).toBeInstanceOf(ColumnIndex)
   const exportedColumnIndex = columnIndexToSheet(columnIndex, engine.getSheetDimensions(sheetId).width, sheetId)
   const dimensions = engine.getSheetDimensions(0)
-  expectArrayWithSameContent(normalizeSheet(expected, dimensions), normalizeSheet(exportedColumnIndex, dimensions))
+  const indexes = expected.map(x => x.map(z => z.cellValue))
+  expectArrayWithSameContent(normalizeSheet(indexes, dimensions), normalizeSheet(exportedColumnIndex, dimensions))
 }
 

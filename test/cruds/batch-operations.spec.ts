@@ -4,43 +4,43 @@ import {adr, expectArrayWithSameContent} from '../testUtils'
 
 describe('batch cruds', () => {
   it('should run batch cruds and call recompute only once', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       //
-      ['foo'],
+      [{ cellValue: 'foo' }],
       //
-      ['bar'],
-    ])
+      [{ cellValue: 'bar' }],
+    ]})
 
     const evaluatorSpy = spyOn(engine.evaluator, 'partialRun')
 
     engine.batch(() => {
-      engine.setCellContents(adr('B1'), [['=A1']])
+      engine.setCellContents(adr('B1'), [[{ cellValue: '=A1' }]])
       engine.addRows(0, [0, 1], [1, 1])
       engine.removeRows(0, [0, 1])
     })
 
     expect(evaluatorSpy).toHaveBeenCalledTimes(1)
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
-    expect(engine.getCellValue(adr('A2'))).toBe(null)
-    expect(engine.getCellValue(adr('A3'))).toEqual('bar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('bar')
   })
 
   it('should run batch cruds unitl fail and call recompute only once', () => {
-    const [engine] = HyperFormula.buildFromArray([
+    const [engine] = HyperFormula.buildFromArray({ cells: [
       //
-      ['foo'],
+      [{ cellValue: 'foo' }],
       //
-      ['bar'],
-    ])
+      [{ cellValue: 'bar' }],
+    ]})
 
     const evaluatorSpy = spyOn(engine.evaluator, 'partialRun')
 
     try {
       engine.batch(() => {
-        engine.setCellContents(adr('B1'), [['=A1']])
+        engine.setCellContents(adr('B1'), [[{ cellValue: '=A1' }]])
         engine.addRows(0, [0, 1], [1, 1])
         engine.removeRows(0, [0, 1])
-        engine.addRows(1, [0, 1]) // fail
+        engine.addRows(1, [0, 1])
         engine.addRows(0, [0, 1])
       })
     } catch (e) {
@@ -48,9 +48,9 @@ describe('batch cruds', () => {
     }
 
     expect(evaluatorSpy).toHaveBeenCalledTimes(1)
-    expect(engine.getCellValue(adr('A1'))).toEqual('foo')
-    expect(engine.getCellValue(adr('A2'))).toBe(null)
-    expect(engine.getCellValue(adr('A3'))).toEqual('bar')
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('foo')
+    expect(engine.getCellValue(adr('A2')).cellValue).toBe(null)
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('bar')
   })
 })
 

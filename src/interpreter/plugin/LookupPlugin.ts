@@ -133,7 +133,7 @@ export class LookupPlugin extends FunctionPlugin implements FunctionPluginTypech
       value = rangeValue.data[rowIndex][index]
     } else {
       const address = simpleCellAddress(range.sheet, range.start.col + index, range.start.row + rowIndex)
-      value = this.dependencyGraph.getCellValue(address)
+      value = this.dependencyGraph.getCellValue(address).cellValue
     }
 
     if (value instanceof SimpleRangeValue) {
@@ -161,7 +161,7 @@ export class LookupPlugin extends FunctionPlugin implements FunctionPluginTypech
       value = rangeValue.data[index][colIndex]
     } else {
       const address = simpleCellAddress(range.sheet, range.start.col + colIndex, range.start.row + index)
-      value = this.dependencyGraph.getCellValue(address)
+      value = this.dependencyGraph.getCellValue(address).cellValue
     }
 
     if (value instanceof SimpleRangeValue) {

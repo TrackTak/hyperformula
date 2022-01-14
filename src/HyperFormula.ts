@@ -18,7 +18,7 @@ import {
   isSimpleCellAddress,
   SimpleCellAddress
 } from './Cell'
-import {CellContent, CellContentParser, RawCellContent} from './CellContentParser'
+import {CellContent, CellContentParser, DataRawCellContent, GenericDataRawCellContent, InputCell, RawCellContent} from './CellContentParser'
 import {CellValue} from './CellValue'
 import {Config, ConfigParams, getDefaultConfig} from './Config'
 import { ContentChanges } from './ContentChanges'
@@ -48,7 +48,7 @@ import {LicenseKeyValidityState} from './helpers/licenseKeyValidator'
 import {buildTranslationPackage, RawTranslationPackage, TranslationPackage} from './i18n'
 import {FunctionPluginDefinition} from './interpreter'
 import {FunctionRegistry, FunctionTranslationsPackage} from './interpreter/FunctionRegistry'
-import {FormatInfo} from './interpreter/InterpreterValue'
+import {CellData, FormatInfo} from './interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import {NamedExpression, NamedExpressionOptions, NamedExpressions} from './NamedExpressions'
@@ -65,7 +65,7 @@ import {
   Unparser,
 } from './parser'
 import {Serialization, SerializedNamedExpression} from './Serialization'
-import {Sheet, SheetDimensions, Sheets} from './Sheet'
+import {GenericSheet, GenericSheets, InputSheet, SheetDimensions, InputSheets} from './Sheet'
 import {Statistics, StatType} from './statistics'
 
 /**
@@ -116,7 +116,6 @@ export class HyperFormula implements TypedEmitter {
   public static languages: Record<string, RawTranslationPackage> = {}
   private static registeredLanguages: Map<string, TranslationPackage> = new Map()
   private _evaluationSuspended: boolean = false
-  private readonly _emitter: Emitter = new Emitter()
 
   protected constructor(
     private _config: Config,
@@ -133,6 +132,7 @@ export class HyperFormula implements TypedEmitter {
     private _namedExpressions: NamedExpressions,
     private _serialization: Serialization,
     private _functionRegistry: FunctionRegistry,
+    private _emitter: Emitter
   ) {
   }
 
@@ -259,10 +259,11 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Factories
    */
-  public static buildFromArray(sheet: Sheet, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<void>] {
+  public static buildFromArray<SheetMetadata, CellMetadata>(sheet: InputSheet<CellMetadata, SheetMetadata>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
     const [engine, evaluatorPromise] = BuildEngineFactory.buildFromSheet(sheet, configInput, namedExpressions)
+    const hyperFormula = this.buildFromEngineState(engine)
 
-    return [this.buildFromEngineState(engine), evaluatorPromise]
+    return [hyperFormula, hyperFormula.wrapEvaluatorPromiseWithChanges(evaluatorPromise)]
   }
 
   /**
@@ -301,10 +302,11 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Factories
    */
-  public static buildFromSheets(sheets: Sheets, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<void>] {
+  public static buildFromSheets<SheetMetadata, CellMetadata>(sheets: InputSheets<CellMetadata, SheetMetadata>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
     const [engine, evaluatorPromise]  = BuildEngineFactory.buildFromSheets(sheets, configInput, namedExpressions)
+    const hyperFormula = this.buildFromEngineState(engine)
 
-    return [this.buildFromEngineState(engine), evaluatorPromise]
+    return [hyperFormula, hyperFormula.wrapEvaluatorPromiseWithChanges(evaluatorPromise)]
   }
 
   /**
@@ -323,10 +325,11 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Factories
    */
-  public static buildEmpty(configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<void>] {
+  public static buildEmpty(configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
     const [engine, evaluatorPromise]  = BuildEngineFactory.buildEmpty(configInput, namedExpressions)
+    const hyperFormula = this.buildFromEngineState(engine)
 
-    return [this.buildFromEngineState(engine), evaluatorPromise]
+    return [hyperFormula, hyperFormula.wrapEvaluatorPromiseWithChanges(evaluatorPromise)]
   }
 
   /**
@@ -615,6 +618,7 @@ export class HyperFormula implements TypedEmitter {
       engine.namedExpressions,
       engine.serialization,
       engine.functionRegistry,
+      engine.eventEmitter
     )
   }
 
@@ -643,7 +647,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public getCellValue(cellAddress: SimpleCellAddress): CellValue {
+  public getCellValue<CellMetadata>(cellAddress: SimpleCellAddress): CellData<CellValue, CellMetadata> {
     if (!isSimpleCellAddress(cellAddress)) {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
@@ -674,7 +678,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public getCellFormula(cellAddress: SimpleCellAddress): string | undefined {
+  public getCellFormula<CellMetadata>(cellAddress: SimpleCellAddress): CellData<string | undefined, CellMetadata> {
     if (!isSimpleCellAddress(cellAddress)) {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
@@ -682,7 +686,7 @@ export class HyperFormula implements TypedEmitter {
   }
 
   /**
-   * Returns [[RawCellContent]] with a serialized content of the cell of a given address: either a cell formula, an explicit value, or an error.
+   * Returns [[DataRawCellContent]] with a serialized content of the cell of a given address: either a cell formula, an explicit value, or an error.
    *
    * @param {SimpleCellAddress} cellAddress - cell coordinates
    *
@@ -705,7 +709,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public getCellSerialized(cellAddress: SimpleCellAddress): RawCellContent {
+  public getCellSerialized<CellMetadata>(cellAddress: SimpleCellAddress): GenericDataRawCellContent<CellMetadata> {
     if (!isSimpleCellAddress(cellAddress)) {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
@@ -737,7 +741,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetValues(sheetId: number): CellValue[][] {
+  public getSheetValues<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<CellData<CellValue, CellMetadata>, SheetMetadata> {
     validateArgToType(sheetId, 'number', 'sheetId')
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getSheetValues(sheetId)
@@ -770,13 +774,13 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetFormulas(sheetId: number): (string | undefined)[][] {
+  public getSheetFormulas<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<CellData<string | undefined, CellMetadata>, SheetMetadata> {
     validateArgToType(sheetId, 'number', 'sheetId')
     return this._serialization.getSheetFormulas(sheetId)
   }
 
   /**
-   * Returns an array of arrays of [[RawCellContent]] with serialized content of cells from [[Sheet]], either a cell formula or an explicit value.
+   * Returns an array of arrays of [[DataRawCellContent]] with serialized content of cells from [[Sheet]], either a cell formula or an explicit value.
    *
    * @param {SimpleCellAddress} sheetId - sheet ID number
    *
@@ -803,7 +807,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetSerialized(sheetId: number): RawCellContent[][] {
+  public getSheetSerialized<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<GenericDataRawCellContent<CellMetadata>, SheetMetadata> {
     validateArgToType(sheetId, 'number', 'sheetId')
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getSheetSerialized(sheetId)
@@ -883,7 +887,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getAllSheetsValues(): Record<string, CellValue[][]> {
+  public getAllSheetsValues<SheetMetadata, CellMetadata>(): GenericSheets<CellData<CellValue, CellMetadata>, SheetMetadata> {
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getAllSheetsValues()
   }
@@ -902,12 +906,12 @@ export class HyperFormula implements TypedEmitter {
    * ```
    * @category Sheets
    */
-  public getAllSheetsFormulas(): Record<string, (string | undefined)[][]> {
+  public getAllSheetsFormulas<SheetMetadata, CellMetadata>(): GenericSheets<CellData<string | undefined, CellMetadata>, SheetMetadata> {
     return this._serialization.getAllSheetsFormulas()
   }
 
   /**
-   * Returns formulas or values of all sheets in a form of an object which property keys are strings and values are arrays of arrays of [[RawCellContent]].
+   * Returns formulas or values of all sheets in a form of an object which property keys are strings and values are arrays of arrays of [[DataRawCellContent]].
    *
    * @throws [[EvaluationSuspendedError]] when the evaluation is suspended
    *
@@ -923,7 +927,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getAllSheetsSerialized(): Record<string, RawCellContent[][]> {
+  public getAllSheetsSerialized<SheetMetadata>(): GenericSheets<DataRawCellContent, SheetMetadata> {
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getAllSheetsSerialized()
   }
@@ -949,14 +953,14 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Instance
    */
-  public updateConfig(newParams: Partial<ConfigParams>): Promise<void> {
+  public updateConfig(newParams: Partial<ConfigParams>): Promise<ExportedChange[]> {
     const newConfig = this._config.mergeConfig(newParams)
 
     const configNewLanguage = this._config.mergeConfig({language: newParams.language})
-    const serializedSheets = this._serialization.withNewConfig(configNewLanguage, this._namedExpressions).getAllSheetsSerialized()
+    const serializedSheets= this._serialization.withNewConfig(configNewLanguage, this._namedExpressions).getAllSheetsSerialized()
     const serializedNamedExpressions = this._serialization.getAllNamedExpressionsSerialized()
 
-    const [newEngine, promise] = BuildEngineFactory.rebuildWithConfig(newConfig, serializedSheets, serializedNamedExpressions, this._stats)
+    const [newEngine, evaluatorPromise] = BuildEngineFactory.rebuildWithConfig(newConfig, serializedSheets, serializedNamedExpressions, this._stats)
 
     this._config = newEngine.config
     this._stats = newEngine.stats
@@ -973,7 +977,7 @@ export class HyperFormula implements TypedEmitter {
     this._serialization = newEngine.serialization
     this._functionRegistry = newEngine.functionRegistry
 
-    return promise
+    return this.wrapEvaluatorPromiseWithChanges(evaluatorPromise)
   }
 
   /**
@@ -1001,7 +1005,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Instance
    */
-  public rebuildAndRecalculate(): Promise<void> {
+  public rebuildAndRecalculate(): Promise<ExportedChange[]> {
     return this.updateConfig({})
   }
 
@@ -1177,7 +1181,7 @@ export class HyperFormula implements TypedEmitter {
    * Note that this method may trigger dependency graph recalculation.
    *
    * @param {SimpleCellAddress} topLeftCornerAddress - top left corner of block of cells
-   * @param {(RawCellContent[][]|RawCellContent)} cellContents - array with content
+   * @param {(DataRawCellContent[][]|DataRawCellContent)} cellContents - array with content
    *
    * @fires [[valuesUpdated]] if recalculation was triggered by this change
    *
@@ -1202,8 +1206,8 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Cells
    */
-  public setCellContents(topLeftCornerAddress: SimpleCellAddress, cellContents: RawCellContent[][] | RawCellContent): [ExportedChange[], Promise<ExportedChange[]>] {
-    this._crudOperations.setCellContents(topLeftCornerAddress, cellContents)
+  public setCellContents<CellMetadata>(topLeftCornerAddress: SimpleCellAddress, cellContents: InputCell<CellMetadata>[][] | InputCell<CellMetadata>, clearRedoStack = true): [ExportedChange[], Promise<ExportedChange[]>] {
+    this._crudOperations.setCellContents(topLeftCornerAddress, cellContents, clearRedoStack)
     return this.recomputeIfDependencyGraphNeedsIt()
   }
 
@@ -2126,7 +2130,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Clipboard
    */
-  public copy(source: SimpleCellRange): CellValue[][] {
+  public copy<CellMetadata>(source: SimpleCellRange): CellData<CellValue, CellMetadata>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2159,7 +2163,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Clipboard
    */
-  public cut(source: SimpleCellRange): CellValue[][] {
+  public cut<CellMetadata>(source: SimpleCellRange): CellData<CellValue, CellMetadata>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2249,6 +2253,22 @@ export class HyperFormula implements TypedEmitter {
   }
 
   /**
+  *
+  * @category Undo and Redo
+  */
+  public suspendAddingUndoEntries(): void {
+    this._crudOperations.undoRedo.suspendAddingUndoEntries()
+  }
+
+  /**
+    *
+    * @category Undo and Redo
+    */
+  public resumeAddingUndoEntries(): void {
+    this._crudOperations.undoRedo.resumeAddingUndoEntries()
+  }
+
+  /**
    * Clears the redo stack in undoRedo history.
    *
    * @example
@@ -2325,7 +2345,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Ranges
    */
-  public getRangeValues(source: SimpleCellRange): CellValue[][] {
+  public getRangeValues<CellMetadata>(source: SimpleCellRange): CellData<CellValue, CellMetadata>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2361,7 +2381,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Ranges
    */
-  public getRangeFormulas(source: SimpleCellRange): (string | undefined)[][] {
+  public getRangeFormulas<CellMetadata>(source: SimpleCellRange): CellData<string | undefined, CellMetadata>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2397,7 +2417,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Ranges
    */
-  public getRangeSerialized(source: SimpleCellRange): RawCellContent[][] {
+  public getRangeSerialized<CellMetadata>(source: SimpleCellRange): GenericDataRawCellContent<CellMetadata>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2431,7 +2451,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Ranges
    */
-  public getFillRangeData(source: SimpleCellRange, target: SimpleCellRange, offsetsFromTarget: boolean = false): RawCellContent[][] {
+  public getFillRangeData<CellMetadata>(source: SimpleCellRange, target: SimpleCellRange, offsetsFromTarget: boolean = false): GenericDataRawCellContent<CellMetadata>[][] {
     if (!isSimpleCellRange(source)) {
       throw new ExpectedValueOfTypeError('SimpleCellRange', 'source')
     }
@@ -2512,14 +2532,27 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public addSheet(sheetName?: string): string {
+  public addSheet<SheetMetadata>(sheetName?: string, sheetMetadata?: SheetMetadata): string {
     if (sheetName !== undefined) {
       validateArgToType(sheetName, 'string', 'sheetName')
     }
-    const addedSheetName = this._crudOperations.addSheet(sheetName)
+    const addedSheetName = this._crudOperations.addSheet(sheetName, sheetMetadata)
     this._emitter.emit(Events.SheetAdded, addedSheetName)
     return addedSheetName
   }
+
+  /**
+   * @category Sheets
+   */
+  public getSheetMetadata<SheetMetadata>(sheetId: number): SheetMetadata {
+    if (sheetId !== undefined) {
+      validateArgToType(sheetId, 'number', 'sheetId')
+    }
+    const sheet = this.sheetMapping.fetchSheetById(sheetId)
+    
+    return sheet.sheetMetadata
+  }
+
 
   /**
    * Returns information whether it is possible to remove sheet for the engine.
@@ -2587,14 +2620,12 @@ export class HyperFormula implements TypedEmitter {
   public removeSheet(sheetId: number): [ExportedChange[], Promise<ExportedChange[]>] {
     validateArgToType(sheetId, 'number', 'sheetId')
     const displayName = this.sheetMapping.getDisplayName(sheetId)!
+    const previousSheetNames = this.getSheetNames()
+
     this._crudOperations.removeSheet(sheetId)
     const [changes, asyncChanges] = this.recomputeIfDependencyGraphNeedsIt()
     
-    asyncChanges.then((exportedChanges) => {
-      this._emitter.emit(Events.SheetRemoved, displayName, exportedChanges)
-    })
-    
-    this._emitter.emit(Events.SheetRemoved, displayName, changes)
+    this._emitter.emit(Events.SheetRemoved, displayName, changes, previousSheetNames)
 
     return [changes, asyncChanges]
   }
@@ -2674,7 +2705,7 @@ export class HyperFormula implements TypedEmitter {
    * Returns `false` if there is no sheet with a given name.
    *
    * @param {number} sheetId - sheet ID.
-   * @param {RawCellContent[][]} values - array of new values
+   * @param {DataRawCellContent[][]} values - array of new values
    *
    * @throws [[ExpectedValueOfTypeError]] if any of its basic type argument is of wrong type
    *
@@ -2692,7 +2723,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public isItPossibleToReplaceSheetContent(sheetId: number, values: RawCellContent[][]): boolean {
+  public isItPossibleToReplaceSheetContent<CellMetadata>(sheetId: number, values: InputCell<CellMetadata>[][]): boolean {
     validateArgToType(sheetId, 'number', 'sheetId')
     try {
       this._crudOperations.ensureScopeIdIsValid(sheetId)
@@ -2705,11 +2736,11 @@ export class HyperFormula implements TypedEmitter {
 
   /**
    * Replaces the sheet content with new values.
-   * The new value is to be provided as an array of arrays of [[RawCellContent]].
+   * The new value is to be provided as an array of arrays of [[DataRawCellContent]].
    * The method finds sheet ID based on the provided sheet name.
    *
    * @param {number} sheetId - sheet ID.
-   * @param {RawCellContent[][]} values - array of new values
+   * @param {DataRawCellContent[][]} values - array of new values
    *
    * @throws [[ExpectedValueOfTypeError]] if any of its basic type argument is of wrong type
    * @throws [[NoSheetWithIdError]] when the given sheet ID does not exists
@@ -2729,10 +2760,19 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public setSheetContent(sheetId: number, values: RawCellContent[][]): [ExportedChange[], Promise<ExportedChange[]>] {
+  public setSheetContent<CellMetadata>(sheetId: number, values: InputCell<CellMetadata>[][]): [ExportedChange[], Promise<ExportedChange[]>] {
     validateArgToType(sheetId, 'number', 'sheetId')
     this._crudOperations.setSheetContent(sheetId, values)
     return this.recomputeIfDependencyGraphNeedsIt()
+  }
+
+  /**
+   * @category Sheets
+   */
+  public setSheetMetadata<SheetMetadata>(sheetId: number, sheetMetadata: SheetMetadata): void {
+    validateArgToType(sheetId, 'number', 'sheetId')
+
+    this.sheetMapping.setSheetMetadata(sheetId, sheetMetadata)
   }
 
   /**
@@ -3204,7 +3244,8 @@ export class HyperFormula implements TypedEmitter {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
     this.ensureEvaluationIsNotSuspended()
-    const value = this.dependencyGraph.getCellValue(cellAddress)
+    const value = this.dependencyGraph.getCellValue(cellAddress).cellValue
+    
     return getCellValueType(value)
   }
 
@@ -3238,7 +3279,8 @@ export class HyperFormula implements TypedEmitter {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
     this.ensureEvaluationIsNotSuspended()
-    const value = this.dependencyGraph.getCellValue(cellAddress)
+    const value = this.dependencyGraph.getCellValue(cellAddress).cellValue
+
     return getCellValueDetailedType(value)
   }
 
@@ -3272,7 +3314,8 @@ export class HyperFormula implements TypedEmitter {
       throw new ExpectedValueOfTypeError('SimpleCellAddress', 'cellAddress')
     }
     this.ensureEvaluationIsNotSuspended()
-    const value = this.dependencyGraph.getCellValue(cellAddress)
+    const value = this.dependencyGraph.getCellValue(cellAddress).cellValue
+
     return getCellValueFormat(value)
   }
 
@@ -3406,6 +3449,18 @@ export class HyperFormula implements TypedEmitter {
     return this.resumeEvaluation()
   }
 
+  public batchUndoRedo(batchOperations: () => void) {
+    this._crudOperations.beginUndoRedoBatchMode()
+
+    try {
+      batchOperations()
+    } catch (e) {
+      this._crudOperations.commitUndoRedoBatchMode()
+      throw (e)
+    }
+    this._crudOperations.commitUndoRedoBatchMode()
+  }
+
   /**
    * Suspends the dependency graph recalculation.
    * It allows optimizing the performance.
@@ -3519,7 +3574,7 @@ export class HyperFormula implements TypedEmitter {
    * Returns `false` if the operation might be disrupted.
    *
    * @param {string} expressionName - a name of the expression to be added
-   * @param {RawCellContent} expression - the expression
+   * @param {DataRawCellContent} expression - the expression
    * @param {number?} scope - scope definition, `sheetId` for local scope or `undefined` for global scope
    *
    * @throws [[ExpectedValueOfTypeError]] if any of its basic type argument is of wrong type
@@ -3556,7 +3611,7 @@ export class HyperFormula implements TypedEmitter {
    * Note that this method may trigger dependency graph recalculation.
    *
    * @param {string} expressionName - a name of the expression to be added
-   * @param {RawCellContent} expression - the expression
+   * @param {DataRawCellContent} expression - the expression
    * @param {number?} scope - scope definition, `sheetId` for local scope or `undefined` for global scope
    * @param {NamedExpressionOptions?} options - additional metadata related to named expression
    *
@@ -3639,7 +3694,7 @@ export class HyperFormula implements TypedEmitter {
     this._crudOperations.ensureScopeIdIsValid(scope)
     const namedExpression = this._namedExpressions.namedExpressionForScope(expressionName, scope)
     if (namedExpression) {
-      return this._serialization.getCellValue(namedExpression.address)
+      return this._serialization.getCellValue(namedExpression.address).cellValue
     } else {
       return undefined
     }
@@ -3680,7 +3735,7 @@ export class HyperFormula implements TypedEmitter {
     if (namedExpression === undefined) {
       return undefined
     } else {
-      return this._serialization.getCellFormula(namedExpression.address)
+      return this._serialization.getCellFormula(namedExpression.address).cellValue
     }
   }
 
@@ -3724,7 +3779,7 @@ export class HyperFormula implements TypedEmitter {
       return undefined
     }
 
-    const expression = this._serialization.getCellFormula(namedExpression.address)
+    const expression = this._serialization.getCellFormula(namedExpression.address).cellValue
 
     return {
       name: expressionName,
@@ -3741,7 +3796,7 @@ export class HyperFormula implements TypedEmitter {
    * Returns `false` if the operation might be disrupted.
    *
    * @param {string} expressionName - an expression name, case insensitive.
-   * @param {RawCellContent} newExpression - a new expression
+   * @param {DataRawCellContent} newExpression - a new expression
    * @param {number?} scope - scope definition, `sheetId` for local scope or `undefined` for global scope
    *
    * @throws [[ExpectedValueOfTypeError]] if any of its basic type argument is of wrong type
@@ -3781,7 +3836,7 @@ export class HyperFormula implements TypedEmitter {
    * Note that this method may trigger dependency graph recalculation.
    *
    * @param {string} expressionName - an expression name, case insensitive.
-   * @param {RawCellContent} newExpression - a new expression
+   * @param {DataRawCellContent} newExpression - a new expression
    * @param {number?} scope - scope definition, `sheetId` for local scope or `undefined` for global scope
    * @param {NamedExpressionOptions?} options - additional metadata related to named expression
    *
@@ -4048,16 +4103,15 @@ export class HyperFormula implements TypedEmitter {
     if (ast === undefined) {
       throw new NotAFormulaError()
     }
-    const [interpreterValue, asyncPromiseVertex] = this.evaluator.runAndForget(ast, address, dependencies)
+    const [interpreterValue, promise] = this.evaluator.runAndForget(ast, address, dependencies)
     
-    const cellValuePromise = new Promise<CellValue | CellValue[][]>((resolve, reject) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      asyncPromiseVertex?.getPromise!().then((interpreterValue) => {
-        resolve(this._exporter.exportScalarOrRange(interpreterValue))
+    const newPromise = new Promise<CellValue | CellValue[][]>((resolve, reject) => {
+      promise?.then((value) => {
+        resolve(this._exporter.exportScalarOrRange(value))
       }).catch(reject)
     })
 
-    return [this._exporter.exportScalarOrRange(interpreterValue), cellValuePromise]
+    return [this._exporter.exportScalarOrRange(interpreterValue), newPromise]
   }
 
   /**
@@ -4326,7 +4380,23 @@ export class HyperFormula implements TypedEmitter {
     objectDestroy(this)
   }
 
-  public extractFormula(formulaString: string, sheetId: number = 1) {
+  private wrapEvaluatorPromiseWithChanges(evaluatorPromise: Promise<ContentChanges>): Promise<ExportedChange[]> {
+    const promise = new Promise<ExportedChange[]>((resolve, reject) => {
+      evaluatorPromise.then((contentChanges) => {
+        const exportedChanges = contentChanges.exportChanges(this._exporter)
+
+        if (!contentChanges.isEmpty()) {
+          this._emitter.emit(Events.AsyncValuesUpdated, exportedChanges)  
+        }
+
+        resolve(exportedChanges)
+      }).catch(reject)
+    })
+
+    return promise
+  }
+
+  public extractFormula(formulaString: string, sheetId: number = 1):  { ast?: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[] } {
     return this.extractTemporaryFormula(formulaString, sheetId, false)
   }
 
@@ -4337,7 +4407,8 @@ export class HyperFormula implements TypedEmitter {
   }
 
   private extractTemporaryFormula(formulaString: string, sheetId: number = 1, stripWhitespaces = true): { ast?: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[] } {
-    const parsedCellContent = this._cellContentParser.parse(formulaString)
+    const parsedCellContent = this._cellContentParser.parse({ cellValue: formulaString })
+    
     const address = {sheet: sheetId, col: 0, row: 0}
     if (!(parsedCellContent instanceof CellContent.Formula)) {
       return {address, dependencies: []}
@@ -4368,24 +4439,14 @@ export class HyperFormula implements TypedEmitter {
       let evaluatorPromise: Promise<ContentChanges> = Promise.resolve(ContentChanges.empty())
 
       if (verticesToRecomputeFrom.length > 0) {
-        const [contentChanges, promise] = this.evaluator.partialRun(verticesToRecomputeFrom)
+        const [contentChanges,, promise] = this.evaluator.partialRun(verticesToRecomputeFrom)
 
         evaluatorPromise = promise
 
         changes.addAll(contentChanges)
       }
 
-      const promise = new Promise<ExportedChange[]>((resolve, reject) => {
-        evaluatorPromise.then((contentChanges) => {
-          const exportedChanges = contentChanges.exportChanges(this._exporter)
-  
-          if (!contentChanges.isEmpty()) {
-            this._emitter.emit(Events.AsyncValuesUpdated, exportedChanges)  
-          }
-  
-          resolve(exportedChanges)
-        }).catch(reject)
-      })
+      const promise = this.wrapEvaluatorPromiseWithChanges(evaluatorPromise)
   
       const exportedChanges = changes.exportChanges(this._exporter)
 

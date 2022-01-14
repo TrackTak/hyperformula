@@ -5,7 +5,7 @@
 
 import {SimpleCellRange} from './AbsoluteCellRange'
 import {CellError, CellType, CellValueDetailedType, CellValueType, ErrorType, SimpleCellAddress} from './Cell'
-import {RawCellContent} from './CellContentParser'
+import {DataRawCellContent, RawCellContent} from './CellContentParser'
 import {CellValue, DetailedCellError, NoErrorCellValue} from './CellValue'
 import {Config, ConfigParams} from './Config'
 import {ColumnRowIndex} from './CrudOperations'
@@ -48,12 +48,37 @@ import {HyperFormula} from './HyperFormula'
 import {RawTranslationPackage} from './i18n'
 import enGB from './i18n/languages/enGB'
 import {FunctionArgument, FunctionPlugin, FunctionPluginDefinition} from './interpreter'
-import {FormatInfo} from './interpreter/InterpreterValue'
+import {CellData, FormatInfo} from './interpreter/InterpreterValue'
 import * as plugins from './interpreter/plugin'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {NamedExpression, NamedExpressionOptions} from './NamedExpressions'
 import {SerializedNamedExpression} from './Serialization'
 import {Sheet, SheetDimensions, Sheets} from './Sheet'
+import {
+  UndoEntry,
+  BaseUndoEntry,
+  RemoveRowsUndoEntry, 
+  MoveCellsUndoEntry, 
+  AddRowsUndoEntry, 
+  SetRowOrderUndoEntry, 
+  SetColumnOrderUndoEntry, 
+  SetSheetContentUndoEntry, 
+  MoveRowsUndoEntry, 
+  MoveColumnsUndoEntry,
+  AddColumnsUndoEntry,
+  RemoveColumnsUndoEntry,
+  AddSheetUndoEntry,
+  RemoveSheetUndoEntry,
+  RenameSheetUndoEntry,
+  ClearSheetUndoEntry,
+  SetCellContentsUndoEntry,
+  PasteUndoEntry,
+  AddNamedExpressionUndoEntry,
+  RemoveNamedExpressionUndoEntry,
+  ChangeNamedExpressionUndoEntry,
+  BatchUndoEntry,
+  UndoRedo
+} from './UndoRedo'
 
 /** @internal */
 class HyperFormulaNS extends HyperFormula {
@@ -115,10 +140,12 @@ export {
   AlwaysSparse,
   DenseSparseChooseBasedOnThreshold,
   CellValue,
+  CellData,
   NoErrorCellValue,
   ConfigParams,
   ExportedChange,
   RawCellContent,
+  DataRawCellContent,
   FormatInfo,
   Sheet,
   Sheets,
@@ -170,4 +197,27 @@ export {
   TargetLocationHasArrayError,
   UnableToParseError,
   SerializedNamedExpression,
+  UndoEntry,
+  BaseUndoEntry,
+  RemoveRowsUndoEntry, 
+  MoveCellsUndoEntry, 
+  AddRowsUndoEntry, 
+  SetRowOrderUndoEntry, 
+  SetColumnOrderUndoEntry, 
+  SetSheetContentUndoEntry, 
+  MoveRowsUndoEntry, 
+  MoveColumnsUndoEntry,
+  AddColumnsUndoEntry,
+  RemoveColumnsUndoEntry,
+  AddSheetUndoEntry,
+  RemoveSheetUndoEntry,
+  RenameSheetUndoEntry,
+  ClearSheetUndoEntry,
+  SetCellContentsUndoEntry,
+  PasteUndoEntry,
+  AddNamedExpressionUndoEntry,
+  RemoveNamedExpressionUndoEntry,
+  ChangeNamedExpressionUndoEntry,
+  BatchUndoEntry,
+  UndoRedo,
 }

@@ -23,7 +23,16 @@
  import {NumberLiteralHelper} from './NumberLiteralHelper'
  
  export type RawCellContent = Date | string | number | boolean | null | undefined
- 
+
+ export type DataRawCellContent = GenericDataRawCellContent<any>
+
+ export type InputCell<CellMetadata> = Maybe<GenericDataRawCellContent<CellMetadata>>
+
+ export type GenericDataRawCellContent<CellMetadata> = {
+  cellValue?: RawCellContent,
+  metadata?: CellMetadata,
+ }
+
  export namespace CellContent {
    export class Number {
      constructor(public readonly value: ExtendedNumber) {
@@ -42,7 +51,6 @@
    }
  
    export class Empty {
- 
      private static instance: Empty
  
      public static getSingletonInstance() {
@@ -94,6 +102,17 @@
    const errorRegex = /#[A-Za-z0-9\/]+[?!]?/
    return errorRegex.test(upperCased) && Object.prototype.hasOwnProperty.call(errorMapping, upperCased)
  }
+
+ export function isCellData<T extends Object>(obj: T | DataRawCellContent) {
+  const isObject = obj != null && typeof obj === 'object' && !Array.isArray(obj)
+  const keys = Object.keys(obj ?? {})
+
+  if (!isObject || !keys.length) return false
+
+  const isCellData = keys.every(key => key === 'cellValue' || key === 'metadata')
+
+  return isCellData
+ }
  
  export class CellContentParser {
    constructor(
@@ -102,49 +121,67 @@
      private readonly numberLiteralsHelper: NumberLiteralHelper) {
    }
  
-   public parse(content: RawCellContent): CellContent.Type {
-     if (content === undefined || content === null) {
-       return CellContent.Empty.getSingletonInstance()
-     } else if (typeof content === 'number') {
-       if (isNumberOverflow(content)) {
-         return new CellContent.Error(ErrorType.NUM, ErrorMessage.ValueLarge)
-       } else {
-         return new CellContent.Number(content)
-       }
-     } else if (typeof content === 'boolean') {
-       return new CellContent.Boolean(content)
-     } else if (content instanceof Date) {
-       const dateVal = this.dateHelper.dateToNumber({
-         day: content.getDate(),
-         month: content.getMonth() + 1,
-         year: content.getFullYear()
-       })
-       const timeVal = timeToNumber({
-         hours: content.getHours(),
-         minutes: content.getMinutes(),
-         seconds: content.getSeconds() + content.getMilliseconds() / 1000
-       })
-       const val = dateVal + timeVal
-       if (val < 0) {
-         return new CellContent.Error(ErrorType.NUM, ErrorMessage.DateBounds)
-       }
-       if (val % 1 === 0) {
-         return new CellContent.Number(new DateNumber(val, 'Date()'))
-       } else if (val < 1) {
-         return new CellContent.Number(new TimeNumber(val, 'Date()'))
-       } else {
-         return new CellContent.Number(new DateTimeNumber(val, 'Date()'))
-       }
-     } else if (typeof content === 'string') {
-       if (isBoolean(content)) {
-         return new CellContent.Boolean(content.toLowerCase() === 'true')
-       } else if (isFormula(content)) {
-         return new CellContent.Formula(content)
-       } else if (isError(content, this.config.errorMapping)) {
-         return new CellContent.Error(this.config.errorMapping[content.toUpperCase()])
-       } else if (isPercent(content)) {
-        let trimmedContent = content.trim()
+   public parse(content: DataRawCellContent | InputCell<any>): CellContent.Type {
+      if (content === undefined || content === null) {
+        return CellContent.Empty.getSingletonInstance()
+      }
+
+      if (!isCellData(content)) {
+        throw new UnableToParseError(content)
+      }
+
+      return this.parseRawCellContent(content.cellValue)
+   }
+
+   public isCurrency(text: string): boolean {
+     const trimmedContent = text.trim()
  
+     return !!this.currencyMatcher(trimmedContent)
+   }
+
+   private parseRawCellContent(content: RawCellContent): CellContent.Type {
+      if (content === undefined || content === null) {
+        return CellContent.Empty.getSingletonInstance()
+      } else if (typeof content === 'number') {
+        if (isNumberOverflow(content)) {
+          return new CellContent.Error(ErrorType.NUM, ErrorMessage.ValueLarge)
+        } else {
+          return new CellContent.Number(content)
+        }
+      } else if (typeof content === 'boolean') {
+        return new CellContent.Boolean(content)
+      } else if (content instanceof Date) {
+        const dateVal = this.dateHelper.dateToNumber({
+          day: content.getDate(),
+          month: content.getMonth() + 1,
+          year: content.getFullYear()
+        })
+        const timeVal = timeToNumber({
+          hours: content.getHours(),
+          minutes: content.getMinutes(),
+          seconds: content.getSeconds() + content.getMilliseconds() / 1000
+        })
+        const val = dateVal + timeVal
+        if (val < 0) {
+          return new CellContent.Error(ErrorType.NUM, ErrorMessage.DateBounds)
+        }
+        if (val % 1 === 0) {
+          return new CellContent.Number(new DateNumber(val, 'Date()'))
+        } else if (val < 1) {
+          return new CellContent.Number(new TimeNumber(val, 'Date()'))
+        } else {
+          return new CellContent.Number(new DateTimeNumber(val, 'Date()'))
+        }
+      } else if (typeof content === 'string') {
+        if (isBoolean(content)) {
+          return new CellContent.Boolean(content.toLowerCase() === 'true')
+        } else if (isFormula(content)) {
+          return new CellContent.Formula(content)
+        } else if (isError(content, this.config.errorMapping)) {
+          return new CellContent.Error(this.config.errorMapping[content.toUpperCase()])
+        } else if (isPercent(content)) {
+        let trimmedContent = content.trim()
+
         trimmedContent = trimmedContent.slice(0, trimmedContent.length - 1)
     
         const val = this.numberLiteralsHelper.numericStringToMaybeNumber(trimmedContent)
@@ -156,52 +193,45 @@
         }
     
         return new CellContent.String(this.getSlicedContentString(content))
-       } else if(this.isCurrency(content)) {
-         let trimmedContent = content.trim()
- 
-         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-         const res = this.currencyMatcher(trimmedContent)!
-         const currency = res[0]
- 
-         trimmedContent = res[1]
- 
-         const val = this.numberLiteralsHelper.numericStringToMaybeNumber(trimmedContent)
- 
-         if (val !== undefined) {
+        } else if(this.isCurrency(content)) {
+          let trimmedContent = content.trim()
+
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const res = this.currencyMatcher(trimmedContent)!
+          const currency = res[0]
+
+          trimmedContent = res[1]
+
+          const val = this.numberLiteralsHelper.numericStringToMaybeNumber(trimmedContent)
+
+          if (val !== undefined) {
           const parseAsNum = new CurrencyNumber(val, currency)
-  
+
           return new CellContent.Number(parseAsNum)
-         }
-         return new CellContent.String(this.getSlicedContentString(content))
-       } else {
-         const trimmedContent = content.trim()
-         const val = this.numberLiteralsHelper.numericStringToMaybeNumber(trimmedContent)
-         
-         if (val !== undefined) {
-           return new CellContent.Number(val)
-         }
-         const parsedDateNumber = this.dateHelper.dateStringToDateNumber(trimmedContent)
-         if (parsedDateNumber !== undefined) {
-           return new CellContent.Number(parsedDateNumber)
-         } else {
-           return new CellContent.String(this.getSlicedContentString(content))
-         }
-       }
-     } else {
-       throw new UnableToParseError(content)
-     }
+          }
+          return new CellContent.String(this.getSlicedContentString(content))
+        } else {
+          const trimmedContent = content.trim()
+          const val = this.numberLiteralsHelper.numericStringToMaybeNumber(trimmedContent)
+          
+          if (val !== undefined) {
+            return new CellContent.Number(val)
+          }
+          const parsedDateNumber = this.dateHelper.dateStringToDateNumber(trimmedContent)
+          if (parsedDateNumber !== undefined) {
+            return new CellContent.Number(parsedDateNumber)
+          } else {
+            return new CellContent.String(this.getSlicedContentString(content))
+          }
+        }
+      } else {
+        throw new UnableToParseError(content)
+      }
    }
 
-   public isCurrency(text: string): boolean {
-     const trimmedContent = text.trim()
- 
-     return !!this.currencyMatcher(trimmedContent)
+   private getSlicedContentString(content: string): string {
+     return content.startsWith('\'') ? content.slice(1) : content
    }
-
-
-  private getSlicedContentString(content: string): string {
-    return content.startsWith('\'') ? content.slice(1) : content
-  }
  
    private currencyMatcher(token: string): Maybe<[string, string]> {
      for (const currency of this.config.currencySymbol) {

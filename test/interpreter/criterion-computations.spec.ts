@@ -3,113 +3,113 @@ import {adr} from '../testUtils'
 
 describe('Criterions - operators computations', () => {
   it('usage of greater than operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A3, ">1", B1:B3)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A3, ">1", B1:B3)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(7)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(7)
   })
 
   it('usage of greater than or equal operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A3, ">=1", B1:B3)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A3, ">=1", B1:B3)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(12)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(12)
   })
 
   it('usage of less than operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A2, "<1", B1:B2)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A2, "<1", B1:B2)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(3)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(3)
   })
 
   it('usage of less than or equal operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A3, "<=1", B1:B3)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A3, "<=1", B1:B3)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(8)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(8)
   })
 
   it('usage of equal operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A3, "=1", B1:B3)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A3, "=1", B1:B3)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(5)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(5)
   })
 
   it('usage of not equal operator', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['0', '3'],
-      ['1', '5'],
-      ['2', '7'],
-      ['=SUMIF(A1:A3, "<>1", B1:B3)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '0' }, { cellValue: '3' }],
+      [{ cellValue: '1' }, { cellValue: '5' }],
+      [{ cellValue: '2' }, { cellValue: '7' }],
+      [{ cellValue: '=SUMIF(A1:A3, "<>1", B1:B3)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(10)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(10)
   })
 
   it('empty values #1', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', ''],
-      ['2', '8'],
-      ['3', '9'],
-      ['=SUMIF(B1:B3, "=", A1:A3)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '' }],
+      [{ cellValue: '2' }, { cellValue: '8' }],
+      [{ cellValue: '3' }, { cellValue: '9' }],
+      [{ cellValue: '=SUMIF(B1:B3, "=", A1:A3)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(0)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(0)
   })
 
   it('empty values #2', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', ''],
-      ['2', '8'],
-      ['3', '9'],
-      ['=SUMIF(B1:B3, "<>", A1:A3)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '' }],
+      [{ cellValue: '2' }, { cellValue: '8' }],
+      [{ cellValue: '3' }, { cellValue: '9' }],
+      [{ cellValue: '=SUMIF(B1:B3, "<>", A1:A3)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(6)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(6)
   })
 
   it('empty values #3', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', ' '],
-      ['2', '1'],
-      ['3', 'TRUE'],
-      ['=SUMIF(B1:B3, "=0", A1:A3)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: ' ' }],
+      [{ cellValue: '2' }, { cellValue: '1' }],
+      [{ cellValue: '3' }, { cellValue: 'TRUE' }],
+      [{ cellValue: '=SUMIF(B1:B3, "=0", A1:A3)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(0)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(0)
   })
 
   it('empty values #4', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      [''],
-      ['8'],
-      ['9'],
-      ['=COUNTIF(A1:A3, "=")'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '' }],
+      [{ cellValue: '8' }],
+      [{ cellValue: '9' }],
+      [{ cellValue: '=COUNTIF(A1:A3, "=")' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A4'))).toEqual(0)
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual(0)
   })
 })
 
@@ -163,58 +163,60 @@ describe('big test', () => {
       ['w 3h1 1s1 F', 12.2000000000116],
       ['w 3h1 1s1 F 1r1', 12.1999999999971],
       ['w 3h1 1s1 Fx', 24.5],
-      ['w 3h1 1s1 F', 10],
+      ['w 3h1 1s1 F', 10 ],
       ['w 3h1 1s1 F', 12.1999999999971],
       [],
       ['=COUNTA(A1:A49)', '=SUM(B1:B50)', null, null, 'codes counted  >  ', '=SUM(F1:F20)', '=SUM(G1:G21)'],
-    ]
+    ].map(x => x.map(z => ({
+      cellValue: z
+    })))
 
-    const [engine] = HyperFormula.buildFromArray(formulas, {useRegularExpressions: true, precisionRounding: 13})
+    const [engine] = HyperFormula.buildFromArray({ cells: formulas }, {useRegularExpressions: true, precisionRounding: 13})
 
-    expect(engine.getCellValue(adr('B51'))).toEqual(304.5)
-    expect(engine.getCellValue(adr('G51'))).toEqual(304.5)
+    expect(engine.getCellValue(adr('B51')).cellValue).toEqual(304.5)
+    expect(engine.getCellValue(adr('G51')).cellValue).toEqual(304.5)
 
-    expect(engine.getCellValue(adr('F1'))).toEqual(14)
-    expect(engine.getCellValue(adr('F2'))).toEqual(2)
-    expect(engine.getCellValue(adr('F3'))).toEqual(11)
-    expect(engine.getCellValue(adr('F4'))).toEqual(0)
-    expect(engine.getCellValue(adr('F5'))).toEqual(5)
-    expect(engine.getCellValue(adr('F6'))).toEqual(0)
-    expect(engine.getCellValue(adr('F7'))).toEqual(7)
-    expect(engine.getCellValue(adr('F8'))).toEqual(5)
-    expect(engine.getCellValue(adr('F9'))).toEqual(0)
-    expect(engine.getCellValue(adr('F10'))).toEqual(0)
-    expect(engine.getCellValue(adr('F11'))).toEqual(0)
-    expect(engine.getCellValue(adr('F12'))).toEqual(0)
-    expect(engine.getCellValue(adr('F13'))).toEqual(0)
-    expect(engine.getCellValue(adr('F14'))).toEqual(0)
-    expect(engine.getCellValue(adr('F15'))).toEqual(0)
-    expect(engine.getCellValue(adr('F16'))).toEqual(0)
-    expect(engine.getCellValue(adr('F17'))).toEqual(0)
-    expect(engine.getCellValue(adr('F18'))).toEqual(0)
-    expect(engine.getCellValue(adr('F19'))).toEqual(0)
-    expect(engine.getCellValue(adr('F20'))).toEqual(5)
+    expect(engine.getCellValue(adr('F1')).cellValue).toEqual(14)
+    expect(engine.getCellValue(adr('F2')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('F3')).cellValue).toEqual(11)
+    expect(engine.getCellValue(adr('F4')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F5')).cellValue).toEqual(5)
+    expect(engine.getCellValue(adr('F6')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F7')).cellValue).toEqual(7)
+    expect(engine.getCellValue(adr('F8')).cellValue).toEqual(5)
+    expect(engine.getCellValue(adr('F9')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F10')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F11')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F12')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F13')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F14')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F15')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F16')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F17')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F18')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F19')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('F20')).cellValue).toEqual(5)
 
-    expect(engine.getCellValue(adr('G1'))).toEqual(36.39999999998)
-    expect(engine.getCellValue(adr('G2'))).toEqual(4.5000000000146)
-    expect(engine.getCellValue(adr('G3'))).toEqual(43.400000000009)
-    expect(engine.getCellValue(adr('G4'))).toEqual(0)
-    expect(engine.getCellValue(adr('G5'))).toEqual(31.100000000006)
-    expect(engine.getCellValue(adr('G6'))).toEqual(0)
-    expect(engine.getCellValue(adr('G7'))).toEqual(82.199999999997)
-    expect(engine.getCellValue(adr('G8'))).toEqual(57.800000000003)
-    expect(engine.getCellValue(adr('G9'))).toEqual(0)
-    expect(engine.getCellValue(adr('G10'))).toEqual(0)
-    expect(engine.getCellValue(adr('G11'))).toEqual(0)
-    expect(engine.getCellValue(adr('G12'))).toEqual(0)
-    expect(engine.getCellValue(adr('G13'))).toEqual(0)
-    expect(engine.getCellValue(adr('G14'))).toEqual(0)
-    expect(engine.getCellValue(adr('G15'))).toEqual(0)
-    expect(engine.getCellValue(adr('G16'))).toEqual(0)
-    expect(engine.getCellValue(adr('G17'))).toEqual(0)
-    expect(engine.getCellValue(adr('G18'))).toEqual(0)
-    expect(engine.getCellValue(adr('G19'))).toEqual(0)
-    expect(engine.getCellValue(adr('G20'))).toEqual(49.099999999991)
+    expect(engine.getCellValue(adr('G1')).cellValue).toEqual(36.39999999998)
+    expect(engine.getCellValue(adr('G2')).cellValue).toEqual(4.5000000000146)
+    expect(engine.getCellValue(adr('G3')).cellValue).toEqual(43.400000000009)
+    expect(engine.getCellValue(adr('G4')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G5')).cellValue).toEqual(31.100000000006)
+    expect(engine.getCellValue(adr('G6')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G7')).cellValue).toEqual(82.199999999997)
+    expect(engine.getCellValue(adr('G8')).cellValue).toEqual(57.800000000003)
+    expect(engine.getCellValue(adr('G9')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G10')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G11')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G12')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G13')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G14')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G15')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G16')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G17')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G18')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G19')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('G20')).cellValue).toEqual(49.099999999991)
   })
 
   it('Gnumeric test file', () => {
@@ -268,51 +270,54 @@ describe('big test', () => {
       ['=COUNTIF($M$6:$M$7, "es*")', '0', '=A47=B47'],
       ['=COUNTIF($M$6:$M$7, "*es*")', '2', '=A48=B48'],
       ['=COUNTIF($M$6:$M$7, "*ES*")', '2', '=A49=B49']
-    ]
-    const [engine] = HyperFormula.buildFromArray([])
+    ].map(x => x.map(z => ({
+      cellValue: z
+    })))
+    
+    const [engine] = HyperFormula.buildFromArray({ cells: [] })
     engine.addNamedExpression('TRUE', '=TRUE()', undefined)
     engine.addNamedExpression('FALSE', '=FALSE()', undefined)
     engine.setCellContents(adr('A1'), formulas)
-    expect(engine.getCellValue(adr('A10'))).toEqual(1)
-    expect(engine.getCellValue(adr('A11'))).toEqual(0)
-    expect(engine.getCellValue(adr('A12'))).toEqual(0)
-    expect(engine.getCellValue(adr('A13'))).toEqual(5)
-    expect(engine.getCellValue(adr('A14'))).toEqual(6)
-    expect(engine.getCellValue(adr('A15'))).toEqual(0)
-    expect(engine.getCellValue(adr('A16'))).toEqual(0)
-    expect(engine.getCellValue(adr('A17'))).toEqual(2)
-    expect(engine.getCellValue(adr('A18'))).toEqual(2)
-    expect(engine.getCellValue(adr('A19'))).toEqual(2)
-    expect(engine.getCellValue(adr('A20'))).toEqual(2)
-    expect(engine.getCellValue(adr('A21'))).toEqual(3)
-    expect(engine.getCellValue(adr('A22'))).toEqual(2)
-    expect(engine.getCellValue(adr('A23'))).toEqual(0)
-    expect(engine.getCellValue(adr('A24'))).toEqual(0)
-    expect(engine.getCellValue(adr('A25'))).toEqual(0)
-    expect(engine.getCellValue(adr('A26'))).toEqual(2)
-    expect(engine.getCellValue(adr('A27'))).toEqual(0)
-    expect(engine.getCellValue(adr('A28'))).toEqual(0)
-    expect(engine.getCellValue(adr('A29'))).toEqual(0)
-    expect(engine.getCellValue(adr('A30'))).toEqual(0)
-    expect(engine.getCellValue(adr('A31'))).toEqual(1)
-    expect(engine.getCellValue(adr('A32'))).toEqual(1)
-    expect(engine.getCellValue(adr('A33'))).toEqual(0)
-    expect(engine.getCellValue(adr('A34'))).toEqual(1)
-    // expect(engine.getCellValue(adr('A35'))).toEqual(1)
-    expect(engine.getCellValue(adr('A36'))).toEqual(0)
-    // expect(engine.getCellValue(adr('A37'))).toEqual(0)
-    expect(engine.getCellValue(adr('A38'))).toEqual(1)
-    expect(engine.getCellValue(adr('A39'))).toEqual(1)
-    // expect(engine.getCellValue(adr('A40'))).toEqual(0)
-    // expect(engine.getCellValue(adr('A41'))).toEqual(1)
-    expect(engine.getCellValue(adr('A42'))).toEqual(3)
-    expect(engine.getCellValue(adr('A43'))).toEqual(3)
-    // expect(engine.getCellValue(adr('A44'))).toEqual(3)
-    expect(engine.getCellValue(adr('A45'))).toEqual(0)
-    expect(engine.getCellValue(adr('A46'))).toEqual(1)
-    expect(engine.getCellValue(adr('A47'))).toEqual(0)
-    expect(engine.getCellValue(adr('A48'))).toEqual(2)
-    expect(engine.getCellValue(adr('A49'))).toEqual(2)
-    // expect(engine.getCellValue(adr('C1'))).toEqual('All ok')
+    expect(engine.getCellValue(adr('A10')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A11')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A12')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A13')).cellValue).toEqual(5)
+    expect(engine.getCellValue(adr('A14')).cellValue).toEqual(6)
+    expect(engine.getCellValue(adr('A15')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A16')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A17')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A18')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A19')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A20')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A21')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A22')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A23')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A24')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A25')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A26')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A27')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A28')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A29')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A30')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A31')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A32')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A33')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A34')).cellValue).toEqual(1)
+    // expect(engine.getCellValue(adr('A35')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A36')).cellValue).toEqual(0)
+    // expect(engine.getCellValue(adr('A37')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A38')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A39')).cellValue).toEqual(1)
+    // expect(engine.getCellValue(adr('A40')).cellValue).toEqual(0)
+    // expect(engine.getCellValue(adr('A41')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A42')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A43')).cellValue).toEqual(3)
+    // expect(engine.getCellValue(adr('A44')).cellValue).toEqual(3)
+    expect(engine.getCellValue(adr('A45')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A46')).cellValue).toEqual(1)
+    expect(engine.getCellValue(adr('A47')).cellValue).toEqual(0)
+    expect(engine.getCellValue(adr('A48')).cellValue).toEqual(2)
+    expect(engine.getCellValue(adr('A49')).cellValue).toEqual(2)
+    // expect(engine.getCellValue(adr('C1')).cellValue).toEqual('All ok')
   })
 })

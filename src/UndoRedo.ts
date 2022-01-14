@@ -4,9 +4,12 @@
  */
 
 import {equalSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
-import {RawCellContent} from './CellContentParser'
+import {DataRawCellContent, RawCellContent} from './CellContentParser'
 import {ClipboardCell} from './ClipboardOperations'
 import {Config} from './Config'
+import { Emitter } from './Emitter'
+import { CellMetadata } from './interpreter/InterpreterValue'
+import { Maybe } from './Maybe'
 import {InternalNamedExpression, NamedExpressionOptions} from './NamedExpressions'
 import {
   AddColumnsCommand,
@@ -32,7 +35,7 @@ export abstract class BaseUndoEntry implements UndoEntry {
 
 export class RemoveRowsUndoEntry extends BaseUndoEntry {
   constructor(
-    public readonly command: RemoveRowsCommand,
+    public command: RemoveRowsCommand,
     public readonly rowsRemovals: RowsRemoval[],
   ) {
     super()
@@ -71,7 +74,7 @@ export class MoveCellsUndoEntry extends BaseUndoEntry {
 
 export class AddRowsUndoEntry extends BaseUndoEntry {
   constructor(
-    public readonly command: AddRowsCommand,
+    public command: AddRowsCommand,
   ) {
     super()
   }
@@ -125,7 +128,7 @@ export class SetSheetContentUndoEntry extends BaseUndoEntry {
   constructor(
     public readonly sheetId: number,
     public readonly oldSheetContent: ClipboardCell[][],
-    public readonly newSheetContent: RawCellContent[][],
+    public readonly newSheetContent: DataRawCellContent[][],
   ) {
     super()
   }
@@ -191,7 +194,7 @@ export class MoveColumnsUndoEntry extends BaseUndoEntry {
 
 export class AddColumnsUndoEntry extends BaseUndoEntry {
   constructor(
-    public readonly command: AddColumnsCommand,
+    public command: AddColumnsCommand,
   ) {
     super()
   }
@@ -207,7 +210,7 @@ export class AddColumnsUndoEntry extends BaseUndoEntry {
 
 export class RemoveColumnsUndoEntry extends BaseUndoEntry {
   constructor(
-    public readonly command: RemoveColumnsCommand,
+    public command: RemoveColumnsCommand,
     public readonly columnsRemovals: ColumnsRemoval[],
   ) {
     super()
@@ -225,6 +228,8 @@ export class RemoveColumnsUndoEntry extends BaseUndoEntry {
 export class AddSheetUndoEntry extends BaseUndoEntry {
   constructor(
     public readonly sheetName: string,
+    public readonly sheetId: number,
+    public readonly sheetMetadata: any
   ) {
     super()
   }
@@ -242,7 +247,9 @@ export class RemoveSheetUndoEntry extends BaseUndoEntry {
   constructor(
     public readonly sheetName: string,
     public readonly sheetId: number,
+    public readonly sheetMetadata: any,
     public readonly oldSheetContent: ClipboardCell[][],
+    public readonly oldSheetNames: string[],
     public readonly scopedNamedExpressions: [InternalNamedExpression, ClipboardCell][],
     public readonly version: number,
   ) {
@@ -297,7 +304,7 @@ export class SetCellContentsUndoEntry extends BaseUndoEntry {
   constructor(
     public readonly cellContents: {
       address: SimpleCellAddress,
-      newContent: RawCellContent,
+      newContent: DataRawCellContent,
       oldContent: [SimpleCellAddress, ClipboardCell],
     }[],
   ) {
@@ -417,10 +424,12 @@ export class UndoRedo {
   private redoStack: UndoEntry[] = []
   private readonly undoLimit: number
   private batchUndoEntry?: BatchUndoEntry
+  private undoEntriesSuspended = false
 
   constructor(
     config: Config,
     private readonly operations: Operations,
+    private readonly eventEmitter: Emitter
   ) {
     this.undoLimit = config.undoLimit
   }
@@ -539,6 +548,7 @@ export class UndoRedo {
       const address = cellContentData.address
       const [oldContentAddress, oldContent] = cellContentData.oldContent
       if (!equalSimpleCellAddress(address, oldContentAddress)) {
+        this.operations.restoreCellMetadata(address, oldContent.cellMetadata)
         this.operations.setCellEmpty(address)
       }
       this.operations.restoreCell(oldContentAddress, oldContent)
@@ -578,13 +588,13 @@ export class UndoRedo {
 
   public undoAddSheet(operation: AddSheetUndoEntry) {
     const {sheetName} = operation
-    this.operations.removeSheetByName(sheetName)
+    this.operations.removeSheetByName(sheetName, false)
   }
 
   public undoRemoveSheet(operation: RemoveSheetUndoEntry) {
     this.operations.forceApplyPostponedTransformations()
     const {oldSheetContent, sheetId} = operation
-    this.operations.addSheet(operation.sheetName)
+    this.operations.addSheet(operation.sheetName, operation.sheetMetadata, sheetId)
     for (let rowIndex = 0; rowIndex < oldSheetContent.length; rowIndex++) {
       const row = oldSheetContent[rowIndex]
       for (let col = 0; col < row.length; col++) {
@@ -707,11 +717,11 @@ export class UndoRedo {
   }
 
   public redoRemoveSheet(operation: RemoveSheetUndoEntry) {
-    this.operations.removeSheetByName(operation.sheetName)
+    this.operations.removeSheetByName(operation.sheetName, false)
   }
 
   public redoAddSheet(operation: AddSheetUndoEntry) {
-    this.operations.addSheet(operation.sheetName)
+    this.operations.addSheet(operation.sheetName, operation.sheetMetadata, operation.sheetId)
   }
 
   public redoRenameSheet(operation: RenameSheetUndoEntry) {
@@ -755,13 +765,25 @@ export class UndoRedo {
     this.operations.setColumnOrder(operation.sheetId, operation.columnMapping)
   }
 
+  public suspendAddingUndoEntries() {
+    this.undoEntriesSuspended = true
+  }
+
+  public resumeAddingUndoEntries() {
+    this.undoEntriesSuspended = false
+  }
+
   private addUndoEntry(operation: UndoEntry) {
+    if (this.undoEntriesSuspended) return
+
     this.undoStack.push(operation)
     this.undoStack.splice(0, Math.max(0, this.undoStack.length - this.undoLimit))
+    this.eventEmitter.emit('addUndoEntry', operation)
   }
 
   private undoEntry(operation: UndoEntry) {
     operation.doUndo(this)
+    this.eventEmitter.emit('undo', operation)
   }
 
   private restoreOperationOldContent(oldContent: [SimpleCellAddress, ClipboardCell][]) {
@@ -772,12 +794,14 @@ export class UndoRedo {
 
   private redoEntry(operation: UndoEntry) {
     operation.doRedo(this)
+    this.eventEmitter.emit('redo', operation)
   }
 
   private restoreOldDataFromVersion(version: number) {
     const oldDataToRestore = this.oldData.get(version) || []
     for (const entryToRestore of oldDataToRestore) {
       const [address, hash] = entryToRestore
+
       this.operations.setFormulaToCellFromCache(hash, address)
     }
   }

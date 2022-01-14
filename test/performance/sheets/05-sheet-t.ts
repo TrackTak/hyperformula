@@ -1,3 +1,4 @@
+import { DataRawCellContent } from '../../../src'
 import {ExpectedValue} from '../benchmark'
 
 export function sheet(rows: number = 10000) {
@@ -9,9 +10,9 @@ export function sheet(rows: number = 10000) {
 
   while (prev <= rows) {
     const rowToPush = [
-      prettyRandomString(30),
-      prettyRandomString(30),
-      `=CONCATENATE(A${prev}, B${prev})`,
+      { cellValue: prettyRandomString(30) },
+      { cellValue: prettyRandomString(30) },
+      { cellValue: `=CONCATENATE(A${prev}, B${prev})` },
     ]
 
     sheet.push(rowToPush)
@@ -20,10 +21,10 @@ export function sheet(rows: number = 10000) {
   return sheet
 }
 
-export function expectedValues(sheet: string[][]): ExpectedValue[] {
+export function expectedValues(cells: DataRawCellContent[][]): ExpectedValue[] {
   return [
-    {address: 'C1', value: `${sheet[0][0]}${sheet[0][1]}`},
-    {address: 'C1000', value: `${sheet[999][0]}${sheet[999][1]}`},
-    {address: 'C10000', value: `${sheet[9999][0]}${sheet[9999][1]}`},
+    {address: 'C1', value: `${cells[0][0].cellValue}${cells[0][1].cellValue}`},
+    {address: 'C1000', value: `${cells[999][0].cellValue}${cells[999][1].cellValue}`},
+    {address: 'C10000', value: `${cells[9999][0].cellValue}${cells[9999][1].cellValue}`},
   ]
 }

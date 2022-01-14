@@ -4,17 +4,17 @@ import {adr, colEnd, colStart, extractColumnRange} from './testUtils'
 
 describe('Column ranges', () => {
   it('should work', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '=SUM(A:B)']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '=SUM(A:B)' }]
+    ]})
 
-    expect(engine.getCellValue(adr('C1'))).toEqual(3)
+    expect(engine.getCellValue(adr('C1')).cellValue).toEqual(3)
   })
 
   it('should create correct edges for infinite range when building graph', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=SUM(C:D)', '=SUM(C5:D6)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=SUM(C:D)' }, { cellValue: '=SUM(C5:D6)' }],
+    ]})
 
     const cd = engine.rangeMapping.getRange(colStart('C'), colEnd('D'))!
 
@@ -30,12 +30,12 @@ describe('Column ranges', () => {
   })
 
   it('should create correct edges for infinite range', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=SUM(C:E)'],
-      ['=SUM(D:G)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=SUM(C:E)' }],
+      [{ cellValue: '=SUM(D:G)' }],
+    ]})
 
-    engine.setCellContents(adr('B1'), '=SUM(D42:H42)')
+    engine.setCellContents(adr('B1'), { cellValue: '=SUM(D42:H42)' })
 
     const ce = engine.rangeMapping.getRange(colStart('C'), colEnd('E'))!
     const dg = engine.rangeMapping.getRange(colStart('D'), colEnd('G'))!
@@ -58,9 +58,9 @@ describe('Column ranges', () => {
   })
 
   it('should clear column range set in graph when removing column', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=SUM(B:B)']
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=SUM(B:B)' }]
+    ]})
 
     engine.removeColumns(0, [1, 1])
 
@@ -68,14 +68,14 @@ describe('Column ranges', () => {
   })
 
   it('should not move infinite range', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['1', '2', '', '', '=SUM(A:B)']
-    ])
-    expect(engine.getCellValue(adr('E1'))).toEqual(3)
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '1' }, { cellValue: '2' }, { cellValue: '' }, { cellValue: ''}, {cellValue: '=SUM(A:B)' }]
+    ]})
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(3)
 
     engine.moveCells(AbsoluteCellRange.spanFrom(adr('A1'), 2, 1), adr('C1'))
 
-    expect(engine.getCellValue(adr('E1'))).toEqual(0)
+    expect(engine.getCellValue(adr('E1')).cellValue).toEqual(0)
     const range = extractColumnRange(engine, adr('E1'))
     expect(range.start).toEqual(colStart('A'))
     expect(range.end).toEqual(colEnd('B'))

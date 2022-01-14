@@ -139,7 +139,8 @@ export class SimpleRangeValue {
     }
     this._hasOnlyNumbers = true
     this._data = this.range!.addressesArrayMap(this.dependencyGraph!, cellFromRange => {
-      const value = this.dependencyGraph!.getCellValue(cellFromRange)
+      const value = this.dependencyGraph!.getCellValue(cellFromRange).cellValue
+
       if (value instanceof SimpleRangeValue) {
         this._hasOnlyNumbers = false
         return new CellError(ErrorType.VALUE, ErrorMessage.ScalarExpected)

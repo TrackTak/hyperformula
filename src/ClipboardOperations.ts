@@ -3,13 +3,14 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
+import { RawCellContent } from '.'
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {invalidSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from './Cell'
-import {RawCellContent} from './CellContentParser'
 import {Config} from './Config'
 import {DependencyGraph} from './DependencyGraph'
 import {ValueCellVertexValue} from './DependencyGraph/ValueCellVertex'
 import {InvalidArgumentsError, SheetSizeLimitExceededError} from './errors'
+import { CellMetadata } from './interpreter/InterpreterValue'
 import {Operations} from './Operations'
 import {ParsingError} from './parser/Ast'
 
@@ -31,21 +32,25 @@ export interface ClipboardCellValue {
   type: ClipboardCellType.VALUE,
   parsedValue: ValueCellVertexValue,
   rawValue: RawCellContent,
+  cellMetadata: CellMetadata,
 }
 
 export interface ClipboardCellEmpty {
   type: ClipboardCellType.EMPTY,
+  cellMetadata: CellMetadata,
 }
 
 export interface ClipboardCellFormula {
   type: ClipboardCellType.FORMULA,
   hash: string,
+  cellMetadata: CellMetadata,
 }
 
 export interface ClipboardCellParsingError {
   type: ClipboardCellType.PARSING_ERROR,
   rawInput: string,
   errors: ParsingError[],
+  cellMetadata: CellMetadata,
 }
 
 class Clipboard {

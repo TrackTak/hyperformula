@@ -25,9 +25,9 @@ export function rangeLowerBound(range: AbsoluteCellRange, key: RawNoErrorScalarV
 
   let centerValueFn
   if (coordinate === 'row') {
-    centerValueFn = (center: number) => getRawValue(dependencyGraph.getCellValue(simpleCellAddress(range.sheet, range.start.col, center)))
+    centerValueFn = (center: number) => getRawValue(dependencyGraph.getCellValue(simpleCellAddress(range.sheet, range.start.col, center)).cellValue)
   } else {
-    centerValueFn = (center: number) => getRawValue(dependencyGraph.getCellValue(simpleCellAddress(range.sheet, center, range.start.row)))
+    centerValueFn = (center: number) => getRawValue(dependencyGraph.getCellValue(simpleCellAddress(range.sheet, center, range.start.row)).cellValue)
   }
 
   const pos = lowerBound(centerValueFn, key, start, end)

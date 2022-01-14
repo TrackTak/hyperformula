@@ -3,15 +3,26 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import {RawCellContent} from './CellContentParser'
+import {DataRawCellContent, InputCell} from './CellContentParser'
 import {InvalidArgumentsError} from './errors'
 
+export interface GenericSheet<Cell, SheetMetadata> {
+  cells: Cell[][],
+  sheetMetadata?: SheetMetadata,
+}
+
+export type GenericSheets<Cell, SheetMetadata> = Record<string, GenericSheet<Cell, SheetMetadata>>
+
 /**
- * Two-dimenstional array representation of sheet
+ * Object with Two-dimenstional array representation of cells
  */
-export type Sheet = RawCellContent[][]
+export type Sheet = GenericSheet<DataRawCellContent, any>
 
 export type Sheets = Record<string, Sheet>
+
+export type InputSheet<CellMetadata, SheetMetadata> = GenericSheet<InputCell<CellMetadata>, SheetMetadata>
+
+export type InputSheets<CellMetadata, SheetMetadata> = Record<string, InputSheet<CellMetadata, SheetMetadata>>
 
 /**
  * Represents size of a sheet
@@ -30,12 +41,20 @@ export interface SheetBoundaries {
   fill: number,
 }
 
-export function validateAsSheet(sheet: Sheet): void {
-  if (!Array.isArray(sheet)) {
+export function validateAsSheet(sheet: InputSheet<any, any>): void {
+  if (typeof sheet !== 'object' || sheet === null) {
+    throw new InvalidArgumentsError('a sheet object.')
+  }
+
+  validateAsSheetContent(sheet.cells)
+}
+
+export function validateAsSheetContent(cells: InputCell<any>[][]): void {
+  if (!Array.isArray(cells)) {
     throw new InvalidArgumentsError('an array of arrays.')
   }
-  for (let i = 0; i < sheet.length; i++) {
-    if (!Array.isArray(sheet[i])) {
+  for (let i = 0; i < cells.length; i++) {
+    if (!Array.isArray(cells[i])) {
       throw new InvalidArgumentsError('an array of arrays.')
     }
   }
@@ -44,18 +63,18 @@ export function validateAsSheet(sheet: Sheet): void {
 /**
  * Returns actual width, height and fill ratio of a sheet
  *
- * @param sheet - two-dimmensional array sheet representation
+ * @param cells - two-dimmensional array sheet representation
  */
-export function findBoundaries(sheet: Sheet): SheetBoundaries {
+export function findBoundaries(cells: (InputCell<any> | DataRawCellContent)[][]): SheetBoundaries {
   let width = 0
   let height = 0
   let cellsCount = 0
 
-  for (let currentRow = 0; currentRow < sheet.length; currentRow++) {
+  for (let currentRow = 0; currentRow < cells.length; currentRow++) {
     let currentRowWidth = 0
-    for (let currentCol = 0; currentCol < sheet[currentRow].length; currentCol++) {
-      const currentValue = sheet[currentRow][currentCol]
-      if (currentValue === undefined || currentValue === null) {
+    for (let currentCol = 0; currentCol < cells[currentRow].length; currentCol++) {
+      const currentValue = cells[currentRow][currentCol]
+      if ((currentValue?.cellValue === undefined || currentValue.cellValue === null) && !currentValue?.metadata) {
         continue
       }
       currentRowWidth = currentCol + 1

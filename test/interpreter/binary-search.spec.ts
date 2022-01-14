@@ -9,17 +9,17 @@ describe('Binary search', () => {
   })
 
   it('should work for one element', () => {
-    const values: number[] = [1]
+    const values: number[] = [1 ]
     expect(lowerBound(centerValueFn(values), 1, 0, values.length - 1)).toBe(0)
   })
 
   it('should return -1 when all elements are greater', () => {
-    const values: number[] = [3, 5, 10]
+    const values: number[] = [3, 5, 10 ]
     expect(lowerBound(centerValueFn(values), 1, 0, values.length - 1)).toBe(-1)
   })
 
   it('should find index of element in values of odd length', () => {
-    const values: number[] = [3, 5, 10]
+    const values: number[] = [3, 5, 10 ]
     expect(lowerBound(centerValueFn(values), 3, 0, values.length - 1)).toBe(0)
     expect(lowerBound(centerValueFn(values), 5, 0, values.length - 1)).toBe(1)
     expect(lowerBound(centerValueFn(values), 10, 0, values.length - 1)).toBe(2)
@@ -45,12 +45,12 @@ describe('Binary search', () => {
   })
 
   it('should work for bools', () => {
-    const values: boolean[] = [false, false, false, true, true]
+    const values: boolean[] = [false, false, false, true, true ]
     expect(lowerBound(centerValueFn(values), true, 0, values.length - 1)).toBe(3)
   })
 
   it('should work for different types in array', () => {
-    const values = [3, 5, 7, 'aaaa', 'bar', 'foo', false, false, true]
+    const values = [3, 5, 7, 'aaaa', 'bar', 'foo', false, false, true ]
     expect(lowerBound(centerValueFn(values), 5, 0, values.length - 1)).toBe(1)
     expect(lowerBound(centerValueFn(values), 'foo', 0, values.length - 1)).toBe(5)
     expect(lowerBound(centerValueFn(values), false, 0, values.length - 1)).toBe(6)
@@ -59,7 +59,7 @@ describe('Binary search', () => {
   })
 
   it('should return first occurence', () => {
-    const values = [1, 2, 2, 2, 2, 2, 3, 3, 3]
+    const values = [1, 2, 2, 2, 2, 2, 3, 3, 3 ]
     expect(lowerBound(centerValueFn(values), 2, 0, values.length - 1)).toBe(1)
   })
 })

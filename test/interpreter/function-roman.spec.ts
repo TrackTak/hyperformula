@@ -1,77 +1,77 @@
-import {ErrorType, HyperFormula} from '../../src'
+import {CellData, ErrorType, HyperFormula} from '../../src'
 import {ErrorMessage} from '../../src/error-message'
 import {adr, detailedError} from '../testUtils'
 
 describe('Function ROMAN', () => {
   it('should return #NA! error with the wrong number of arguments', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=ROMAN()', '=ROMAN(1, 1, 1)'],
-    ])
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=ROMAN()' }, { cellValue: '=ROMAN(1, 1, 1)' }],
+    ]})
 
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
-    expect(engine.getCellValue(adr('B1'))).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
+    expect(engine.getCellValue(adr('B1')).cellValue).toEqualError(detailedError(ErrorType.NA, ErrorMessage.WrongArgNumber))
   })
 
   it('should properly truncate values and use defaults', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=ROMAN(499)'],
-      ['=ROMAN(499, TRUE())'],
-      ['=ROMAN(499, FALSE())'],
-      ['=ROMAN(499.9)'],
-      ['=ROMAN(499, 1.1)'],
-    ])
-    expect(engine.getCellValue(adr('A1'))).toEqual('CDXCIX')
-    expect(engine.getCellValue(adr('A2'))).toEqual('CDXCIX')
-    expect(engine.getCellValue(adr('A3'))).toEqual('ID')
-    expect(engine.getCellValue(adr('A4'))).toEqual('CDXCIX')
-    expect(engine.getCellValue(adr('A5'))).toEqual('LDVLIV')
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=ROMAN(499)' }],
+      [{ cellValue: '=ROMAN(499, TRUE())' }],
+      [{ cellValue: '=ROMAN(499, FALSE())' }],
+      [{ cellValue: '=ROMAN(499.9)' }],
+      [{ cellValue: '=ROMAN(499, 1.1)' }],
+    ]})
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqual('CDXCIX')
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqual('CDXCIX')
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqual('ID')
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqual('CDXCIX')
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqual('LDVLIV')
   })
 
   it('should throw correct error if arguments are out of bounds', () => {
-    const [engine] = HyperFormula.buildFromArray([
-      ['=ROMAN(0)'],
-      ['=ROMAN(4000)'],
-      ['=ROMAN(-1)'],
-      ['=ROMAN(1,"a")'],
-      ['=ROMAN(1,5)'],
-    ])
-    expect(engine.getCellValue(adr('A1'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A2'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
-    expect(engine.getCellValue(adr('A3'))).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
-    expect(engine.getCellValue(adr('A4'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
-    expect(engine.getCellValue(adr('A5'))).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ValueLarge))
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=ROMAN(0)' }],
+      [{ cellValue: '=ROMAN(4000)' }],
+      [{ cellValue: '=ROMAN(-1)' }],
+      [{ cellValue: '=ROMAN(1,"a")' }],
+      [{ cellValue: '=ROMAN(1,5)' }],
+    ]})
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A2')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueLarge))
+    expect(engine.getCellValue(adr('A3')).cellValue).toEqualError(detailedError(ErrorType.NUM, ErrorMessage.ValueSmall))
+    expect(engine.getCellValue(adr('A4')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.NumberCoercion))
+    expect(engine.getCellValue(adr('A5')).cellValue).toEqualError(detailedError(ErrorType.VALUE, ErrorMessage.ValueLarge))
   })
 
   it('should output correct value for mode 0', () => {
-    const [engine] = HyperFormula.buildFromArray([input(0)])
-    expect(engine.getSheetValues(0)).toEqual([mode0])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input(0)]})
+    expect(engine.getSheetValues(0).cells).toEqual([mode0.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 1', () => {
-    const [engine] = HyperFormula.buildFromArray([input(1)])
-    expect(engine.getSheetValues(0)).toEqual([mode1])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input(1)]})
+    expect(engine.getSheetValues(0).cells).toEqual([mode1.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 2', () => {
-    const [engine] = HyperFormula.buildFromArray([input(2)])
-    expect(engine.getSheetValues(0)).toEqual([mode2])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input(2)]})
+    expect(engine.getSheetValues(0).cells).toEqual([mode2.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 3', () => {
-    const [engine] = HyperFormula.buildFromArray([input(3)])
-    expect(engine.getSheetValues(0)).toEqual([mode3])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input(3)]})
+    expect(engine.getSheetValues(0).cells).toEqual([mode3.map(x => new CellData(x))])
   })
 
   it('should output correct value for mode 4', () => {
-    const [engine] = HyperFormula.buildFromArray([input(4)])
-    expect(engine.getSheetValues(0)).toEqual([mode4])
+    const [engine] = HyperFormula.buildFromArray({ cells: [input(4)]})
+    expect(engine.getSheetValues(0).cells).toEqual([mode4.map(x => new CellData(x))])
   })
 })
 
 function input(mode: number) {
   const ret = []
   for (let i = 1; i < 4000; i++) {
-    ret.push(`=ROMAN(${i},${mode})`)
+    ret.push({ cellValue: `=ROMAN(${i},${mode})` })
   }
   return ret
 }

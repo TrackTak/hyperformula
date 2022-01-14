@@ -43,15 +43,15 @@ export interface ParsingResult {
  */
 export class ParserWithCaching {
   public statsCacheUsed: number = 0
-  private cache: Cache
-  private lexer: FormulaLexer
+  private readonly cache: Cache
+  private readonly lexer: FormulaLexer
   private readonly lexerConfig: ILexerConfig
-  private formulaParser: FormulaParser
+  private readonly formulaParser: FormulaParser
 
   constructor(
     private readonly config: ParserConfig,
     private readonly functionRegistry: FunctionRegistry,
-    private readonly sheetMapping: SheetMappingFn,
+    private readonly sheetMapping: SheetMappingFn
   ) {
     this.lexerConfig = buildLexerConfig(config)
     this.lexer = new FormulaLexer(this.lexerConfig)
