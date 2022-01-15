@@ -1,9 +1,9 @@
-import {CellData, DataRawCellContent, HyperFormula} from '../../src'
+import {CellData, HyperFormula} from '../../src'
 import {AlwaysSparse} from '../../src/DependencyGraph/AddressMapping/ChooseAddressMappingPolicy'
 import {adr} from '../testUtils'
 
 const mapToCellData = (values: any[][]) => ({ cells: values.map(x => x.map(z => new CellData(z))) })
-const mapFromCellData = (cellData: (DataRawCellContent | CellData<any>)[][]) => cellData.map(x => x.map(z => z.cellValue))
+const mapFromCellData = (cellData: any[][]) => cellData.map(x => x.map(z => z.cellValue))
 
 describe('swapping columns - checking if it is possible', () => {
   it('should validate numbers for negative columns', () => {
@@ -82,7 +82,7 @@ describe('swapping columns should correctly work', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2], [3, 4], [5]]), {chooseAddressMappingPolicy: new AlwaysSparse()})
     expect(engine.isItPossibleToSwapColumnIndexes(0, [[0, 1], [1, 0]])).toEqual(true)
     engine.swapColumnIndexes(0, [[0, 1], [1, 0]])
-    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[2, 1], [4, 3], [null, 5]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[2, 1], [4, 3], [undefined, 5]])
   })
 
   it('should work with more complicated permutations', () => {
@@ -247,7 +247,7 @@ describe('reorder base case', () => {
     const [engine] = HyperFormula.buildFromArray(mapToCellData([[1, 2], [3, 4], [5]]), {chooseAddressMappingPolicy: new AlwaysSparse()})
     expect(engine.isItPossibleToSetColumnOrder(0, [1, 0])).toEqual(true)
     engine.setColumnOrder(0, [1, 0])
-    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[2, 1], [4, 3], [null, 5]])
+    expect(mapFromCellData(engine.getSheetSerialized(0).cells)).toEqual([[2, 1], [4, 3], [undefined, 5]])
   })
 
   it('should work with more complicated permutations', () => {

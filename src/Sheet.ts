@@ -53,11 +53,11 @@ export function validateAsSheetContent(cells: InputCell<any>[][]): void {
   if (!Array.isArray(cells)) {
     throw new InvalidArgumentsError('an array of arrays.')
   }
-  for (let i = 0; i < cells.length; i++) {
-    if (!Array.isArray(cells[i])) {
+  cells.forEach((cell) => {
+    if (!Array.isArray(cell)) {
       throw new InvalidArgumentsError('an array of arrays.')
     }
-  }
+  })
 }
 
 /**
@@ -70,22 +70,24 @@ export function findBoundaries(cells: (InputCell<any> | DataRawCellContent)[][])
   let height = 0
   let cellsCount = 0
 
-  for (let currentRow = 0; currentRow < cells.length; currentRow++) {
+  cells.forEach((row, currentRow) => {
     let currentRowWidth = 0
-    for (let currentCol = 0; currentCol < cells[currentRow].length; currentCol++) {
-      const currentValue = cells[currentRow][currentCol]
-      if ((currentValue?.cellValue === undefined || currentValue.cellValue === null) && !currentValue?.metadata) {
-        continue
+
+    row.forEach((cell, currentCol) => {
+      const currentValue = cell
+
+      if ((currentValue?.cellValue !== undefined && currentValue?.cellValue !== null) || currentValue?.metadata) {
+        currentRowWidth = currentCol + 1
+        ++cellsCount  
       }
-      currentRowWidth = currentCol + 1
-      ++cellsCount
-    }
+    })
 
     width = Math.max(width, currentRowWidth)
+
     if (currentRowWidth > 0) {
       height = currentRow + 1
     }
-  }
+  })
 
   const sheetSize = width * height
 

@@ -3,8 +3,8 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import { RawCellContent, Sheet } from '.'
-import {simpleCellAddress, SimpleCellAddress} from './Cell'
+import { RawCellContent } from '.'
+import {SimpleCellAddress} from './Cell'
 import {DataRawCellContent} from './CellContentParser'
 import {CellValue} from './CellValue'
 import {Config} from './Config'
@@ -67,7 +67,7 @@ export class Serialization {
   public getCellSerialized(address: SimpleCellAddress, targetAddress?: SimpleCellAddress): DataRawCellContent {
     const cellFormula = this.getCellFormula(address, targetAddress)
 
-    return cellFormula.cellValue === undefined ? this.getRawValue(address) : cellFormula.toRawContent()
+    return cellFormula.cellValue === undefined ? this.getRawValue(address) : cellFormula
   }
 
   public getCellValue(address: SimpleCellAddress): CellData<CellValue> {
@@ -82,47 +82,34 @@ export class Serialization {
     return cell
   }
 
-  public getSheetValues(sheet: number): GenericSheet<CellData<CellValue>, any> {
+  public getSheetValues(sheet: number): GenericSheet<Maybe<CellData<CellValue>>, Maybe<any>> {
     return this.genericSheetGetter(sheet, (arg) => this.getCellValue(arg))
   }
 
-  public getSheetFormulas(sheet: number): GenericSheet<CellData<string | undefined>, any > {
+  public getSheetFormulas(sheet: number): GenericSheet<Maybe<CellData<string | undefined>>, Maybe<any>> {
     return this.genericSheetGetter(sheet, (arg) => this.getCellFormula(arg))
   }
 
   public genericSheetGetter<T extends CellData<any> | DataRawCellContent>(sheet: number, getter: (address: SimpleCellAddress) => T): GenericSheet<T, any> {
-    const sheetHeight = this.dependencyGraph.getSheetHeight(sheet)
-    const sheetWidth = this.dependencyGraph.getSheetWidth(sheet)
+    const entries = this.dependencyGraph.getSheetEntries(sheet)
     const sheetMetadata = this.sheetMapping.fetchSheetById(sheet).sheetMetadata
-    const arr: T[][] = new Array(sheetHeight)
+    const cells: T[][] = []
 
-    for (let i = 0; i < sheetHeight; i++) {
-      arr[i] = new Array(sheetWidth)
+    for (const [address] of entries) {
+      const cell = getter(address)
+      const { row, col } = address
 
-      for (let j = 0; j < sheetWidth; j++) {
-        const address = simpleCellAddress(sheet, j, i)
-        arr[i][j] = getter(address)
-      }
-      for (let j = sheetWidth - 1; j >= 0; j--) {
-        const cell = arr[i][j]
-
-        if ((cell.cellValue === null || cell.cellValue === undefined) && !cell.metadata) {
-          arr[i].pop()
-        } else {
-          break
+      if ((cell.cellValue !== undefined && cell.cellValue !== null) || cell.metadata) {
+        if (!cells[row]) {
+          cells[row] = []
         }
+
+        cells[row][col] = cell
       }
     }
 
-    for (let i = sheetHeight - 1; i >= 0; i--) {
-      if (arr[i].length === 0) {
-        arr.pop()
-      } else {
-        break
-      }
-    }
     return {
-      cells: arr,
+      cells,
       sheetMetadata
     }
   }
@@ -136,19 +123,19 @@ export class Serialization {
     return result
   }
 
-  public getSheetSerialized(sheet: number): Sheet {
+  public getSheetSerialized(sheet: number): GenericSheet<Maybe<DataRawCellContent>, Maybe<any>> {
     return this.genericSheetGetter(sheet, (arg) => this.getCellSerialized(arg))
   }
 
-  public getAllSheetsValues(): GenericSheets<CellData<CellValue>, any> {
+  public getAllSheetsValues(): GenericSheets<Maybe<CellData<CellValue>>, Maybe<any>> {
     return this.genericAllSheetsGetter((arg) => this.getSheetValues(arg))
   }
 
-  public getAllSheetsFormulas(): GenericSheets<CellData<string | undefined>, any> {
+  public getAllSheetsFormulas(): GenericSheets<Maybe<CellData<string | undefined>>, Maybe<any>> {
     return this.genericAllSheetsGetter((arg) => this.getSheetFormulas(arg))
   }
 
-  public getAllSheetsSerialized(): Record<string, Sheet> {
+  public getAllSheetsSerialized(): Record<string, GenericSheet<Maybe<DataRawCellContent>, Maybe<any>>> {
     return this.genericAllSheetsGetter((arg) => this.getSheetSerialized(arg))
   }
 

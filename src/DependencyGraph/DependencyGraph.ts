@@ -659,6 +659,10 @@ export class DependencyGraph {
     return this.addressMapping.getWidth(sheet)
   }
 
+  public getSheetEntries(sheet: number) {
+    return this.addressMapping.sheetEntries(sheet)
+  }
+
   public getArray(range: AbsoluteCellRange): Maybe<ArrayVertex> {
     return this.arrayMapping.getArray(range)
   }

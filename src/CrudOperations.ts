@@ -283,7 +283,6 @@ export class CrudOperations {
     this.ensureScopeIdIsValid(sheetId)
     this.ensureItIsPossibleToChangeSheetContents(sheetId, values)
 
-    validateAsSheetContent(values)
     this.undoRedo.clearRedoStack()
     this.clipboardOperations.abortCut()
     const oldSheetContent = this.operations.getSheetClipboardCells(sheetId)
@@ -582,6 +581,8 @@ export class CrudOperations {
   }
 
   public ensureItIsPossibleToChangeSheetContents(sheetId: number, content: InputCell<any>[][]) {
+    validateAsSheetContent(content)
+
     const boundaries = findBoundaries(content)
     const targetRange = AbsoluteCellRange.spanFrom(simpleCellAddress(sheetId, 0, 0), boundaries.width, boundaries.height)
     this.ensureRangeInSizeLimits(targetRange)

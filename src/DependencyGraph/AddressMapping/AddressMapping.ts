@@ -96,12 +96,12 @@ export class AddressMapping {
     if (vertex instanceof ValueCellVertex) {
       const values = vertex.getValues()
 
-      return new CellData(values.rawValue, cellMetadata).toRawContent()
+      return new CellData(values.rawValue, cellMetadata)
     } else if (vertex instanceof ArrayVertex) {
-      return new CellData(vertex.getArrayCellRawValue(address), cellMetadata).toRawContent()
+      return new CellData(vertex.getArrayCellRawValue(address), cellMetadata)
     }
 
-    return new CellData(null, cellMetadata).toRawContent()
+    return new CellData(null, cellMetadata)
   }
 
   /** @inheritDoc */
