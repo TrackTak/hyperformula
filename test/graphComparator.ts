@@ -144,7 +144,7 @@ export class EngineComparator {
       return vertex.range
     }
     for (const [address, v] of engine.addressMapping.entries()) {
-      if (v === vertex) {
+      if (v?.vertex === vertex) {
         return address
       }
     }

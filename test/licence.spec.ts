@@ -13,6 +13,6 @@ describe('Wrong licence', () => {
 
   it('serialization', () => {
     const [engine] = HyperFormula.buildFromArray({ cells: [[{ cellValue: '=TRUE()' }, { cellValue: null }, { cellValue: 1 }, { cellValue: '=A('}]] }, {licenseKey: ''})
-    expect(engine.getSheetSerialized(0).cells).toEqual([[{ cellValue: '=TRUE()' }, { cellValue: null }, { cellValue: 1 }, { cellValue: '=A('}]])
+    expect(engine.getSheetSerialized(0).cells).toEqual([[{ cellValue: '=TRUE()' }, undefined, { cellValue: 1 }, { cellValue: '=A('}]])
   })
 })

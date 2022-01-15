@@ -190,7 +190,7 @@ describe('#getAllFormulas', () => {
       Foo: { cells: [[{ cellValue: 1 }, { cellValue: '=SUM(A1)' }]]},
     })
 
-    expect(engine.getAllSheetsFormulas()).toEqual({'Foo': { cells: [[{ cellValue: undefined }, { cellValue: '=SUM(A1)' }]] }, 'Sheet1': { cells: [[{ cellValue: '=A()' }]]} })
+    expect(engine.getAllSheetsFormulas()).toEqual({'Foo': { cells: [[undefined, { cellValue: '=SUM(A1)' }]] }, 'Sheet1': { cells: [[{ cellValue: '=A()' }]]} })
   })
 })
 
@@ -333,14 +333,14 @@ describe('#getRangeValues', () => {
 })
 
 describe('#getSheetValues', () => {
-  it('sholud return values from sheet', () => {
+  it('should return values from sheet', () => {
     const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: 1 }, { cellValue: 'foo' }, { cellValue: '=SUM(1, A1)' }, { cellValue: null}, {cellValue: '=TRUE()' }, { cellValue: null }]
     ]})
 
     const out = engine.getSheetValues(0).cells
     
-    expectArrayWithSameContent([[{ cellValue: 1 }, { cellValue: 'foo' }, { cellValue: 2 }, { cellValue: null}, {cellValue: true }]], out)
+    expectArrayWithSameContent([[{ cellValue: 1 }, { cellValue: 'foo' }, { cellValue: 2 }, undefined, {cellValue: true }]], out)
   })
 })
 

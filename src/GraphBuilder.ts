@@ -87,10 +87,8 @@ export class SimpleStrategy implements GraphBuilderStrategy {
       const sheetId = this.dependencyGraph.getSheetId(sheetName)
       const sheet = sheets[sheetName]
 
-      for (let i = 0; i < sheet.cells.length; ++i) {
-        const row = sheet.cells[i]
-        for (let j = 0; j < row.length; ++j) {
-          const cellContent = row[j]
+      sheet.cells.forEach((row, i) => {
+        row.forEach((cellContent, j) => {
           const address = simpleCellAddress(sheetId, j, i)
           const parsedCellContent = this.cellContentParser.parse(cellContent)
           const dependency = this.setDependency(address, cellContent, parsedCellContent)
@@ -100,8 +98,8 @@ export class SimpleStrategy implements GraphBuilderStrategy {
 
             dependencies.set(vertex, cellDependency)
           }
-        }
-      }
+        })
+      })
     }
 
     return dependencies

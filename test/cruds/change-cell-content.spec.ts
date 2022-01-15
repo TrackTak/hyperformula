@@ -970,7 +970,7 @@ describe('arrays', () => {
       [{ cellValue: 1 }, { cellValue: 2 }],
       [{ cellValue: 3 }, { cellValue: 4 }, { cellValue: 'foo' }],
       [{  cellValue: noSpace() }],
-      [{ cellValue: null }, { cellValue: 'foo' }]
+      [undefined, { cellValue: 'foo' }]
     ])
   })
 
@@ -1010,7 +1010,7 @@ describe('arrays', () => {
       [{ cellValue: 1 }, { cellValue: 2 }],
       [{ cellValue: 3 }, { cellValue: 4 }, { cellValue: 10 }],
       [{ cellValue: noSpace() }],
-      [{ cellValue: null }, { cellValue: 10 }]
+      [undefined, { cellValue: 10 }]
     ])
   })
 
@@ -1044,7 +1044,7 @@ describe('arrays', () => {
       [{ cellValue: 1 }, { cellValue: 2 }],
       [{ cellValue: 3 }, { cellValue: 4 }, { cellValue: 3 }],
       [{ cellValue: noSpace() }, { cellValue: 1 }, { cellValue: 2 }],
-      [{ cellValue: null }, { cellValue: 3 }, { cellValue: 4 }]
+      [undefined, { cellValue: 3 }, { cellValue: 4 }]
     ])
   })
 

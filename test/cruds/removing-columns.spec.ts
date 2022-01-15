@@ -583,7 +583,7 @@ describe('Removing rows - arrays', () => {
 
     expect(engine.getSheetValues(0).cells).toEqual([
       [{ cellValue: noSpace() }, { cellValue: 1 }],
-      [{ cellValue: null }, { cellValue: 1 }, { cellValue: 2 }],
+      [undefined, { cellValue: 1 }, { cellValue: 2 }],
     ])
 
     const expected = HyperFormula.buildFromArray({ cells: [

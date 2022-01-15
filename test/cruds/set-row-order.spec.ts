@@ -1,9 +1,9 @@
-import {CellData, DataRawCellContent, HyperFormula} from '../../src'
+import {CellData, HyperFormula} from '../../src'
 import {AlwaysSparse} from '../../src/DependencyGraph/AddressMapping/ChooseAddressMappingPolicy'
 import {adr} from '../testUtils'
 
 const mapToCellData = (values: any[][]) => ({ cells: values.map(x => x.map(z => new CellData(z))) })
-const mapFromCellData = (cellData: (DataRawCellContent | CellData<any>)[][]) => cellData.map(x => x.map(z => z.cellValue))
+const mapFromCellData = (cellData: any[][]) => cellData.map(x => x.map(z => z.cellValue))
 
 describe('swapping rows - checking if it is possible', () => {
   it('should validate numbers for negative rows', () => {

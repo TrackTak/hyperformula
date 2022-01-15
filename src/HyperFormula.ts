@@ -51,6 +51,7 @@ import {FunctionRegistry, FunctionTranslationsPackage} from './interpreter/Funct
 import {CellData, FormatInfo} from './interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
+import { Maybe } from './Maybe'
 import {NamedExpression, NamedExpressionOptions, NamedExpressions} from './NamedExpressions'
 import {normalizeAddedIndexes, normalizeRemovedIndexes} from './Operations'
 import {
@@ -741,7 +742,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetValues<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<CellData<CellValue, CellMetadata>, SheetMetadata> {
+  public getSheetValues<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<Maybe<CellData<CellValue, CellMetadata>>, Maybe<SheetMetadata>> {
     validateArgToType(sheetId, 'number', 'sheetId')
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getSheetValues(sheetId)
@@ -774,7 +775,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetFormulas<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<CellData<string | undefined, CellMetadata>, SheetMetadata> {
+  public getSheetFormulas<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<Maybe<CellData<string | undefined, CellMetadata>>, Maybe<SheetMetadata>> {
     validateArgToType(sheetId, 'number', 'sheetId')
     return this._serialization.getSheetFormulas(sheetId)
   }
@@ -807,7 +808,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getSheetSerialized<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<GenericDataRawCellContent<CellMetadata>, SheetMetadata> {
+  public getSheetSerialized<SheetMetadata, CellMetadata>(sheetId: number): GenericSheet<Maybe<GenericDataRawCellContent<CellMetadata>>, Maybe<SheetMetadata>> {
     validateArgToType(sheetId, 'number', 'sheetId')
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getSheetSerialized(sheetId)
@@ -887,7 +888,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getAllSheetsValues<SheetMetadata, CellMetadata>(): GenericSheets<CellData<CellValue, CellMetadata>, SheetMetadata> {
+  public getAllSheetsValues<SheetMetadata, CellMetadata>(): GenericSheets<Maybe<CellData<CellValue, CellMetadata>>, Maybe<SheetMetadata>> {
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getAllSheetsValues()
   }
@@ -906,7 +907,7 @@ export class HyperFormula implements TypedEmitter {
    * ```
    * @category Sheets
    */
-  public getAllSheetsFormulas<SheetMetadata, CellMetadata>(): GenericSheets<CellData<string | undefined, CellMetadata>, SheetMetadata> {
+  public getAllSheetsFormulas<SheetMetadata, CellMetadata>(): GenericSheets<Maybe<CellData<string | undefined, CellMetadata>>, Maybe<SheetMetadata>> {
     return this._serialization.getAllSheetsFormulas()
   }
 
@@ -927,7 +928,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Sheets
    */
-  public getAllSheetsSerialized<SheetMetadata>(): GenericSheets<DataRawCellContent, SheetMetadata> {
+  public getAllSheetsSerialized<SheetMetadata>(): GenericSheets<Maybe<DataRawCellContent>, Maybe<SheetMetadata>> {
     this.ensureEvaluationIsNotSuspended()
     return this._serialization.getAllSheetsSerialized()
   }

@@ -46,18 +46,6 @@ export class CellData<CellValue, CellMetadataType = CellMetadata> {
       this.metadata = metadata
     }
   }
-
-  public toRawContent() {
-    if (this.metadata !== undefined) {
-      return {
-        cellValue: this.cellValue,
-        metadata: this.metadata
-      }
-    }
-    return {
-      cellValue: this.cellValue
-    }
-  }
 }
 
 export abstract class RichNumber {
