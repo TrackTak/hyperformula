@@ -4,10 +4,9 @@
  */
 
 import {SheetCellAddress, simpleCellAddress, SimpleCellAddress} from '../../Cell'
-import { CellMetadata } from '../../interpreter/InterpreterValue'
 import {Maybe} from '../../Maybe'
 import {ColumnsSpan, RowsSpan} from '../../Span'
-import {CellVertex} from '../Vertex'
+import {CellVertex, CellVertexMetadata} from '../Vertex'
 import {IAddressMappingStrategy} from './IAddressMappingStrategy'
 
 /**
@@ -21,8 +20,7 @@ export class DenseStrategy implements IAddressMappingStrategy {
    *
    * It is created when building the mapping and the size of it is fixed.
    */
-  private readonly mapping: CellVertex[][]
-  private readonly metadataMapping: CellMetadata[][]
+  private readonly mapping: CellVertexMetadata[][]
 
   /**
    * @param width - width of the stored sheet
@@ -30,30 +28,21 @@ export class DenseStrategy implements IAddressMappingStrategy {
    */
   constructor(private width: number, private height: number) {
     this.mapping = new Array(height)
-    this.metadataMapping = new Array(height)
 
     for (let i = 0; i < height; i++) {
       this.mapping[i] = new Array(width)
-      this.metadataMapping[i] = new Array(width)
     }
   }
 
   /** @inheritDoc */
-  public getCell(address: SheetCellAddress): Maybe<CellVertex> {
+  public get(address: SheetCellAddress): Maybe<CellVertexMetadata> {
     const cell = this.getCellVertex(address.col, address.row)
 
     return cell
   }
 
   /** @inheritDoc */
-  public getCellMetadata(address: SheetCellAddress): CellMetadata {
-    const metadata = this.metadataMapping[address.row]?.[address.col]
-
-    return metadata
-  }
-
-  /** @inheritDoc */
-  public setCell(address: SheetCellAddress, newVertex: CellVertex) {
+  public set(address: SheetCellAddress, newVertexMetadata: CellVertexMetadata) {
     this.width = Math.max(this.width, address.col + 1)
     this.height = Math.max(this.height, address.row + 1)
 
@@ -63,36 +52,12 @@ export class DenseStrategy implements IAddressMappingStrategy {
       this.mapping[address.row] = new Array(this.width)
     }
 
-    this.mapping[address.row][address.col] = newVertex
-  }
-
-
-  /** @inheritDoc */
-  public setCellMetadata(address: SheetCellAddress, cellMetadata: CellMetadata) {
-    this.width = Math.max(this.width, address.col + 1)
-    this.height = Math.max(this.height, address.row + 1)
-
-    const rowMetadataMapping = this.metadataMapping[address.row]
-
-    if (!rowMetadataMapping) {
-      this.metadataMapping[address.row] = new Array(this.width)
-    }
-
-    this.metadataMapping[address.row][address.col] = cellMetadata
+    this.mapping[address.row][address.col] = newVertexMetadata
   }
 
   /** @inheritDoc */
   public has(address: SheetCellAddress): boolean {
     const row = this.mapping[address.row]
-    if (!row) {
-      return false
-    }
-    return !!row[address.col]
-  }
-
-  /** @inheritDoc */
-  public hasMetadata(address: SheetCellAddress): boolean {
-    const row = this.metadataMapping[address.row]
     if (!row) {
       return false
     }
@@ -109,44 +74,33 @@ export class DenseStrategy implements IAddressMappingStrategy {
     return this.width
   }
 
-  public removeCell(address: SimpleCellAddress): void {
+  public remove(address: SimpleCellAddress): void {
     if (this.mapping[address.row] !== undefined) {
       delete this.mapping[address.row][address.col]
     }
   }
 
-  public removeCellMetadata(address: SimpleCellAddress): void {
-    if (this.metadataMapping[address.row] !== undefined) {
-      delete this.metadataMapping[address.row][address.col]
-    }
-  }
-
   public addRows(row: number, numberOfRows: number): void {
-    this.modifyMappings((mapping) => {
-      const newRows: any[] = []
+    const newRows: any[] = []
 
-      for (let i = 0; i < numberOfRows; i++) {
-        newRows.push(new Array(this.width))
-      }
-      
-      mapping.splice(row, 0, ...newRows)
-    })
+    for (let i = 0; i < numberOfRows; i++) {
+      newRows.push(new Array(this.width))
+    }
+    
+    this.mapping.splice(row, 0, ...newRows)
     this.height += numberOfRows
   }
 
   public addColumns(column: number, numberOfColumns: number): void {
     for (let i = 0; i < this.height; i++) {
-      this.modifyMappings((mapping) => {
-        mapping[i].splice(column, 0, ...new Array(numberOfColumns))      
-      })
+      this.mapping[i].splice(column, 0, ...new Array(numberOfColumns))      
     }
     this.width += numberOfColumns
   }
 
   public removeRows(removedRows: RowsSpan): void {
-    this.modifyMappings((mapping) => {
-      mapping.splice(removedRows.rowStart, removedRows.numberOfRows)
-    })
+    this.mapping.splice(removedRows.rowStart, removedRows.numberOfRows)
+    
     const rightmostRowRemoved = Math.min(this.height - 1, removedRows.rowEnd)
     const numberOfRowsRemoved = Math.max(0, rightmostRowRemoved - removedRows.rowStart + 1)
     this.height = Math.max(0, this.height - numberOfRowsRemoved)
@@ -154,21 +108,19 @@ export class DenseStrategy implements IAddressMappingStrategy {
 
   public removeColumns(removedColumns: ColumnsSpan): void {
     for (let i = 0; i < this.height; i++) {
-      this.modifyMappings((mapping) => {
-        mapping[i].splice(removedColumns.columnStart, removedColumns.numberOfColumns)
-      })
+      this.mapping[i].splice(removedColumns.columnStart, removedColumns.numberOfColumns)
     }
     const rightmostColumnRemoved = Math.min(this.width - 1, removedColumns.columnEnd)
     const numberOfColumnsRemoved = Math.max(0, rightmostColumnRemoved - removedColumns.columnStart + 1)
     this.width = Math.max(0, this.width - numberOfColumnsRemoved)
   }
 
-  public* getEntries(sheet: number): IterableIterator<[SimpleCellAddress, CellVertex]> {
+  public* getEntries(sheet: number): IterableIterator<[SimpleCellAddress, CellVertexMetadata]> {
     for (let y = 0; y < this.height; ++y) {
       for (let x = 0; x < this.width; ++x) {
-        const vertex = this.getCellVertex(x, y)
-        if (vertex) {
-          yield [simpleCellAddress(sheet, x, y), vertex]
+        const cellVertex = this.getCellVertex(x, y)
+        if (cellVertex) {
+          yield [simpleCellAddress(sheet, x, y), cellVertex]
         }
       }
     }
@@ -176,18 +128,18 @@ export class DenseStrategy implements IAddressMappingStrategy {
 
   public* verticesFromColumn(column: number): IterableIterator<CellVertex> {
     for (let y = 0; y < this.height; ++y) {
-      const vertex = this.getCellVertex(column, y)
-      if (vertex) {
-        yield vertex
+      const cellVertex = this.getCellVertex(column, y)
+      if (cellVertex?.vertex) {
+        yield cellVertex.vertex
       }
     }
   }
 
   public* verticesFromRow(row: number): IterableIterator<CellVertex> {
     for (let x = 0; x < this.width; ++x) {
-      const vertex = this.getCellVertex(x, row)
-      if (vertex) {
-        yield vertex
+      const cellVertex = this.getCellVertex(x, row)
+      if (cellVertex?.vertex) {
+        yield cellVertex.vertex
       }
     }
   }
@@ -195,9 +147,9 @@ export class DenseStrategy implements IAddressMappingStrategy {
   public* verticesFromColumnsSpan(columnsSpan: ColumnsSpan): IterableIterator<CellVertex> {
     for (let x = columnsSpan.columnStart; x <= columnsSpan.columnEnd; ++x) {
       for (let y = 0; y < this.height; ++y) {
-        const vertex = this.getCellVertex(x, y)
-        if (vertex) {
-          yield vertex
+        const cellVertex = this.getCellVertex(x, y)
+        if (cellVertex?.vertex) {
+          yield cellVertex.vertex
         }
       }
     }
@@ -206,31 +158,31 @@ export class DenseStrategy implements IAddressMappingStrategy {
   public* verticesFromRowsSpan(rowsSpan: RowsSpan): IterableIterator<CellVertex> {
     for (let x = 0; x < this.width; ++x) {
       for (let y = rowsSpan.rowStart; y <= rowsSpan.rowEnd; ++y) {
-        const vertex = this.getCellVertex(x, y)
-        if (vertex) {
-          yield vertex
+        const cellVertex = this.getCellVertex(x, y)
+        if (cellVertex?.vertex) {
+          yield cellVertex.vertex
         }
       }
     }
   }
 
-  public* entriesFromRowsSpan(rowsSpan: RowsSpan): IterableIterator<[SimpleCellAddress, CellVertex]> {
+  public* entriesFromRowsSpan(rowsSpan: RowsSpan): IterableIterator<[SimpleCellAddress, CellVertexMetadata]> {
     for (let x = 0; x < this.width; ++x) {
       for (let y = rowsSpan.rowStart; y <= rowsSpan.rowEnd; ++y) {
-        const vertex = this.getCellVertex(x, y)
-        if (vertex) {
-          yield [simpleCellAddress(rowsSpan.sheet, x, y), vertex]
+        const cellVertex = this.getCellVertex(x, y)
+        if (cellVertex) {
+          yield [simpleCellAddress(rowsSpan.sheet, x, y), cellVertex]
         }
       }
     }
   }
 
-  public* entriesFromColumnsSpan(columnsSpan: ColumnsSpan): IterableIterator<[SimpleCellAddress, CellVertex]> {
+  public* entriesFromColumnsSpan(columnsSpan: ColumnsSpan): IterableIterator<[SimpleCellAddress, CellVertexMetadata]> {
     for (let y = 0; y < this.height; ++y) {
       for (let x = columnsSpan.columnStart; x <= columnsSpan.columnEnd; ++x) {
-        const vertex = this.getCellVertex(x, y)
-        if (vertex) {
-          yield [simpleCellAddress(columnsSpan.sheet, x, y), vertex]
+        const cellVertex = this.getCellVertex(x, y)
+        if (cellVertex) {
+          yield [simpleCellAddress(columnsSpan.sheet, x, y), cellVertex]
         }
       }
     }
@@ -239,20 +191,15 @@ export class DenseStrategy implements IAddressMappingStrategy {
   public* vertices(): IterableIterator<CellVertex> {
     for (let y = 0; y < this.height; ++y) {
       for (let x = 0; x < this.width; ++x) {
-        const vertex = this.getCellVertex(x, y)
-        if (vertex) {
-          yield vertex
+        const cellVertex = this.getCellVertex(x, y)
+        if (cellVertex?.vertex) {
+          yield cellVertex.vertex
         }
       }
     }
   }
 
-  private getCellVertex(x: number, y: number): Maybe<CellVertex> {
+  private getCellVertex(x: number, y: number): Maybe<CellVertexMetadata> {
     return this.mapping[y]?.[x]
-  }
-
-  private modifyMappings(callback: (mapping: (CellVertex | CellMetadata)[][]) => void) {
-    callback(this.mapping)
-    callback(this.metadataMapping)
   }
 }

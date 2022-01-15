@@ -49,6 +49,7 @@ import {Graph, TopSortResult} from './Graph'
 import {RangeMapping} from './RangeMapping'
 import {SheetMapping} from './SheetMapping'
 import {RawAndParsedValue} from './ValueCellVertex'
+import { CellVertexMetadata } from './Vertex'
 
 export class DependencyGraph {
   public readonly graph: Graph<Vertex>
@@ -282,7 +283,10 @@ export class DependencyGraph {
 
   public removeRows(removedRows: RowsSpan): EagerChangesGraphChangeResult {
     this.stats.measure(StatType.ADJUSTING_GRAPH, () => {
-      for (const [address, vertex] of this.addressMapping.entriesFromRowsSpan(removedRows)) {
+      for (const [address, {vertex}] of this.addressMapping.entriesFromRowsSpan(removedRows)) {
+        if (vertex === undefined) {
+          continue
+        }
         for (const adjacentNode of this.graph.adjacentNodes(vertex)) {
           this.graph.markNodeAsSpecialRecentlyChanged(adjacentNode)
         }
@@ -321,7 +325,10 @@ export class DependencyGraph {
 
   public removeSheet(removedSheetId: number) {
     const arrays: Set<ArrayVertex> = new Set()
-    for (const [adr, vertex] of this.addressMapping.sheetEntries(removedSheetId)) {
+    for (const [adr, {vertex}] of this.addressMapping.sheetEntries(removedSheetId)) {
+      if (vertex === undefined) {
+        continue
+      }
       if (vertex instanceof ArrayVertex) {
         if (arrays.has(vertex)) {
           continue
@@ -334,7 +341,6 @@ export class DependencyGraph {
       }
       this.removeVertex(vertex)
       this.addressMapping.removeCell(adr)
-      this.addressMapping.removeCellMetadata(adr)
     }
 
     this.stats.measure(StatType.ADJUSTING_ARRAY_MAPPING, () => {
@@ -359,7 +365,10 @@ export class DependencyGraph {
 
   public clearSheet(sheetId: number) {
     const arrays: Set<ArrayVertex> = new Set()
-    for (const [address, vertex] of this.addressMapping.sheetEntries(sheetId)) {
+    for (const [address, {vertex}] of this.addressMapping.sheetEntries(sheetId)) {
+      if (vertex === undefined) {
+        continue
+      }
       if (vertex instanceof ArrayVertex) {
         arrays.add(vertex)
       } else {
@@ -377,7 +386,10 @@ export class DependencyGraph {
 
   public removeColumns(removedColumns: ColumnsSpan): EagerChangesGraphChangeResult {
     this.stats.measure(StatType.ADJUSTING_GRAPH, () => {
-      for (const [address, vertex] of this.addressMapping.entriesFromColumnsSpan(removedColumns)) {
+      for (const [address, {vertex}] of this.addressMapping.entriesFromColumnsSpan(removedColumns)) {
+        if (vertex === undefined) {
+          continue
+        }
         for (const adjacentNode of this.graph.adjacentNodes(vertex)) {
           this.graph.markNodeAsSpecialRecentlyChanged(adjacentNode)
         }
@@ -589,11 +601,11 @@ export class DependencyGraph {
     }
   }
 
-  public* entriesFromRowsSpan(rowsSpan: RowsSpan): IterableIterator<[SimpleCellAddress, CellVertex]> {
+  public* entriesFromRowsSpan(rowsSpan: RowsSpan): IterableIterator<[SimpleCellAddress, CellVertexMetadata]> {
     yield* this.addressMapping.entriesFromRowsSpan(rowsSpan)
   }
 
-  public* entriesFromColumnsSpan(columnsSpan: ColumnsSpan): IterableIterator<[SimpleCellAddress, CellVertex]> {
+  public* entriesFromColumnsSpan(columnsSpan: ColumnsSpan): IterableIterator<[SimpleCellAddress, CellVertexMetadata]> {
     yield* this.addressMapping.entriesFromColumnsSpan(columnsSpan)
   }
 

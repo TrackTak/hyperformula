@@ -4,10 +4,9 @@
  */
 
 import {SheetCellAddress, SimpleCellAddress} from '../../Cell'
-import { CellMetadata } from '../../interpreter/InterpreterValue'
 import {Maybe} from '../../Maybe'
 import {ColumnsSpan, RowsSpan} from '../../Span'
-import {CellVertex} from '../Vertex'
+import {CellVertex, CellVertexMetadata} from '../Vertex'
 
 export type AddressMappingStrategyConstructor = new (width: number, height: number) => IAddressMappingStrategy
 
@@ -20,9 +19,7 @@ export interface IAddressMappingStrategy {
    *
    * @param address - cell address
    */
-  getCell(address: SheetCellAddress): Maybe<CellVertex>,
-
-  getCellMetadata(address: SheetCellAddress): CellMetadata,
+  get(address: SheetCellAddress): Maybe<CellVertexMetadata>,
 
   /**
    * Set vertex for given address
@@ -30,13 +27,9 @@ export interface IAddressMappingStrategy {
    * @param address - cell address
    * @param newVertex - vertex to associate with address
    */
-  setCell(address: SheetCellAddress, newVertex: CellVertex): void,
+  set(address: SheetCellAddress, newVertexMetadata: CellVertexMetadata): void,
 
-  setCellMetadata(address: SheetCellAddress, cellMetadata: CellMetadata): void,
-
-  removeCell(address: SimpleCellAddress): void,
-
-  removeCellMetadata(address: SimpleCellAddress): void,
+  remove(address: SimpleCellAddress): void,
 
   /**
    * Returns whether the address is present or not
@@ -44,8 +37,6 @@ export interface IAddressMappingStrategy {
    * @param address - address
    */
   has(address: SheetCellAddress): boolean,
-
-  hasMetadata(address: SheetCellAddress): boolean,
 
   /**
    * Returns height of stored sheet
@@ -65,7 +56,7 @@ export interface IAddressMappingStrategy {
 
   removeColumns(removedColumns: ColumnsSpan): void,
 
-  getEntries(sheet: number): IterableIterator<[SimpleCellAddress, CellVertex]>,
+  getEntries(sheet: number): IterableIterator<[SimpleCellAddress, CellVertexMetadata]>,
 
   verticesFromColumn(column: number): IterableIterator<CellVertex>,
 
@@ -75,9 +66,9 @@ export interface IAddressMappingStrategy {
 
   verticesFromRowsSpan(rowsSpan: RowsSpan): IterableIterator<CellVertex>,
 
-  entriesFromRowsSpan(rowsSpan: RowsSpan): IterableIterator<[SimpleCellAddress, CellVertex]>,
+  entriesFromRowsSpan(rowsSpan: RowsSpan): IterableIterator<[SimpleCellAddress, CellVertexMetadata]>,
 
-  entriesFromColumnsSpan(columnsSpan: ColumnsSpan): IterableIterator<[SimpleCellAddress, CellVertex]>,
+  entriesFromColumnsSpan(columnsSpan: ColumnsSpan): IterableIterator<[SimpleCellAddress, CellVertexMetadata]>,
 
   vertices(): IterableIterator<CellVertex>,
 }
