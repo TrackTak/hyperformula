@@ -577,18 +577,18 @@ export class Operations {
     const convertedNewSheetContent: DataRawCellContent[][] = []
 
     this.clearSheet(sheetId)
-    for (let i = 0; i < newSheetContent.length; i++) {
+
+    newSheetContent.forEach((row, i) => {
       convertedNewSheetContent[i] = []
-      
-      for (let j = 0; j < newSheetContent[i].length; j++) {
-        const value = newSheetContent[i][j]
+
+      row.forEach((cell, j) => {
         const address = simpleCellAddress(sheetId, j, i)
 
-        convertedNewSheetContent[i][j] = value ?? { cellValue: undefined }
+        convertedNewSheetContent[i][j] = cell ?? { cellValue: undefined }
 
-        this.setCellContent(address, value)
-      }
-    }
+        this.setCellContent(address, cell)
+      })
+    })
 
     return convertedNewSheetContent
   }

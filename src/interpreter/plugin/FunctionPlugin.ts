@@ -3,7 +3,6 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import { CellData } from '../..'
 import {AbsoluteCellRange} from '../../AbsoluteCellRange'
 import {ArraySize, ArraySizePredictor} from '../../ArraySize'
 import {CellError, ErrorType, SimpleCellAddress} from '../../Cell'
@@ -389,12 +388,10 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     
     retArr.forEach((row) => {
       const rowPromise = new Promise<InterpreterValue[]>((resolve, reject) => {
-        const promises: Promise<InterpreterValue>[] = []
-
-        row.forEach(({ argCoerceFailure, coercedArguments }) => {
-          if (argCoerceFailure === undefined) {
-            promises.push(fn(...coercedArguments))
-          }
+        const promises: Promise<InterpreterValue>[] = row.map(({ argCoerceFailure, coercedArguments }) => {
+          const value = argCoerceFailure !== undefined ? Promise.resolve(argCoerceFailure) : fn(...coercedArguments)
+      
+          return value
         })
 
         Promise.all(promises).then(resolve).catch(reject)
@@ -409,7 +406,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
       const rowArr: InternalScalarValue[] = []
 
       for (const value of row) {
-        const ret = this.returnInferedType(value, metadata)
+        const ret = this.returnInferredType(value, metadata)
     
         if (maxHeight === 1 && maxWidth === 1) {
           return ret
@@ -445,7 +442,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
       const rowArr: InternalScalarValue[] = []
 
       for (const { argCoerceFailure, coercedArguments } of row) {
-        const ret = argCoerceFailure ?? this.returnInferedType(fn(...coercedArguments), metadata)
+        const ret = argCoerceFailure ?? this.returnInferredType(fn(...coercedArguments), metadata)
     
         if (maxHeight === 1 && maxWidth === 1) {
           return ret
@@ -472,7 +469,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     nonReferenceCallback: (...arg: any) => InternalScalarValue = () => new CellError(ErrorType.NA, ErrorMessage.CellRefExpected)
   ) => {
     if (args.length === 0) {
-      return this.returnInferedType(noArgCallback(), metadata)
+      return this.returnInferredType(noArgCallback(), metadata)
     } else if (args.length > 1) {
       return new CellError(ErrorType.NA, ErrorMessage.WrongArgNumber)
     }
@@ -495,7 +492,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     }
 
     if (cellReference !== undefined) {
-      return this.returnInferedType(referenceCallback(cellReference), metadata)
+      return this.returnInferredType(referenceCallback(cellReference), metadata)
     }
 
     return this.runFunction(args, state, metadata, nonReferenceCallback)
@@ -600,7 +597,7 @@ export abstract class FunctionPlugin implements FunctionPluginTypecheck<Function
     return { maxWidth, maxHeight, retArr}
   }
 
-  private returnInferedType<T>(val: T | ExtendedNumber, metadata: FunctionMetadata): T | InterpreterValue | ExtendedNumber {
+  private returnInferredType<T>(val: T | ExtendedNumber, metadata: FunctionMetadata): T | InterpreterValue | ExtendedNumber {
     const {inferReturnType, returnNumberType} = metadata
     
     if (returnNumberType !== undefined && isExtendedNumber(val)) {

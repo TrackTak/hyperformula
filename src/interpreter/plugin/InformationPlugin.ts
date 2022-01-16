@@ -20,7 +20,7 @@ export class InformationPlugin extends FunctionPlugin implements FunctionPluginT
     'COLUMN': {
       method: 'column',
       parameters: [
-        {argumentType: ArgumentTypes.NOERROR, optional: true}
+        {argumentType: ArgumentTypes.NOERROR, optionalArg: true}
       ],
       isDependentOnSheetStructureChange: true,
       doesNotNeedArgumentsToBeComputed: true,
@@ -119,7 +119,7 @@ export class InformationPlugin extends FunctionPlugin implements FunctionPluginT
     'ROW': {
       method: 'row',
       parameters: [
-        {argumentType: ArgumentTypes.NOERROR, optional: true}
+        {argumentType: ArgumentTypes.NOERROR, optionalArg: true}
       ],
       isDependentOnSheetStructureChange: true,
       doesNotNeedArgumentsToBeComputed: true,

@@ -5,9 +5,8 @@ import {Config} from '../src/Config'
 import {Events} from '../src/Emitter'
 import {ErrorMessage} from '../src/error-message'
 import {InterpreterState} from '../src/interpreter/InterpreterState'
-import {AsyncInternalScalarValue} from '../src/interpreter/InterpreterValue'
+import {AsyncInterpreterValue} from '../src/interpreter/InterpreterValue'
 import {ArgumentTypes, FunctionPlugin, FunctionPluginTypecheck} from '../src/interpreter/plugin/FunctionPlugin'
-import {AsyncSimpleRangeValue} from '../src/interpreter/SimpleRangeValue'
 import {ProcedureAst} from '../src/parser'
 import {adr, detailedError, detailedErrorWithOrigin, expectEngineToBeTheSameAs} from './testUtils'
 
@@ -17,13 +16,17 @@ class AsyncPlugin extends FunctionPlugin implements FunctionPluginTypecheck<Asyn
       method: 'asyncFoo',
       isAsyncMethod: true,
       parameters: [
-        {argumentType: ArgumentTypes.ANY}
+        {
+          argumentType: ArgumentTypes.ANY,
+          optionalArg: true
+        }
       ],
     },
     'ASYNC_ARRAY_FOO': {
       method: 'asyncArrayFoo',
       arraySizeMethod: 'asyncArrayFooSize',
       isAsyncMethod: true,
+      parameters: [],
     },
     'LONG_ASYNC_FOO': {
       method: 'longAsyncFoo',
@@ -35,10 +38,12 @@ class AsyncPlugin extends FunctionPlugin implements FunctionPluginTypecheck<Asyn
     'TIMEOUT_FOO': {
       method: 'timeoutFoo',
       isAsyncMethod: true,
+      parameters: [],
     },
     'ASYNC_ERROR_FOO': {
       method: 'asyncErrorFoo',
       isAsyncMethod: true,
+      parameters: [],
     },
   }
 
@@ -52,23 +57,29 @@ class AsyncPlugin extends FunctionPlugin implements FunctionPluginTypecheck<Asyn
     },
   }
 
-  public asyncFoo(ast: ProcedureAst, state: InterpreterState): AsyncInternalScalarValue {
-    return new Promise(resolve => setTimeout(() => {
-      if (ast.args[0]) {
-        const argument = this.evaluateAst(ast.args[0], state) as number
+  public asyncFoo(ast: ProcedureAst, state: InterpreterState): AsyncInterpreterValue {
+    const metadata = this.metadata('ASYNC_FOO')
 
-        resolve(argument + 5)
-        return
-      }
-  
-      resolve(1)
-    }, 100))
+    return this.runAsyncFunction(ast.args, state, metadata, async(argument) => {
+      return new Promise(resolve => setTimeout(() => {
+        if (argument !== undefined) {  
+          resolve(argument + 5)
+          return
+        }
+    
+        resolve(1)
+      }, 100))
+    })
   }
 
-  public asyncArrayFoo(_ast: ProcedureAst, _state: InterpreterState): AsyncSimpleRangeValue {
-    return new Promise(resolve => setTimeout(() => {
-      resolve(SimpleRangeValue.onlyValues([[1, 1], [1, 1]]))
-    }, 100))
+  public asyncArrayFoo(ast: ProcedureAst, state: InterpreterState): AsyncInterpreterValue {
+    const metadata = this.metadata('ASYNC_ARRAY_FOO')
+
+    return this.runAsyncFunction(ast.args, state, metadata, async() => {
+      return new Promise(resolve => setTimeout(() => {
+        resolve(SimpleRangeValue.onlyValues([[1, 1], [1, 1]]))
+      }, 100))
+    })
   }
 
   public asyncArrayFooSize(ast: ProcedureAst, _state: InterpreterState) {
@@ -80,27 +91,39 @@ class AsyncPlugin extends FunctionPlugin implements FunctionPluginTypecheck<Asyn
     return ArraySize.error()
   }
   
-  public async longAsyncFoo(ast: ProcedureAst, state: InterpreterState): AsyncInternalScalarValue {
-    return new Promise(resolve => setTimeout(() => {
-      const argument = this.evaluateAst(ast.args[0], state)
+  public async longAsyncFoo(ast: ProcedureAst, state: InterpreterState): AsyncInterpreterValue {
+    const metadata = this.metadata('LONG_ASYNC_FOO')
 
-      if (argument instanceof CellError) {
-        resolve(argument)
-
-        return
-      }
-      
-      resolve(argument as number + ' longAsyncFoo')
-    }, 3000))
+    return this.runAsyncFunction(ast.args, state, metadata, async() => {
+      return new Promise(resolve => setTimeout(() => {
+        const argument = this.evaluateAst(ast.args[0], state)
+  
+        if (argument instanceof CellError) {
+          resolve(argument)
+  
+          return
+        }
+        
+        resolve(argument as number + ' longAsyncFoo')
+      }, 3000))
+    })
   }
 
-  public async timeoutFoo(_ast: ProcedureAst, _state: InterpreterState): AsyncInternalScalarValue {
-    return new Promise(resolve => setTimeout(() => resolve('timeoutFoo'), Config.defaultConfig.timeoutTime + 10000))
+  public async timeoutFoo(ast: ProcedureAst, state: InterpreterState): AsyncInterpreterValue {
+    const metadata = this.metadata('TIMEOUT_FOO')
+
+    return this.runAsyncFunction(ast.args, state, metadata, async() => {
+      return new Promise(resolve => setTimeout(() => resolve('timeoutFoo'), Config.defaultConfig.timeoutTime + 10000))
+    })
   }
 
-  public async asyncErrorFoo(_ast: ProcedureAst, _state: InterpreterState): AsyncInternalScalarValue {
-    return new Promise(() => {
-      throw new Error('asyncErrorFoo')
+  public async asyncErrorFoo(ast: ProcedureAst, state: InterpreterState): AsyncInterpreterValue {
+    const metadata = this.metadata('ASYNC_ERROR_FOO')
+
+    return this.runAsyncFunction(ast.args, state, metadata, async() => {
+      return new Promise(() => {
+        throw new Error('asyncErrorFoo')
+      })
     })
   }
 }
@@ -192,6 +215,16 @@ describe('async functions', () => {
       expect(handler).toHaveBeenCalledTimes(2)
       expect(changes).toEqual([new ExportedCellChange(adr('A1'), 1), new ExportedCellChange(adr('B1'), 1), new ExportedCellChange(adr('C1'), 1)])
     })
+  })
+
+  it('handles argument coercion errors correctly', async() => {
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '=ASYNC_FOO(UNKNOWN_FOO())' }],
+    ]})
+
+    await promise
+
+    expect(engine.getCellValue(adr('A1')).cellValue).toEqualError(detailedErrorWithOrigin(ErrorType.NAME, 'Sheet1!A1', ErrorMessage.FunctionName('UNKNOWN_FOO')))
   })
 
   it('should return #TIMEOUT error if function does not resolve due to the request taking too long', async() => {
