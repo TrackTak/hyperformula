@@ -9,6 +9,9 @@
   "bugs": {
     "url": "https://github.com/handsontable/hyperformula/issues"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "author": "Handsoncode <hello@handsontable.com>",
   "version": "5.0.1",
   "keywords": [
