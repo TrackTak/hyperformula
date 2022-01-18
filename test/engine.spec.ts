@@ -371,6 +371,15 @@ describe('#getCellSerialized', () => {
     expect(engine.getCellSerialized(adr('C1')).cellValue).toEqual('=SUM(1, A2)')
   })
 
+  it('should return only formula for arrays', () => {
+    const [engine] = HyperFormula.buildFromArray({ cells: [
+      [{ cellValue: '={1,2}' }]
+    ]})
+
+    expect(engine.getCellSerialized(adr('A1')).cellValue).toEqual('={1,2}')
+    expect(engine.getCellSerialized(adr('B1')).cellValue).toEqual(undefined)
+  })
+
   it('should return formula for parsing error', () => {
     const [engine] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=SUM(' }]
@@ -425,6 +434,7 @@ describe('#getAllSheetsSerialized', () => {
   it('should serialize all sheets', () => {
     const [engine] = HyperFormula.buildFromSheets({
       Sheet1: { cells:  [[{ cellValue: '=A()' }]], sheetMetadata: { test: 'value' } },
+      Sheet2: { cells:  [[{ cellValue: '={1,2}' }]] },
       Foo: { cells: [[{ cellValue: 1 }]]},
       Err1: { cells: [[{ cellValue: '=A1' }]] },
       Err2: { cells: [[{ cellValue: '234.23141234.2314' }]]},
@@ -434,6 +444,7 @@ describe('#getAllSheetsSerialized', () => {
     expect(engine.getAllSheetsSerialized()).toEqual({
       'Foo': { cells: [[{ cellValue: 1 }]]},
       'Sheet1': { cells: [[{ cellValue: '=A()' }]], sheetMetadata: { test: 'value' }},
+      'Sheet2': { cells:  [[{ cellValue: '={1,2}' }]] },
       'Err1': { cells: [[{ cellValue: '=A1' }]]},
       'Err2': { cells: [[{ cellValue: '234.23141234.2314' }]]},
       'Err3': { cells: [[{ cellValue: '#DIV/0!' }]]},

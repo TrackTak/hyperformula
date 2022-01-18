@@ -32,14 +32,23 @@ export class Serialization {
   ) {
   }
 
+  private isArrayVertexPartOfArray(cellValue: ArrayVertex, address: SimpleCellAddress) {
+    const arrayVertexAddress = cellValue.getAddress(this.dependencyGraph.lazilyTransformingAstService)
+    
+    if (arrayVertexAddress.row !== address.row || arrayVertexAddress.col !== address.col || arrayVertexAddress.sheet !== address.sheet) {
+      return true
+    }
+
+    return false
+  }
+
   private parseCellFormula(cellValue: CellVertex, address: SimpleCellAddress, targetAddress?: SimpleCellAddress): Maybe<string> {    
     if (cellValue instanceof FormulaCellVertex) {
       const formula = cellValue.getFormula(this.dependencyGraph.lazilyTransformingAstService)
       targetAddress = targetAddress ?? address
       return this.unparser.unparse(formula, targetAddress)
     } else if (cellValue instanceof ArrayVertex) {
-      const arrayVertexAddress = cellValue.getAddress(this.dependencyGraph.lazilyTransformingAstService)
-      if (arrayVertexAddress.row !== address.row || arrayVertexAddress.col !== address.col || arrayVertexAddress.sheet !== address.sheet) {
+      if (this.isArrayVertexPartOfArray(cellValue, address)) {
         return undefined
       }
       targetAddress = targetAddress ?? address
@@ -77,6 +86,19 @@ export class Serialization {
   }
 
   public getRawValue(address: SimpleCellAddress): DataRawCellContent {
+    const cellVertex = this.dependencyGraph.getCell(address)
+
+    if (cellVertex instanceof ArrayVertex) {
+      if (this.isArrayVertexPartOfArray(cellVertex, address)) {
+        const metadata = this.dependencyGraph.getCellMetadata(address)
+
+        return {
+          cellValue: undefined,
+          metadata
+        }
+      }
+    }
+
     const cell = this.dependencyGraph.getRawValue(address)
 
     return cell
