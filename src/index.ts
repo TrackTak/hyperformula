@@ -79,6 +79,7 @@ import {
   BatchUndoEntry,
   UndoRedo
 } from './UndoRedo'
+import * as lexerConfig from './parser/LexerConfig'
 
 /** @internal */
 class HyperFormulaNS extends HyperFormula {
@@ -220,4 +221,5 @@ export {
   ChangeNamedExpressionUndoEntry,
   BatchUndoEntry,
   UndoRedo,
+  lexerConfig
 }
