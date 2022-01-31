@@ -26,7 +26,7 @@
 
  export type DataRawCellContent = GenericDataRawCellContent<any>
 
- export type InputCell<CellMetadata> = Maybe<GenericDataRawCellContent<CellMetadata>>
+ export type InputCell<CellMetadata> = Maybe<GenericDataRawCellContent<CellMetadata>> | null
 
  export type GenericDataRawCellContent<CellMetadata> = {
   cellValue?: RawCellContent,

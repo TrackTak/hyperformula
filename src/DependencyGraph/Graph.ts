@@ -191,8 +191,8 @@ export class Graph<T> {
   /*
    * return a topological sort order, but separates vertices that exist in some cycle
    */
-  public topSortWithScc(): TopSortResult<T> {
-    return this.getTopSortedWithSccSubgraphFrom(Array.from(this.nodes), () => true, () => {
+  public topSortWithScc(operatingFunction: (node: T) => true): TopSortResult<T> {
+    return this.getTopSortedWithSccSubgraphFrom(Array.from(this.nodes), operatingFunction, () => {
     })
   }
 

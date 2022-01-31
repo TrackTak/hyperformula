@@ -8,6 +8,7 @@ import {AbsoluteCellRange, isSimpleCellRange, SimpleCellRange} from './AbsoluteC
 import {validateArgToType} from './ArgumentSanitization'
 import {BuildEngineFactory, EngineState} from './BuildEngineFactory'
 import {
+  CanceledPromise,
   CellType,
   CellValueDetailedType,
   CellValueType,
@@ -21,7 +22,6 @@ import {
 import {CellContent, CellContentParser, DataRawCellContent, GenericDataRawCellContent, InputCell, RawCellContent} from './CellContentParser'
 import {CellValue} from './CellValue'
 import {Config, ConfigParams, getDefaultConfig} from './Config'
-import { ContentChanges } from './ContentChanges'
 import {ColumnRowIndex, CrudOperations} from './CrudOperations'
 import {DateTime, numberToSimpleTime} from './DateTimeHelper'
 import {
@@ -33,6 +33,7 @@ import {
   SheetMapping,
   Vertex,
 } from './DependencyGraph'
+import { FormulaVertex } from './DependencyGraph/FormulaCellVertex'
 import {objectDestroy} from './Destroy'
 import {Emitter, Events, Listeners, TypedEmitter} from './Emitter'
 import {
@@ -48,7 +49,8 @@ import {LicenseKeyValidityState} from './helpers/licenseKeyValidator'
 import {buildTranslationPackage, RawTranslationPackage, TranslationPackage} from './i18n'
 import {FunctionPluginDefinition} from './interpreter'
 import {FunctionRegistry, FunctionTranslationsPackage} from './interpreter/FunctionRegistry'
-import {CellData, FormatInfo} from './interpreter/InterpreterValue'
+import { InterpreterState } from './interpreter/InterpreterState'
+import {CellData, FormatInfo, InterpreterValue} from './interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
 import { Maybe } from './Maybe'
@@ -68,6 +70,11 @@ import {
 import {Serialization, SerializedNamedExpression} from './Serialization'
 import {GenericSheet, GenericSheets, InputSheet, SheetDimensions, InputSheets} from './Sheet'
 import {Statistics, StatType} from './statistics'
+
+interface AsyncVertexValues {
+  vertex: FormulaVertex,
+  values: (InterpreterValue | CanceledPromise<InterpreterValue>)[],
+}
 
 /**
  * This is a class for creating HyperFormula instance, all the following public methods
@@ -117,6 +124,7 @@ export class HyperFormula implements TypedEmitter {
   public static languages: Record<string, RawTranslationPackage> = {}
   private static registeredLanguages: Map<string, TranslationPackage> = new Map()
   private _evaluationSuspended: boolean = false
+  private _destroyed: boolean = false
 
   protected constructor(
     private _config: Config,
@@ -261,10 +269,10 @@ export class HyperFormula implements TypedEmitter {
    * @category Factories
    */
   public static buildFromArray<SheetMetadata, CellMetadata>(sheet: InputSheet<CellMetadata, SheetMetadata>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
-    const [engine, evaluatorPromise] = BuildEngineFactory.buildFromSheet(sheet, configInput, namedExpressions)
+    const [engine, asyncVertices] = BuildEngineFactory.buildFromSheet(sheet, configInput, namedExpressions)
     const hyperFormula = this.buildFromEngineState(engine)
 
-    return [hyperFormula, hyperFormula.wrapEvaluatorPromiseWithChanges(evaluatorPromise)]
+    return [hyperFormula, hyperFormula.recomputeAsyncFunctions(asyncVertices)]
   }
 
   /**
@@ -304,10 +312,10 @@ export class HyperFormula implements TypedEmitter {
    * @category Factories
    */
   public static buildFromSheets<SheetMetadata, CellMetadata>(sheets: InputSheets<CellMetadata, SheetMetadata>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
-    const [engine, evaluatorPromise]  = BuildEngineFactory.buildFromSheets(sheets, configInput, namedExpressions)
+    const [engine, asyncVertices]  = BuildEngineFactory.buildFromSheets(sheets, configInput, namedExpressions)
     const hyperFormula = this.buildFromEngineState(engine)
 
-    return [hyperFormula, hyperFormula.wrapEvaluatorPromiseWithChanges(evaluatorPromise)]
+    return [hyperFormula, hyperFormula.recomputeAsyncFunctions(asyncVertices)]
   }
 
   /**
@@ -327,10 +335,10 @@ export class HyperFormula implements TypedEmitter {
    * @category Factories
    */
   public static buildEmpty(configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
-    const [engine, evaluatorPromise]  = BuildEngineFactory.buildEmpty(configInput, namedExpressions)
+    const [engine, asyncVertices]  = BuildEngineFactory.buildEmpty(configInput, namedExpressions)
     const hyperFormula = this.buildFromEngineState(engine)
 
-    return [hyperFormula, hyperFormula.wrapEvaluatorPromiseWithChanges(evaluatorPromise)]
+    return [hyperFormula, hyperFormula.recomputeAsyncFunctions(asyncVertices)]
   }
 
   /**
@@ -961,7 +969,7 @@ export class HyperFormula implements TypedEmitter {
     const serializedSheets= this._serialization.withNewConfig(configNewLanguage, this._namedExpressions).getAllSheetsSerialized()
     const serializedNamedExpressions = this._serialization.getAllNamedExpressionsSerialized()
 
-    const [newEngine, evaluatorPromise] = BuildEngineFactory.rebuildWithConfig(newConfig, serializedSheets, serializedNamedExpressions, this._stats)
+    const [newEngine, asyncVertices] = BuildEngineFactory.rebuildWithConfig(newConfig, serializedSheets, serializedNamedExpressions, this._stats)
 
     this._config = newEngine.config
     this._stats = newEngine.stats
@@ -978,7 +986,7 @@ export class HyperFormula implements TypedEmitter {
     this._serialization = newEngine.serialization
     this._functionRegistry = newEngine.functionRegistry
 
-    return this.wrapEvaluatorPromiseWithChanges(evaluatorPromise)
+    return this.recomputeAsyncFunctions(asyncVertices)
   }
 
   /**
@@ -2916,14 +2924,8 @@ export class HyperFormula implements TypedEmitter {
    * @category Helpers
    */
   public getCellDependents(address: SimpleCellAddress | SimpleCellRange): (SimpleCellRange | SimpleCellAddress)[] {
-    let vertex
-    if (isSimpleCellAddress(address)) {
-      vertex = this._dependencyGraph.addressMapping.getCell(address)
-    } else if (isSimpleCellRange(address)) {
-      vertex = this._dependencyGraph.rangeMapping.getRange(address.start, address.end)
-    } else {
-      throw new ExpectedValueOfTypeError('SimpleCellAddress | SimpleCellRange', address)
-    }
+    const vertex = this.dependencyGraph.getVertexFromAddress(address)
+
     if (vertex === undefined) {
       return []
     }
@@ -2950,19 +2952,27 @@ export class HyperFormula implements TypedEmitter {
    * @category Helpers
    */
   public getCellPrecedents(address: SimpleCellAddress | SimpleCellRange): (SimpleCellRange | SimpleCellAddress)[] {
-    let vertex
-    if (isSimpleCellAddress(address)) {
-      vertex = this._dependencyGraph.addressMapping.getCell(address)
-    } else if (isSimpleCellRange(address)) {
-      vertex = this._dependencyGraph.rangeMapping.getRange(address.start, address.end)
-    } else {
-      throw new ExpectedValueOfTypeError('SimpleCellAddress | SimpleCellRange', address)
-    }
+    const vertex = this.dependencyGraph.getVertexFromAddress(address)
+    
     if (vertex === undefined) {
       return []
     }
     return this._dependencyGraph.dependencyQueryAddresses(vertex)
   }
+
+  /*
+  *
+  * @category Helpers
+  */
+ public getAllCellPrecedents(address: SimpleCellAddress | SimpleCellRange): (SimpleCellRange | SimpleCellAddress)[] {
+   const vertex = this.dependencyGraph.getVertexFromAddress(address)
+
+   if (vertex === undefined) {
+     return []
+   }
+
+   return this._dependencyGraph.allDependencyQueryAddresses(vertex)
+ }
 
   /**
    * Returns a unique sheet name assigned to the sheet of a given ID or `undefined` if the there is no sheet with a given ID.
@@ -3537,7 +3547,9 @@ export class HyperFormula implements TypedEmitter {
     const [changes, asyncChanges] = this.recomputeIfDependencyGraphNeedsIt()
     
     asyncChanges.then((exportedChanges) => {
-      this._emitter.emit(Events.EvaluationResumed, exportedChanges)
+      if (this._emitter) {
+        this._emitter.emit(Events.EvaluationResumed, exportedChanges)
+      }
     })
 
     this._emitter.emit(Events.EvaluationResumed, changes)
@@ -3653,7 +3665,9 @@ export class HyperFormula implements TypedEmitter {
     const [changes, asyncChanges] = this.recomputeIfDependencyGraphNeedsIt()
     
     asyncChanges.then((exportedChanges) => {
-      this._emitter.emit(Events.NamedExpressionAdded, expressionName, exportedChanges)
+      if (this._emitter) {
+        this._emitter.emit(Events.NamedExpressionAdded, expressionName, exportedChanges)
+      }
     })
 
     this._emitter.emit(Events.NamedExpressionAdded, expressionName, changes)
@@ -3953,7 +3967,9 @@ export class HyperFormula implements TypedEmitter {
       const [changes, asyncChanges] = this.recomputeIfDependencyGraphNeedsIt()
     
       asyncChanges.then((exportedChanges) => {
-        this._emitter.emit(Events.NamedExpressionRemoved, removedNamedExpression.displayName, exportedChanges)
+        if (this._emitter) {
+          this._emitter.emit(Events.NamedExpressionRemoved, removedNamedExpression.displayName, exportedChanges)
+        }
       })
 
       this._emitter.emit(Events.NamedExpressionRemoved, removedNamedExpression.displayName, changes)
@@ -4108,7 +4124,10 @@ export class HyperFormula implements TypedEmitter {
     
     const newPromise = new Promise<CellValue | CellValue[][]>((resolve, reject) => {
       promise?.then((value) => {
-        resolve(this._exporter.exportScalarOrRange(value))
+        if (this._exporter) {
+          resolve(this._exporter.exportScalarOrRange(value))
+        }
+        resolve(null)
       }).catch(reject)
     })
 
@@ -4379,22 +4398,7 @@ export class HyperFormula implements TypedEmitter {
   public destroy(): void {
     this._evaluator.interpreter.destroyGpu()
     objectDestroy(this)
-  }
-
-  private wrapEvaluatorPromiseWithChanges(evaluatorPromise: Promise<ContentChanges>): Promise<ExportedChange[]> {
-    const promise = new Promise<ExportedChange[]>((resolve, reject) => {
-      evaluatorPromise.then((contentChanges) => {
-        const exportedChanges = contentChanges.exportChanges(this._exporter)
-
-        if (!contentChanges.isEmpty()) {
-          this._emitter.emit(Events.AsyncValuesUpdated, exportedChanges)  
-        }
-
-        resolve(exportedChanges)
-      }).catch(reject)
-    })
-
-    return promise
+    this._destroyed = true
   }
 
   public extractFormula(formulaString: string, sheetId: number = 1):  { ast?: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[] } {
@@ -4424,6 +4428,101 @@ export class HyperFormula implements TypedEmitter {
     return {ast, address, dependencies}
   }
 
+  private async recomputeAsyncFunctions(asyncPromiseVertices: FormulaVertex[]): Promise<ExportedChange[]> {
+    if (!asyncPromiseVertices.length) {
+      return Promise.resolve([])
+    }
+  
+    const exportedChanges: ExportedChange[] = []
+    const asyncGroupedVertices = this.dependencyGraph.getAsyncGroupedVertices(asyncPromiseVertices)
+
+    for (const asyncGroupedVerticesRow of asyncGroupedVertices) {
+      const asyncVertexValues = await new Promise<AsyncVertexValues[]>((resolve, reject) => {
+        const promises = asyncGroupedVerticesRow.map((vertex) => {
+          const promise = this.evaluator.startAsyncPromises(vertex.getAsyncPromises(), 
+            new InterpreterState(
+              vertex.getAddress(this.lazilyTransformingAstService),
+              this._config.useArrayArithmetic,
+              vertex
+            )
+          )
+
+          return new Promise<AsyncVertexValues>((resolve, reject) => {
+            promise.then(values => {
+              resolve({
+                values,
+                vertex
+              })
+            }).catch(reject)
+          })
+        })
+
+        Promise.all(promises).then(resolve).catch(reject)
+      })
+
+      let nonCancelledPromises = 0
+
+      if (this._destroyed) {
+        return exportedChanges
+      }
+
+      for (const { vertex, values } of asyncVertexValues) {
+        const address = vertex.getAddress(this.lazilyTransformingAstService)
+        const ast = vertex.getFormula(this.lazilyTransformingAstService)
+        const promisesAreCanceled = values.some(value => value instanceof CanceledPromise)
+
+        if (promisesAreCanceled) {
+          continue
+        }
+
+        nonCancelledPromises += 1
+
+        this._crudOperations.operations.setAsyncFormulaToCell(address, ast)
+      }
+
+      if (nonCancelledPromises > 0) {
+        // TODO: Perhaps could make more performant by only recomputing
+        // cells here that have cells dependent on them instead of every
+        // cell at each level
+        const changes = this.recomputeAsyncVerticesIfDependencyGraphNeedsIt()
+
+        exportedChanges.push(...changes)
+      }
+    }
+
+    return exportedChanges
+  }
+
+  /**
+   * Runs a recomputation starting from recently changed async vertices.
+   *
+   * Note that this method may trigger dependency graph recalculation.
+   *
+   * @fires [[asyncValuesUpdated]] if recalculation was triggered by this change
+   */
+  private recomputeAsyncVerticesIfDependencyGraphNeedsIt(): ExportedChange[] {
+    if (!this._evaluationSuspended && !this._destroyed) {
+      const changes = this._crudOperations.getAndClearContentChanges()
+      const verticesToRecomputeFrom = Array.from(this.dependencyGraph.verticesToRecompute())
+      this.dependencyGraph.clearRecentlyChangedVertices()
+
+      if (verticesToRecomputeFrom.length > 0) {
+        const [contentChanges] = this.evaluator.partialRun(verticesToRecomputeFrom, false)
+
+        changes.addAll(contentChanges)
+      }
+
+      const exportedChanges = changes.exportChanges(this._exporter)
+
+      if (!changes.isEmpty()) {
+        this._emitter.emit(Events.AsyncValuesUpdated, exportedChanges)
+      }
+
+      return exportedChanges
+    }
+    return []
+  }
+
   /**
    * Runs a recomputation starting from recently changed vertices.
    *
@@ -4437,25 +4536,24 @@ export class HyperFormula implements TypedEmitter {
       const verticesToRecomputeFrom = Array.from(this.dependencyGraph.verticesToRecompute())
       this.dependencyGraph.clearRecentlyChangedVertices()
 
-      let evaluatorPromise: Promise<ContentChanges> = Promise.resolve(ContentChanges.empty())
+      let exportedChangesPromise: Promise<ExportedChange[]> = Promise.resolve([])
 
       if (verticesToRecomputeFrom.length > 0) {
-        const [contentChanges,, promise] = this.evaluator.partialRun(verticesToRecomputeFrom)
+        const [contentChanges,, asyncVertices] = this.evaluator.partialRun(verticesToRecomputeFrom, true)
+        const promise = this.recomputeAsyncFunctions(asyncVertices)
 
-        evaluatorPromise = promise
+        exportedChangesPromise = promise
 
         changes.addAll(contentChanges)
       }
 
-      const promise = this.wrapEvaluatorPromiseWithChanges(evaluatorPromise)
-  
       const exportedChanges = changes.exportChanges(this._exporter)
 
       if (!changes.isEmpty()) {
         this._emitter.emit(Events.ValuesUpdated, exportedChanges)
       }
 
-      return [exportedChanges, promise]
+      return [exportedChanges, exportedChangesPromise]
     } else {
       return [[], Promise.resolve([])]
     }

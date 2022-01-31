@@ -149,8 +149,8 @@ describe('Basic Graph manipulation', () => {
   it('#topologicalSort for empty graph', () => {
     const graph = new Graph(dummyGetDependenciesQuery)
 
-    expect(graph.topSortWithScc().sorted).toEqual([])
-    expect(graph.topSortWithScc().cycled).toEqual([])
+    expect(graph.topSortWithScc(() => true).sorted).toEqual([])
+    expect(graph.topSortWithScc(() => true).cycled).toEqual([])
   })
 
   it('#topologicalSort node is included even if he is not connected to anything', () => {
@@ -158,8 +158,8 @@ describe('Basic Graph manipulation', () => {
     const node = identifiableString(0, 'foo')
     graph.addNode(node)
 
-    expect(graph.topSortWithScc().sorted).toEqual([node])
-    expect(graph.topSortWithScc().cycled).toEqual([])
+    expect(graph.topSortWithScc(() => true).sorted).toEqual([node])
+    expect(graph.topSortWithScc(() => true).cycled).toEqual([])
   })
 
   it('#topologicalSort for simple graph', () => {
@@ -170,8 +170,8 @@ describe('Basic Graph manipulation', () => {
     graph.addNode(node1)
     graph.addEdge(node1, node0)
 
-    expect(graph.topSortWithScc().sorted).toEqual([node1, node0])
-    expect(graph.topSortWithScc().cycled).toEqual([])
+    expect(graph.topSortWithScc(() => true).sorted).toEqual([node1, node0])
+    expect(graph.topSortWithScc(() => true).cycled).toEqual([])
   })
 
   it('#topologicalSort for more complex graph', () => {
@@ -191,8 +191,8 @@ describe('Basic Graph manipulation', () => {
     graph.addEdge(node2, node3)
     graph.addEdge(node4, node3)
 
-    expect(graph.topSortWithScc().sorted).toEqual([node0, node1, node2, node4, node3])
-    expect(graph.topSortWithScc().cycled).toEqual([])
+    expect(graph.topSortWithScc(() => true).sorted).toEqual([node0, node1, node2, node4, node3])
+    expect(graph.topSortWithScc(() => true).cycled).toEqual([])
   })
 
   it('#topologicalSort for not connected graph', () => {
@@ -208,8 +208,8 @@ describe('Basic Graph manipulation', () => {
     graph.addEdge(node0, node2)
     graph.addEdge(node1, node3)
 
-    expect(graph.topSortWithScc().sorted).toEqual([node0, node1, node2, node3])
-    expect(graph.topSortWithScc().cycled).toEqual([])
+    expect(graph.topSortWithScc(() => true).sorted).toEqual([node0, node1, node2, node3])
+    expect(graph.topSortWithScc(() => true).cycled).toEqual([])
   })
 
   it('#topologicalSort returns vertices on trivial cycle', () => {
@@ -221,8 +221,8 @@ describe('Basic Graph manipulation', () => {
     graph.addEdge(node0, node1)
     graph.addEdge(node1, node0)
 
-    expect(graph.topSortWithScc().sorted).toEqual([])
-    expect(new Set(graph.topSortWithScc().cycled)).toEqual(new Set([node0, node1]))
+    expect(graph.topSortWithScc(() => true).sorted).toEqual([])
+    expect(new Set(graph.topSortWithScc(() => true).cycled)).toEqual(new Set([node0, node1]))
   })
 
   it('#topologicalSort returns vertices on cycle', () => {
@@ -237,8 +237,8 @@ describe('Basic Graph manipulation', () => {
     graph.addEdge(node1, node2)
     graph.addEdge(node1, node1)
 
-    expect(graph.topSortWithScc().sorted).toEqual([node0, node2])
-    expect(graph.topSortWithScc().cycled).toEqual([node1])
+    expect(graph.topSortWithScc(() => true).sorted).toEqual([node0, node2])
+    expect(graph.topSortWithScc(() => true).cycled).toEqual([node1])
   })
 
   it('#topologicalSort returns one-element cycle', () => {
@@ -247,8 +247,8 @@ describe('Basic Graph manipulation', () => {
     graph.addNode(node)
     graph.addEdge(node, node)
 
-    expect(graph.topSortWithScc().sorted).toEqual([])
-    expect(graph.topSortWithScc().cycled).toEqual([node])
+    expect(graph.topSortWithScc(() => true).sorted).toEqual([])
+    expect(graph.topSortWithScc(() => true).cycled).toEqual([node])
   })
 })
 

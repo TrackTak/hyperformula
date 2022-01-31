@@ -8,10 +8,10 @@ import {AsyncPromiseFetcher} from './AsyncPromise'
 import {CellContentParser} from './CellContentParser'
 import {ClipboardOperations} from './ClipboardOperations'
 import {Config, ConfigParams} from './Config'
-import { ContentChanges } from './ContentChanges'
 import {CrudOperations} from './CrudOperations'
 import {DateTimeHelper} from './DateTimeHelper'
 import {DependencyGraph} from './DependencyGraph'
+import { FormulaVertex } from './DependencyGraph/FormulaCellVertex'
 import { Emitter } from './Emitter'
 import {SheetSizeLimitExceededError} from './errors'
 import {Evaluator} from './Evaluator'
@@ -51,26 +51,26 @@ export type EngineState = {
 }
 
 export class BuildEngineFactory {
-  public static buildFromSheets(sheets: InputSheets<any, any>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, Promise<ContentChanges>] {
+  public static buildFromSheets(sheets: InputSheets<any, any>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, FormulaVertex[]] {
     const config = new Config(configInput)
     return this.buildEngine(config, sheets, namedExpressions)
   }
 
-  public static buildFromSheet(sheet: InputSheet<any, any>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, Promise<ContentChanges>] {
+  public static buildFromSheet(sheet: InputSheet<any, any>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, FormulaVertex[]] {
     const config = new Config(configInput)
     const newsheetprefix = config.translationPackage.getUITranslation(UIElement.NEW_SHEET_PREFIX) + '1'
     return this.buildEngine(config, {[newsheetprefix]: sheet}, namedExpressions)
   }
 
-  public static buildEmpty(configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, Promise<ContentChanges>] {
+  public static buildEmpty(configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [EngineState, FormulaVertex[]] {
     return this.buildEngine(new Config(configInput), {}, namedExpressions)
   }
 
-  public static rebuildWithConfig(config: Config, sheets: InputSheets<any, any>, namedExpressions: SerializedNamedExpression[], stats: Statistics): [EngineState, Promise<ContentChanges>] {
+  public static rebuildWithConfig(config: Config, sheets: InputSheets<any, any>, namedExpressions: SerializedNamedExpression[], stats: Statistics): [EngineState, FormulaVertex[]] {
     return this.buildEngine(config, sheets, namedExpressions, stats)
   }
 
-  private static buildEngine(config: Config, sheets: InputSheets<any, any> = {}, inputNamedExpressions: SerializedNamedExpression[] = [], stats: Statistics = config.useStats ? new Statistics() : new EmptyStatistics()): [EngineState, Promise<ContentChanges>] {
+  private static buildEngine(config: Config, sheets: InputSheets<any, any> = {}, inputNamedExpressions: SerializedNamedExpression[] = [], stats: Statistics = config.useStats ? new Statistics() : new EmptyStatistics()): [EngineState, FormulaVertex[]] {
     stats.start(StatType.BUILD_ENGINE_TOTAL)
 
     const eventEmitter = new Emitter()
@@ -127,7 +127,7 @@ export class BuildEngineFactory {
 
     const evaluator = new Evaluator(config, stats, interpreter, lazilyTransformingAstService, dependencyGraph, columnSearch, operations)
 
-    const evaluatorPromise = evaluator.run()
+    const asyncVertices = evaluator.run()
 
     stats.end(StatType.BUILD_ENGINE_TOTAL)
 
@@ -147,6 +147,6 @@ export class BuildEngineFactory {
       serialization,
       functionRegistry,
       eventEmitter
-    }, evaluatorPromise]
+    }, asyncVertices]
   }
 }

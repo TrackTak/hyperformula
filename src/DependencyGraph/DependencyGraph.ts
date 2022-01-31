@@ -3,7 +3,8 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import {AbsoluteCellRange, SimpleCellRange, simpleCellRange} from '../AbsoluteCellRange'
+import { ExpectedValueOfTypeError } from '..'
+import {AbsoluteCellRange, isSimpleCellRange, SimpleCellRange, simpleCellRange} from '../AbsoluteCellRange'
 import {absolutizeDependencies} from '../absolutizeDependencies'
 import {ArraySize} from '../ArraySize'
 import {AsyncPromise, AsyncPromiseFetcher} from '../AsyncPromise'
@@ -88,19 +89,16 @@ export class DependencyGraph {
     )
   }
 
-  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: Maybe<AsyncPromise[]>, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean, markNodeAsSpecialRecentlyChanged = true): ContentChanges {
+  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: Maybe<AsyncPromise[]>, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean): ContentChanges {
     const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version(), asyncPromises)
-
-    this.exchangeOrAddFormulaVertex(newVertex)
-    this.processCellPrecedents(precedents, newVertex)
-
-    if (markNodeAsSpecialRecentlyChanged) {
-      this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
-    }
 
     if (hasAsyncFunction) {
       this.markAsAsync(newVertex)
     }
+
+    this.exchangeOrAddFormulaVertex(newVertex)
+    this.processCellPrecedents(precedents, newVertex)
+    this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
 
     if (hasVolatileFunction) {
       this.markAsVolatile(newVertex)
@@ -676,7 +674,19 @@ export class DependencyGraph {
   }
 
   public topSortWithScc(): TopSortResult<Vertex> {
-    return this.graph.topSortWithScc()
+    return this.graph.topSortWithScc((vertex: Vertex) => {
+      this.processAsyncVertices(vertex)
+
+      return true
+    })
+  }
+
+  public getTopSortedWithSccSubgraphFrom(modifiedNodes: Vertex[], operatingFunction: (node: Vertex) => boolean, onCycle: (node: Vertex) => void): TopSortResult<Vertex> {
+    return this.graph.getTopSortedWithSccSubgraphFrom(modifiedNodes, (vertex: Vertex) => {
+      this.processAsyncVertices(vertex)
+
+      return operatingFunction(vertex)
+    }, onCycle)
   }
 
   public markAsVolatile(vertex: Vertex) {
@@ -699,37 +709,10 @@ export class DependencyGraph {
     }
   }
 
-  private processAsyncCellDependencies(startVertex: Vertex) {
-    const asyncVertices = this.asyncVertices()
-    const adjacentNodes = this.graph.adjacentNodes(startVertex)
-
-    if (startVertex instanceof FormulaVertex && !startVertex.isResolveIndexSet()) {
-      startVertex.setResolveIndex(0)
-
-      this.graph.dependencyIndexes.set(startVertex, 0)
-    }
-
-    adjacentNodes.forEach((vertex) => {
-      if (vertex instanceof FormulaVertex) {
-        const asyncVertex = asyncVertices.get(vertex)
-        const depIndex = this.graph.dependencyIndexes.get(startVertex) ?? -1
-        // If vertex is async then increment it to the next index
-        // so that Promise.all() can work later
-        const existingIndex = vertex.isResolveIndexSet() ? vertex.getResolveIndex() : -Infinity
-        const newIndex = Math.max(existingIndex, asyncVertex ? depIndex + 1 : depIndex)
-
-        this.graph.dependencyIndexes.set(vertex, newIndex)
-
-        vertex.setResolveIndex(newIndex)
-      }
-    })
-  }
-
   public getAsyncGroupedVertices(vertices: FormulaVertex[]) {
     const asyncVertices: FormulaVertex[][] = []
 
     for (const vertex of vertices) {
-      this.processAsyncCellDependencies(vertex)
       const index = vertex.getResolveIndex()
 
       asyncVertices[index] = asyncVertices[index] ? [
@@ -795,7 +778,57 @@ export class DependencyGraph {
     }
   }
 
-  public dependencyQueryAddresses: (vertex: Vertex) => (SimpleCellAddress | SimpleCellRange)[] = (vertex: Vertex) => {
+  public getVertexFromAddress(address: SimpleCellAddress | SimpleCellRange): Maybe<Vertex> {
+    let vertex: Maybe<Vertex>
+
+    if (isSimpleCellAddress(address)) {
+      vertex = this.addressMapping.getCell(address)
+    } else if (isSimpleCellRange(address)) {
+      vertex = this.rangeMapping.getRange(address.start, address.end)
+    } else {
+      throw new ExpectedValueOfTypeError('SimpleCellAddress | SimpleCellRange', address)
+    }
+
+    return vertex
+  }
+
+  public allDependencyQueryAddresses = (vertex: Vertex): (SimpleCellAddress | SimpleCellRange)[] => {
+    const allVertexPrecedents = new Map()
+    const vertices: Vertex[] = []
+    const addresses: (SimpleCellAddress | SimpleCellRange)[] = []
+
+    vertices.push(vertex)
+
+    while (vertices.length) {
+      const vertex = vertices.shift()
+
+      if (vertex === undefined) {
+        throw new Error('vertex cannot be undefined')
+      }
+
+      const addressPrecedents = this.dependencyQueryAddresses(vertex)
+
+      addressPrecedents.forEach(address => {
+        const vertex = this.getVertexFromAddress(address)
+
+        if (!allVertexPrecedents.has(vertex)) {
+          allVertexPrecedents.set(vertex, vertex)
+
+          addresses.push(address)
+
+          if (vertex === undefined) {
+            throw new Error('vertex cannot be undefined')
+          }
+
+          vertices.push(vertex)
+        }
+      })
+    }
+
+    return addresses
+  }
+
+  public dependencyQueryAddresses = (vertex: Vertex): (SimpleCellAddress | SimpleCellRange)[] => {
     if (vertex instanceof RangeVertex) {
       return this.rangeDependencyQuery(vertex).map(([address, _]) => address)
     } else {
@@ -817,7 +850,7 @@ export class DependencyGraph {
     }
   }
 
-  public dependencyQueryVertices: (vertex: Vertex) => Vertex[] = (vertex: Vertex) => {
+  public dependencyQueryVertices = (vertex: Vertex): Vertex[] => {
     if (vertex instanceof RangeVertex) {
       return this.rangeDependencyQuery(vertex).map(([_, v]) => v)
     } else {
@@ -897,6 +930,31 @@ export class DependencyGraph {
       }
     })
     return ret
+  }
+
+  private processAsyncVertices(vertex: Vertex) {
+    const asyncVertices = this.asyncVertices()
+
+    if (vertex instanceof FormulaVertex && !vertex.isResolveIndexSet()) {
+      vertex.setResolveIndex(0)
+
+      this.graph.dependencyIndexes.set(vertex, 0)
+    }
+
+    this.graph.adjacentNodes(vertex).forEach((depVertex) => {
+      if (depVertex instanceof FormulaVertex) {
+        const asyncVertex = asyncVertices.get(depVertex)
+        const depIndex = this.graph.dependencyIndexes.get(vertex) ?? -1
+        // If vertex is async then increment it to the next index
+        // so that Promise.all() can work later
+        const existingIndex = depVertex.isResolveIndexSet() ? depVertex.getResolveIndex() : -Infinity
+        const newIndex = Math.max(existingIndex, asyncVertex ? depIndex + 1 : depIndex)
+
+        this.graph.dependencyIndexes.set(depVertex, newIndex)
+
+        depVertex.setResolveIndex(newIndex)
+      }
+    })
   }
 
   private correctInfiniteRangesDependenciesByRangeVertex(vertex: RangeVertex) {
