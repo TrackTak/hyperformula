@@ -154,17 +154,17 @@
  export const getCellValueDetailedType = (cellValue: InterpreterValue): CellValueDetailedType => {
    if (isExtendedNumber(cellValue)) {
      return getTypeOfExtendedNumber(cellValue)
-   } else {
-     return getCellValueType(cellValue) as CellValueDetailedType
    }
+     
+   return getCellValueType(cellValue) as CellValueDetailedType
  }
  
  export const getCellValueFormat = (cellValue: InterpreterValue): string | undefined => {
    if (isExtendedNumber(cellValue)) {
      return getFormatOfExtendedNumber(cellValue)
-   } else {
-     return undefined
    }
+
+   return undefined
  }
  
  export class CancelablePromise<T> {

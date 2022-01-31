@@ -66,12 +66,18 @@ describe('Building engine from arrays', () => {
     expect(engine1.getCellValue(adr('A1', 0)).cellValue).toBe(1)
   })
 
+  it('should allow nulls instead of cellData', () => {
+    const [engine1] =HyperFormula.buildFromArray({ cells: [[null]] })
+
+    expect(engine1.getCellValue(adr('A1')).cellValue).toBe(null)
+  })
+
   it('corrupted sheet definition', () => {
     expect(() => {
       HyperFormula.buildFromArray({ cells: [
         [{ cellValue: 0 }, { cellValue: 1 }],
         [{ cellValue: 2 }, { cellValue: 3 }],
-        null, // broken sheet
+        3, // broken sheet
         [{ cellValue: 6 }, { cellValue: 7 }]
       ]} as any)
     }).toThrowError('Invalid arguments, expected an array of arrays.')

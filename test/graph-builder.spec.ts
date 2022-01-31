@@ -65,7 +65,7 @@ describe('GraphBuilder', () => {
     expect(engine.graph.adjacentNodes(ab)).toContain(c1)
   })
 
-  it('async vertices dependencies should work', () => {
+  it('async vertices dependencies should work on build', () => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
     const [engine] = HyperFormula.buildFromArray({ cells: [

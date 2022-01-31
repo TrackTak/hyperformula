@@ -195,7 +195,7 @@ describe('async functions', () => {
 
       const changes = await promise
 
-      expect(changes).toEqual([new ExportedCellChange(adr('B1'), 1), new ExportedCellChange(adr('D1'), 6), new ExportedCellChange(adr('C1'), 2)])
+      expect(changes).toEqual([new ExportedCellChange(adr('B1'), 1), new ExportedCellChange(adr('C1'), 2), new ExportedCellChange(adr('D1'), 6)])
     })
 
     it('asyncValuesUpdated fires once per public async action', async() => {
@@ -279,7 +279,7 @@ describe('async functions', () => {
     expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: '1 longAsyncFoo' }]])
   })
 
-  it('works with multiple async functions one after another', async() => {
+  it('works with setting multiple async functions one after another', async() => {
     const sheet = [[
       { cellValue: 2 }, { cellValue: '=ASYNC_FOO()' }
     ]]
@@ -294,6 +294,47 @@ describe('async functions', () => {
     expect(engine.getSheetValues(0).cells).toEqual([[
       { cellValue: 1 }, { cellValue: 3 }
     ]])
+  })
+
+  it('works with dependent async functions', async() => {
+    const sheet = [[
+      { cellValue: '=ASYNC_FOO()' }, { cellValue: '=ASYNC_FOO(A1)' }
+    ]]
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: sheet })
+
+    await promise
+
+    expect(engine.getSheetValues(0).cells).toEqual([[
+      { cellValue: 1 }, { cellValue: 6 }
+    ]])
+  })
+
+  it('works with dependent async functions with setCellContents', async() => {
+    const sheet = [[
+      { cellValue: '=ASYNC_FOO(B1)' }, { cellValue: '=ASYNC_FOO()' }
+    ]]
+    const [engine, promise] = HyperFormula.buildEmpty()
+
+    engine.addSheet()
+
+    await promise
+
+    await engine.setCellContents(adr('A1'), sheet)[1]
+
+    expect(engine.getSheetValues(0).cells).toEqual([[
+      { cellValue: 6 }, { cellValue: 1 }
+    ]])
+  })
+
+  it('destroyed hyperformula instance does not call resolved async values', async() => {
+    const sheet = [[
+      { cellValue: '=ASYNC_FOO()' }
+    ]]
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: sheet })
+
+    engine.destroy()
+
+    await promise
   })
 
   it('async value recalculated when dependency changes', async() => {

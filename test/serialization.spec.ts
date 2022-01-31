@@ -3,6 +3,21 @@ import {CellValueDetailedType} from '../src/Cell'
 import {adr} from './testUtils'
 
 describe('serialization', () => {
+  it('should allow setting rows to null', () => {
+    // eslint-disable-next-line no-sparse-arrays
+    const [engine1] =HyperFormula.buildFromArray({ cells: [[undefined, null], [null, { cellValue: 1 }]] })
+
+    // serialize and "send" data to server
+    const serialized = JSON.parse(
+      JSON.stringify(engine1.getAllSheetsSerialized())
+    )
+
+    // reload data and "restore" the previous state
+    const [engine2] =HyperFormula.buildFromSheets(serialized)
+
+    expect(engine2.getCellSerialized(adr('A1')).cellValue).toEqual(null)
+  })
+
   it('should not loose sheet information on serialization', () => {
     const formulas = [
       [1, '2', 'foo', true, '\'1', '33$', '12/01/15', '1%', '=FOO(', '#DIV/0!', new Date(1995, 11, 17)]

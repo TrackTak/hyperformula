@@ -88,7 +88,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
       const sheet = sheets[sheetName]
 
       sheet.cells.forEach((row, i) => {
-        row.forEach((cellContent, j) => {
+        row?.forEach((cellContent, j) => {
           const address = simpleCellAddress(sheetId, j, i)
           const parsedCellContent = this.cellContentParser.parse(cellContent)
           const dependency = this.setDependency(address, cellContent, parsedCellContent)
@@ -105,7 +105,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
     return dependencies
   }
 
-  private setDependency(address: SimpleCellAddress, rawCellContent: Maybe<DataRawCellContent>, parsedCellContent: CellContent.Type): null | [Vertex, CellDependency[]] {    
+  private setDependency(address: SimpleCellAddress, rawCellContent: Maybe<DataRawCellContent> | null, parsedCellContent: CellContent.Type): null | [Vertex, CellDependency[]] {    
     this.dependencyGraph.addCellMetadata(address, rawCellContent?.metadata)
 
     if (parsedCellContent instanceof CellContent.Formula) {

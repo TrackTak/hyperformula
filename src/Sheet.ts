@@ -20,7 +20,7 @@ export type Sheet = GenericSheet<DataRawCellContent, any>
 
 export type Sheets = Record<string, Sheet>
 
-export type InputSheet<CellMetadata, SheetMetadata> = GenericSheet<InputCell<CellMetadata>, SheetMetadata>
+export type InputSheet<CellMetadata, SheetMetadata> = GenericSheet<InputCell<CellMetadata> | null, SheetMetadata>
 
 export type InputSheets<CellMetadata, SheetMetadata> = Record<string, InputSheet<CellMetadata, SheetMetadata>>
 
@@ -49,12 +49,12 @@ export function validateAsSheet(sheet: InputSheet<any, any>): void {
   validateAsSheetContent(sheet.cells)
 }
 
-export function validateAsSheetContent(cells: InputCell<any>[][]): void {
+export function validateAsSheetContent(cells: (InputCell<any> | null)[][]): void {
   if (!Array.isArray(cells)) {
     throw new InvalidArgumentsError('an array of arrays.')
   }
-  cells.forEach((cell) => {
-    if (!Array.isArray(cell)) {
+  cells.forEach((row) => {
+    if (row !== null && row !== undefined && !Array.isArray(row)) {
       throw new InvalidArgumentsError('an array of arrays.')
     }
   })
@@ -73,7 +73,7 @@ export function findBoundaries(cells: (InputCell<any> | DataRawCellContent)[][])
   cells.forEach((row, currentRow) => {
     let currentRowWidth = 0
 
-    row.forEach((cell, currentCol) => {
+    row?.forEach((cell, currentCol) => {
       const currentValue = cell
 
       if ((currentValue?.cellValue !== undefined && currentValue?.cellValue !== null) || currentValue?.metadata) {

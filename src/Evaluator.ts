@@ -27,11 +27,6 @@ import {Operations} from './Operations'
 import {Ast, AstNodeType, RelativeDependency} from './parser'
 import {Statistics, StatType} from './statistics'
 
-interface AsyncVertexValues {
-  vertex: FormulaVertex,
-  values: (InterpreterValue | CanceledPromise<InterpreterValue>)[],
-}
-
 export class Evaluator {
   constructor(
     private readonly config: Config,
@@ -44,7 +39,7 @@ export class Evaluator {
   ) {
   }
 
-  public run(): Promise<ContentChanges> {
+  public run(): FormulaVertex[] {
     this.stats.start(StatType.TOP_SORT)
     const {sorted, cycled} = this.dependencyGraph.topSortWithScc()
     this.stats.end(StatType.TOP_SORT)
@@ -54,86 +49,12 @@ export class Evaluator {
     })
   }
 
-  private startAsyncPromises(asyncPromises: AsyncPromise[], state: InterpreterState) {
-    return Promise.all(asyncPromises.map(x => {
-      return x.startPromise(state).getPromise()
-    }))
-  }
-
-  private async recomputeAsyncFunctions(asyncPromiseVertices: FormulaVertex[]): Promise<ContentChanges> {
-    const changes = ContentChanges.empty()
-
-    if (!asyncPromiseVertices.length) {
-      return changes
-    }
-
-    const asyncGroupedVertices = this.dependencyGraph.getAsyncGroupedVertices(asyncPromiseVertices)
-
-    for (const asyncGroupedVerticesRow of asyncGroupedVertices) {
-      const asyncVertexValues = await new Promise<AsyncVertexValues[]>((resolve, reject) => {
-        const promises = asyncGroupedVerticesRow.map((vertex) => {
-          const promise = this.startAsyncPromises(vertex.getAsyncPromises(), 
-            new InterpreterState(
-              vertex.getAddress(this.lazilyTransformingAstService),
-              this.config.useArrayArithmetic,
-              vertex
-            )
-          )
-
-          return new Promise<AsyncVertexValues>((resolve, reject) => {
-            promise.then(values => {
-              resolve({
-                values,
-                vertex
-              })
-            }).catch(reject)
-          })
-        })
-
-        Promise.all(promises).then(resolve).catch(reject)
-      })
-
-      for (const { vertex, values } of asyncVertexValues) {
-        const address = vertex.getAddress(this.lazilyTransformingAstService)
-        const ast = vertex.getFormula(this.lazilyTransformingAstService)
-        const currentValue = vertex.isComputed() ? vertex.getCellValue() : undefined
-        const promisesAreCanceled = values.some(value => value instanceof CanceledPromise)
-
-        if (promisesAreCanceled) {
-          continue
-        } 
-
-        this.operations.setAsyncFormulaToCell(address, ast)
-
-        const newVertex = this.dependencyGraph.getCell(address) as FormulaVertex
-
-        this.recomputeFormulaVertexValue(newVertex, false)
-
-        const newCellValue = newVertex.getCellValue()
-        const currentRawValue = getRawValue(currentValue)
-        const newRawValue = getRawValue(newCellValue)
-
-        changes.addChange(newCellValue, address)
-
-        this.columnSearch.change(currentRawValue, newRawValue, address)
-      }
-    }
-
-    // TODO: Don't recompute cancelled vertices
-    const verticesToRecomputeFrom = Array.from(this.dependencyGraph.verticesToRecompute())
-    const [contentChanges] = this.partialRun(verticesToRecomputeFrom, false)
-
-    changes.addAll(contentChanges)
-
-    return changes
-  }
-
-  public partialRun(vertices: Vertex[], recalculateAsyncPromises = true): [ContentChanges, Vertex[], Promise<ContentChanges>] {
+  public partialRun(vertices: Vertex[], recalculateAsyncPromises: boolean): [ContentChanges, Vertex[], FormulaVertex[]] {
     const changes = ContentChanges.empty()
     const asyncVertices: FormulaVertex[] = []
 
     const { sorted } = this.stats.measure(StatType.EVALUATION, () => {
-      return this.dependencyGraph.graph.getTopSortedWithSccSubgraphFrom(vertices,
+      return this.dependencyGraph.getTopSortedWithSccSubgraphFrom(vertices,
         (vertex: Vertex) => {
           if (vertex instanceof FormulaVertex) {
             const currentValue = vertex.isComputed() ? vertex.getCellValue() : undefined
@@ -179,7 +100,7 @@ export class Evaluator {
       )
     })
 
-    return [changes, sorted, this.recomputeAsyncFunctions(asyncVertices)]
+    return [changes, sorted, asyncVertices]
   }
 
   public runAndForget(ast: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[]): [InterpreterValue, Promise<InterpreterValue>?] {
@@ -219,10 +140,16 @@ export class Evaluator {
     return [ret]
   }
 
+  public startAsyncPromises(asyncPromises: AsyncPromise[], state: InterpreterState) {
+    return Promise.all(asyncPromises.map(x => {
+      return x.startPromise(state).getPromise()
+    }))
+  }
+
   /**
    * Recalculates formulas in the topological sort order
    */
-  private recomputeFormulas(cycled: Vertex[], sorted: Vertex[]): Promise<ContentChanges> {
+  private recomputeFormulas(cycled: Vertex[], sorted: Vertex[]): FormulaVertex[] {
     cycled.forEach((vertex: Vertex) => {
       if (vertex instanceof FormulaVertex) {
         vertex.setCellValue(new CellError(ErrorType.CYCLE, undefined, vertex))
@@ -248,7 +175,7 @@ export class Evaluator {
       }
     })
 
-    return this.recomputeAsyncFunctions(asyncVertices)
+    return asyncVertices
   }
 
   private recomputeFormulaVertexValue(vertex: FormulaVertex, recalculateAsyncPromises: boolean): InterpreterValue {
