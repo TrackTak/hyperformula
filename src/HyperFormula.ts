@@ -4437,6 +4437,10 @@ export class HyperFormula implements TypedEmitter {
     const asyncGroupedVertices = this.dependencyGraph.getAsyncGroupedVertices(asyncPromiseVertices)
 
     for (const asyncGroupedVerticesRow of asyncGroupedVertices) {
+      if (!asyncGroupedVerticesRow) {
+        continue
+      }
+
       const asyncVertexValues = await new Promise<AsyncVertexValues[]>((resolve, reject) => {
         const promises = asyncGroupedVerticesRow.map((vertex) => {
           const promise = this.evaluator.startAsyncPromises(vertex.getAsyncPromises(), 
