@@ -811,16 +811,32 @@ export class DependencyGraph {
       addressPrecedents.forEach(address => {
         const vertex = this.getVertexFromAddress(address)
 
-        if (!allVertexPrecedents.has(vertex)) {
-          allVertexPrecedents.set(vertex, vertex)
+        if (vertex === undefined) {
+          throw new Error('vertex cannot be undefined')
+        }
 
-          addresses.push(address)
-
-          if (vertex === undefined) {
-            throw new Error('vertex cannot be undefined')
+        if (isSimpleCellRange(address)) {
+          // All simpleCellRanges have precedents of simpleCellAddresses so
+          // don't add an address here
+          if (!allVertexPrecedents.has(vertex)) {
+            allVertexPrecedents.set(vertex, vertex)
+            vertices.push(vertex)
           }
+        } else {
+          if (!allVertexPrecedents.has(vertex)) {
+            allVertexPrecedents.set(vertex, vertex)
+            vertices.push(vertex)
 
-          vertices.push(vertex)
+            if (vertex instanceof ArrayVertex) {
+              vertex.getRange().arrayOfAddressesInRange().forEach((row) => {
+                row.forEach((simpleCellAddress) => {
+                  addresses.push(simpleCellAddress)
+                })
+              })
+            } else {
+              addresses.push(address)
+            }
+          }
         }
       })
     }
