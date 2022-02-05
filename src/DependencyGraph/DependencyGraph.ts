@@ -7,7 +7,7 @@ import { ExpectedValueOfTypeError } from '..'
 import {AbsoluteCellRange, isSimpleCellRange, SimpleCellRange, simpleCellRange} from '../AbsoluteCellRange'
 import {absolutizeDependencies} from '../absolutizeDependencies'
 import {ArraySize} from '../ArraySize'
-import {AsyncPromise, AsyncPromiseFetcher} from '../AsyncPromise'
+import {AsyncPromiseFetcher} from '../AsyncPromise'
 import {CellError, ErrorType, isSimpleCellAddress, simpleCellAddress, SimpleCellAddress} from '../Cell'
 import {DataRawCellContent} from '../CellContentParser'
 import {CellDependency} from '../CellDependency'
@@ -89,12 +89,40 @@ export class DependencyGraph {
     )
   }
 
-  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, asyncPromises: Maybe<AsyncPromise[]>, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean): ContentChanges {
-    const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version(), asyncPromises)
+  public updateAsyncCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean): ContentChanges {
+    const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version())
 
-    if (hasAsyncFunction) {
-      this.markAsAsync(newVertex)
+    this.exchangeOrAddFormulaVertex(newVertex)
+    this.processCellPrecedents(precedents, newVertex)
+
+    // Remove dependent async specialNodesRecentlyChanged vertices as
+    // these are updated in parallel next iteration
+    const adjacentVertices = this.graph.adjacentNodes(newVertex)
+
+    adjacentVertices.forEach((vertex) => {
+      if (this.graph.hasAsyncNode(vertex)) {
+        this.graph.specialNodesRecentlyChanged.delete(vertex)
+      }
+    })
+
+    this.graph.markNodeAsSpecialRecentlyChanged(newVertex)
+
+    if (hasVolatileFunction) {
+      this.markAsVolatile(newVertex)
     }
+
+    if (hasStructuralChangeFunction) {
+      this.markAsDependentOnStructureChange(newVertex)
+    }
+
+    this.markAsAsync(newVertex)
+    this.correctInfiniteRangesDependency(address)
+
+    return this.getAndClearContentChanges()
+  }
+
+  public setFormulaToCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean, hasAsyncFunction: boolean): ContentChanges {
+    const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version())
 
     this.exchangeOrAddFormulaVertex(newVertex)
     this.processCellPrecedents(precedents, newVertex)
@@ -106,6 +134,10 @@ export class DependencyGraph {
 
     if (hasStructuralChangeFunction) {
       this.markAsDependentOnStructureChange(newVertex)
+    }
+
+    if (hasAsyncFunction) {
+      this.markAsAsync(newVertex)
     }
 
     this.correctInfiniteRangesDependency(address)
@@ -763,11 +795,12 @@ export class DependencyGraph {
     this.graph.addNode(newNode)
     const adjNodesStored = this.graph.adjacentNodes(oldNode)
     this.removeVertex(oldNode)
-    adjNodesStored.forEach((adjacentNode) => {
+
+    for (const adjacentNode of adjNodesStored) {
       if (this.graph.hasNode(adjacentNode)) {
         this.graph.addEdge(newNode, adjacentNode)
       }
-    })
+    }
   }
 
   public exchangeOrAddGraphNode(oldNode: Maybe<Vertex>, newNode: Vertex) {

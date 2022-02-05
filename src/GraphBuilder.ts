@@ -118,11 +118,12 @@ export class SimpleStrategy implements GraphBuilderStrategy {
       } else {
         this.shrinkArrayIfNeeded(address)
 
-        const asyncPromises = this.asyncPromiseFetcher.checkFunctionPromises(parseResult.ast, address)
+        this.asyncPromiseFetcher.setFunctionPromisesToAst(parseResult.ast, address)
+        
         const size = this.arraySizePredictor.checkArraySize(parseResult.ast, address)
 
         if (size.isScalar()) {
-          const vertex = new FormulaCellVertex(parseResult.ast, address, 0, asyncPromises)
+          const vertex = new FormulaCellVertex(parseResult.ast, address, 0)
 
           this.dependencyGraph.addVertex(address, vertex)
 
@@ -138,7 +139,7 @@ export class SimpleStrategy implements GraphBuilderStrategy {
 
           return [vertex, absolutizeDependencies(parseResult.dependencies, address)]
         } else {
-          const vertex = new ArrayVertex(parseResult.ast, address, new ArraySize(size.width, size.height), asyncPromises)
+          const vertex = new ArrayVertex(parseResult.ast, address, new ArraySize(size.width, size.height))
 
           this.dependencyGraph.addArrayVertex(address, vertex)
 

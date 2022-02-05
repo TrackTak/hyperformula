@@ -4112,7 +4112,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Helpers
    */
-  public calculateFormula(formulaString: string, sheetId: number): [CellValue | CellValue[][], Promise<CellValue | CellValue[][]>] {
+  public calculateFormula(formulaString: string, sheetId: number): [CellValue | CellValue[][], Maybe<Promise<CellValue | CellValue[][]>>] {
     validateArgToType(formulaString, 'string', 'formulaString')
     validateArgToType(sheetId, 'number', 'sheetId')
     this._crudOperations.ensureScopeIdIsValid(sheetId)
@@ -4121,9 +4121,15 @@ export class HyperFormula implements TypedEmitter {
       throw new NotAFormulaError()
     }
     const [interpreterValue, promise] = this.evaluator.runAndForget(ast, address, dependencies)
-    
+
+    const exportedValue = this._exporter.exportScalarOrRange(interpreterValue)
+
+    if (!promise) {
+      return [exportedValue, undefined]
+    }
+
     const newPromise = new Promise<CellValue | CellValue[][]>((resolve, reject) => {
-      promise?.then((value) => {
+      promise.then((value) => {
         if (this._exporter) {
           resolve(this._exporter.exportScalarOrRange(value))
         }
@@ -4131,7 +4137,7 @@ export class HyperFormula implements TypedEmitter {
       }).catch(reject)
     })
 
-    return [this._exporter.exportScalarOrRange(interpreterValue), newPromise]
+    return [exportedValue, newPromise]
   }
 
   /**
@@ -4428,7 +4434,7 @@ export class HyperFormula implements TypedEmitter {
     return {ast, address, dependencies}
   }
 
-  private async recomputeAsyncFunctions(asyncPromiseVertices: FormulaVertex[]): Promise<ExportedChange[]> {
+  private async recomputeAsyncFunctions(asyncPromiseVertices: FormulaVertex[], recalculateAsyncVertices: boolean = false): Promise<ExportedChange[]> {
     if (!asyncPromiseVertices.length) {
       return Promise.resolve([])
     }
@@ -4436,7 +4442,7 @@ export class HyperFormula implements TypedEmitter {
     const exportedChanges: ExportedChange[] = []
     const asyncGroupedVertices = this.dependencyGraph.getAsyncGroupedVertices(asyncPromiseVertices)
 
-    for (const asyncGroupedVerticesRow of asyncGroupedVertices) {
+    for (const asyncGroupedVerticesRow of asyncGroupedVertices) {      
       if (!asyncGroupedVerticesRow) {
         continue
       }
@@ -4472,6 +4478,7 @@ export class HyperFormula implements TypedEmitter {
 
       for (const { vertex, values } of asyncVertexValues) {
         const address = vertex.getAddress(this.lazilyTransformingAstService)
+        
         const ast = vertex.getFormula(this.lazilyTransformingAstService)
         const promisesAreCanceled = values.some(value => value instanceof CanceledPromise)
 
@@ -4481,13 +4488,10 @@ export class HyperFormula implements TypedEmitter {
 
         nonCancelledPromises += 1
 
-        this._crudOperations.operations.setAsyncFormulaToCell(address, ast)
+        this._crudOperations.operations.updateAsyncFormulaCell(address, ast)
       }
 
       if (nonCancelledPromises > 0) {
-        // TODO: Perhaps could make more performant by only recomputing
-        // cells here that have cells dependent on them instead of every
-        // cell at each level
         const changes = this.recomputeAsyncVerticesIfDependencyGraphNeedsIt()
 
         exportedChanges.push(...changes)

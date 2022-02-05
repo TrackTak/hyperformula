@@ -72,6 +72,7 @@ export class Evaluator {
               changes.addChange(newCellValue, address)
 
               this.columnSearch.change(currentRawValue, newRawValue, address)
+
               return true
             }
             return false
@@ -96,7 +97,7 @@ export class Evaluator {
             vertex.setCellValue(value)
             changes.addChange(value, address)
           }
-        },
+        }
       )
     })
 
@@ -116,7 +117,7 @@ export class Evaluator {
       }
     }
     
-    this.dependencyGraph.asyncPromiseFetcher.checkFunctionPromises(ast, address)
+    this.dependencyGraph.asyncPromiseFetcher.setFunctionPromisesToAst(ast, address)
     
     const state = new InterpreterState(address, this.config.useArrayArithmetic)
     const ret = this.evaluateAstToCellValue(ast, state)
