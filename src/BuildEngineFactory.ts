@@ -125,7 +125,7 @@ export class BuildEngineFactory {
       graphBuilder.buildGraph(sheets, stats)
     })
 
-    const evaluator = new Evaluator(config, stats, interpreter, lazilyTransformingAstService, dependencyGraph, columnSearch, operations)
+    const evaluator = new Evaluator(config, stats, interpreter, lazilyTransformingAstService, dependencyGraph, columnSearch)
 
     const asyncVertices = evaluator.run()
 

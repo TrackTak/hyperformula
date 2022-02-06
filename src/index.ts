@@ -80,6 +80,7 @@ import {
   UndoRedo
 } from './UndoRedo'
 import * as lexerConfig from './parser/LexerConfig'
+import { CachedGraphType } from './DependencyGraph/DependencyGraph'
 
 /** @internal */
 class HyperFormulaNS extends HyperFormula {
@@ -221,5 +222,6 @@ export {
   ChangeNamedExpressionUndoEntry,
   BatchUndoEntry,
   UndoRedo,
-  lexerConfig
+  lexerConfig,
+  CachedGraphType
 }

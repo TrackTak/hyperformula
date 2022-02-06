@@ -16,14 +16,15 @@ import {CanceledPromise, CellError, ErrorType, SimpleCellAddress} from './Cell'
 import {Config} from './Config'
 import {ContentChanges} from './ContentChanges'
 import {ArrayVertex, DependencyGraph, RangeVertex, Vertex} from './DependencyGraph'
+import { CachedGraphType } from './DependencyGraph/DependencyGraph'
 import {FormulaVertex} from './DependencyGraph/FormulaCellVertex'
+import { TopSortResult } from './DependencyGraph/Graph'
 import {Interpreter} from './interpreter/Interpreter'
 import {InterpreterState} from './interpreter/InterpreterState'
 import {EmptyValue, getRawValue, InterpreterValue} from './interpreter/InterpreterValue'
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
-import {Operations} from './Operations'
 import {Ast, AstNodeType, RelativeDependency} from './parser'
 import {Statistics, StatType} from './statistics'
 
@@ -35,73 +36,17 @@ export class Evaluator {
     private readonly lazilyTransformingAstService: LazilyTransformingAstService,
     private readonly dependencyGraph: DependencyGraph,
     private readonly columnSearch: ColumnSearchStrategy,
-    private readonly operations: Operations,
   ) {
   }
 
   public run(): FormulaVertex[] {
     this.stats.start(StatType.TOP_SORT)
-    const {sorted, cycled} = this.dependencyGraph.topSortWithScc()
+    const { sorted, cycled } = this.dependencyGraph.topSortWithScc()
     this.stats.end(StatType.TOP_SORT)
 
     return this.stats.measure(StatType.EVALUATION, () => {
       return this.recomputeFormulas(cycled, sorted)
     })
-  }
-
-  public partialRun(vertices: Vertex[], recalculateAsyncPromises: boolean): [ContentChanges, Vertex[], FormulaVertex[]] {
-    const changes = ContentChanges.empty()
-    const asyncVertices: FormulaVertex[] = []
-
-    const { sorted } = this.stats.measure(StatType.EVALUATION, () => {
-      return this.dependencyGraph.getTopSortedWithSccSubgraphFrom(vertices,
-        (vertex: Vertex) => {
-          if (vertex instanceof FormulaVertex) {
-            const currentValue = vertex.isComputed() ? vertex.getCellValue() : undefined
-            const newCellValue = this.recomputeFormulaVertexValue(vertex, recalculateAsyncPromises)
-
-            if (vertex.hasAsyncPromisesPending()) {
-              asyncVertices.push(vertex)
-            }
-
-            if (newCellValue !== currentValue) {
-              const address = vertex.getAddress(this.lazilyTransformingAstService)
-              const currentRawValue = getRawValue(currentValue)
-              const newRawValue = getRawValue(newCellValue)
-
-              changes.addChange(newCellValue, address)
-
-              this.columnSearch.change(currentRawValue, newRawValue, address)
-
-              return true
-            }
-            return false
-          } else if (vertex instanceof RangeVertex) {
-            vertex.clearCache()
-            return true
-          } else {
-            return true
-          }
-        },
-        (vertex: Vertex) => {
-          if (vertex instanceof RangeVertex) {
-            vertex.clearCache()
-          } else if (vertex instanceof FormulaVertex) {
-            const address = vertex.getAddress(this.lazilyTransformingAstService)
-            const rawValue = getRawValue(vertex.valueOrUndef())
-
-            this.columnSearch.remove(rawValue, address)
-            const error = new CellError(ErrorType.CYCLE, undefined, vertex)
-            const value = error
-
-            vertex.setCellValue(value)
-            changes.addChange(value, address)
-          }
-        }
-      )
-    })
-
-    return [changes, sorted, asyncVertices]
   }
 
   public runAndForget(ast: Ast, address: SimpleCellAddress, dependencies: RelativeDependency[]): [InterpreterValue, Promise<InterpreterValue>?] {
@@ -145,6 +90,110 @@ export class Evaluator {
     return Promise.all(asyncPromises.map(x => {
       return x.startPromise(state).getPromise()
     }))
+  }
+
+  public partialRun(vertices: Vertex[], recalculateAsyncPromises: boolean): [ContentChanges, FormulaVertex[]] {
+    if (this.dependencyGraph.cachedGraphType === CachedGraphType.NONE) {
+      return this.partialRunNonCachedGraph(vertices, recalculateAsyncPromises)
+    }
+
+    if (this.dependencyGraph.cachedGraphType === CachedGraphType.MAIN) {
+      const cachedTopSortedGraph = this.dependencyGraph.getCachedTopSortedGraph()
+
+      return this.runCachedGraph(recalculateAsyncPromises, cachedTopSortedGraph)
+    }
+
+    if (this.dependencyGraph.cachedGraphType === CachedGraphType.SUB_GRAPH) {
+      const cachedTopSortedWithSccSubgraph = this.dependencyGraph.getCachedTopSortedWithSccSubgraph()
+
+      if (cachedTopSortedWithSccSubgraph === null) {
+        return this.partialRunNonCachedGraph(vertices, recalculateAsyncPromises)
+      }
+
+      return this.runCachedGraph(recalculateAsyncPromises, cachedTopSortedWithSccSubgraph)
+    }
+
+    throw new Error('unexpected cachedGraphType encountered')
+  }
+
+  private runCachedGraph(recalculateAsyncPromises: boolean, cachedTopSortGraph: TopSortResult<Vertex> | null): [ContentChanges, FormulaVertex[]] {
+    if (cachedTopSortGraph === null) {
+      throw new Error('cachedTopSortGraph should not be null')
+    }
+
+    const changes = ContentChanges.empty()
+    const asyncVertices: FormulaVertex[] = []
+    const { sorted, cycled } = cachedTopSortGraph
+
+    this.stats.measure(StatType.EVALUATION, () => {
+      sorted.forEach((vertex) => {
+        this.operatingFunction(changes, asyncVertices, recalculateAsyncPromises, vertex)
+      })
+
+      cycled.forEach((vertex) => {
+        this.onCycle(changes, vertex)
+      })
+    })
+
+    return [changes, asyncVertices]
+  }
+
+  private partialRunNonCachedGraph(vertices: Vertex[], recalculateAsyncPromises: boolean): [ContentChanges, FormulaVertex[]] {
+    const changes = ContentChanges.empty()
+    const asyncVertices: FormulaVertex[] = []
+
+    this.stats.measure(StatType.EVALUATION, () => {
+      this.dependencyGraph.getTopSortedWithSccSubgraphFrom(vertices,
+        (vertex: Vertex) => this.operatingFunction(changes, asyncVertices, recalculateAsyncPromises, vertex),
+        (vertex: Vertex) => this.onCycle(changes, vertex)
+      )
+    })
+
+    return [changes, asyncVertices]
+  }
+
+  private operatingFunction(changes: ContentChanges, asyncVertices: FormulaVertex[], recalculateAsyncPromises: boolean, vertex: Vertex): boolean {
+    if (vertex instanceof FormulaVertex) {
+      const currentValue = vertex.isComputed() ? vertex.getCellValue() : undefined
+      const newCellValue = this.recomputeFormulaVertexValue(vertex, recalculateAsyncPromises)
+
+      if (vertex.hasAsyncPromisesPending()) {
+        asyncVertices.push(vertex)
+      }
+
+      if (newCellValue !== currentValue) {
+        const address = vertex.getAddress(this.lazilyTransformingAstService)
+        const currentRawValue = getRawValue(currentValue)
+        const newRawValue = getRawValue(newCellValue)
+
+        changes.addChange(newCellValue, address)
+
+        this.columnSearch.change(currentRawValue, newRawValue, address)
+
+        return true
+      }
+      return false
+    } else if (vertex instanceof RangeVertex) {
+      vertex.clearCache()
+      return true
+    }
+    return true
+  }
+
+  private onCycle(changes: ContentChanges, vertex: Vertex) {
+    if (vertex instanceof RangeVertex) {
+      vertex.clearCache()
+    } else if (vertex instanceof FormulaVertex) {
+      const address = vertex.getAddress(this.lazilyTransformingAstService)
+      const rawValue = getRawValue(vertex.valueOrUndef())
+
+      this.columnSearch.remove(rawValue, address)
+      const error = new CellError(ErrorType.CYCLE, undefined, vertex)
+      const value = error
+
+      vertex.setCellValue(value)
+      changes.addChange(value, address)
+    }
   }
 
   /**

@@ -52,9 +52,18 @@ import {SheetMapping} from './SheetMapping'
 import {RawAndParsedValue} from './ValueCellVertex'
 import { CellVertexMetadata } from './Vertex'
 
+export enum CachedGraphType {
+  NONE = 'NONE',
+  MAIN = 'MAIN',
+  SUB_GRAPH = 'SUB_GRAPH'
+}
+
 export class DependencyGraph {
   public readonly graph: Graph<Vertex>
+  private cachedTopSortedGraph: TopSortResult<Vertex> | null = null
+  private cachedTopSortedWithSccSubgraph: TopSortResult<Vertex> | null = null
   private changes: ContentChanges = ContentChanges.empty()
+  public cachedGraphType: CachedGraphType = CachedGraphType.NONE
 
   constructor(
     public readonly addressMapping: AddressMapping,
@@ -68,6 +77,20 @@ export class DependencyGraph {
     public readonly asyncPromiseFetcher: AsyncPromiseFetcher
   ) {
     this.graph = new Graph<Vertex>(this.dependencyQueryVertices)
+  }
+
+  public getCachedTopSortedGraph() {
+    return this.cachedTopSortedGraph
+  }
+
+  public getCachedTopSortedWithSccSubgraph() {
+    return this.cachedTopSortedWithSccSubgraph
+  }
+
+  public clearCachedGraphs() {
+    this.cachedTopSortedGraph = null
+    this.cachedTopSortedWithSccSubgraph = null
+    this.cachedGraphType = CachedGraphType.NONE
   }
 
   /**
@@ -706,19 +729,27 @@ export class DependencyGraph {
   }
 
   public topSortWithScc(): TopSortResult<Vertex> {
-    return this.graph.topSortWithScc((vertex: Vertex) => {
+    this.cachedTopSortedGraph = this.graph.topSortWithScc((vertex: Vertex) => {
       this.processAsyncVertices(vertex)
 
       return true
     })
+
+    return this.cachedTopSortedGraph
   }
 
   public getTopSortedWithSccSubgraphFrom(modifiedNodes: Vertex[], operatingFunction: (node: Vertex) => boolean, onCycle: (node: Vertex) => void): TopSortResult<Vertex> {
-    return this.graph.getTopSortedWithSccSubgraphFrom(modifiedNodes, (vertex: Vertex) => {
+    const topSortedWithSccSubgraph = this.graph.getTopSortedWithSccSubgraphFrom(modifiedNodes, (vertex: Vertex) => {
       this.processAsyncVertices(vertex)
 
       return operatingFunction(vertex)
     }, onCycle)
+
+    if (this.cachedGraphType === CachedGraphType.SUB_GRAPH) {
+      this.cachedTopSortedWithSccSubgraph = topSortedWithSccSubgraph
+    }
+    
+    return topSortedWithSccSubgraph
   }
 
   public markAsVolatile(vertex: Vertex) {

@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import { CellError } from '.'
+import { CachedGraphType, CellError } from '.'
 import {AbsoluteCellRange, isSimpleCellRange, SimpleCellRange} from './AbsoluteCellRange'
 import {validateArgToType} from './ArgumentSanitization'
 import {BuildEngineFactory, EngineState} from './BuildEngineFactory'
@@ -3580,6 +3580,14 @@ export class HyperFormula implements TypedEmitter {
     return this._evaluationSuspended
   }
 
+  public useCachedGraph(graphType: CachedGraphType.MAIN | CachedGraphType.SUB_GRAPH) {
+    this._dependencyGraph.cachedGraphType = graphType
+  }
+
+  public stopUsingCachedGraph() {
+    this.dependencyGraph.clearCachedGraphs()
+  }
+
   /**
    * Returns information whether it is possible to add named expression into a specific scope.
    * Checks against particular rules to ascertain that addNamedExpression can be called.
@@ -4434,7 +4442,7 @@ export class HyperFormula implements TypedEmitter {
     return {ast, address, dependencies}
   }
 
-  private async recomputeAsyncFunctions(asyncPromiseVertices: FormulaVertex[], recalculateAsyncVertices: boolean = false): Promise<ExportedChange[]> {
+  private async recomputeAsyncFunctions(asyncPromiseVertices: FormulaVertex[]): Promise<ExportedChange[]> {
     if (!asyncPromiseVertices.length) {
       return Promise.resolve([])
     }
@@ -4547,7 +4555,8 @@ export class HyperFormula implements TypedEmitter {
       let exportedChangesPromise: Promise<ExportedChange[]> = Promise.resolve([])
 
       if (verticesToRecomputeFrom.length > 0) {
-        const [contentChanges,, asyncVertices] = this.evaluator.partialRun(verticesToRecomputeFrom, true)
+        const [contentChanges, asyncVertices] = this.evaluator.partialRun(verticesToRecomputeFrom, true)
+
         const promise = this.recomputeAsyncFunctions(asyncVertices)
 
         exportedChangesPromise = promise
