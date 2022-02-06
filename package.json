@@ -150,5 +150,10 @@
     "regenerator-runtime": "^0.13.3",
     "tiny-emitter": "^2.1.0",
     "unorm": "^1.6.0"
-  }
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "maintained node versions"
+  ]
 }
