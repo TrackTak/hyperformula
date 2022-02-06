@@ -195,7 +195,7 @@ describe('async functions', () => {
 
       const changes = await promise
 
-      expect(changes).toEqual([new ExportedCellChange(adr('A1'), 1), new ExportedCellChange(adr('B1'), 2)])
+      expect(changes).toEqual([new ExportedCellChange(adr('A1'), 1), new ExportedCellChange(adr('B1'), getLoadingError('Sheet1!B1')), new ExportedCellChange(adr('B1'), 2)])
     })
 
     it('async values are calculated after promises resolve', async() => {
