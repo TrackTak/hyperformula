@@ -166,12 +166,14 @@ describe('Events', () => {
   it('asyncValuesUpdated works', async() => {
     HyperFormula.registerFunctionPlugin(AsyncTestPlugin, AsyncTestPlugin.translations)
 
-    const [engine] = HyperFormula.buildFromArray({ cells: [
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: [
       [{ cellValue: '=ASYNC_FOO()' }]
     ]})
     const handler = jasmine.createSpy()
 
     engine.on(Events.AsyncValuesUpdated, handler)
+
+    await promise
 
     await engine.setCellContents(adr('B1'), [[{ cellValue: '=ASYNC_FOO()' }]])[1]
 

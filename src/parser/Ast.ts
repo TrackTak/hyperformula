@@ -109,6 +109,10 @@ export enum RangeSheetReferenceType {
   BOTH_ABSOLUTE
 }
 
+export interface AsyncAst {
+  asyncPromise?: AsyncPromise,
+}
+
 export interface AstWithWhitespace {
   startOffset?: number,
   endOffset?: number,
@@ -253,8 +257,8 @@ export const buildRowRangeAst = (
 }
 
 export interface BinaryOpAst extends AstWithWhitespace {
-  left: Ast,
-  right: Ast,
+  left: Ast & AsyncAst,
+  right: Ast & AsyncAst,
 }
 
 export interface ConcatenateOpAst extends BinaryOpAst {
@@ -463,7 +467,7 @@ export const buildPowerOpAst = (
 
 export interface MinusUnaryOpAst extends AstWithWhitespace {
   type: AstNodeType.MINUS_UNARY_OP,
-  value: Ast,
+  value: Ast & AsyncAst,
 }
 
 export const buildMinusUnaryOpAst = (
@@ -481,7 +485,7 @@ export const buildMinusUnaryOpAst = (
 
 export interface PlusUnaryOpAst extends AstWithWhitespace {
   type: AstNodeType.PLUS_UNARY_OP,
-  value: Ast,
+  value: Ast & AsyncAst,
 }
 
 export const buildPlusUnaryOpAst = (
@@ -499,7 +503,7 @@ export const buildPlusUnaryOpAst = (
 
 export interface PercentOpAst extends AstWithWhitespace {
   type: AstNodeType.PERCENT_OP,
-  value: Ast,
+  value: Ast & AsyncAst,
 }
 
 export const buildPercentOpAst = (
@@ -515,11 +519,10 @@ export const buildPercentOpAst = (
   leadingWhitespace: leadingWhitespace?.image,
 })
 
-export interface ProcedureAst extends AstWithInternalWhitespace {
+export interface ProcedureAst extends AstWithInternalWhitespace, AsyncAst {
   type: AstNodeType.FUNCTION_CALL,
   procedureName: string,
   args: Ast[],
-  asyncPromise?: AsyncPromise,
 }
 
 export const buildProcedureAst = (
@@ -541,7 +544,7 @@ export const buildProcedureAst = (
 
 export interface ArrayAst extends AstWithInternalWhitespace {
   type: AstNodeType.ARRAY,
-  args: Ast[][],
+  args: (Ast & AsyncAst)[][],
 }
 
 export const buildArrayAst = (
@@ -575,7 +578,7 @@ export const buildNamedExpressionAst = (
 
 export interface ParenthesisAst extends AstWithInternalWhitespace {
   type: AstNodeType.PARENTHESIS,
-  expression: Ast,
+  expression: Ast & AsyncAst,
 }
 
 export const buildParenthesisAst = (

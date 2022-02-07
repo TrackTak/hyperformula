@@ -11,6 +11,8 @@ import {InterpreterState} from './interpreter/InterpreterState'
 import {InterpreterValue} from './interpreter/InterpreterValue'
 import {Ast, AstNodeType, ProcedureAst} from './parser'
 
+type PromiseGetter = (state: InterpreterState) => CancelablePromise<InterpreterValue>
+
 export class AsyncPromise {
   private isResolvedValue = false
   /** Most recently fetched value of this promise. */
@@ -18,7 +20,7 @@ export class AsyncPromise {
   private cancelablePromise?: CancelablePromise<InterpreterValue>
 
   constructor(
-    private promiseGetter: (state: InterpreterState) => CancelablePromise<InterpreterValue>,
+    private promiseGetter: PromiseGetter,
   ) {
     if (!promiseGetter) {
       throw Error('promiseGetter must be supplied')
@@ -68,7 +70,7 @@ export class AsyncPromiseFetcher {
   ) {
   }
 
-  public checkFunctionPromises(ast: Ast, formulaAddress: SimpleCellAddress): AsyncPromise[] {
+  public setFunctionPromisesToAst(ast: Ast, formulaAddress: SimpleCellAddress): AsyncPromise[] {
     const value = this.checkFunctionPromisesForAst(ast, {formulaAddress, arraysFlag: this.config.useArrayArithmetic})
   
     return value.filter(x => x) as AsyncPromise[]

@@ -76,6 +76,14 @@ const collectDependenciesFn = (ast: Ast, functionRegistry: FunctionRegistry, dep
     case AstNodeType.PARENTHESIS:
       collectDependenciesFn(ast.expression, functionRegistry, dependenciesSet, needArgument)
       return
+    case AstNodeType.ARRAY: {
+        ast.args.forEach((arrArg: Ast[]) => {
+          arrArg.forEach((ast) => 
+            collectDependenciesFn(ast, functionRegistry, dependenciesSet, needArgument)
+          )
+        })
+        return
+      }
     case AstNodeType.FUNCTION_CALL: {
       const functionNeedArgument = !functionRegistry.doesFunctionNeedArgumentToBeComputed(ast.procedureName)
       ast.args.forEach((argAst: Ast) =>

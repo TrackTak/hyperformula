@@ -188,6 +188,16 @@ describe('async functions', () => {
   })
 
   describe('exported changes', () => {
+    it('buildFromArray', async() => {
+      const [,promise] = HyperFormula.buildFromArray({ cells: [[
+        { cellValue: '=ASYNC_FOO()' }, { cellValue: '=ASYNC_FOO()+A1' }
+      ]]})
+
+      const changes = await promise
+
+      expect(changes).toEqual([new ExportedCellChange(adr('A1'), 1), new ExportedCellChange(adr('B1'), getLoadingError('Sheet1!B1')), new ExportedCellChange(adr('B1'), 2)])
+    })
+
     it('async values are calculated after promises resolve', async() => {
       const [engine] = HyperFormula.buildFromArray({ cells: [] })
 
@@ -306,6 +316,38 @@ describe('async functions', () => {
 
     expect(engine.getSheetValues(0).cells).toEqual([[
       { cellValue: 1 }, { cellValue: 6 }
+    ]])
+  })
+
+  it('works with nested dependent async functions and non-async functions', async() => {
+    const sheet = [[
+      { cellValue: 1 }, { cellValue: '=ASYNC_FOO(A1)' }, { cellValue: '=ASYNC_FOO(B1)' } 
+    ]]
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: sheet })
+
+    await promise
+
+    expect(engine.getSheetValues(0).cells).toEqual([[
+      { cellValue: 1 }, { cellValue: 6 }, { cellValue: 11 }
+    ]])
+  })
+
+  it('works with dependent async functions and non-async functions with setCellContents', async() => {
+    const sheet = [[
+      { cellValue: 1 }, { cellValue: '=ASYNC_FOO(A1)' }, { cellValue: '=ASYNC_FOO(B1)' }
+    ]]
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: sheet })
+
+    engine.addSheet()
+
+    await promise
+
+    await engine.setCellContents(adr('A1'), {
+      cellValue: 2
+    })[1]
+
+    expect(engine.getSheetValues(0).cells).toEqual([[
+      { cellValue: 2 }, { cellValue: 7 }, { cellValue: 12 }
     ]])
   })
 
