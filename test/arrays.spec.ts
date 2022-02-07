@@ -466,9 +466,9 @@ describe('build from array', () => {
       [{ cellValue: '=ASYNC_ARRAY_FOO()' }],
     ] }, {useArrayArithmetic: true})
 
-    engine.setCellContents(adr('C1'), { cellValue: '=TRANSPOSE(A1:B2)' })
-
     await promise
+
+    await engine.setCellContents(adr('C1'), { cellValue: '=TRANSPOSE(A1:B2)' })[1]
 
     expect(engine.getSheetValues(0).cells).toEqual([
       [{ cellValue: 1 }, { cellValue: 1 }, { cellValue: 1 }, { cellValue: 1}], 

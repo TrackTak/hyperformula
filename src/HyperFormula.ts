@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Handsoncode. All rights reserved.
  */
 
-import { CellError } from '.'
+import { CachedGraphType, CellError } from '.'
 import {AbsoluteCellRange, isSimpleCellRange, SimpleCellRange} from './AbsoluteCellRange'
 import {validateArgToType} from './ArgumentSanitization'
 import {BuildEngineFactory, EngineState} from './BuildEngineFactory'
@@ -3580,6 +3580,14 @@ export class HyperFormula implements TypedEmitter {
     return this._evaluationSuspended
   }
 
+  public useCachedGraph(graphType: CachedGraphType.MAIN | CachedGraphType.SUB_GRAPH) {
+    this._dependencyGraph.cachedGraphType = graphType
+  }
+
+  public stopUsingCachedGraph() {
+    this.dependencyGraph.clearCachedGraphs()
+  }
+
   /**
    * Returns information whether it is possible to add named expression into a specific scope.
    * Checks against particular rules to ascertain that addNamedExpression can be called.
@@ -4112,7 +4120,7 @@ export class HyperFormula implements TypedEmitter {
    *
    * @category Helpers
    */
-  public calculateFormula(formulaString: string, sheetId: number): [CellValue | CellValue[][], Promise<CellValue | CellValue[][]>] {
+  public calculateFormula(formulaString: string, sheetId: number): [CellValue | CellValue[][], Maybe<Promise<CellValue | CellValue[][]>>] {
     validateArgToType(formulaString, 'string', 'formulaString')
     validateArgToType(sheetId, 'number', 'sheetId')
     this._crudOperations.ensureScopeIdIsValid(sheetId)
@@ -4121,9 +4129,15 @@ export class HyperFormula implements TypedEmitter {
       throw new NotAFormulaError()
     }
     const [interpreterValue, promise] = this.evaluator.runAndForget(ast, address, dependencies)
-    
+
+    const exportedValue = this._exporter.exportScalarOrRange(interpreterValue)
+
+    if (!promise) {
+      return [exportedValue, undefined]
+    }
+
     const newPromise = new Promise<CellValue | CellValue[][]>((resolve, reject) => {
-      promise?.then((value) => {
+      promise.then((value) => {
         if (this._exporter) {
           resolve(this._exporter.exportScalarOrRange(value))
         }
@@ -4131,7 +4145,7 @@ export class HyperFormula implements TypedEmitter {
       }).catch(reject)
     })
 
-    return [this._exporter.exportScalarOrRange(interpreterValue), newPromise]
+    return [exportedValue, newPromise]
   }
 
   /**
@@ -4436,7 +4450,7 @@ export class HyperFormula implements TypedEmitter {
     const exportedChanges: ExportedChange[] = []
     const asyncGroupedVertices = this.dependencyGraph.getAsyncGroupedVertices(asyncPromiseVertices)
 
-    for (const asyncGroupedVerticesRow of asyncGroupedVertices) {
+    for (const asyncGroupedVerticesRow of asyncGroupedVertices) {      
       if (!asyncGroupedVerticesRow) {
         continue
       }
@@ -4472,6 +4486,7 @@ export class HyperFormula implements TypedEmitter {
 
       for (const { vertex, values } of asyncVertexValues) {
         const address = vertex.getAddress(this.lazilyTransformingAstService)
+        
         const ast = vertex.getFormula(this.lazilyTransformingAstService)
         const promisesAreCanceled = values.some(value => value instanceof CanceledPromise)
 
@@ -4481,13 +4496,10 @@ export class HyperFormula implements TypedEmitter {
 
         nonCancelledPromises += 1
 
-        this._crudOperations.operations.setAsyncFormulaToCell(address, ast)
+        this._crudOperations.operations.updateAsyncFormulaCell(address, ast)
       }
 
       if (nonCancelledPromises > 0) {
-        // TODO: Perhaps could make more performant by only recomputing
-        // cells here that have cells dependent on them instead of every
-        // cell at each level
         const changes = this.recomputeAsyncVerticesIfDependencyGraphNeedsIt()
 
         exportedChanges.push(...changes)
@@ -4543,7 +4555,8 @@ export class HyperFormula implements TypedEmitter {
       let exportedChangesPromise: Promise<ExportedChange[]> = Promise.resolve([])
 
       if (verticesToRecomputeFrom.length > 0) {
-        const [contentChanges,, asyncVertices] = this.evaluator.partialRun(verticesToRecomputeFrom, true)
+        const [contentChanges, asyncVertices] = this.evaluator.partialRun(verticesToRecomputeFrom, true)
+
         const promise = this.recomputeAsyncFunctions(asyncVertices)
 
         exportedChangesPromise = promise

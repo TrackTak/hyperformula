@@ -108,6 +108,15 @@ export class Graph<T> {
   }
 
   /**
+   * Checks whether an async node is present in graph
+   *
+   * @param node - node to check
+   */
+  public hasAsyncNode(node: T): boolean {
+    return this.specialNodesAsync.has(node)
+  }
+
+  /**
    * Checks whether a node is present in graph
    *
    * @param node - node to check
@@ -206,7 +215,6 @@ export class Graph<T> {
    * @param onCycle - action to be performed when node is on cycle
    */
   public getTopSortedWithSccSubgraphFrom(modifiedNodes: T[], operatingFunction: (node: T) => boolean, onCycle: (node: T) => void): TopSortResult<T> {
-
     const entranceTime: Map<T, number> = new Map()
     const low: Map<T, number> = new Map()
     const parent: Map<T, T> = new Map()
@@ -302,11 +310,15 @@ export class Graph<T> {
       if (sccNonSingletons.has(t) || this.adjacentNodes(t).has(t)) {
         cycled.push(t)
         onCycle(t)
-        this.adjacentNodes(t).forEach((s: T) => shouldBeUpdatedMapping.add(s))
+        this.adjacentNodes(t).forEach((s: T) =>{
+          shouldBeUpdatedMapping.add(s)
+        })
       } else {
         sorted.push(t)
         if (shouldBeUpdatedMapping.has(t) && operatingFunction(t)) {
-          this.adjacentNodes(t).forEach((s: T) => shouldBeUpdatedMapping.add(s))
+          this.adjacentNodes(t).forEach((s: T) => {
+            shouldBeUpdatedMapping.add(s)
+          })
         }
       }
     })
