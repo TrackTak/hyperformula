@@ -11,7 +11,6 @@ features.
 | [core-js](https://github.com/zloirock/core-js) | The MIT License | Denis Pushkarev |
 | [GPU.js](https://github.com/gpujs/gpu.js/) ([optional](enabling-gpu-acceleration.md)) | The MIT License | GPU.js team |
 | [jStat](https://github.com/jstat/jstat) | The MIT License | jStat |
-| [regenerator-runtime](https://github.com/facebook/regenerator/tree/master/packages/regenerator-runtime) | The MIT License | Facebook, Inc. |
 | [tiny-emitter](https://github.com/scottcorgan/tiny-emitter) | The MIT License | Scott Corgan |
 | [unorm](https://github.com/walling/unorm) | The MIT License | Matsuza, Bjarke Walling |
 
