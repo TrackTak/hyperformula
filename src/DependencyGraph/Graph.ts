@@ -28,7 +28,7 @@ export class Graph<T> {
   /** Set with nodes in graph. */
   public nodes: Set<T> = new Set()
 
-  public dependencyIndexes: Map<T, number> = new Map()
+  public asyncResolveIndexes: Map<T, number> = new Map()
   public specialNodes: Set<T> = new Set()
   public specialNodesAsync: Map<T, T> = new Map()
   public specialNodesStructuralChanges: Set<T> = new Set()
@@ -152,7 +152,7 @@ export class Graph<T> {
     this.specialNodesRecentlyChanged.delete(node)
     this.specialNodesStructuralChanges.delete(node)
     this.infiniteRanges.delete(node)
-    this.dependencyIndexes.delete(node)
+    this.asyncResolveIndexes.delete(node)
 
     return this.removeDependencies(node)
   }

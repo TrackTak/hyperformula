@@ -17,8 +17,6 @@ import {Ast, AstNodeType} from '../parser'
 import {ColumnsSpan, RowsSpan} from '../Span'
 
 export abstract class FormulaVertex {
-  private resolveIndex?: number
-
   protected constructor(
     protected formula: Ast,
     protected cellAddress: SimpleCellAddress,
@@ -26,16 +24,8 @@ export abstract class FormulaVertex {
   ) {
   }
 
-  public setResolveIndex(resolveIndex: number) {
-    this.resolveIndex = resolveIndex
-  }
-
-  public getResolveIndex() {
-    if (this.resolveIndex === undefined) {
-      throw new Error('resolveIndex has not been set')
-    }
-
-    return this.resolveIndex
+  public hasLongRunningAsyncMethod() {
+    return this.getAsyncPromises().some(x => x.isLongRunningAsyncMethod)
   }
 
   public checkForAsyncPromises(ast: Ast): (AsyncPromise | undefined)[] {
@@ -96,10 +86,6 @@ export abstract class FormulaVertex {
     const asyncPromises = this.checkForAsyncPromises(this.formula).filter(x => x !== undefined)
 
     return asyncPromises.length > 0
-  }
-
-  public isResolveIndexSet() {
-    return this.resolveIndex !== undefined
   }
 
   public get width(): number {
