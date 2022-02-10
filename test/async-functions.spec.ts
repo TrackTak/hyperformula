@@ -292,7 +292,7 @@ describe('async functions', () => {
 
     expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 3 }]])
   })
-
+  
   it('handles promise races gracefully', async() => {
     const [engine, enginePromise] = HyperFormula.buildFromArray({ cells: [[
       { cellValue: 'foo' }, { cellValue: '=LONG_ASYNC_FOO(A1)' }

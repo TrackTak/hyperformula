@@ -24,10 +24,13 @@ export class AsyncPromise {
   private resolvedValue?: InterpreterValue | CanceledPromise<InterpreterValue>
   private cancelablePromise?: CancelablePromise<InterpreterValue>
   public isWaitingOnPrecedentResolving = false
+  public chunked: Chunked = {
+    isChunked: false,
+    chunkedIterator: 0
+  }
 
   constructor(
     private promiseGetter: PromiseGetter,
-    public chunked: Chunked
   ) {
     if (!promiseGetter) {
       throw Error('promiseGetter must be supplied')
@@ -35,6 +38,7 @@ export class AsyncPromise {
   }
 
   public startPromise(state: InterpreterState) {
+    this.resetIsResolvedValue()
     const cancelablePromise = this.promiseGetter(state)
 
     cancelablePromise.getPromise().then((value) => {
@@ -160,10 +164,7 @@ export class AsyncPromiseFetcher {
           return new CancelablePromise(promise)
         }
 
-        const asyncPromise = new AsyncPromise(promiseGetter, ast.asyncPromise?.chunked ?? {
-          isChunked: false,
-          chunkedIterator: 0
-        })
+        const asyncPromise = new AsyncPromise(promiseGetter)
 
         const newAst = {
           ...ast,
