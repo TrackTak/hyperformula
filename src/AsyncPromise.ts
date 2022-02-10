@@ -11,16 +11,23 @@ import {InterpreterState} from './interpreter/InterpreterState'
 import {InterpreterValue} from './interpreter/InterpreterValue'
 import {Ast, AstNodeType, ProcedureAst} from './parser'
 
-type PromiseGetter = (state: InterpreterState) => CancelablePromise<InterpreterValue>
+export type PromiseGetter = (state: InterpreterState) => CancelablePromise<InterpreterValue>
+
+export type Chunked = {
+  isChunked: boolean,
+  chunkedIterator: number,
+}
 
 export class AsyncPromise {
   private isResolvedValue = false
   /** Most recently fetched value of this promise. */
   private resolvedValue?: InterpreterValue | CanceledPromise<InterpreterValue>
   private cancelablePromise?: CancelablePromise<InterpreterValue>
+  public isWaitingOnPrecedentResolving = false
 
   constructor(
     private promiseGetter: PromiseGetter,
+    public chunked: Chunked
   ) {
     if (!promiseGetter) {
       throw Error('promiseGetter must be supplied')
@@ -70,18 +77,16 @@ export class AsyncPromiseFetcher {
   ) {
   }
 
-  public setFunctionPromisesToAst(ast: Ast, formulaAddress: SimpleCellAddress): AsyncPromise[] {
-    const value = this.checkFunctionPromisesForAst(ast, {formulaAddress, arraysFlag: this.config.useArrayArithmetic})
+  public getNewAstWithFunctionPromises(ast: Ast, formulaAddress: SimpleCellAddress): Ast {
+    const newAst = this.checkFunctionPromisesForAst(ast, {formulaAddress, arraysFlag: this.config.useArrayArithmetic})
   
-    return value.filter(x => x) as AsyncPromise[]
+    return newAst
   }
 
-  public checkFunctionPromisesForAst(ast: Ast, state: InterpreterState): (AsyncPromise | undefined)[] {
+  private checkFunctionPromisesForAst(ast: Ast, state: InterpreterState): Ast {
     switch (ast.type) {
       case AstNodeType.FUNCTION_CALL: {
-        this.setAsyncPromiseToProcedureAst(ast)
-
-        return [ast.asyncPromise]
+        return this.setAsyncPromiseToProcedureAst(ast)
       }
       case AstNodeType.DIV_OP:
       case AstNodeType.CONCATENATE_OP:
@@ -95,38 +100,40 @@ export class AsyncPromiseFetcher {
       case AstNodeType.PLUS_OP:
       case AstNodeType.POWER_OP:
       case AstNodeType.TIMES_OP: {
-        const left = this.checkFunctionPromisesForAst(ast.left, state)
-        const right = this.checkFunctionPromisesForAst(ast.right, state)
-        
-        return [...left, ...right]
+        ast.left = this.checkFunctionPromisesForAst(ast.left, state)
+        ast.right = this.checkFunctionPromisesForAst(ast.right, state)
+
+        return ast
       }
       case AstNodeType.MINUS_UNARY_OP:
       case AstNodeType.PLUS_UNARY_OP:
       case AstNodeType.PERCENT_OP: {
-        return this.checkFunctionPromisesForAst(ast.value, state)
+        ast.value = this.checkFunctionPromisesForAst(ast.value, state)
+
+        return ast
       }
       case AstNodeType.PARENTHESIS: {
-        return this.checkFunctionPromisesForAst(ast.expression, state)
+        ast.expression = this.checkFunctionPromisesForAst(ast.expression, state)
+
+        return ast
       }
       case AstNodeType.ARRAY: {
-        const values: (AsyncPromise | undefined)[] = []
-
-        for (const row of ast.args) {
-          row.map(ast => {
-            const value = this.checkFunctionPromisesForAst(ast, state)
-
-            values.push(...value)
+        const newAsts = ast.args.map((row) => {
+          return row.map(ast => {
+            return this.checkFunctionPromisesForAst(ast, state)
           })
-        }
+        })
 
-        return [...values]
+        ast.args = newAsts
+
+        return ast
       }
       default:
-        return []
+        return ast
     }
   }
 
-  private setAsyncPromiseToProcedureAst(ast: ProcedureAst) {
+  public setAsyncPromiseToProcedureAst(ast: ProcedureAst): ProcedureAst {
     const metadata = this.functionRegistry.getMetadata(ast.procedureName)
 
     if (metadata?.isAsyncMethod) {
@@ -135,7 +142,7 @@ export class AsyncPromiseFetcher {
       if (pluginFunction !== undefined) {
         const promiseGetter = (state: InterpreterState) => {
           const promise = new Promise<InterpreterValue>((resolve, reject) => {
-            const pluginFunctionValue = pluginFunction(ast, state)
+            const pluginFunctionValue = pluginFunction(newAst, state)
             const functionPromise = withTimeout(pluginFunctionValue, this.config.timeoutTime)
 
             functionPromise.then((interpreterValue) => {
@@ -152,11 +159,20 @@ export class AsyncPromiseFetcher {
           return new CancelablePromise(promise)
         }
 
-        const asyncPromise = new AsyncPromise(promiseGetter)
+        const asyncPromise = new AsyncPromise(promiseGetter, ast.asyncPromise?.chunked ?? {
+          isChunked: false,
+          chunkedIterator: 0
+        })
 
-        ast.asyncPromise = asyncPromise
+        const newAst = {
+          ...ast,
+          asyncPromise
+        }
+        
+        return newAst
       }
     }
+    return ast
   }
 }
 

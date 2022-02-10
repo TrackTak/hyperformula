@@ -7,5 +7,7 @@ import {ParserWithCaching} from '../../src/parser'
 
 export function buildEmptyParserWithCaching(config: Config, sheetMapping?: SheetMapping): ParserWithCaching {
   sheetMapping = sheetMapping || new SheetMapping(buildTranslationPackage(enGB))
-  return new ParserWithCaching(config, new FunctionRegistry(config), sheetMapping.get)
+  const functionRegistry = new FunctionRegistry(config)
+
+  return new ParserWithCaching(config, functionRegistry, sheetMapping.get)
 }

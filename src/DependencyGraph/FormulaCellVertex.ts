@@ -13,7 +13,8 @@ import {ErrorMessage} from '../error-message'
 import {EmptyValue, getRawValue, InternalScalarValue, InterpreterValue} from '../interpreter/InterpreterValue'
 import {LazilyTransformingAstService} from '../LazilyTransformingAstService'
 import {Maybe} from '../Maybe'
-import {Ast, AstNodeType} from '../parser'
+import {Ast} from '../parser'
+import { checkAstForAsyncPromises } from '../parser/Ast'
 import {ColumnsSpan, RowsSpan} from '../Span'
 
 export abstract class FormulaVertex {
@@ -24,66 +25,14 @@ export abstract class FormulaVertex {
   ) {
   }
 
-  public hasLongRunningAsyncMethod() {
-    return this.getAsyncPromises().some(x => x.isLongRunningAsyncMethod)
-  }
-
-  public checkForAsyncPromises(ast: Ast): (AsyncPromise | undefined)[] {
-    switch (ast.type) {
-      case AstNodeType.FUNCTION_CALL: {
-        return [ast.asyncPromise]
-      }
-      case AstNodeType.DIV_OP:
-      case AstNodeType.CONCATENATE_OP:
-      case AstNodeType.EQUALS_OP:
-      case AstNodeType.GREATER_THAN_OP:
-      case AstNodeType.GREATER_THAN_OR_EQUAL_OP:
-      case AstNodeType.LESS_THAN_OP:
-      case AstNodeType.LESS_THAN_OR_EQUAL_OP:
-      case AstNodeType.MINUS_OP:
-      case AstNodeType.NOT_EQUAL_OP:
-      case AstNodeType.PLUS_OP:
-      case AstNodeType.POWER_OP:
-      case AstNodeType.TIMES_OP: {
-        const left = this.checkForAsyncPromises(ast.left)
-        const right = this.checkForAsyncPromises(ast.right)
-        
-        return [...left, ...right]
-      }
-      case AstNodeType.MINUS_UNARY_OP:
-      case AstNodeType.PLUS_UNARY_OP:
-      case AstNodeType.PERCENT_OP: {
-        return this.checkForAsyncPromises(ast.value)
-      }
-      case AstNodeType.PARENTHESIS: {
-        return this.checkForAsyncPromises(ast.expression)
-      }
-      case AstNodeType.ARRAY: {
-        const values: (AsyncPromise | undefined)[] = []
-
-        for (const row of ast.args) {
-          row.map(ast => {
-            const value = this.checkForAsyncPromises(ast)
-
-            values.push(...value)
-          })
-        }
-
-        return [...values]
-      }
-      default:
-        return []
-      }
-  }
-
   public getAsyncPromises(): AsyncPromise[] {
-    const asyncPromises = this.checkForAsyncPromises(this.formula).filter(x => x !== undefined)
+    const asyncPromises = checkAstForAsyncPromises(this.formula)
 
-    return asyncPromises as AsyncPromise[]
+    return asyncPromises
   }
 
   public hasAsyncPromises() {
-    const asyncPromises = this.checkForAsyncPromises(this.formula).filter(x => x !== undefined)
+    const asyncPromises = checkAstForAsyncPromises(this.formula)
 
     return asyncPromises.length > 0
   }
@@ -129,17 +78,30 @@ export abstract class FormulaVertex {
     return this.cellAddress
   }
 
-  public recalculateAsyncPromisesWhenNeeded() {
+  public setAsyncPromisesToWaitingOrNot(isWaitingOnPrecedentResolving: boolean) {
     this.getAsyncPromises().forEach((asyncPromise) => {
-      asyncPromise.resetIsResolvedValue()
+      asyncPromise.isWaitingOnPrecedentResolving = isWaitingOnPrecedentResolving
     })
   }
 
   /**
    * Returns true if the vertex has asynchronous promises pending.
    */
-  public hasAsyncPromisesPending(): boolean {
-    return !!this.getAsyncPromises().some(x => !x.getIsResolvedValue())
+  public areAsyncPromisesWaitingToBeResolved(): boolean {
+    const asyncPromises = this.getAsyncPromises()
+
+    if (asyncPromises.length === 0) {
+      return false
+    }
+
+    return asyncPromises.every(x => x.isWaitingOnPrecedentResolving)
+  }
+
+  /**
+   * Returns true if the vertex has asynchronous promises started.
+   */
+  public doesHaveAsyncPromises(): boolean {
+    return this.getAsyncPromises().length > 0
   }
 
   /**

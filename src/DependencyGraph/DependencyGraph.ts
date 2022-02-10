@@ -238,8 +238,16 @@ export class DependencyGraph {
     this.graph.clearSpecialNodesRecentlyChanged()
   }
 
+  public clearRecentlyChangedAsyncVertices() {
+    this.graph.clearAsyncSpecialNodesRecentlyChanged()
+  }
+
   public verticesToRecompute() {
     return new Set([...this.graph.specialNodesRecentlyChanged, ...this.volatileVertices()])
+  }
+
+  public asyncVerticesToRecompute() {
+    return new Set(this.graph.specialAsyncNodesRecentlyChanged)
   }
 
   public processCellPrecedents(cellPrecedents: CellDependency[], endVertex: Vertex) {

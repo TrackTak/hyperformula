@@ -33,6 +33,7 @@ export class Graph<T> {
   public specialNodesAsync: Map<T, T> = new Map()
   public specialNodesStructuralChanges: Set<T> = new Set()
   public specialNodesRecentlyChanged: Set<T> = new Set()
+  public specialAsyncNodesRecentlyChanged: Set<T> = new Set()
   public infiniteRanges: Set<T> = new Set()
 
   /** Nodes adjacency mapping. */
@@ -150,6 +151,7 @@ export class Graph<T> {
     this.specialNodes.delete(node)
     this.specialNodesAsync.delete(node)
     this.specialNodesRecentlyChanged.delete(node)
+    this.specialAsyncNodesRecentlyChanged.delete(node)
     this.specialNodesStructuralChanges.delete(node)
     this.infiniteRanges.delete(node)
     this.asyncResolveIndexes.delete(node)
@@ -171,12 +173,22 @@ export class Graph<T> {
     }
   }
 
+  public markAsyncNodeAsSpecialRecentlyChanged(node: T) {
+    if (this.nodes.has(node)) {
+      this.specialAsyncNodesRecentlyChanged.add(node)
+    }
+  }
+
   public markNodeAsChangingWithStructure(node: T) {
     this.specialNodesStructuralChanges.add(node)
   }
 
   public clearSpecialNodesRecentlyChanged() {
     this.specialNodesRecentlyChanged.clear()
+  }
+
+  public clearAsyncSpecialNodesRecentlyChanged() {
+    this.specialAsyncNodesRecentlyChanged.clear()
   }
 
   public clearSpecialNodesAsync() {

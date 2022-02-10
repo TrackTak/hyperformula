@@ -12,7 +12,7 @@
 import {AbsoluteCellRange} from './AbsoluteCellRange'
 import {absolutizeDependencies} from './absolutizeDependencies'
 import { AsyncPromise } from './AsyncPromise'
-import {CanceledPromise, CellError, ErrorType, SimpleCellAddress} from './Cell'
+import {CellError, ErrorType, SimpleCellAddress} from './Cell'
 import {Config} from './Config'
 import {ContentChanges} from './ContentChanges'
 import {ArrayVertex, DependencyGraph, RangeVertex, Vertex} from './DependencyGraph'
@@ -25,7 +25,8 @@ import {EmptyValue, getRawValue, InterpreterValue} from './interpreter/Interpret
 import {SimpleRangeValue} from './interpreter/SimpleRangeValue'
 import {LazilyTransformingAstService} from './LazilyTransformingAstService'
 import {ColumnSearchStrategy} from './Lookup/SearchStrategy'
-import {Ast, AstNodeType, RelativeDependency} from './parser'
+import {Ast, RelativeDependency} from './parser'
+import { checkAstForAsyncPromises } from './parser/Ast'
 import {Statistics, StatType} from './statistics'
 
 export class Evaluator {
@@ -39,13 +40,13 @@ export class Evaluator {
   ) {
   }
 
-  public run(): FormulaVertex[] {
+  public run(): void {
     this.stats.start(StatType.TOP_SORT)
     const { sorted, cycled } = this.dependencyGraph.topSortWithScc()
     this.stats.end(StatType.TOP_SORT)
 
-    return this.stats.measure(StatType.EVALUATION, () => {
-      return this.recomputeFormulas(cycled, sorted)
+    this.stats.measure(StatType.EVALUATION, () => {
+      this.recomputeFormulas(cycled, sorted)
     })
   }
 
@@ -62,21 +63,21 @@ export class Evaluator {
       }
     }
     
-    this.dependencyGraph.asyncPromiseFetcher.setFunctionPromisesToAst(ast, address)
-    
+    const newAst = this.dependencyGraph.asyncPromiseFetcher.getNewAstWithFunctionPromises(ast, address)
+    const asyncPromises = checkAstForAsyncPromises(newAst)
     const state = new InterpreterState(address, this.config.useArrayArithmetic)
-    const ret = this.evaluateAstToCellValue(ast, state)
+    const ret = this.evaluateAstToCellValue(newAst, state)
 
     tmpRanges.forEach((rangeVertex) => {
       this.dependencyGraph.rangeMapping.removeRange(rangeVertex)
     })
 
-    if (ast.type === AstNodeType.FUNCTION_CALL && ast.asyncPromise) {
-      const asyncPromise = ast.asyncPromise
-
+    if (asyncPromises.length) {
       const promise = new Promise<InterpreterValue>((resolve, reject) => {
-        this.startAsyncPromises([asyncPromise], state).then(([value]) => {
-          resolve(value instanceof CanceledPromise ? value.value : value)
+        this.startAsyncPromises(asyncPromises, state).then(() => {
+          const ret = this.evaluateAstToCellValue(newAst, state)
+
+          resolve(ret)
         }).catch(reject)
       })
 
@@ -87,47 +88,46 @@ export class Evaluator {
   }
 
   public startAsyncPromises(asyncPromises: AsyncPromise[], state: InterpreterState) {
-    return Promise.all(asyncPromises.map(x => {
-      return x.startPromise(state).getPromise()
+    return Promise.all(asyncPromises.map(asyncPromise => {
+      return asyncPromise.startPromise(state).getPromise()
     }))
   }
 
-  public partialRun(vertices: Vertex[], recalculateAsyncPromises: boolean): [ContentChanges, FormulaVertex[]] {
+  public partialRun(vertices: Vertex[]): ContentChanges {
     if (this.dependencyGraph.cachedGraphType === CachedGraphType.NONE) {
-      return this.partialRunNonCachedGraph(vertices, recalculateAsyncPromises)
+      return this.partialRunNonCachedGraph(vertices)
     }
 
     if (this.dependencyGraph.cachedGraphType === CachedGraphType.MAIN) {
       const cachedTopSortedGraph = this.dependencyGraph.getCachedTopSortedGraph()
 
-      return this.runCachedGraph(recalculateAsyncPromises, cachedTopSortedGraph)
+      return this.runCachedGraph(cachedTopSortedGraph)
     }
 
     if (this.dependencyGraph.cachedGraphType === CachedGraphType.SUB_GRAPH) {
       const cachedTopSortedWithSccSubgraph = this.dependencyGraph.getCachedTopSortedWithSccSubgraph()
 
       if (cachedTopSortedWithSccSubgraph === null) {
-        return this.partialRunNonCachedGraph(vertices, recalculateAsyncPromises)
+        return this.partialRunNonCachedGraph(vertices)
       }
 
-      return this.runCachedGraph(recalculateAsyncPromises, cachedTopSortedWithSccSubgraph)
+      return this.runCachedGraph(cachedTopSortedWithSccSubgraph)
     }
 
     throw new Error('unexpected cachedGraphType encountered')
   }
 
-  private runCachedGraph(recalculateAsyncPromises: boolean, cachedTopSortGraph: TopSortResult<Vertex> | null): [ContentChanges, FormulaVertex[]] {
+  private runCachedGraph(cachedTopSortGraph: TopSortResult<Vertex> | null): ContentChanges {
     if (cachedTopSortGraph === null) {
       throw new Error('cachedTopSortGraph should not be null')
     }
 
     const changes = ContentChanges.empty()
-    const asyncVertices: FormulaVertex[] = []
     const { sorted, cycled } = cachedTopSortGraph
 
     this.stats.measure(StatType.EVALUATION, () => {
       sorted.forEach((vertex) => {
-        this.operatingFunction(changes, asyncVertices, recalculateAsyncPromises, vertex)
+        this.operatingFunction(changes, vertex)
       })
 
       cycled.forEach((vertex) => {
@@ -135,31 +135,26 @@ export class Evaluator {
       })
     })
 
-    return [changes, asyncVertices]
+    return changes
   }
 
-  private partialRunNonCachedGraph(vertices: Vertex[], recalculateAsyncPromises: boolean): [ContentChanges, FormulaVertex[]] {
+  private partialRunNonCachedGraph(vertices: Vertex[]): ContentChanges {
     const changes = ContentChanges.empty()
-    const asyncVertices: FormulaVertex[] = []
 
     this.stats.measure(StatType.EVALUATION, () => {
       this.dependencyGraph.getTopSortedWithSccSubgraphFrom(vertices,
-        (vertex: Vertex) => this.operatingFunction(changes, asyncVertices, recalculateAsyncPromises, vertex),
+        (vertex: Vertex) => this.operatingFunction(changes, vertex),
         (vertex: Vertex) => this.onCycle(changes, vertex)
       )
     })
 
-    return [changes, asyncVertices]
+    return changes
   }
 
-  private operatingFunction(changes: ContentChanges, asyncVertices: FormulaVertex[], recalculateAsyncPromises: boolean, vertex: Vertex): boolean {
+  private operatingFunction(changes: ContentChanges, vertex: Vertex): boolean {
     if (vertex instanceof FormulaVertex) {
       const currentValue = vertex.isComputed() ? vertex.getCellValue() : undefined
-      const newCellValue = this.recomputeFormulaVertexValue(vertex, recalculateAsyncPromises)
-
-      if (vertex.hasAsyncPromisesPending()) {
-        asyncVertices.push(vertex)
-      }
+      const newCellValue = this.recomputeFormulaVertexValue(vertex)
 
       if (newCellValue !== currentValue) {
         const address = vertex.getAddress(this.lazilyTransformingAstService)
@@ -199,42 +194,35 @@ export class Evaluator {
   /**
    * Recalculates formulas in the topological sort order
    */
-  private recomputeFormulas(cycled: Vertex[], sorted: Vertex[]): FormulaVertex[] {
+  private recomputeFormulas(cycled: Vertex[], sorted: Vertex[]): void {
     cycled.forEach((vertex: Vertex) => {
       if (vertex instanceof FormulaVertex) {
         vertex.setCellValue(new CellError(ErrorType.CYCLE, undefined, vertex))
       }
     })
 
-    const asyncVertices: FormulaVertex[] = []
-
     sorted.forEach((vertex: Vertex) => {
       if (vertex instanceof FormulaVertex) {
-        const newCellValue = this.recomputeFormulaVertexValue(vertex, true)
+        const newCellValue = this.recomputeFormulaVertexValue(vertex)
         const address = vertex.getAddress(this.lazilyTransformingAstService)
         const rawValue = getRawValue(newCellValue)
 
         this.columnSearch.add(rawValue, address)
 
-        if (vertex.hasAsyncPromisesPending()) {
-          asyncVertices.push(vertex)
-        }
-
       } else if (vertex instanceof RangeVertex) {
         vertex.clearCache()
       }
     })
-
-    return asyncVertices
   }
 
-  private recomputeFormulaVertexValue(vertex: FormulaVertex, recalculateAsyncPromises: boolean): InterpreterValue {
+  private recomputeFormulaVertexValue(vertex: FormulaVertex): InterpreterValue {
     const address = vertex.getAddress(this.lazilyTransformingAstService)
+
     if (vertex instanceof ArrayVertex && (vertex.array.size.isRef || !this.dependencyGraph.isThereSpaceForArray(vertex))) {
       return vertex.setNoSpace()
     } else {
-      if (recalculateAsyncPromises) {
-        vertex.recalculateAsyncPromisesWhenNeeded()
+      if (vertex.hasAsyncPromises() && !vertex.areAsyncPromisesWaitingToBeResolved()) {
+        this.dependencyGraph.graph.markAsyncNodeAsSpecialRecentlyChanged(vertex)
       }
       
       const formula = vertex.getFormula(this.lazilyTransformingAstService)

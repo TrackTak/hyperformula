@@ -638,3 +638,55 @@ function assertRangeConsistency(start: AddressWithSheet, end: AddressWithSheet, 
 export function imageWithWhitespace(image: string, leadingWhitespace?: string) {
   return (leadingWhitespace ?? '') + image
 }
+
+export function checkAstForAsyncPromises(ast: Ast): AsyncPromise[] {
+  switch (ast.type) {
+    case AstNodeType.FUNCTION_CALL: {
+      if (ast.asyncPromise) {
+        return [ast.asyncPromise]
+      }
+
+      return []
+    }
+    case AstNodeType.DIV_OP:
+    case AstNodeType.CONCATENATE_OP:
+    case AstNodeType.EQUALS_OP:
+    case AstNodeType.GREATER_THAN_OP:
+    case AstNodeType.GREATER_THAN_OR_EQUAL_OP:
+    case AstNodeType.LESS_THAN_OP:
+    case AstNodeType.LESS_THAN_OR_EQUAL_OP:
+    case AstNodeType.MINUS_OP:
+    case AstNodeType.NOT_EQUAL_OP:
+    case AstNodeType.PLUS_OP:
+    case AstNodeType.POWER_OP:
+    case AstNodeType.TIMES_OP: {
+      const left = checkAstForAsyncPromises(ast.left)
+      const right = checkAstForAsyncPromises(ast.right)
+      
+      return [...left, ...right]
+    }
+    case AstNodeType.MINUS_UNARY_OP:
+    case AstNodeType.PLUS_UNARY_OP:
+    case AstNodeType.PERCENT_OP: {
+      return checkAstForAsyncPromises(ast.value)
+    }
+    case AstNodeType.PARENTHESIS: {
+      return checkAstForAsyncPromises(ast.expression)
+    }
+    case AstNodeType.ARRAY: {
+      const values: AsyncPromise[] = []
+
+      for (const row of ast.args) {
+        row.map(ast => {
+          const value = checkAstForAsyncPromises(ast)
+
+          values.push(...value)
+        })
+      }
+
+      return [...values]
+    }
+    default:
+      return []
+    }
+}
