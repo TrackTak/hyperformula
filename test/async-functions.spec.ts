@@ -311,7 +311,7 @@ describe('async functions', () => {
   })
 
   // TODO: How to handle dependents? I.e =ASYNC_FOO(B1)
-  it.only('works with setting multiple async functions one after another', async() => {
+  it('works with setting multiple async functions one after another', async() => {
     const sheet = [[
       { cellValue: '=ASYNC_FOO()' }, { cellValue: '=CHUNKED_ASYNC_FOO()+ASYNC_FOO()' }, { cellValue: '=CHUNKED_ASYNC_FOO()' }
     ]]
