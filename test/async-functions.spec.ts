@@ -310,22 +310,23 @@ describe('async functions', () => {
     expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: '1 longAsyncFoo' }]])
   })
 
-  // it.only('works with setting multiple async functions one after another', async() => {
-  //   const sheet = [[
-  //     { cellValue: '=ASYNC_FOO()' }, { cellValue: '=CHUNKED_ASYNC_FOO()+1' }, { cellValue: '=CHUNKED_ASYNC_FOO()' }, { cellValue: '=ASYNC_FOO(A1)'}
-  //   ]]
-  //   const handler = jasmine.createSpy()
-  //   const [engine, promise] = HyperFormula.buildFromArray({ cells: sheet })
+  // TODO: How to handle dependents? I.e =ASYNC_FOO(B1)
+  it.only('works with setting multiple async functions one after another', async() => {
+    const sheet = [[
+      { cellValue: '=ASYNC_FOO()' }, { cellValue: '=CHUNKED_ASYNC_FOO()+ASYNC_FOO()' }, { cellValue: '=CHUNKED_ASYNC_FOO()' }
+    ]]
+    const handler = jasmine.createSpy()
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: sheet })
 
-  //   engine.on(Events.AsyncValuesUpdated, handler)
+    engine.on(Events.AsyncValuesUpdated, handler)
 
-  //   await promise
+    await promise
 
-  //   expect(engine.getSheetValues(0).cells).toEqual([[
-  //     { cellValue: 1 }, { cellValue: 3 }, { cellValue: 2 }, { cellValue: 7 }
-  //   ]])
-  //   expect(handler).toHaveBeenCalledTimes(4)
-  // })
+    expect(engine.getSheetValues(0).cells).toEqual([[
+      { cellValue: 1 }, { cellValue: 3 }, { cellValue: 2 }
+    ]])
+    expect(handler).toHaveBeenCalledTimes(2)
+  })
 
   it('works with dependent async functions', async() => {
     const sheet = [[

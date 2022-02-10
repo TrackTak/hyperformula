@@ -4479,7 +4479,7 @@ export class HyperFormula implements TypedEmitter {
             promise.then(values => {
               resolve({
                 values,
-                vertex
+                vertex,
               })
             }).catch(reject)
           })
@@ -4497,7 +4497,7 @@ export class HyperFormula implements TypedEmitter {
       for (const { vertex, values } of asyncVertexValues) {
         const address = vertex.getAddress(this.lazilyTransformingAstService)
         
-        let ast = vertex.getFormula(this.lazilyTransformingAstService)
+        const ast = vertex.getFormula(this.lazilyTransformingAstService)
         const promisesAreCanceled = values.some(value => value instanceof CanceledPromise)
 
         if (promisesAreCanceled) {
@@ -4506,9 +4506,6 @@ export class HyperFormula implements TypedEmitter {
 
         nonCancelledPromises += 1
 
-        if (ast.type === AstNodeType.FUNCTION_CALL && ast.asyncPromise?.chunked.isChunked) {
-          ast = this._asyncPromiseFetcher.setAsyncPromiseToProcedureAst(ast)
-        }
         this._crudOperations.operations.updateAsyncFormulaCell(address, ast)
       }
 

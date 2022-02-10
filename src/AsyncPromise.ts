@@ -67,6 +67,7 @@ export class AsyncPromise {
 
   public resetIsResolvedValue() {
     this.isResolvedValue = false
+    this.resolvedValue = undefined
   }
 }
 

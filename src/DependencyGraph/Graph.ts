@@ -30,7 +30,8 @@ export class Graph<T> {
 
   public asyncResolveIndexes: Map<T, number> = new Map()
   public specialNodes: Set<T> = new Set()
-  public specialNodesAsync: Map<T, T> = new Map()
+  public specialNodesAsync: Set<T> = new Set()
+  public specialNodesAsyncChunked: Set<T> = new Set()
   public specialNodesStructuralChanges: Set<T> = new Set()
   public specialNodesRecentlyChanged: Set<T> = new Set()
   public specialAsyncNodesRecentlyChanged: Set<T> = new Set()
@@ -71,6 +72,7 @@ export class Graph<T> {
     if (!this.nodes.has(toNode)) {
       throw new Error(`Unknown node ${toNode}`)
     }
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.edges.get(fromNode)!.add(toNode)
   }
@@ -150,6 +152,7 @@ export class Graph<T> {
     this.nodes.delete(node)
     this.specialNodes.delete(node)
     this.specialNodesAsync.delete(node)
+    this.specialNodesAsyncChunked.delete(node)
     this.specialNodesRecentlyChanged.delete(node)
     this.specialAsyncNodesRecentlyChanged.delete(node)
     this.specialNodesStructuralChanges.delete(node)
@@ -164,7 +167,15 @@ export class Graph<T> {
   }
 
   public markNodeAsSpecialAsync(node: T) {
-    this.specialNodesAsync.set(node, node)
+    this.specialNodesAsync.add(node)
+  }
+
+  public markNodeAsSpecialAsyncChunked(node: T) {
+    this.specialNodesAsyncChunked.add(node)
+  }
+
+  public deleteSpecialAsyncChunkedNode(node: T) {
+    this.specialNodesAsyncChunked.delete(node)
   }
 
   public markNodeAsSpecialRecentlyChanged(node: T) {
@@ -192,6 +203,10 @@ export class Graph<T> {
   }
 
   public clearSpecialNodesAsync() {
+    this.specialNodesAsync.clear()
+  }
+
+  public clearSpecialNodesAsyncChunked() {
     this.specialNodesAsync.clear()
   }
 

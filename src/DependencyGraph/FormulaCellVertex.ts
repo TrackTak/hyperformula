@@ -85,6 +85,20 @@ export abstract class FormulaVertex {
   }
 
   /**
+   * 
+   * Returns true if the vertex has chunked asynchronous promises.
+   */
+  public hasChunkedAsyncPromises(): boolean {
+    const asyncPromises = this.getAsyncPromises()
+
+    if (asyncPromises.length === 0) {
+      return false
+    }
+
+    return asyncPromises.some(x => x.chunked.isChunked)
+  }
+
+  /**
    * Returns true if the vertex has asynchronous promises pending.
    */
   public areAsyncPromisesWaitingToBeResolved(): boolean {

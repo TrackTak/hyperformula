@@ -115,6 +115,20 @@ export class DependencyGraph {
   public updateAsyncCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean): ContentChanges {
     const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version())
 
+    const asyncPromises = newVertex.getAsyncPromises()
+
+    asyncPromises.forEach((asyncPromise) => {
+      if (asyncPromise.chunked.isChunked) {
+        asyncPromise.resetIsResolvedValue()
+      }
+        
+      asyncPromise.isWaitingOnPrecedentResolving = true
+    })
+
+    if (newVertex.hasChunkedAsyncPromises()) {
+      this.markAsAsyncChunked(newVertex)
+    }
+    
     this.exchangeOrAddFormulaVertex(newVertex)
     this.processCellPrecedents(precedents, newVertex)
 
@@ -247,7 +261,7 @@ export class DependencyGraph {
   }
 
   public asyncVerticesToRecompute() {
-    return new Set(this.graph.specialAsyncNodesRecentlyChanged)
+    return new Set([...this.graph.specialAsyncNodesRecentlyChanged, ...this.asyncChunkedVertices()])
   }
 
   public processCellPrecedents(cellPrecedents: CellDependency[], endVertex: Vertex) {
@@ -768,6 +782,10 @@ export class DependencyGraph {
     this.graph.markNodeAsSpecialAsync(vertex)
   }
 
+  public markAsAsyncChunked(vertex: Vertex) {
+    this.graph.markNodeAsSpecialAsyncChunked(vertex)
+  }
+
   public markAsDependentOnStructureChange(vertex: Vertex) {
     this.graph.markNodeAsChangingWithStructure(vertex)
   }
@@ -804,6 +822,10 @@ export class DependencyGraph {
 
   public asyncVertices() {
     return this.graph.specialNodesAsync
+  }
+
+  public asyncChunkedVertices() {
+    return this.graph.specialNodesAsyncChunked
   }
 
   public volatileVertices() {

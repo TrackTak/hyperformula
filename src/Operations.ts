@@ -610,6 +610,8 @@ export class Operations {
       throw new Error('async cell must be an instance of FormulaVertex')
     }
 
+    this.dependencyGraph.graph.deleteSpecialAsyncChunkedNode(vertex)
+    
     const { dependencies, hasStructuralChangeFunction, hasVolatileFunction } = this.parser.fetchCachedResultForAst(ast)
     const size = this.arraySizePredictor.checkArraySize(ast, address)
 

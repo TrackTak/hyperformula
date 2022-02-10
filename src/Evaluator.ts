@@ -165,6 +165,12 @@ export class Evaluator {
 
         this.columnSearch.change(currentRawValue, newRawValue, address)
 
+        const isAsyncChunkedVertex = this.dependencyGraph.graph.specialNodesAsyncChunked.has(vertex)
+
+        if (isAsyncChunkedVertex) {
+          return false
+        }
+        
         return true
       }
       return false
@@ -208,14 +214,13 @@ export class Evaluator {
         const rawValue = getRawValue(newCellValue)
 
         this.columnSearch.add(rawValue, address)
-
       } else if (vertex instanceof RangeVertex) {
         vertex.clearCache()
       }
     })
   }
 
-  private recomputeFormulaVertexValue(vertex: FormulaVertex): InterpreterValue {
+  public recomputeFormulaVertexValue(vertex: FormulaVertex): InterpreterValue {
     const address = vertex.getAddress(this.lazilyTransformingAstService)
 
     if (vertex instanceof ArrayVertex && (vertex.array.size.isRef || !this.dependencyGraph.isThereSpaceForArray(vertex))) {
