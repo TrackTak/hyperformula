@@ -115,6 +115,22 @@ export class DependencyGraph {
   public updateAsyncCell(address: SimpleCellAddress, ast: Ast, precedents: CellDependency[], size: ArraySize, hasVolatileFunction: boolean, hasStructuralChangeFunction: boolean): ContentChanges {
     const newVertex = FormulaVertex.fromAst(ast, address, size, this.lazilyTransformingAstService.version())
 
+    const asyncPromises = newVertex.getAsyncPromises()
+
+    asyncPromises.forEach((asyncPromise) => {
+      if (asyncPromise.chunked.isChunked) {
+        asyncPromise.resetResolvedValue()
+      } else {
+        asyncPromise.chunked.chunkedIterator = 0
+      }
+        
+      asyncPromise.isWaitingOnPrecedentResolving = true
+    })
+
+    if (newVertex.hasChunkedAsyncPromises()) {
+      this.markAsAsyncChunked(newVertex)
+    }
+    
     this.exchangeOrAddFormulaVertex(newVertex)
     this.processCellPrecedents(precedents, newVertex)
 
@@ -238,8 +254,16 @@ export class DependencyGraph {
     this.graph.clearSpecialNodesRecentlyChanged()
   }
 
+  public clearRecentlyChangedAsyncVertices() {
+    this.graph.clearAsyncSpecialNodesRecentlyChanged()
+  }
+
   public verticesToRecompute() {
     return new Set([...this.graph.specialNodesRecentlyChanged, ...this.volatileVertices()])
+  }
+
+  public asyncVerticesToRecompute() {
+    return new Set([...this.graph.specialAsyncNodesRecentlyChanged, ...this.asyncChunkedVertices()])
   }
 
   public processCellPrecedents(cellPrecedents: CellDependency[], endVertex: Vertex) {
@@ -760,6 +784,10 @@ export class DependencyGraph {
     this.graph.markNodeAsSpecialAsync(vertex)
   }
 
+  public markAsAsyncChunked(vertex: Vertex) {
+    this.graph.markNodeAsSpecialAsyncChunked(vertex)
+  }
+
   public markAsDependentOnStructureChange(vertex: Vertex) {
     this.graph.markNodeAsChangingWithStructure(vertex)
   }
@@ -773,22 +801,33 @@ export class DependencyGraph {
   }
 
   public getAsyncGroupedVertices(vertices: FormulaVertex[]) {
-    const asyncVertices: FormulaVertex[][] = []
-
+    const asyncGroupedVertices: FormulaVertex[][] = []
+    
     for (const vertex of vertices) {
-      const index = vertex.getResolveIndex()
+      const asyncResolveIndexes = this.graph.asyncResolveIndexes.get(vertex)
 
-      asyncVertices[index] = asyncVertices[index] ? [
-        ...asyncVertices[index],
-        vertex
-      ] : [vertex]
+      if (asyncResolveIndexes === undefined) {
+        throw new Error('asyncResolveIndexes should not be undefined')
+      }
+
+      const resolveIndex = asyncResolveIndexes
+
+      if (!asyncGroupedVertices[resolveIndex]) {
+        asyncGroupedVertices[resolveIndex] = []
+      }
+
+      asyncGroupedVertices[resolveIndex].push(vertex)
     }
 
-    return asyncVertices
+    return asyncGroupedVertices
   }
 
   public asyncVertices() {
     return this.graph.specialNodesAsync
+  }
+
+  public asyncChunkedVertices() {
+    return this.graph.specialNodesAsyncChunked
   }
 
   public volatileVertices() {
@@ -1015,24 +1054,24 @@ export class DependencyGraph {
   private processAsyncVertices(vertex: Vertex) {
     const asyncVertices = this.asyncVertices()
 
-    if (vertex instanceof FormulaVertex && !vertex.isResolveIndexSet()) {
-      vertex.setResolveIndex(0)
+    if (vertex instanceof FormulaVertex && !this.graph.asyncResolveIndexes.has(vertex)) {
+      const resolveIndex = 0
 
-      this.graph.dependencyIndexes.set(vertex, 0)
+      this.graph.asyncResolveIndexes.set(vertex, resolveIndex)
     }
 
     this.graph.adjacentNodes(vertex).forEach((depVertex) => {
       if (depVertex instanceof FormulaVertex) {
-        const asyncVertex = asyncVertices.get(depVertex)
-        const depIndex = this.graph.dependencyIndexes.get(vertex) ?? -1
+        const isAsyncVertex = asyncVertices.has(depVertex)
+        const depIndex = this.graph.asyncResolveIndexes.get(vertex) ?? -1
+        
         // If vertex is async then increment it to the next index
         // so that Promise.all() can work later
-        const existingIndex = depVertex.isResolveIndexSet() ? depVertex.getResolveIndex() : -Infinity
-        const newIndex = Math.max(existingIndex, asyncVertex ? depIndex + 1 : depIndex)
+        const existingResolveIndex = this.graph.asyncResolveIndexes.has(depVertex) ? this.graph.asyncResolveIndexes.get(depVertex)! : -Infinity
 
-        this.graph.dependencyIndexes.set(depVertex, newIndex)
+        const newResolveIndex = Math.max(existingResolveIndex, isAsyncVertex ? depIndex + 1 : depIndex)
 
-        depVertex.setResolveIndex(newIndex)
+        this.graph.asyncResolveIndexes.set(depVertex, newResolveIndex)
       }
     })
   }

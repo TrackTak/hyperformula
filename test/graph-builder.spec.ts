@@ -81,12 +81,12 @@ describe('GraphBuilder', () => {
     const a2 = engine.addressMapping.fetchCell(adr('A2')) as FormulaVertex
     const b2 = engine.addressMapping.fetchCell(adr('B2')) as FormulaVertex
 
-    expect(a1.getResolveIndex()).toBe(0)
-    expect(b1.getResolveIndex()).toBe(1)
-    expect(c1.getResolveIndex()).toBe(1)
-    expect(d1.getResolveIndex()).toBe(2)
-    expect(a2.getResolveIndex()).toBe(0)
-    expect(b2.getResolveIndex()).toBe(1)
+    expect(engine.dependencyGraph.graph.asyncResolveIndexes.get(a1)).toBe(0)
+    expect(engine.dependencyGraph.graph.asyncResolveIndexes.get(b1)).toBe(1)
+    expect(engine.dependencyGraph.graph.asyncResolveIndexes.get(c1)).toBe(1)
+    expect(engine.dependencyGraph.graph.asyncResolveIndexes.get(d1)).toBe(2)
+    expect(engine.dependencyGraph.graph.asyncResolveIndexes.get(a2)).toBe(0)
+    expect(engine.dependencyGraph.graph.asyncResolveIndexes.get(b2)).toBe(1)
   })
 
   it('#loadSheet - it should build graph with only one RangeVertex', () => {

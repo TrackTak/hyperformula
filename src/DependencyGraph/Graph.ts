@@ -28,11 +28,13 @@ export class Graph<T> {
   /** Set with nodes in graph. */
   public nodes: Set<T> = new Set()
 
-  public dependencyIndexes: Map<T, number> = new Map()
+  public asyncResolveIndexes: Map<T, number> = new Map()
   public specialNodes: Set<T> = new Set()
-  public specialNodesAsync: Map<T, T> = new Map()
+  public specialNodesAsync: Set<T> = new Set()
+  public specialNodesAsyncChunked: Set<T> = new Set()
   public specialNodesStructuralChanges: Set<T> = new Set()
   public specialNodesRecentlyChanged: Set<T> = new Set()
+  public specialAsyncNodesRecentlyChanged: Set<T> = new Set()
   public infiniteRanges: Set<T> = new Set()
 
   /** Nodes adjacency mapping. */
@@ -70,6 +72,7 @@ export class Graph<T> {
     if (!this.nodes.has(toNode)) {
       throw new Error(`Unknown node ${toNode}`)
     }
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.edges.get(fromNode)!.add(toNode)
   }
@@ -149,10 +152,12 @@ export class Graph<T> {
     this.nodes.delete(node)
     this.specialNodes.delete(node)
     this.specialNodesAsync.delete(node)
+    this.specialNodesAsyncChunked.delete(node)
     this.specialNodesRecentlyChanged.delete(node)
+    this.specialAsyncNodesRecentlyChanged.delete(node)
     this.specialNodesStructuralChanges.delete(node)
     this.infiniteRanges.delete(node)
-    this.dependencyIndexes.delete(node)
+    this.asyncResolveIndexes.delete(node)
 
     return this.removeDependencies(node)
   }
@@ -162,12 +167,26 @@ export class Graph<T> {
   }
 
   public markNodeAsSpecialAsync(node: T) {
-    this.specialNodesAsync.set(node, node)
+    this.specialNodesAsync.add(node)
+  }
+
+  public markNodeAsSpecialAsyncChunked(node: T) {
+    this.specialNodesAsyncChunked.add(node)
+  }
+
+  public deleteSpecialAsyncChunkedNode(node: T) {
+    this.specialNodesAsyncChunked.delete(node)
   }
 
   public markNodeAsSpecialRecentlyChanged(node: T) {
     if (this.nodes.has(node)) {
       this.specialNodesRecentlyChanged.add(node)
+    }
+  }
+
+  public markAsyncNodeAsSpecialRecentlyChanged(node: T) {
+    if (this.nodes.has(node)) {
+      this.specialAsyncNodesRecentlyChanged.add(node)
     }
   }
 
@@ -179,7 +198,15 @@ export class Graph<T> {
     this.specialNodesRecentlyChanged.clear()
   }
 
+  public clearAsyncSpecialNodesRecentlyChanged() {
+    this.specialAsyncNodesRecentlyChanged.clear()
+  }
+
   public clearSpecialNodesAsync() {
+    this.specialNodesAsync.clear()
+  }
+
+  public clearSpecialNodesAsyncChunked() {
     this.specialNodesAsync.clear()
   }
 

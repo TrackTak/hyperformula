@@ -51,7 +51,7 @@ export class ParserWithCaching {
   constructor(
     private readonly config: ParserConfig,
     private readonly functionRegistry: FunctionRegistry,
-    private readonly sheetMapping: SheetMappingFn
+    private readonly sheetMapping: SheetMappingFn,
   ) {
     this.lexerConfig = buildLexerConfig(config)
     this.lexer = new FormulaLexer(this.lexerConfig)
@@ -100,6 +100,7 @@ export class ParserWithCaching {
         cacheResult = this.cache.set(hash, parsingResult.ast)
       }
     }
+
     const {ast, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, relativeDependencies} = cacheResult
 
     return {ast, errors: [], hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, dependencies: relativeDependencies}

@@ -6,6 +6,7 @@
 import { CachedGraphType, CellError } from '.'
 import {AbsoluteCellRange, isSimpleCellRange, SimpleCellRange} from './AbsoluteCellRange'
 import {validateArgToType} from './ArgumentSanitization'
+import { AsyncPromiseFetcher } from './AsyncPromise'
 import {BuildEngineFactory, EngineState} from './BuildEngineFactory'
 import {
   CanceledPromise,
@@ -141,6 +142,7 @@ export class HyperFormula implements TypedEmitter {
     private _namedExpressions: NamedExpressions,
     private _serialization: Serialization,
     private _functionRegistry: FunctionRegistry,
+    private _asyncPromiseFetcher: AsyncPromiseFetcher,
     private _emitter: Emitter
   ) {
   }
@@ -269,10 +271,10 @@ export class HyperFormula implements TypedEmitter {
    * @category Factories
    */
   public static buildFromArray<SheetMetadata, CellMetadata>(sheet: InputSheet<CellMetadata, SheetMetadata>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
-    const [engine, asyncVertices] = BuildEngineFactory.buildFromSheet(sheet, configInput, namedExpressions)
+    const engine = BuildEngineFactory.buildFromSheet(sheet, configInput, namedExpressions)
     const hyperFormula = this.buildFromEngineState(engine)
 
-    return [hyperFormula, hyperFormula.recomputeAsyncFunctions(asyncVertices)]
+    return [hyperFormula, hyperFormula.recomputeAsyncVerticesIfDependencyGraphNeedsIt()]
   }
 
   /**
@@ -312,10 +314,10 @@ export class HyperFormula implements TypedEmitter {
    * @category Factories
    */
   public static buildFromSheets<SheetMetadata, CellMetadata>(sheets: InputSheets<CellMetadata, SheetMetadata>, configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
-    const [engine, asyncVertices]  = BuildEngineFactory.buildFromSheets(sheets, configInput, namedExpressions)
+    const engine  = BuildEngineFactory.buildFromSheets(sheets, configInput, namedExpressions)
     const hyperFormula = this.buildFromEngineState(engine)
 
-    return [hyperFormula, hyperFormula.recomputeAsyncFunctions(asyncVertices)]
+    return [hyperFormula, hyperFormula.recomputeAsyncVerticesIfDependencyGraphNeedsIt()]
   }
 
   /**
@@ -335,10 +337,10 @@ export class HyperFormula implements TypedEmitter {
    * @category Factories
    */
   public static buildEmpty(configInput: Partial<ConfigParams> = {}, namedExpressions: SerializedNamedExpression[] = []): [HyperFormula, Promise<ExportedChange[]>] {
-    const [engine, asyncVertices]  = BuildEngineFactory.buildEmpty(configInput, namedExpressions)
+    const engine = BuildEngineFactory.buildEmpty(configInput, namedExpressions)
     const hyperFormula = this.buildFromEngineState(engine)
 
-    return [hyperFormula, hyperFormula.recomputeAsyncFunctions(asyncVertices)]
+    return [hyperFormula, hyperFormula.recomputeAsyncVerticesIfDependencyGraphNeedsIt()]
   }
 
   /**
@@ -627,6 +629,7 @@ export class HyperFormula implements TypedEmitter {
       engine.namedExpressions,
       engine.serialization,
       engine.functionRegistry,
+      engine.asyncPromiseFetcher,
       engine.eventEmitter
     )
   }
@@ -969,7 +972,7 @@ export class HyperFormula implements TypedEmitter {
     const serializedSheets= this._serialization.withNewConfig(configNewLanguage, this._namedExpressions).getAllSheetsSerialized()
     const serializedNamedExpressions = this._serialization.getAllNamedExpressionsSerialized()
 
-    const [newEngine, asyncVertices] = BuildEngineFactory.rebuildWithConfig(newConfig, serializedSheets, serializedNamedExpressions, this._stats)
+    const newEngine = BuildEngineFactory.rebuildWithConfig(newConfig, serializedSheets, serializedNamedExpressions, this._stats)
 
     this._config = newEngine.config
     this._stats = newEngine.stats
@@ -986,7 +989,7 @@ export class HyperFormula implements TypedEmitter {
     this._serialization = newEngine.serialization
     this._functionRegistry = newEngine.functionRegistry
 
-    return this.recomputeAsyncFunctions(asyncVertices)
+    return this.recomputeAsyncVerticesIfDependencyGraphNeedsIt()
   }
 
   /**
@@ -4448,7 +4451,14 @@ export class HyperFormula implements TypedEmitter {
     }
   
     const exportedChanges: ExportedChange[] = []
+    const promises: Promise<ExportedChange[]>[] = []
     const asyncGroupedVertices = this.dependencyGraph.getAsyncGroupedVertices(asyncPromiseVertices)
+
+    asyncGroupedVertices.forEach(asyncGroupedVerticesRow => {
+      asyncGroupedVerticesRow.forEach((vertex) => {
+        vertex.setAsyncPromisesToWaitingOrNot(true)
+      })
+    })
 
     for (const asyncGroupedVerticesRow of asyncGroupedVertices) {      
       if (!asyncGroupedVerticesRow) {
@@ -4464,12 +4474,12 @@ export class HyperFormula implements TypedEmitter {
               vertex
             )
           )
-
+              
           return new Promise<AsyncVertexValues>((resolve, reject) => {
             promise.then(values => {
               resolve({
                 values,
-                vertex
+                vertex,
               })
             }).catch(reject)
           })
@@ -4500,13 +4510,26 @@ export class HyperFormula implements TypedEmitter {
       }
 
       if (nonCancelledPromises > 0) {
-        const changes = this.recomputeAsyncVerticesIfDependencyGraphNeedsIt()
+        const [changes, promise] = this.recomputeIfDependencyGraphNeedsIt()
 
         exportedChanges.push(...changes)
+        promises.push(promise)
       }
     }
 
-    return exportedChanges
+    const promise = new Promise<ExportedChange[]>((resolve, reject) => {
+      Promise.all(promises).then(() => {
+        resolve(exportedChanges)
+      }).catch(reject)
+    })
+
+    asyncGroupedVertices.forEach(asyncGroupedVerticesRow => {
+      asyncGroupedVerticesRow.forEach((vertex) => {
+        vertex.setAsyncPromisesToWaitingOrNot(false)
+      })
+    })
+
+    return promise
   }
 
   /**
@@ -4516,27 +4539,30 @@ export class HyperFormula implements TypedEmitter {
    *
    * @fires [[asyncValuesUpdated]] if recalculation was triggered by this change
    */
-  private recomputeAsyncVerticesIfDependencyGraphNeedsIt(): ExportedChange[] {
+  private recomputeAsyncVerticesIfDependencyGraphNeedsIt(): Promise<ExportedChange[]> {
     if (!this._evaluationSuspended && !this._destroyed) {
-      const changes = this._crudOperations.getAndClearContentChanges()
-      const verticesToRecomputeFrom = Array.from(this.dependencyGraph.verticesToRecompute())
-      this.dependencyGraph.clearRecentlyChangedVertices()
+      this._crudOperations.getAndClearContentChanges()
+      const asyncVerticesToRecomputeFrom = Array.from(this.dependencyGraph.asyncVerticesToRecompute())
+      this.dependencyGraph.clearRecentlyChangedAsyncVertices()
 
-      if (verticesToRecomputeFrom.length > 0) {
-        const [contentChanges] = this.evaluator.partialRun(verticesToRecomputeFrom, false)
+      let exportedChangesPromise: Promise<ExportedChange[]> = Promise.resolve([])
 
-        changes.addAll(contentChanges)
+      if (asyncVerticesToRecomputeFrom.length > 0) {
+        const promise = this.recomputeAsyncFunctions(asyncVerticesToRecomputeFrom as FormulaVertex[])
+
+        exportedChangesPromise = new Promise((resolve, reject) => {
+          promise.then((exportedChanges) => {
+            if (exportedChanges.length) {
+              this._emitter.emit(Events.AsyncValuesUpdated, exportedChanges)
+            }
+            resolve(exportedChanges)
+          }).catch(reject)  
+        })
       }
 
-      const exportedChanges = changes.exportChanges(this._exporter)
-
-      if (!changes.isEmpty()) {
-        this._emitter.emit(Events.AsyncValuesUpdated, exportedChanges)
-      }
-
-      return exportedChanges
+      return exportedChangesPromise
     }
-    return []
+    return Promise.resolve([])
   }
 
   /**
@@ -4555,13 +4581,11 @@ export class HyperFormula implements TypedEmitter {
       let exportedChangesPromise: Promise<ExportedChange[]> = Promise.resolve([])
 
       if (verticesToRecomputeFrom.length > 0) {
-        const [contentChanges, asyncVertices] = this.evaluator.partialRun(verticesToRecomputeFrom, true)
-
-        const promise = this.recomputeAsyncFunctions(asyncVertices)
-
-        exportedChangesPromise = promise
+        const contentChanges = this.evaluator.partialRun(verticesToRecomputeFrom)
 
         changes.addAll(contentChanges)
+
+        exportedChangesPromise = this.recomputeAsyncVerticesIfDependencyGraphNeedsIt()
       }
 
       const exportedChanges = changes.exportChanges(this._exporter)

@@ -45,6 +45,11 @@ class AsyncPlugin extends FunctionPlugin implements FunctionPluginTypecheck<Asyn
       isAsyncMethod: true,
       parameters: [],
     },
+    'CHUNKED_ASYNC_FOO': {
+      method: 'chunkedAsyncFoo',
+      isAsyncMethod: true,
+      parameters: [],
+    }
   }
 
   public static translations = {
@@ -53,9 +58,12 @@ class AsyncPlugin extends FunctionPlugin implements FunctionPluginTypecheck<Asyn
       'ASYNC_ARRAY_FOO': 'ASYNC_ARRAY_FOO',
       'LONG_ASYNC_FOO': 'LONG_ASYNC_FOO',
       'TIMEOUT_FOO': 'TIMEOUT_FOO',
-      'ASYNC_ERROR_FOO': 'ASYNC_ERROR_FOO'
+      'ASYNC_ERROR_FOO': 'ASYNC_ERROR_FOO',
+      'CHUNKED_ASYNC_FOO': 'CHUNKED_ASYNC_FOO'
     },
   }
+
+  private chunkedIterator = 0
 
   public asyncFoo(ast: ProcedureAst, state: InterpreterState): AsyncInterpreterValue {
     const metadata = this.metadata('ASYNC_FOO')
@@ -120,10 +128,23 @@ class AsyncPlugin extends FunctionPlugin implements FunctionPluginTypecheck<Asyn
   public async asyncErrorFoo(ast: ProcedureAst, state: InterpreterState): AsyncInterpreterValue {
     const metadata = this.metadata('ASYNC_ERROR_FOO')
 
+    return this.runAsyncFunction(ast.args, state, metadata, () => {
+      throw new Error('asyncErrorFoo')
+    })
+  }
+
+  public chunkedAsyncFoo(ast: ProcedureAst, state: InterpreterState): AsyncInterpreterValue {
+    const metadata = this.metadata('CHUNKED_ASYNC_FOO')
+
     return this.runAsyncFunction(ast.args, state, metadata, async() => {
-      return new Promise(() => {
-        throw new Error('asyncErrorFoo')
-      })
+      return new Promise(resolve => setTimeout(() => {
+        const { chunked } = ast.asyncPromise!
+
+        chunked.chunkedIterator++
+        chunked.isChunked = chunked.chunkedIterator < 2
+
+        resolve(chunked.chunkedIterator)
+      }, 100))
     })
   }
 }
@@ -249,11 +270,11 @@ describe('async functions', () => {
   }, Config.defaultConfig.timeoutTime + 3000)
 
   it('should throw an error if function does not resolve', async() => {      
-    const [, promise] = HyperFormula.buildFromArray({ cells: [
-      [{ cellValue: '=ASYNC_ERROR_FOO()' }],
-    ]})
-
     try {
+      const [, promise] = HyperFormula.buildFromArray({ cells: [
+        [{ cellValue: '=ASYNC_ERROR_FOO()' }],
+      ]})
+  
       await promise
     } catch (error) {
       expect(error).toEqualError(new Error('asyncErrorFoo'))
@@ -271,7 +292,7 @@ describe('async functions', () => {
 
     expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 3 }]])
   })
-
+  
   it('handles promise races gracefully', async() => {
     const [engine, enginePromise] = HyperFormula.buildFromArray({ cells: [[
       { cellValue: 'foo' }, { cellValue: '=LONG_ASYNC_FOO(A1)' }
@@ -289,21 +310,22 @@ describe('async functions', () => {
     expect(engine.getSheetValues(0).cells).toEqual([[{ cellValue: 1 }, { cellValue: '1 longAsyncFoo' }]])
   })
 
+  // TODO: How to handle dependents? I.e =ASYNC_FOO(B1)
   it('works with setting multiple async functions one after another', async() => {
     const sheet = [[
-      { cellValue: 2 }, { cellValue: '=ASYNC_FOO()' }
+      { cellValue: '=ASYNC_FOO()' }, { cellValue: '=CHUNKED_ASYNC_FOO()+ASYNC_FOO()' }, { cellValue: '=CHUNKED_ASYNC_FOO()' }
     ]]
-    const [engine] = HyperFormula.buildFromArray({ cells: sheet })
+    const handler = jasmine.createSpy()
+    const [engine, promise] = HyperFormula.buildFromArray({ cells: sheet })
 
-    const [,promise] = engine.setSheetContent(0, [[
-      { cellValue: '=ASYNC_FOO()' }, { cellValue: 3 }
-    ]])
+    engine.on(Events.AsyncValuesUpdated, handler)
 
     await promise
 
     expect(engine.getSheetValues(0).cells).toEqual([[
-      { cellValue: 1 }, { cellValue: 3 }
+      { cellValue: 1 }, { cellValue: 3 }, { cellValue: 2 }
     ]])
+    expect(handler).toHaveBeenCalledTimes(2)
   })
 
   it('works with dependent async functions', async() => {
@@ -411,13 +433,13 @@ describe('async functions', () => {
       { cellValue: 1 }
     ]]})
     
-    const [cellValue, promise] = engine.calculateFormula('=ASYNC_FOO(A1)', 0)
+    const [cellValue, promise] = engine.calculateFormula('=ASYNC_FOO(A1)+1', 0)
 
     expect(cellValue).toEqual(detailedError(ErrorType.LOADING, ErrorMessage.FunctionLoading))
 
     const newCellValue = await promise
 
-    expect(newCellValue).toEqual(6)
+    expect(newCellValue).toEqual(7)
   })
 
   it('batch works with async functions', async() => {

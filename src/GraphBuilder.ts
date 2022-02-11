@@ -38,12 +38,12 @@ export class GraphBuilder {
    */
   constructor(
     private readonly dependencyGraph: DependencyGraph,
-    private readonly columnSearch: ColumnSearchStrategy,
-    private readonly parser: ParserWithCaching,
-    private readonly cellContentParser: CellContentParser,
-    private readonly stats: Statistics,
-    private readonly arraySizePredictor: ArraySizePredictor,
-    private readonly asyncPromiseFetcher: AsyncPromiseFetcher
+    columnSearch: ColumnSearchStrategy,
+    parser: ParserWithCaching,
+    cellContentParser: CellContentParser,
+    stats: Statistics,
+    arraySizePredictor: ArraySizePredictor,
+    asyncPromiseFetcher: AsyncPromiseFetcher
   ) {
     this.buildStrategy = new SimpleStrategy(dependencyGraph, columnSearch, parser, stats, cellContentParser, arraySizePredictor, asyncPromiseFetcher)
   }
@@ -117,9 +117,9 @@ export class SimpleStrategy implements GraphBuilderStrategy {
         this.dependencyGraph.addVertex(address, vertex)
       } else {
         this.shrinkArrayIfNeeded(address)
-
-        this.asyncPromiseFetcher.setFunctionPromisesToAst(parseResult.ast, address)
         
+        parseResult.ast = this.asyncPromiseFetcher.getNewAstWithFunctionPromises(parseResult.ast, address)
+
         const size = this.arraySizePredictor.checkArraySize(parseResult.ast, address)
 
         if (size.isScalar()) {

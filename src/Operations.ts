@@ -610,6 +610,8 @@ export class Operations {
       throw new Error('async cell must be an instance of FormulaVertex')
     }
 
+    this.dependencyGraph.graph.deleteSpecialAsyncChunkedNode(vertex)
+    
     const { dependencies, hasStructuralChangeFunction, hasVolatileFunction } = this.parser.fetchCachedResultForAst(ast)
     const size = this.arraySizePredictor.checkArraySize(ast, address)
 
@@ -668,10 +670,9 @@ export class Operations {
     this.parser.rememberNewAst(cleanedAst)
     const cleanedDependencies = filterDependenciesOutOfScope(absoluteDependencies)
     const size = this.arraySizePredictor.checkArraySize(ast, address)
+    const asyncAst = this.asyncPromiseFetcher.getNewAstWithFunctionPromises(cleanedAst, address)
 
-    this.asyncPromiseFetcher.setFunctionPromisesToAst(ast, address)
-
-    this.dependencyGraph.setFormulaToCell(address, cleanedAst, cleanedDependencies, size, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
+    this.dependencyGraph.setFormulaToCell(address, asyncAst, cleanedDependencies, size, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
   }
 
   /**
@@ -712,9 +713,12 @@ export class Operations {
         this.setParsingErrorToCell(parsedCellContent.formula, errors, address)
       } else {
         const size = this.arraySizePredictor.checkArraySize(ast, address)
-        this.asyncPromiseFetcher.setFunctionPromisesToAst(ast, address)
+        const asyncAst = this.asyncPromiseFetcher.getNewAstWithFunctionPromises(ast, address)
 
-        this.setFormulaToCell(address, size, parserResult)
+        this.setFormulaToCell(address, size, {
+          ...parserResult,
+          ast: asyncAst
+        })
       }
     } else if (parsedCellContent instanceof CellContent.Empty) {
       this.setCellEmpty(address)
@@ -903,9 +907,9 @@ export class Operations {
         throw new NoRelativeAddressesAllowedError()
       }
       const {ast, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, dependencies} = parsingResult
-      this.asyncPromiseFetcher.setFunctionPromisesToAst(ast, address)
+      const asyncAst = this.asyncPromiseFetcher.getNewAstWithFunctionPromises(ast, address)
       
-      this.dependencyGraph.setFormulaToCell(address, ast, absolutizeDependencies(dependencies, address), ArraySize.scalar(), hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
+      this.dependencyGraph.setFormulaToCell(address, asyncAst, absolutizeDependencies(dependencies, address), ArraySize.scalar(), hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
     } else if (cellValue instanceof CellContent.Empty) {
       this.setCellEmpty(address)
     } else {
@@ -975,10 +979,9 @@ export class Operations {
       if (sourceVertex instanceof FormulaCellVertex) {
         const parsingResult = this.parser.fetchCachedResultForAst(sourceVertex.getFormula(this.lazilyTransformingAstService))
         const {ast, hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction, dependencies} = parsingResult
-
-        this.asyncPromiseFetcher.setFunctionPromisesToAst(ast, expression.address)
+        const asyncAst = this.asyncPromiseFetcher.getNewAstWithFunctionPromises(ast, expression.address)
         
-        this.dependencyGraph.setFormulaToCell(expression.address, ast, absolutizeDependencies(dependencies, expression.address), ArraySize.scalar(), hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
+        this.dependencyGraph.setFormulaToCell(expression.address, asyncAst, absolutizeDependencies(dependencies, expression.address), ArraySize.scalar(), hasVolatileFunction, hasStructuralChangeFunction, hasAsyncFunction)
       } else if (sourceVertex instanceof EmptyCellVertex) {
         this.setCellEmpty(expression.address)
       } else if (sourceVertex instanceof ValueCellVertex) {
