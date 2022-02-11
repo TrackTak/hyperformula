@@ -38,7 +38,6 @@ export class AsyncPromise {
   }
 
   public startPromise(state: InterpreterState) {
-    this.resetIsResolvedValue()
     const cancelablePromise = this.promiseGetter(state)
 
     cancelablePromise.getPromise().then((value) => {
@@ -69,7 +68,7 @@ export class AsyncPromise {
     return this.isResolvedValue
   }
 
-  public resetIsResolvedValue() {
+  public resetResolvedValue() {
     this.isResolvedValue = false
     this.resolvedValue = undefined
   }

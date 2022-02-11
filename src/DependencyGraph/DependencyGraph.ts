@@ -119,7 +119,9 @@ export class DependencyGraph {
 
     asyncPromises.forEach((asyncPromise) => {
       if (asyncPromise.chunked.isChunked) {
-        asyncPromise.resetIsResolvedValue()
+        asyncPromise.resetResolvedValue()
+      } else {
+        asyncPromise.chunked.chunkedIterator = 0
       }
         
       asyncPromise.isWaitingOnPrecedentResolving = true

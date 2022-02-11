@@ -227,6 +227,10 @@ export class Evaluator {
       return vertex.setNoSpace()
     } else {
       if (vertex.hasAsyncPromises() && !vertex.areAsyncPromisesWaitingToBeResolved()) {
+        vertex.getAsyncPromises().forEach((asyncPromise) => {
+          asyncPromise.resetResolvedValue()
+        })
+
         this.dependencyGraph.graph.markAsyncNodeAsSpecialRecentlyChanged(vertex)
       }
       
